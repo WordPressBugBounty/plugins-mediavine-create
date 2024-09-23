@@ -1,0 +1,24 @@
+name: PHP Composer
+
+on:
+  pull_request:
+    branches:
+      - current
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate
+
+    - name: Install dependencies
+      run: composer install -o --prefer-dist
+            
+    - name: Validate PHPCS
+      run: ./vendor/bin/phpcs

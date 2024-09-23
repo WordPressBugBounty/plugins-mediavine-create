@@ -1,0 +1,3076 @@
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+/*!
+ * isobject <https://github.com/jonschlinkert/isobject>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+
+/*! ../../../components/ContextualImagePicker */
+
+/*! ../../../components/DNDExpandable */
+
+/*! ../../../components/DropdownWithAddNew */
+
+/*! ../../../components/NoItems */
+
+/*! ../../../components/TaxonomySelect */
+
+/*! ../../../components/WYSIWYG */
+
+/*! ../../../helpers/auth */
+
+/*! ../../../helpers/constants */
+
+/*! ../../../helpers/data */
+
+/*! ../../../helpers/hoc */
+
+/*! ../../../helpers/settings */
+
+/*! ../../../react */
+
+/*! ../../DragDropContext */
+
+/*! ../../DragSourceMonitorImpl */
+
+/*! ../../DropTargetMonitorImpl */
+
+/*! ../../SourceConnector */
+
+/*! ../../TargetConnector */
+
+/*! ../../registerSource */
+
+/*! ../../registerTarget */
+
+/*! ../../utils/discount_lodash */
+
+/*! ../../utils/matchesType */
+
+/*! ../NativeTypes */
+
+/*! ../actions/dragDrop */
+
+/*! ../actions/registry */
+
+/*! ../cancel/Cancel */
+
+/*! ../cancel/isCancel */
+
+/*! ../core/buildFullPath */
+
+/*! ../core/createError */
+
+/*! ../defaults */
+
+/*! ../discount_lodash */
+
+/*! ../env/data */
+
+/*! ../helpers/auth */
+
+/*! ../helpers/buildURL */
+
+/*! ../helpers/cache */
+
+/*! ../helpers/combineURLs */
+
+/*! ../helpers/constants */
+
+/*! ../helpers/data */
+
+/*! ../helpers/isAbsoluteURL */
+
+/*! ../helpers/lists */
+
+/*! ../helpers/mcp */
+
+/*! ../helpers/settings */
+
+/*! ../helpers/validator */
+
+/*! ../types */
+
+/*! ../util */
+
+/*! ../util/Constants */
+
+/*! ../utils */
+
+/*! ../utils/dirtiness */
+
+/*! ../utils/discount_lodash */
+
+/*! ../utils/equality */
+
+/*! ./ */
+
+/*! ./../../../webpack/buildin/global.js */
+
+/*! ./../../../webpack/buildin/module.js */
+
+/*! ./../../process/browser.js */
+
+/*! ./../../webpack/buildin/global.js */
+
+/*! ./../core/settle */
+
+/*! ./../defaults */
+
+/*! ./../helpers/buildURL */
+
+/*! ./../helpers/cookies */
+
+/*! ./../helpers/isURLSameOrigin */
+
+/*! ./../helpers/parseHeaders */
+
+/*! ./../utils */
+
+/*! ./../webpack/buildin/global.js */
+
+/*! ./../webpack/buildin/module.js */
+
+/*! ./BrowserDetector */
+
+/*! ./Cancel */
+
+/*! ./Channel */
+
+/*! ./CompositeDisposable */
+
+/*! ./Disposable */
+
+/*! ./DragDropContext */
+
+/*! ./DragDropManagerImpl */
+
+/*! ./DragDropMonitorImpl */
+
+/*! ./DragLayer */
+
+/*! ./DragPreviewImage */
+
+/*! ./DragSource */
+
+/*! ./DragSourceMonitorImpl */
+
+/*! ./DropTarget */
+
+/*! ./DropTargetMonitorImpl */
+
+/*! ./DropdownWithAddNew */
+
+/*! ./EnterLeaveCounter */
+
+/*! ./HTML5Backend */
+
+/*! ./HandlerRegistryImpl */
+
+/*! ./InterceptorManager */
+
+/*! ./MonotonicInterpolant */
+
+/*! ./NativeDragSource */
+
+/*! ./NativeDragSources */
+
+/*! ./NativeTypes */
+
+/*! ./OffsetUtils */
+
+/*! ./Request */
+
+/*! ./SerialDisposable */
+
+/*! ./SourceConnector */
+
+/*! ./TargetConnector */
+
+/*! ./Video */
+
+/*! ./_DataView */
+
+/*! ./_Hash */
+
+/*! ./_ListCache */
+
+/*! ./_Map */
+
+/*! ./_MapCache */
+
+/*! ./_Promise */
+
+/*! ./_Set */
+
+/*! ./_Stack */
+
+/*! ./_Symbol */
+
+/*! ./_Uint8Array */
+
+/*! ./_WeakMap */
+
+/*! ./_apply */
+
+/*! ./_arrayEach */
+
+/*! ./_arrayFilter */
+
+/*! ./_arrayLikeKeys */
+
+/*! ./_arrayMap */
+
+/*! ./_arrayPush */
+
+/*! ./_assignValue */
+
+/*! ./_assocIndexOf */
+
+/*! ./_baseAssign */
+
+/*! ./_baseAssignIn */
+
+/*! ./_baseAssignValue */
+
+/*! ./_baseClone */
+
+/*! ./_baseCreate */
+
+/*! ./_baseFlatten */
+
+/*! ./_baseGet */
+
+/*! ./_baseGetAllKeys */
+
+/*! ./_baseGetTag */
+
+/*! ./_baseHasIn */
+
+/*! ./_baseIsArguments */
+
+/*! ./_baseIsMap */
+
+/*! ./_baseIsNative */
+
+/*! ./_baseIsSet */
+
+/*! ./_baseIsTypedArray */
+
+/*! ./_baseKeys */
+
+/*! ./_baseKeysIn */
+
+/*! ./_basePick */
+
+/*! ./_basePickBy */
+
+/*! ./_baseSet */
+
+/*! ./_baseSetToString */
+
+/*! ./_baseSlice */
+
+/*! ./_baseTimes */
+
+/*! ./_baseToString */
+
+/*! ./_baseTrim */
+
+/*! ./_baseUnary */
+
+/*! ./_baseUnset */
+
+/*! ./_castPath */
+
+/*! ./_cloneArrayBuffer */
+
+/*! ./_cloneBuffer */
+
+/*! ./_cloneDataView */
+
+/*! ./_cloneRegExp */
+
+/*! ./_cloneSymbol */
+
+/*! ./_cloneTypedArray */
+
+/*! ./_copyArray */
+
+/*! ./_copyObject */
+
+/*! ./_copySymbols */
+
+/*! ./_copySymbolsIn */
+
+/*! ./_coreJsData */
+
+/*! ./_customOmitClone */
+
+/*! ./_defineProperty */
+
+/*! ./_flatRest */
+
+/*! ./_freeGlobal */
+
+/*! ./_getAllKeys */
+
+/*! ./_getAllKeysIn */
+
+/*! ./_getMapData */
+
+/*! ./_getNative */
+
+/*! ./_getPrototype */
+
+/*! ./_getRawTag */
+
+/*! ./_getSymbols */
+
+/*! ./_getSymbolsIn */
+
+/*! ./_getTag */
+
+/*! ./_getValue */
+
+/*! ./_hasPath */
+
+/*! ./_hashClear */
+
+/*! ./_hashDelete */
+
+/*! ./_hashGet */
+
+/*! ./_hashHas */
+
+/*! ./_hashSet */
+
+/*! ./_initCloneArray */
+
+/*! ./_initCloneByTag */
+
+/*! ./_initCloneObject */
+
+/*! ./_isFlattenable */
+
+/*! ./_isIndex */
+
+/*! ./_isKey */
+
+/*! ./_isKeyable */
+
+/*! ./_isMasked */
+
+/*! ./_isPrototype */
+
+/*! ./_listCacheClear */
+
+/*! ./_listCacheDelete */
+
+/*! ./_listCacheGet */
+
+/*! ./_listCacheHas */
+
+/*! ./_listCacheSet */
+
+/*! ./_mapCacheClear */
+
+/*! ./_mapCacheDelete */
+
+/*! ./_mapCacheGet */
+
+/*! ./_mapCacheHas */
+
+/*! ./_mapCacheSet */
+
+/*! ./_memoizeCapped */
+
+/*! ./_nativeCreate */
+
+/*! ./_nativeKeys */
+
+/*! ./_nativeKeysIn */
+
+/*! ./_nodeUtil */
+
+/*! ./_objectToString */
+
+/*! ./_overArg */
+
+/*! ./_overRest */
+
+/*! ./_parent */
+
+/*! ./_root */
+
+/*! ./_setToString */
+
+/*! ./_shortOut */
+
+/*! ./_stackClear */
+
+/*! ./_stackDelete */
+
+/*! ./_stackGet */
+
+/*! ./_stackHas */
+
+/*! ./_stackSet */
+
+/*! ./_stringToPath */
+
+/*! ./_toKey */
+
+/*! ./_toSource */
+
+/*! ./_trimmedEndIndex */
+
+/*! ./actions/dragDrop */
+
+/*! ./actions/registry */
+
+/*! ./adapters/xhr */
+
+/*! ./arrayLikeToArray */
+
+/*! ./atob */
+
+/*! ./auth */
+
+/*! ./base64_url_decode */
+
+/*! ./beginDrag */
+
+/*! ./cancel/Cancel */
+
+/*! ./cancel/CancelToken */
+
+/*! ./cancel/isCancel */
+
+/*! ./cjs/react-dom-server.browser.production.min.js */
+
+/*! ./cjs/react-dom.production.min.js */
+
+/*! ./cjs/react-is.production.min.js */
+
+/*! ./cjs/react.production.min.js */
+
+/*! ./cjs/scheduler.production.min.js */
+
+/*! ./common */
+
+/*! ./constant */
+
+/*! ./constants */
+
+/*! ./contracts */
+
+/*! ./core/Axios */
+
+/*! ./core/enhanceError */
+
+/*! ./core/mergeConfig */
+
+/*! ./createError */
+
+/*! ./createSourceFactory */
+
+/*! ./createTargetFactory */
+
+/*! ./debounce */
+
+/*! ./decode */
+
+/*! ./decorateHandler */
+
+/*! ./defaults */
+
+/*! ./defineProperty */
+
+/*! ./dirtyHandlerIds */
+
+/*! ./discount_lodash */
+
+/*! ./dispatchRequest */
+
+/*! ./dragOffset */
+
+/*! ./dragOperation */
+
+/*! ./drop */
+
+/*! ./encode */
+
+/*! ./endDrag */
+
+/*! ./enhanceError */
+
+/*! ./env/data */
+
+/*! ./eq */
+
+/*! ./factories */
+
+/*! ./factoryWithThrowingShims */
+
+/*! ./flatten */
+
+/*! ./getDataFromDataTransfer */
+
+/*! ./getEmptyImage */
+
+/*! ./hasIn */
+
+/*! ./helpers/bind */
+
+/*! ./helpers/isAxiosError */
+
+/*! ./helpers/normalizeHeaderName */
+
+/*! ./helpers/spread */
+
+/*! ./hooks */
+
+/*! ./hover */
+
+/*! ./identity */
+
+/*! ./implementation */
+
+/*! ./interfaces */
+
+/*! ./internal/drag */
+
+/*! ./internal/drop */
+
+/*! ./internal/useCollector */
+
+/*! ./internal/useDragDropManager */
+
+/*! ./internal/useMonitorOutput */
+
+/*! ./isArguments */
+
+/*! ./isArray */
+
+/*! ./isArrayLike */
+
+/*! ./isBuffer */
+
+/*! ./isFunction */
+
+/*! ./isLength */
+
+/*! ./isMap */
+
+/*! ./isObject */
+
+/*! ./isObjectLike */
+
+/*! ./isPlainObject */
+
+/*! ./isSet */
+
+/*! ./isSymbol */
+
+/*! ./isTypedArray */
+
+/*! ./keys */
+
+/*! ./keysIn */
+
+/*! ./last */
+
+/*! ./lib/ReactPropTypesSecret */
+
+/*! ./lib/axios */
+
+/*! ./local/setClientOffset */
+
+/*! ./memoize */
+
+/*! ./mergeConfig */
+
+/*! ./nativeTypesConfig */
+
+/*! ./needs-ie-fallback */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/asyncToGenerator */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/classCallCheck */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createClass */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createSuper */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/defineProperty */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/inherits */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectSpread2 */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectWithoutProperties */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/slicedToArray */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/taggedTemplateLiteral */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/toConsumableArray */
+
+/*! ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/regenerator */
+
+/*! ./now */
+
+/*! ./polyfill */
+
+/*! ./publishDragSource */
+
+/*! ./raw */
+
+/*! ./reducers */
+
+/*! ./refCount */
+
+/*! ./registerSource */
+
+/*! ./registerTarget */
+
+/*! ./setPrototypeOf.js */
+
+/*! ./settings */
+
+/*! ./shams */
+
+/*! ./shared */
+
+/*! ./shim */
+
+/*! ./stateId */
+
+/*! ./structures/Channel */
+
+/*! ./structures/Playlist */
+
+/*! ./structures/Video */
+
+/*! ./stubArray */
+
+/*! ./stubFalse */
+
+/*! ./toNumber */
+
+/*! ./toString */
+
+/*! ./transformData */
+
+/*! ./types */
+
+/*! ./useCollector */
+
+/*! ./useDrag */
+
+/*! ./useDragDropManager */
+
+/*! ./useDragLayer */
+
+/*! ./useDrop */
+
+/*! ./util */
+
+/*! ./util/Constants */
+
+/*! ./utils */
+
+/*! ./utils/checkDecoratorArguments */
+
+/*! ./utils/cloneWithRef */
+
+/*! ./utils/coords */
+
+/*! ./utils/dirtiness */
+
+/*! ./utils/discount_lodash */
+
+/*! ./utils/disposables */
+
+/*! ./utils/getDecoratedComponent */
+
+/*! ./utils/getNextUniqueId */
+
+/*! ./utils/isRef */
+
+/*! ./utils/isRefable */
+
+/*! ./utils/isValidType */
+
+/*! ./utils/matchesType */
+
+/*! ./utils/polyfills/endsWith */
+
+/*! ./views/Editor/Recipe */
+
+/*! ./wrapConnectorHooks */
+
+/*! /Users/seth/local/dev/app/public/wp-content/plugins/mediavine-create/admin/ui/src/main.tsx */
+
+/*! @emotion/is-prop-valid */
+
+/*! @emotion/unitless */
+
+/*! @mediavine/ui */
+
+/*! @mediavine/wp */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@babel/runtime/helpers/assertThisInitialized.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@babel/runtime/helpers/defineProperty.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@babel/runtime/helpers/extends.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@babel/runtime/helpers/inheritsLoose.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@mediavine/ui/dist/ui.esm.js (<- Module is referenced from these modules with unsupported syntax: ./node_modules/@mediavine/wp/dist/bundle.js (referenced with cjs require)) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@mediavine/wordpress-safe-react/src/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/@mediavine/wp/dist/bundle.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/axios/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/classCallCheck.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/classCallCheck.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createClass.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createClass.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createSuper.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createSuper.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/defineProperty.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/inherits.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/inherits.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectSpread2.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectSpread2.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/slicedToArray.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/slicedToArray.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/taggedTemplateLiteral.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/taggedTemplateLiteral.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/toConsumableArray.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/toConsumableArray.js because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/typeof.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/regenerator/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/color-contrast/dist/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/create-react-context/lib/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/debug/src/browser.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/deep-equal/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/get-window/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/immutable/dist/immutable.es.js (<- Module is referenced from these modules with unsupported syntax: ./node_modules/react-immutable-proptypes/dist/ImmutablePropTypes.js (referenced with cjs require)) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/is-hotkey/lib/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/isomorphic-base64/browser.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/juration/juration.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/lodash/omit.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/lodash/throttle.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/luxon/build/cjs-browser/luxon.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/memoize-one/dist/memoize-one.esm.js because of ./node_modules/styled-components/dist/styled-components.browser.esm.js */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/nanoid/index.browser.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/popper.js/dist/esm/popper.js (<- Module uses injected variables (global)) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/prop-types/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/query-string/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/react-day-picker/lib/react-day-picker.min.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/react-dnd-html5-backend/lib/cjs/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/react-dnd/lib/cjs/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/react-dom/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/react-dom/server.browser.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/react-immutable-proptypes/dist/ImmutablePropTypes.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/selection-is-backward/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/slate/lib/slate.es.js (<- Module uses injected variables (global)) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/styled-components/dist/styled-components.browser.esm.js (<- Module uses injected variables (process)) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/tiny-invariant/dist/tiny-invariant.esm.js because of ./node_modules/slate/lib/slate.es.js */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/tiny-warning/dist/tiny-warning.esm.js because of ./node_modules/slate/lib/slate.es.js */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/type-of/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/valid-url/index.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./node_modules/warning/warning.js (<- Module is not an ECMAScript module) */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/APIRegistrationPrompt.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/APIRegistrationPrompt.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ContextualImagePicker.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ContextualImagePicker.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/DNDExpandable.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/DataPlaceholder.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ErrorNotice.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ErrorNotice.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/MCPAuthenticationPrompt.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/MCPAuthenticationPrompt.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ModeControl.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ModeControl.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/NoItems.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ScrapeResults.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/ScrapeResults.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/StickyCompoundBox.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/StickyCompoundBox.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/TaxonomySelect.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/TimeControls.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/components/TimeControls.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/fixtures/data.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/fixtures/data.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/auth.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/auth.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/cache.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/cache.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/constants.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/constants.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/data.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/data.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/hoc.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/hoc.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/lists.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/locationContext.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/locationContext.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/mcp.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/settings.ts because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/helpers/settings.ts because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/List.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/List.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/Recipe.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Author.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Author.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/CardProducts.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/CardProducts.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/CustomFields.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/CustomFields.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Details.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Details.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/DuplicateButton.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/EditorWrap.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/EditorWrap.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Instructions.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Instructions.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/MaterialsAdvanced.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/MaterialsAdvanced.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/MaterialsSimple.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/MaterialsSimple.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Notes.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Notes.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Nutrition.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/NutritionFields.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/OptimizeButton.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/OptimizeButton.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/SEO.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/SEO.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Utilities.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/Utilities.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/VideoControls.tsx because of ./src/main.tsx */
+
+/*! ModuleConcatenation bailout: Cannot concat with ./src/views/Editor/components/VideoControls.tsx because of ./src/shared.tsx */
+
+/*! ModuleConcatenation bailout: Module is not an ECMAScript module */
+
+/*! ModuleConcatenation bailout: Module is referenced from these modules with unsupported syntax: ./node_modules/react-immutable-proptypes/dist/ImmutablePropTypes.js (referenced with cjs require) */
+
+/*! ModuleConcatenation bailout: Module is referenced from these modules with unsupported syntax: ./src/main.tsx (referenced with cjs require) */
+
+/*! ModuleConcatenation bailout: Module uses injected variables (global) */
+
+/*! ModuleConcatenation bailout: Module uses injected variables (process) */
+
+/*! all exports used */
+
+/*! asap */
+
+/*! axios */
+
+/*! call-bind */
+
+/*! call-bind/callBound */
+
+/*! debug */
+
+/*! decode-uri-component */
+
+/*! define-properties */
+
+/*! direction */
+
+/*! dnd-core */
+
+/*! esrever */
+
+/*! exports provided: ADMIN, auth, baseURL, getApiParams, getServicesApiParams, register, REST_BASE */
+
+/*! exports provided: AUTHORS_RESPONSE, CUSTOM_FIELDS, HOWTO_CARD, LIST_CARD, PRODUCT, RECIPE_CARD, REVIEW, SHAPES, TERMS */
+
+/*! exports provided: AUTOSAVE_INTERVAL, ALLOWED_CARD_TYPES, CARD_TYPES, DROPDOWN_SCROLLWRAP_HEIGHT, ERRORS_WITH_HARD_WARNINGS, ERRORS_WITH_SOFT_WARNINGS, DEFAULT_PRIMARY, DEFAULT_SECONDARY, DEFAULT_PRIMARY_DARK_STYLE, DEFAULT_SECONDARY_DARK_STYLE, SECONDARY_TEXT_COLOR, EVT_NAME, LABELS, LIST_TYPES, LONG_INTERMEDIATE_STATUS_DEBOUNCE, NULL_GROUP, PER_PAGE, RICH_TEXTAREA_FORMATS, SAVE_DRAFT_STYLES, PUBLISH_STYLES, SHORT_INTERMEDIATE_STATUS_DEBOUNCE, SUPPORTED_META, TIME_CONTROL_BREAKPOINT */
+
+/*! exports provided: ItemMeta, default */
+
+/*! exports provided: MCP_VIDEO_ENDPOINT, getBearerToken */
+
+/*! exports provided: ThemeConsumer, ThemeProvider, Badge, Box, Button, CacheSourceControl, CollapseTable, ColorPicker, CompoundBox, ControlBox, ControlTooltip, Copyable, DND, DNDConsumer, DNDContext, DNDIcons, DNDProvider, DataCache, DatePicker, DateRangePicker, DragContainer, DragItem, Dropdown, Expandable, Flex, Footer, FormWrap, Grid, H1, H2, H3, H4, H5, H6, Header, Headings, Icon, Image, InlineGroup, InlineModal, Input, InputGroup, JSONInOut, Label, LocaleDate, MediaItem, Modal, ModalContext, MultiOptionDropdown, MultiTip, Network, Notice, NoticeCTA, PaginatedTable, PaginatedTableV2, Pagination, Password, RadioGroup, ReorderableTable, ReorderableTableV2, Resize, Responsive, Rule, ScreenReader, ScrollWrap, SingleOptionDropdown, Spinner, Stars, Sticky, Table, TableParts, TableV2, Tabs, Tag, Text, ThemeBase, ToggleBox, Tooltip, Truncate, UICache, WYSIWYG, WYSIWYGComponents, alert, confirm, darkThemeCssGlobals, makeDarkTheme, normalizeHex, theme, validHex */
+
+/*! exports provided: __DO_NOT_USE__ActionTypes, applyMiddleware, bindActionCreators, combineReducers, compose, createStore */
+
+/*! exports provided: assignUUID, generateIdFromString, stripUUID */
+
+/*! exports provided: checkEmailConfirmation, clearLocalDataAndReload, getAllowedTypes, getFlag, getSetting, getSettings, getSettingValue, republish, setSetting, shouldSettingDisplay, getApiEmail */
+
+/*! exports provided: default */
+
+/*! exports provided: default, Annotation, Block, Change, Data, Decoration, Document, Editor, Inline, KeyUtils, Leaf, Mark, Node, Operation, PathUtils, Point, Range, resetMemoization, Selection, Text, TextUtils, useMemoization, Value */
+
+/*! exports provided: default, Collection, Iterable, List, Map, OrderedMap, OrderedSet, Range, Record, Repeat, Seq, Set, Stack, fromJS, get, getIn, has, hasIn, hash, is, isAssociative, isCollection, isImmutable, isIndexed, isKeyed, isList, isMap, isOrdered, isOrderedMap, isOrderedSet, isPlainObject, isRecord, isSeq, isSet, isStack, isValueObject, merge, mergeDeep, mergeDeepWith, mergeWith, remove, removeIn, set, setIn, update, updateIn, version */
+
+/*! exports provided: default, HEADING */
+
+/*! exports provided: default, LABELS, UNITS */
+
+/*! exports provided: default, LocationConsumer, getLocation, LocationProvider */
+
+/*! exports provided: default, concatArrays, merge */
+
+/*! exports provided: default, confirmUseCachedData */
+
+/*! exports provided: default, createGlobalStyle, css, isStyledComponent, keyframes, ServerStyleSheet, StyleSheetConsumer, StyleSheetContext, StyleSheetManager, ThemeConsumer, ThemeContext, ThemeProvider, withTheme, __DO_NOT_USE_OR_YOU_WILL_BE_HAUNTED_BY_SPOOKY_GHOSTS */
+
+/*! exports provided: default, normalizeInternal, normalizeExternal */
+
+/*! exports provided: default, normalizeNutrition */
+
+/*! exports provided: default, unsavedData */
+
+/*! exports provided: defaultButtonText, filterListItem, getExternalScrapeParams, getIndexWithoutTextItems, getInternalQueryParams, getInternalScrapeParams, getLabel, indexWithinItems, isAmazon, isAmazonShortlink, reduceByUniqueTitle, supportedMeta, titleExists, titleIsUnique */
+
+/*! exports provided: withNetworkUpdate, withNetworkCreate, withNetworkRead, withNetworkDelete */
+
+/*! exports used: ADMIN, REST_BASE, auth, baseURL, getApiParams, getServicesApiParams, register */
+
+/*! exports used: ALLOWED_CARD_TYPES, AUTOSAVE_INTERVAL, CARD_TYPES, DEFAULT_PRIMARY, DEFAULT_PRIMARY_DARK_STYLE, DEFAULT_SECONDARY, DEFAULT_SECONDARY_DARK_STYLE, DROPDOWN_SCROLLWRAP_HEIGHT, ERRORS_WITH_SOFT_WARNINGS, EVT_NAME, LABELS, LIST_TYPES, LONG_INTERMEDIATE_STATUS_DEBOUNCE, NULL_GROUP, PER_PAGE, PUBLISH_STYLES, RICH_TEXTAREA_FORMATS, SAVE_DRAFT_STYLES, SECONDARY_TEXT_COLOR, SHORT_INTERMEDIATE_STATUS_DEBOUNCE, SUPPORTED_META, TIME_CONTROL_BREAKPOINT */
+
+/*! exports used: Block, Change, Data, Document, Editor, Inline, Leaf, Mark, Node, PathUtils, Range, Selection, Text, Value */
+
+/*! exports used: DateTime */
+
+/*! exports used: DragDropContext, DragSource, DropTarget */
+
+/*! exports used: HOWTO_CARD, RECIPE_CARD */
+
+/*! exports used: ImagePicker, Link, LinkProvider, Router, createPluginScope, withRouter */
+
+/*! exports used: ItemMeta, default */
+
+/*! exports used: LABELS, UNITS, default */
+
+/*! exports used: LocationConsumer, LocationProvider, getLocation */
+
+/*! exports used: MCP_VIDEO_ENDPOINT, getBearerToken */
+
+/*! exports used: assignUUID, generateIdFromString, stripUUID */
+
+/*! exports used: atob, btoa */
+
+/*! exports used: checkEmailConfirmation, clearLocalDataAndReload, getAllowedTypes, getFlag, getSetting, getSettingValue, getSettings, republish, setSetting, shouldSettingDisplay */
+
+/*! exports used: default */
+
+/*! exports used: default, isKeyHotkey */
+
+/*! exports used: default, normalizeExternal, normalizeInternal */
+
+/*! exports used: default, normalizeNutrition */
+
+/*! exports used: default, unsavedData */
+
+/*! exports used: defaultButtonText, filterListItem, getExternalScrapeParams, getIndexWithoutTextItems, getInternalQueryParams, getInternalScrapeParams, getLabel, indexWithinItems, isAmazon, isAmazonShortlink, reduceByUniqueTitle, supportedMeta, titleIsUnique */
+
+/*! exports used: renderToStaticMarkup */
+
+/*! exports used: reverse */
+
+/*! exports used: withNetworkCreate, withNetworkDelete, withNetworkRead, withNetworkUpdate */
+
+/*! filter-obj */
+
+/*! function-bind */
+
+/*! get-document */
+
+/*! get-intrinsic */
+
+/*! gud */
+
+/*! has */
+
+/*! has-symbols */
+
+/*! has-symbols/shams */
+
+/*! has-tostringtag/shams */
+
+/*! hoist-non-react-statics */
+
+/*! https://mths.be/esrever v0.2.0 by @mathias */
+
+/*! https://mths.be/punycode v1.4.1 by @mathias */
+
+/*! immutable */
+
+/*! invariant */
+
+/*! is-arguments */
+
+/*! is-date-object */
+
+/*! is-plain-object */
+
+/*! is-regex */
+
+/*! iso8601-duration */
+
+/*! isobject */
+
+/*! juration */
+
+/*! jwt-decode */
+
+/*! lodash/omit */
+
+/*! lodash/pick */
+
+/*! memoize-one */
+
+/*! merge-anything */
+
+/*! ms */
+
+/*! nanoid */
+
+/*! no exports provided */
+
+/*! no static exports found */
+
+/*! node-fetch */
+
+/*! object-assign */
+
+/*! object-is */
+
+/*! object-keys */
+
+/*! prop-types */
+
+/*! punycode */
+
+/*! querystring */
+
+/*! react */
+
+/*! react-dom */
+
+/*! react-is */
+
+/*! redux */
+
+/*! regenerator-runtime */
+
+/*! regexp.prototype.flags */
+
+/*! scheduler */
+
+/*! shallowequal */
+
+/*! simple-youtube-api */
+
+/*! split-on-first */
+
+/*! strict-uri-encode */
+
+/*! styled-components */
+
+/*! stylis-rule-sheet */
+
+/*! stylis/stylis.min */
+
+/*! tiny-invariant */
+
+/*! tiny-warning */
+
+/*! url */
+
+/*! warning */
+
+/*!************************!*\
+  !*** ./src/shared.tsx ***!
+  \************************/
+
+/*!****************************!*\
+  !*** ./src/helpers/mcp.ts ***!
+  \****************************/
+
+/*!****************************!*\
+  !*** multi ./src/main.tsx ***!
+  \****************************/
+
+/*!*****************************!*\
+  !*** ./src/helpers/auth.ts ***!
+  \*****************************/
+
+/*!*****************************!*\
+  !*** ./src/helpers/data.ts ***!
+  \*****************************/
+
+/*!******************************!*\
+  !*** ./src/fixtures/data.ts ***!
+  \******************************/
+
+/*!******************************!*\
+  !*** ./src/helpers/cache.ts ***!
+  \******************************/
+
+/*!******************************!*\
+  !*** ./src/helpers/lists.ts ***!
+  \******************************/
+
+/*!*********************************!*\
+  !*** ./node_modules/url/url.js ***!
+  \*********************************/
+
+/*!*********************************!*\
+  !*** ./src/helpers/settings.ts ***!
+  \*********************************/
+
+/*!**********************************!*\
+  !*** ./node_modules/ms/index.js ***!
+  \**********************************/
+
+/*!**********************************!*\
+  !*** ./node_modules/url/util.js ***!
+  \**********************************/
+
+/*!**********************************!*\
+  !*** ./src/helpers/constants.ts ***!
+  \**********************************/
+
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+
+/*!***********************************!*\
+  !*** (webpack)/buildin/module.js ***!
+  \***********************************/
+
+/*!***********************************!*\
+  !*** ./node_modules/gud/index.js ***!
+  \***********************************/
+
+/*!***********************************!*\
+  !*** ./node_modules/lodash/eq.js ***!
+  \***********************************/
+
+/*!***********************************!*\
+  !*** ./src/main.tsx + 39 modules ***!
+  \***********************************/
+
+/*!************************************!*\
+  !*** ./node_modules/lodash/now.js ***!
+  \************************************/
+
+/*!************************************!*\
+  !*** ./src/components/NoItems.tsx ***!
+  \************************************/
+
+/*!************************************!*\
+  !*** ./src/components/WYSIWYG.tsx ***!
+  \************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/axios/index.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/lodash/_Map.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/lodash/_Set.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/lodash/keys.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/lodash/last.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/lodash/omit.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/lodash/pick.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./node_modules/react/index.js ***!
+  \*************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/lodash/_Hash.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/lodash/_root.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/lodash/hasIn.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/lodash/isMap.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./node_modules/lodash/isSet.js ***!
+  \**************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/has/src/index.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_Stack.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_apply.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_isKey.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_toKey.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/lodash/keysIn.js ***!
+  \***************************************/
+
+/*!***************************************!*\
+  !*** ./node_modules/type-of/index.js ***!
+  \***************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/is-regex/index.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/isobject/index.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_Symbol.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_getTag.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_parent.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/lodash/flatten.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/lodash/isArray.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/lodash/memoize.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/object-is/shim.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./node_modules/react-is/index.js ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./src/components/ErrorNotice.tsx ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./src/components/ModeControl.tsx ***!
+  \****************************************/
+
+/*!****************************************!*\
+  !*** ./src/helpers/locationContext.ts ***!
+  \****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/axios.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/utils.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/call-bind/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/direction/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/esrever/esrever.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_Promise.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_WeakMap.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseGet.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseSet.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hasPath.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hashGet.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hashHas.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hashSet.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_isIndex.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_overArg.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/constant.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/debounce.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/identity.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isBuffer.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isLength.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isObject.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isSymbol.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/throttle.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/toNumber.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/toString.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/object-is/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/process/browser.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/react-dom/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/scheduler/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/valid-url/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./node_modules/warning/warning.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
+  !*** ./src/helpers/hoc.tsx + 4 modules ***!
+  \*****************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/asap/browser-raw.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/debug/src/common.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/deep-equal/index.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/filter-obj/index.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/get-window/index.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_DataView.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_MapCache.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_arrayMap.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_baseKeys.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_basePick.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_baseTrim.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_castPath.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_flatRest.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_getValue.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_isMasked.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_nodeUtil.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_overRest.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_shortOut.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_stackGet.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_stackHas.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_stackSet.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_toSource.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/stubArray.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/lodash/stubFalse.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/prop-types/index.js ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./src/components/DNDExpandable.tsx ***!
+  \******************************************/
+
+/*!******************************************!*\
+  !*** ./src/components/ScrapeResults.tsx ***!
+  \******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/asap/browser-asap.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/debug/src/browser.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/has-symbols/index.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/has-symbols/shams.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/invariant/browser.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/juration/juration.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_ListCache.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_arrayEach.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_arrayPush.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseClone.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseHasIn.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseIsMap.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseIsSet.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseSlice.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseTimes.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseUnary.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseUnset.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_copyArray.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_getNative.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_getRawTag.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_hashClear.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_isKeyable.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/isFunction.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/object-keys/index.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/stylis/stylis.min.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./src/components/TaxonomySelect.tsx ***!
+  \*******************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/defaults.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/env/data.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/get-document/index.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/is-arguments/index.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_Uint8Array.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseAssign.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseCreate.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseGetTag.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseKeysIn.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_basePickBy.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_copyObject.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_coreJsData.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_freeGlobal.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_getAllKeys.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_getMapData.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_getSymbols.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_hashDelete.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_nativeKeys.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_stackClear.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/isArguments.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/lodash/isArrayLike.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/node-fetch/browser.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/object-is/polyfill.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/query-string/index.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/shallowequal/index.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./node_modules/slate/lib/slate.es.js ***!
+  \********************************************/
+
+/*!********************************************!*\
+  !*** ./src/components/DataPlaceholder.tsx ***!
+  \********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/call-bind/callBound.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/function-bind/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/get-intrinsic/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/is-hotkey/lib/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/jwt-decode/lib/atob.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_arrayFilter.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_assignValue.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseFlatten.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_cloneBuffer.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_cloneRegExp.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_cloneSymbol.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_copySymbols.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_isPrototype.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheGet.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheHas.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheSet.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_setToString.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_stackDelete.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/isObjectLike.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/isTypedArray.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./node_modules/object-assign/index.js ***!
+  \*********************************************/
+
+/*!*********************************************!*\
+  !*** ./src/views/Editor/components/SEO.tsx ***!
+  \*********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/is-date-object/index.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/jwt-decode/lib/index.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_assocIndexOf.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseAssignIn.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseIsNative.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseToString.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_getAllKeysIn.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_getPrototype.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_getSymbolsIn.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_listCacheGet.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_listCacheHas.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_listCacheSet.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_nativeCreate.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_nativeKeysIn.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_stringToPath.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/isPlainObject.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/nanoid/index.browser.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./node_modules/split-on-first/index.js ***!
+  \**********************************************/
+
+/*!**********************************************!*\
+  !*** ./src/components/StickyCompoundBox.tsx ***!
+  \**********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/axios/lib/core/settle.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/has-tostringtag/shams.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/is-plain-object/index.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_arrayLikeKeys.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_cloneDataView.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_copySymbolsIn.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_isFlattenable.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheClear.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_memoizeCapped.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/querystring-es3/index.js ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./src/components/DropdownWithAddNew.tsx ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./src/views/Editor/List.tsx + 6 modules ***!
+  \***********************************************/
+
+/*!***********************************************!*\
+  !*** ./src/views/Editor/components/Notes.tsx ***!
+  \***********************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/index.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_baseGetAllKeys.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_defineProperty.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_initCloneArray.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_initCloneByTag.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_listCacheClear.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_mapCacheDelete.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_objectToString.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/querystring-es3/decode.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./node_modules/querystring-es3/encode.js ***!
+  \************************************************/
+
+/*!************************************************!*\
+  !*** ./src/views/Editor/components/Author.tsx ***!
+  \************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/define-properties/index.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseAssignValue.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseIsArguments.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseSetToString.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_cloneTypedArray.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_customOmitClone.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_initCloneObject.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_listCacheDelete.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_trimmedEndIndex.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/object-keys/isArguments.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/index.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/strict-uri-encode/index.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./node_modules/stylis-rule-sheet/index.js ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./src/views/Editor/Recipe.tsx + 1 modules ***!
+  \*************************************************/
+
+/*!*************************************************!*\
+  !*** ./src/views/Editor/components/Details.tsx ***!
+  \*************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/juration/languages/en-GB.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/juration/languages/en-US.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/juration/languages/it-IT.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/lodash/_baseIsTypedArray.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/lodash/_cloneArrayBuffer.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/object-is/implementation.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./node_modules/react-dom/server.browser.js ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./src/components/APIRegistrationPrompt.tsx ***!
+  \**************************************************/
+
+/*!**************************************************!*\
+  !*** ./src/components/ContextualImagePicker.tsx ***!
+  \**************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/@mediavine/wp/dist/bundle.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/color-contrast/dist/index.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/isomorphic-base64/browser.js ***!
+  \***************************************************/
+
+/*!***************************************************!*\
+  !*** ./node_modules/popper.js/dist/esm/popper.js ***!
+  \***************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/createError.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/decode-uri-component/index.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/contracts.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/factories.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/iso8601-duration/lib/index.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/object-keys/implementation.js ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./node_modules/redux/es/redux.js + 2 modules ***!
+  \****************************************************/
+
+/*!****************************************************!*\
+  !*** ./src/components/MCPAuthenticationPrompt.tsx ***!
+  \****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/validator.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/interfaces.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/immutable/dist/immutable.es.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DragLayer.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/regenerator-runtime/runtime.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/regexp.prototype.flags/shim.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./node_modules/selection-is-backward/index.js ***!
+  \*****************************************************/
+
+/*!*****************************************************!*\
+  !*** ./src/components/TimeControls.tsx + 2 modules ***!
+  \*****************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/function-bind/implementation.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DragSource.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DropTarget.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/regexp.prototype.flags/index.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/index.js ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./src/views/Editor/components/CustomFields.tsx ***!
+  \******************************************************/
+
+/*!******************************************************!*\
+  !*** ./src/views/Editor/components/Instructions.tsx ***!
+  \******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/utils/coords.js ***!
+  \*******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/juration/languages sync ^\.\/.*$ ***!
+  \*******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/luxon/build/cjs-browser/luxon.js ***!
+  \*******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/index.js ***!
+  \*******************************************************/
+
+/*!*******************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/isRef.js ***!
+  \*******************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/extends.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/create-react-context/lib/index.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/react/cjs/react.production.min.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/Request.js ***!
+  \********************************************************/
+
+/*!********************************************************!*\
+  !*** ./src/views/Editor/components/OptimizeButton.tsx ***!
+  \********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/reducers/index.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/utils/equality.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/get-window/needs-ie-fallback.br.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/useDrag.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/useDrop.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./node_modules/regexp.prototype.flags/polyfill.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./src/views/Editor/components/DuplicateButton.tsx ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./src/views/Editor/components/MaterialsSimple.tsx ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
+  !*** ./src/views/Editor/components/NutritionFields.tsx ***!
+  \*********************************************************/
+
+/*!**********************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/utils/dirtiness.js ***!
+  \**********************************************************/
+
+/*!**********************************************************!*\
+  !*** ./node_modules/jwt-decode/lib/base64_url_decode.js ***!
+  \**********************************************************/
+
+/*!**********************************************************!*\
+  !*** ./node_modules/memoize-one/dist/memoize-one.esm.js ***!
+  \**********************************************************/
+
+/*!**********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/registerSource.js ***!
+  \**********************************************************/
+
+/*!**********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/registerTarget.js ***!
+  \**********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/registry.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/reducers/stateId.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DragDropContext.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/SourceConnector.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/TargetConnector.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/decorateHandler.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/isRefable.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/util/index.js ***!
+  \***********************************************************/
+
+/*!***********************************************************!*\
+  !*** ./src/views/Editor/components/MaterialsAdvanced.tsx ***!
+  \***********************************************************/
+
+/*!************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/reducers/refCount.js ***!
+  \************************************************************/
+
+/*!************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/utils/matchesType.js ***!
+  \************************************************************/
+
+/*!************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DragPreviewImage.js ***!
+  \************************************************************/
+
+/*!************************************************************!*\
+  !*** ./node_modules/tiny-warning/dist/tiny-warning.esm.js ***!
+  \************************************************************/
+
+/*!*************************************************************!*\
+  !*** ./node_modules/prop-types/factoryWithThrowingShims.js ***!
+  \*************************************************************/
+
+/*!*************************************************************!*\
+  !*** ./node_modules/prop-types/lib/ReactPropTypesSecret.js ***!
+  \*************************************************************/
+
+/*!*************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/isValidType.js ***!
+  \*************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/inheritsLoose.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/DragDropManagerImpl.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/DragDropMonitorImpl.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/HandlerRegistryImpl.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/reducers/dragOffset.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/useDragLayer.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/cloneWithRef.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/wrapConnectorHooks.js ***!
+  \**************************************************************/
+
+/*!**************************************************************!*\
+  !*** ./node_modules/react-is/cjs/react-is.production.min.js ***!
+  \**************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/defineProperty.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/setPrototypeOf.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/index.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/createSourceFactory.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/createTargetFactory.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/internal/drag.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/internal/drop.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/regexp.prototype.flags/implementation.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/util/Constants.js ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./src/views/Editor/components/Nutrition.tsx + 1 modules ***!
+  \***************************************************************/
+
+/*!***************************************************************!*\
+  !*** ./src/views/Editor/components/Utilities.tsx + 5 modules ***!
+  \***************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/@mediavine/ui/dist/ui.esm.js + 27 modules ***!
+  \****************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/drop.js ***!
+  \****************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/utils/discount_lodash.js ***!
+  \****************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/utils/getNextUniqueId.js ***!
+  \****************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/react-dom/cjs/react-dom.production.min.js ***!
+  \****************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/scheduler/cjs/scheduler.production.min.js ***!
+  \****************************************************************/
+
+/*!****************************************************************!*\
+  !*** ./node_modules/tiny-invariant/dist/tiny-invariant.esm.js ***!
+  \****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/create-react-context/lib/implementation.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/hover.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/index.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/types.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/reducers/dragOperation.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DragSourceMonitorImpl.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/DropTargetMonitorImpl.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/discount_lodash.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/structures/Video.js ***!
+  \*****************************************************************/
+
+/*!*****************************************************************!*\
+  !*** ./src/views/Editor/components/EditorWrap.tsx + 33 modules ***!
+  \*****************************************************************/
+
+/*!******************************************************************!*\
+  !*** ./src/views/Editor/components/CardProducts.tsx + 7 modules ***!
+  \******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/@mediavine/wordpress-safe-react/src/index.js ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/endDrag.js ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/reducers/dirtyHandlerIds.js ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/merge-anything/dist/index.esm.js + 1 modules ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/react-day-picker/lib/react-day-picker.min.js ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/disposables/index.js ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/structures/Channel.js ***!
+  \*******************************************************************/
+
+/*!*******************************************************************!*\
+  !*** ./src/views/Editor/components/VideoControls.tsx + 2 modules ***!
+  \*******************************************************************/
+
+/*!********************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/polyfills/endsWith.js ***!
+  \********************************************************************/
+
+/*!********************************************************************!*\
+  !*** ./node_modules/simple-youtube-api/src/structures/Playlist.js ***!
+  \********************************************************************/
+
+/*!*********************************************************************!*\
+  !*** ./node_modules/@emotion/unitless/dist/unitless.browser.esm.js ***!
+  \*********************************************************************/
+
+/*!*********************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/beginDrag.js ***!
+  \*********************************************************************/
+
+/*!*********************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/NativeTypes.js ***!
+  \*********************************************************************/
+
+/*!*********************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/OffsetUtils.js ***!
+  \*********************************************************************/
+
+/*!**********************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/assertThisInitialized.js ***!
+  \**********************************************************************/
+
+/*!**********************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/HTML5Backend.js ***!
+  \**********************************************************************/
+
+/*!***********************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/getEmptyImage.js ***!
+  \***********************************************************************/
+
+/*!***********************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/internal/useCollector.js ***!
+  \***********************************************************************/
+
+/*!***********************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/getDecoratedComponent.js ***!
+  \***********************************************************************/
+
+/*!************************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/disposables/Disposable.js ***!
+  \************************************************************************/
+
+/*!*************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/BrowserDetector.js ***!
+  \*************************************************************************/
+
+/*!*************************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/checkDecoratorArguments.js ***!
+  \*************************************************************************/
+
+/*!**************************************************************************!*\
+  !*** ./node_modules/node-libs-browser/node_modules/punycode/punycode.js ***!
+  \**************************************************************************/
+
+/*!***************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/EnterLeaveCounter.js ***!
+  \***************************************************************************/
+
+/*!***************************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/internal/useMonitorOutput.js ***!
+  \***************************************************************************/
+
+/*!***************************************************************************!*\
+  !*** ./node_modules/react-immutable-proptypes/dist/ImmutablePropTypes.js ***!
+  \***************************************************************************/
+
+/*!*****************************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js ***!
+  \*****************************************************************************/
+
+/*!*****************************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/publishDragSource.js ***!
+  \*****************************************************************************/
+
+/*!*****************************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/hooks/internal/useDragDropManager.js ***!
+  \*****************************************************************************/
+
+/*!******************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/MonotonicInterpolant.js ***!
+  \******************************************************************************/
+
+/*!******************************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/disposables/SerialDisposable.js ***!
+  \******************************************************************************/
+
+/*!******************************************************************************!*\
+  !*** ./node_modules/styled-components/dist/styled-components.browser.esm.js ***!
+  \******************************************************************************/
+
+/*!*******************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/utils/discount_lodash.js ***!
+  \*******************************************************************************/
+
+/*!*******************************************************************************!*\
+  !*** ./node_modules/react-dom/cjs/react-dom-server.browser.production.min.js ***!
+  \*******************************************************************************/
+
+/*!*********************************************************************************!*\
+  !*** ./node_modules/dnd-core/lib/cjs/actions/dragDrop/local/setClientOffset.js ***!
+  \*********************************************************************************/
+
+/*!*********************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/NativeDragSources/index.js ***!
+  \*********************************************************************************/
+
+/*!*********************************************************************************!*\
+  !*** ./node_modules/react-dnd/lib/cjs/utils/disposables/CompositeDisposable.js ***!
+  \*********************************************************************************/
+
+/*!**********************************************************************************!*\
+  !*** ./node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js ***!
+  \**********************************************************************************/
+
+/*!*******************************************************************************************!*\
+  !*** ./node_modules/@emotion/is-prop-valid/dist/is-prop-valid.browser.esm.js + 1 modules ***!
+  \*******************************************************************************************/
+
+/*!********************************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/NativeDragSources/NativeDragSource.js ***!
+  \********************************************************************************************/
+
+/*!*********************************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/NativeDragSources/nativeTypesConfig.js ***!
+  \*********************************************************************************************/
+
+/*!**********************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/regenerator/index.js ***!
+  \**********************************************************************************************/
+
+/*!***********************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/typeof.js ***!
+  \***********************************************************************************************/
+
+/*!***************************************************************************************************!*\
+  !*** ./node_modules/react-dnd-html5-backend/lib/cjs/NativeDragSources/getDataFromDataTransfer.js ***!
+  \***************************************************************************************************/
+
+/*!****************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createClass.js ***!
+  \****************************************************************************************************/
+
+/*!******************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectSpread2.js ***!
+  \******************************************************************************************************/
+
+/*!*******************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/classCallCheck.js ***!
+  \*******************************************************************************************************/
+
+/*!*******************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/defineProperty.js ***!
+  \*******************************************************************************************************/
+
+/*!*********************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js ***!
+  \*********************************************************************************************************/
+
+/*!*********************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js ***!
+  \*********************************************************************************************************/
+
+/*!*************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/inherits.js + 1 modules ***!
+  \*************************************************************************************************************/
+
+/*!**************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/taggedTemplateLiteral.js ***!
+  \**************************************************************************************************************/
+
+/*!****************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/createSuper.js + 4 modules ***!
+  \****************************************************************************************************************/
+
+/*!******************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/slicedToArray.js + 3 modules ***!
+  \******************************************************************************************************************/
+
+/*!*******************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js ***!
+  \*******************************************************************************************************************/
+
+/*!**********************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 3 modules ***!
+  \**********************************************************************************************************************/
+
+/*!****************************************************************************************************************************!*\
+  !*** ./node_modules/babel-preset-react-app/node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js + 1 modules ***!
+  \****************************************************************************************************************************/
+
+/** @license React v0.19.1
+ * scheduler.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.14.0
+ * react-dom-server.browser.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.14.0
+ * react-dom.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.14.0
+ * react.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**!
+ * @fileOverview Kickass library to create and place poppers near their reference elements.
+ * @version 1.16.1
+ * @license
+ * Copyright (c) 2016 Federico Zivolo and contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */

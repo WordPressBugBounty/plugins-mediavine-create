@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards for Plugins">
+	<description>Generally-applicable sniffs for WordPress plugins</description>
+	<config name="installed_paths" value="vendor/wp-coding-standards/wpcs" />
+    <arg name="colors"/>
+
+	<rule ref="WordPress-VIP">
+		<exclude name="WordPress.VIP.SuperGlobalInputUsage" />
+		<exclude name="WordPress.NamingConventions.ValidVariableName" />
+		<exclude name="WordPress.WP.AlternativeFunctions" />
+		<exclude name="WordPress.VIP.FileSystemWritesDisallow" />
+		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.DirectQuery" />
+
+		<!-- DB interface uses one off calls run through API, no need to cache -->
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
+
+		<!-- We want to prepare statements outside other $wpdb functions -->
+		<exclude name="WordPress.WP.PreparedSQL.NotPrepared" />
+
+		<!-- Some importers require the use of meta_key -->
+		<exclude name="WordPress.VIP.SlowDBQuery.slow_db_query_meta_key" />
+
+		 <!-- We're not using serialize/unserialize indiscriminately -->
+        <exclude name="WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize" />
+        <exclude name="WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize" />
+	</rule>
+
+	<!-- ads.txt requires file writes -->
+
+	<rule ref="WordPress.VIP.FileSystemWritesDisallow">
+		<exclude-pattern>*</exclude-pattern>
+	</rule>
+
+	<!-- WP AMP doesn't follow it's own rules -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS" />
+		</properties>
+	</rule>
+
+	<!-- Check all PHP files in directory tree by default. -->
+	<arg name="extensions" value="php"/>
+	<file>.</file>
+
+	<!-- Show sniff codes in all reports -->
+	<arg value="s"/>
+	<exclude-pattern>plugin_update_check.php</exclude-pattern>
+	<exclude-pattern>/lib/helpers/easy-recipe/</exclude-pattern>
+	<exclude-pattern>/lib/helpers/ingredient-parse.php</exclude-pattern>
+	<exclude-pattern>/lib/importers/</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>/tests/*</exclude-pattern>
+</ruleset>

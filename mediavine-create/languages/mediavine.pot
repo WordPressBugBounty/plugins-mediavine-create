@@ -1,0 +1,3397 @@
+# Copyright (C) 2021 Mediavine
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: Create by Mediavine 1.7.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/create\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-12-10T20:44:53+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.5.0\n"
+"X-Domain: mediavine\n"
+
+#. Plugin Name of the plugin
+#: admin/class-admin-init.php:294
+#: admin/class-admin-init.php:350
+msgid "Create by Mediavine"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://www.mediavine.com/mediavine-create/"
+msgstr ""
+
+#. Description of the plugin
+msgid "Create custom recipe cards to be displayed in posts."
+msgstr ""
+
+#. Author of the plugin
+msgid "Mediavine"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://www.mediavine.com/"
+msgstr ""
+
+#: admin/class-admin-init.php:242
+#: class-plugin.php:1166
+#: admin/ui/build/app.build.1.7.0.js:142650
+#: admin/ui/build/app.build.1.7.0.js:161148
+msgid "Recipes"
+msgstr ""
+
+#: admin/class-admin-init.php:243
+#: class-plugin.php:1173
+#: admin/ui/build/app.build.1.7.0.js:142651
+msgid "How-Tos"
+msgstr ""
+
+#: admin/class-admin-init.php:269
+#: lib/i18n/class-translation.php:52
+#: lib/views/v1/shortcode-mv-create-products.php:66
+#: admin/ui/build/app.build.1.7.0.js:141580
+#: admin/ui/build/app.build.1.7.0.js:147861
+#: admin/ui/build/app.build.1.7.0.js:148812
+msgid "Recommended Products"
+msgstr ""
+
+#: admin/class-admin-init.php:270
+msgid "User Reviews"
+msgstr ""
+
+#: admin/class-admin-init.php:285
+#: admin/class-admin-init.php:293
+msgid "Create by Mediavine Plugin Settings"
+msgstr ""
+
+#: admin/class-admin-init.php:286
+msgid "Settings"
+msgstr ""
+
+#: class-plugin.php:290
+msgid "Create"
+msgstr ""
+
+#: class-plugin.php:437
+msgid "Measurement System"
+msgstr ""
+
+#: class-plugin.php:438
+msgid "Force a default measurement system (or choose \"Any\" to allow either)."
+msgstr ""
+
+#: class-plugin.php:442
+msgid "Metric"
+msgstr ""
+
+#: class-plugin.php:446
+msgid "Imperial"
+msgstr ""
+
+#: class-plugin.php:450
+msgid "Any"
+msgstr ""
+
+#: class-plugin.php:470
+msgid "Product Registration"
+msgstr ""
+
+#: class-plugin.php:471
+msgid "In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs."
+msgstr ""
+
+#: class-plugin.php:495
+msgid "Enabled Debugging"
+msgstr ""
+
+#: class-plugin.php:496
+msgid "Enable this setting to send all error log data to Sentry for the Publisher Engineering team to debug. This reduces the need for FTP and should be used in lieu of debug log/error log files."
+msgstr ""
+
+#: class-plugin.php:832
+msgid "Thanks for installing Create by Mediavine!"
+msgstr ""
+
+#. translators: %1$s: linked importer plugin
+#: class-plugin.php:836
+msgid "If you're moving from another recipe plugin, you can also download and install our %1$s."
+msgstr ""
+
+#: class-plugin.php:837
+msgid "importer plugin"
+msgstr ""
+
+#: class-plugin.php:1096
+msgid "CSS Class"
+msgstr ""
+
+#: class-plugin.php:1097
+msgid "Add an additional CSS class to this card."
+msgstr ""
+
+#: class-plugin.php:1102
+msgid "Custom Nutrition Disclaimer"
+msgstr ""
+
+#: class-plugin.php:1103
+msgid "Example: Nutrition information isn’t always accurate."
+msgstr ""
+
+#: class-plugin.php:1109
+msgid "Custom Affiliate Message"
+msgstr ""
+
+#: class-plugin.php:1110
+msgid "Override the default affiliate message for this card."
+msgstr ""
+
+#: class-plugin.php:1116
+msgid "Show Custom Affiliate Message"
+msgstr ""
+
+#: class-plugin.php:1117
+msgid "Check this box to display an affiliate message on this List."
+msgstr ""
+
+#: class-plugin.php:1126
+msgid "Social Footer Icon"
+msgstr ""
+
+#: class-plugin.php:1127
+msgid "Override the default social footer icon for this card."
+msgstr ""
+
+#: class-plugin.php:1140
+msgid "Social Footer Heading"
+msgstr ""
+
+#: class-plugin.php:1141
+msgid "Override the default social footer heading for this card."
+msgstr ""
+
+#: class-plugin.php:1147
+msgid "Social Footer Content"
+msgstr ""
+
+#: class-plugin.php:1148
+msgid "Override the default social footer content for this card."
+msgstr ""
+
+#: class-plugin.php:1165
+#: admin/ui/build/app.build.1.7.0.js:133935
+#: admin/ui/build/app.build.1.7.0.js:134910
+#: admin/ui/build/app.build.1.7.0.js:137003
+msgid "Recipe"
+msgstr ""
+
+#: class-plugin.php:1172
+#: admin/ui/build/app.build.1.7.0.js:133936
+#: admin/ui/build/app.build.1.7.0.js:134912
+#: admin/ui/build/app.build.1.7.0.js:137004
+msgid "How-To"
+msgstr ""
+
+#: class-plugin.php:1179
+#: admin/ui/build/app.build.1.7.0.js:133937
+#: admin/ui/build/app.build.1.7.0.js:134911
+#: admin/ui/build/app.build.1.7.0.js:137129
+msgid "List"
+msgstr ""
+
+#: class-plugin.php:1180
+#: admin/ui/build/app.build.1.7.0.js:142652
+#: admin/ui/build/app.build.1.7.0.js:161151
+msgid "Lists"
+msgstr ""
+
+#: lib/api/v1/creations-args.php:14
+msgid "ID of the card being referenced."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:8
+msgid "Unique identifier for the card."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:14
+msgid "Title of the card."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:18
+msgid "."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:22
+msgid "One of 'recipe' or 'diy'."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:26
+msgid "Name of the author."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:30
+msgid "Timestamp of creation."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:34
+msgid "Timestamp of last edit."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:38
+msgid "HTML description."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:42
+msgid "HTML instructions."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:46
+msgid "HTM instructions with ads inline."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:50
+msgid "Notes."
+msgstr ""
+
+#: lib/api/v1/creations-schema.php:54
+msgid "Fully qualified URL of post."
+msgstr ""
+
+#: lib/class-api-services.php:59
+#: lib/class-api-services.php:74
+msgid "Bad Request"
+msgstr ""
+
+#: lib/class-api-services.php:60
+msgid "Missing required input"
+msgstr ""
+
+#: lib/class-api-services.php:75
+msgid "We're missing important information"
+msgstr ""
+
+#: lib/class-custom-content.php:114
+msgid "Content Blocks"
+msgstr ""
+
+#: lib/class-custom-content.php:118
+msgid "Meta Boxes"
+msgstr ""
+
+#: lib/class-publish.php:15
+#: lib/class-publish.php:578
+#: lib/nutrition/class-nutrition-api.php:61
+#: lib/nutrition/class-nutrition-api.php:95
+#: lib/product-maps/class-products-map-api.php:91
+#: lib/products/class-products-api.php:125
+#: lib/products/class-products-api.php:209
+#: lib/supplies/class-supplies-api.php:81
+msgid "Entry Not Found"
+msgstr ""
+
+#: lib/class-publish.php:16
+#: lib/class-publish.php:578
+msgid "The Creation could not be found"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:21
+msgid "Missing required field: [title]"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:26
+msgid "Missing required field: [type]"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:44
+#: lib/supplies/class-supplies-api.php:31
+msgid "Entry Not Created"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:44
+msgid "A conflict occurred and the Creation could not be created"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:91
+msgid "Entry Not Updated"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:91
+msgid "A conflict occurred and the Creation could not be updated"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:289
+msgid "The Create Card could not be found"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:321
+#: lib/creations/class-creations-api.php:382
+msgid "Creation not found"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:351
+#: lib/product-maps/class-products-map-api.php:199
+#: lib/products/class-products-api.php:415
+#: lib/reviews/class-reviews-api.php:495
+#: lib/supplies/class-supplies-api.php:104
+msgid "Entry Could Not Be Deleted"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:351
+msgid "A conflict occurred and the Creation could not be deleted"
+msgstr ""
+
+#: lib/creations/class-creations-jump-to-recipe.php:365
+#: lib/settings-group/class-pro.php:39
+#: lib/settings-group/class-pro.php:46
+msgid "Jump to Recipe"
+msgstr ""
+
+#: lib/creations/class-creations-jump-to-recipe.php:367
+#: lib/settings-group/class-pro.php:52
+#: lib/settings-group/class-pro.php:59
+msgid "Jump to How-To"
+msgstr ""
+
+#: lib/creations/class-creations-meta-blocks.php:58
+msgid "Disable Jump-to-Recipe"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:67
+msgid "Facebook Page:"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:71
+msgid "Instagram:"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:75
+msgid "Pinterest Profile:"
+msgstr ""
+
+#. Translators: Type of card. Will output either 'recipe' or 'project'
+#: lib/creations/class-creations-views.php:539
+msgid "Did you make this %s?"
+msgstr ""
+
+#. Translators: Social Service name with link
+#: lib/creations/class-creations-views.php:558
+msgid "Please leave a comment on the blog or share a photo on %s"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:726
+#: admin/ui/build/app.build.1.7.0.js:134947
+#: admin/ui/build/app.build.1.7.0.js:152339
+msgid "Get the Recipe"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:728
+msgid "Read the Guide"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:730
+#: admin/ui/build/app.build.1.7.0.js:134965
+#: admin/ui/build/app.build.1.7.0.js:152337
+msgid "Continue Reading"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:751
+#: lib/creations/class-creations-views.php:1300
+#: lib/creations/class-creations.php:683
+msgid "Prep Time"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:757
+#: lib/creations/class-creations.php:684
+msgid "Active Time"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:763
+#: lib/creations/class-creations-views.php:1302
+#: lib/creations/class-creations.php:685
+msgid "Additional Time"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:769
+#: lib/creations/class-creations-views.php:1322
+msgid "Total Time"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:773
+#: lib/i18n/class-translation.php:45
+#: lib/views/v1/big-image/shortcode-mv-create-title.php:12
+#: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:19
+#: lib/views/v1/centered-dark/shortcode-mv-create-times.php:11
+#: lib/views/v1/centered/shortcode-mv-create-nutrition.php:19
+#: lib/views/v1/centered/shortcode-mv-create-times.php:11
+#: lib/views/v1/dark/shortcode-mv-create-nutrition.php:17
+#: lib/views/v1/shortcode-mv-create-nutrition.php:17
+#: lib/views/v1/shortcode-mv-create-title.php:4
+#: admin/ui/build/app.build.1.7.0.js:148530
+#: admin/ui/build/app.build.1.7.0.js:148534
+msgid "Yield"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:777
+#: lib/i18n/class-translation.php:51
+#: lib/views/v1/shortcode-mv-create-footer.php:36
+#: admin/ui/build/app.build.1.7.0.js:144645
+#: admin/ui/build/app.build.1.7.0.js:149922
+msgid "Category"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:781
+#: lib/creations/class-creations-views.php:953
+#: lib/i18n/class-translation.php:59
+#: admin/ui/build/app.build.1.7.0.js:155393
+msgid "Calories"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:785
+#: lib/creations/class-creations-views.php:1184
+#: lib/i18n/class-translation.php:48
+#: admin/ui/build/app.build.1.7.0.js:149928
+msgid "Cuisine"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:790
+#: lib/creations/class-creations-views.php:1187
+#: lib/i18n/class-translation.php:49
+#: admin/ui/build/app.build.1.7.0.js:149934
+msgid "Project Type"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:793
+#: admin/ui/build/app.build.1.7.0.js:149946
+msgid "Cost"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:796
+#: lib/creations/class-creations-views.php:1330
+#: admin/ui/build/app.build.1.7.0.js:149940
+msgid "Difficulty"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:958
+#: lib/i18n/class-translation.php:60
+#: admin/ui/build/app.build.1.7.0.js:155394
+msgid "Total Fat"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:963
+#: lib/i18n/class-translation.php:61
+#: admin/ui/build/app.build.1.7.0.js:155395
+msgid "Saturated Fat"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:968
+#: lib/i18n/class-translation.php:62
+#: admin/ui/build/app.build.1.7.0.js:155396
+msgid "Trans Fat"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:973
+#: lib/i18n/class-translation.php:63
+#: admin/ui/build/app.build.1.7.0.js:155397
+msgid "Unsaturated Fat"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:978
+#: lib/i18n/class-translation.php:64
+#: admin/ui/build/app.build.1.7.0.js:155398
+msgid "Cholesterol"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:983
+#: lib/i18n/class-translation.php:65
+#: admin/ui/build/app.build.1.7.0.js:155399
+msgid "Sodium"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:988
+#: lib/i18n/class-translation.php:66
+#: admin/ui/build/app.build.1.7.0.js:155400
+msgid "Carbohydrates"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:993
+#: lib/i18n/class-translation.php:67
+msgid "Net Carbohydrates"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:998
+#: lib/i18n/class-translation.php:68
+#: admin/ui/build/app.build.1.7.0.js:155401
+msgid "Fiber"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1003
+#: lib/i18n/class-translation.php:69
+#: admin/ui/build/app.build.1.7.0.js:155402
+msgid "Sugar"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1008
+#: lib/i18n/class-translation.php:70
+#: admin/ui/build/app.build.1.7.0.js:155407
+msgid "Sugar Alcohols"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1013
+#: lib/i18n/class-translation.php:71
+#: admin/ui/build/app.build.1.7.0.js:155403
+msgid "Protein"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1182
+#: lib/i18n/class-translation.php:50
+#: admin/ui/build/app.build.1.7.0.js:144577
+msgid "Type"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1301
+#: lib/creations/class-creations.php:690
+msgid "Cook Time"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1334
+msgid "Estimated Cost"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1381
+msgid "year"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1382
+msgid "years"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1385
+msgid "month"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1386
+msgid "months"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1389
+msgid "day"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1390
+msgid "days"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1393
+#: lib/products/class-amazon.php:558
+msgid "hour"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1394
+#: lib/products/class-amazon.php:559
+msgid "hours"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1397
+#: lib/products/class-amazon.php:563
+msgid "minute"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1398
+#: lib/products/class-amazon.php:564
+#: admin/ui/build/app.build.1.7.0.js:132068
+msgid "minutes"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1401
+#: lib/products/class-amazon.php:575
+msgid "second"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1402
+#: lib/products/class-amazon.php:576
+msgid "seconds"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1591
+msgid "No Card with ID found"
+msgstr ""
+
+#: lib/creations/class-creations-wp-content.php:9
+#: admin/ui/build/app.build.1.7.0.js:137632
+msgid "Create Card"
+msgstr ""
+
+#: lib/creations/class-creations-wp-content.php:10
+#: admin/ui/build/app.build.1.7.0.js:142519
+msgid "Create Cards"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:16
+#: lib/creations/class-creations-wp-content.php:18
+#: lib/creations/class-creations-wp-content.php:22
+#: lib/creations/class-creations-wp-content.php:115
+msgid "Add New %1$s"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:20
+#: lib/creations/class-creations-wp-content.php:109
+msgid "Edit %1$s"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:24
+#: lib/creations/class-creations-wp-content.php:111
+msgid "View %1$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:26
+msgid "View %2$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:28
+#: lib/creations/class-creations-wp-content.php:99
+msgid "Search %2$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:30
+#: lib/creations/class-creations-wp-content.php:125
+msgid "No %2$s found"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:32
+msgid "No %2$s found in trash"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:34
+#: lib/creations/class-creations-wp-content.php:107
+msgid "Parent %2$s:"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:36
+#: lib/creations/class-creations-wp-content.php:103
+msgid "All %2$s"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:38
+msgid "%1$s Archives"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:40
+msgid "%1$s Attributes"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:42
+msgid "Insert into %1$s"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:44
+msgid "Uploaded to this %1$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:46
+msgid "Filter %2$s list"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:48
+msgid "%2$s list navigation"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:50
+msgid "%2$s list"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:101
+msgid "Popular %2$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:105
+msgid "Parent %2$s"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:113
+msgid "Update %1$s"
+msgstr ""
+
+#. translators: %1$s: post type name
+#: lib/creations/class-creations-wp-content.php:117
+msgid "New %1$s Name"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:119
+msgid "Separate %2$s with commas"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:121
+msgid "Add or remove %2$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:123
+msgid "Choose from the most used %2$s"
+msgstr ""
+
+#. translators: %2$s: post type name
+#: lib/creations/class-creations-wp-content.php:127
+msgid "No %2$s"
+msgstr ""
+
+#: lib/creations/class-creations.php:175
+msgid "Create Card Square (Small)"
+msgstr ""
+
+#: lib/creations/class-creations.php:182
+msgid "Create Card Square"
+msgstr ""
+
+#: lib/creations/class-creations.php:189
+msgid "Create Card Square (Medium High)"
+msgstr ""
+
+#: lib/creations/class-creations.php:196
+msgid "Create Card Square (High Res)"
+msgstr ""
+
+#: lib/creations/class-creations.php:203
+msgid "Create Card 4:3 (Small)"
+msgstr ""
+
+#: lib/creations/class-creations.php:210
+msgid "Create Card 4:3"
+msgstr ""
+
+#: lib/creations/class-creations.php:217
+msgid "Create Card 4:3 (High Res)"
+msgstr ""
+
+#: lib/creations/class-creations.php:224
+msgid "Create Card 3:4 (Small)"
+msgstr ""
+
+#: lib/creations/class-creations.php:231
+msgid "Create Card 3:4"
+msgstr ""
+
+#: lib/creations/class-creations.php:238
+msgid "Create Card 3:4 (High Res)"
+msgstr ""
+
+#: lib/creations/class-creations.php:245
+msgid "Create Card 16:9 (Small)"
+msgstr ""
+
+#: lib/creations/class-creations.php:252
+msgid "Create Card 16:9"
+msgstr ""
+
+#: lib/creations/class-creations.php:259
+msgid "Create Card 16:9 (High Res)"
+msgstr ""
+
+#: lib/creations/class-creations.php:267
+msgid "Create Card No Ratio"
+msgstr ""
+
+#: lib/creations/class-creations.php:274
+msgid "Create Card Vertical Pin"
+msgstr ""
+
+#: lib/creations/class-creations.php:525
+msgid "Post ID was not set in function call"
+msgstr ""
+
+#: lib/creations/class-creations.php:525
+msgid "A Post ID was not included in the request"
+msgstr ""
+
+#: lib/creations/class-creations.php:529
+msgid "Post ID value was not a number"
+msgstr ""
+
+#: lib/creations/class-creations.php:529
+msgid "A Post ID varable was included but was non-numeric"
+msgstr ""
+
+#: lib/db-interface/class-mv-dbi.php:69
+msgid "An error occurred with the request."
+msgstr ""
+
+#. translators: Link to learn about enabling permalinks
+#: lib/functions-version-check.php:104
+msgid "<strong>Create by Mediavine</strong> uses the WordPress REST API to power its functionality. In order for this to work properly, pretty permalinks must be enabled.<br><br>%1$s"
+msgstr ""
+
+#. translators: Link to learn about enabling permalinks
+#: lib/functions-version-check.php:105
+msgid "Learn about enabling permalinks"
+msgstr ""
+
+#. translators: Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
+#: lib/functions-version-check.php:133
+msgid "<strong>Create by Mediavine</strong> requires PHP version %1$s or higher, but recommends %2$s or higher. This site is running PHP version %3$s.<br><br>%4$s."
+msgstr ""
+
+#: lib/functions-version-check.php:137
+#: lib/functions-version-check.php:166
+msgid "Learn about updating PHP"
+msgstr ""
+
+#. translators: Required WP version number; Current WP version number
+#: lib/functions-version-check.php:148
+msgid "<strong>Create by Mediavine</strong> requires WordPress %1$s or higher. This site is running WordPress %2$s. Please update WordPress to activate <strong>Create by Mediavine</strong>."
+msgstr ""
+
+#: lib/functions-version-check.php:151
+#: lib/functions-version-check.php:180
+msgid "Learn about updating WordPress"
+msgstr ""
+
+#. translators: Date within styled tag; Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
+#: lib/functions-version-check.php:161
+msgid "Starting %1$s, <strong>Create by Mediavine</strong> will require PHP version %2$s, but recommends %3$s or higher. This site is running PHP version %4$s. To maintain compatibility with <strong>Create by Mediavine</strong>, please upgrade your PHP version.<br><br>%5$s."
+msgstr ""
+
+#. translators: Date within styled tag; Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
+#. translators: Date within styled tag; Required WP version number
+#: lib/functions-version-check.php:162
+#: lib/functions-version-check.php:177
+msgid "January 2021"
+msgstr ""
+
+#. translators: Date within styled tag; Required WP version number
+#: lib/functions-version-check.php:176
+msgid "Starting %1$s, WordPress %2$s will be required for all functionality, however keeping WordPress up-to-date at the latest version is still recommended. To maintain future compatibility with <strong>Create by Mediavine</strong>, please update WordPress."
+msgstr ""
+
+#: lib/functions-version-check.php:186
+msgid "<strong>Create by Mediavine</strong> has been deactivated."
+msgstr ""
+
+#. translators: a list of disabled PHP extensions
+#: lib/functions-version-check.php:212
+msgid "<strong>Create by Mediavine</strong> requires the following disabled PHP extensions in order to function properly: <code>%1$s</code>.<br/><br/>Your hosting environment does not currently have these enabled.<br/><br/>Please contact your hosting provider and ask them to ensure these extensions are enabled."
+msgstr ""
+
+#: lib/i18n/class-translation.php:7
+msgid "Comments"
+msgstr ""
+
+#: lib/i18n/class-translation.php:8
+msgid "Comments & Reviews"
+msgstr ""
+
+#: lib/i18n/class-translation.php:9
+#: admin/ui/build/app.build.1.7.0.js:143315
+msgid "Rating"
+msgstr ""
+
+#: lib/i18n/class-translation.php:10
+#: admin/ui/build/app.build.1.7.0.js:143281
+msgid "Reviews"
+msgstr ""
+
+#: lib/i18n/class-translation.php:11
+msgid "Your rating has been submitted. Write a review below (optional)."
+msgstr ""
+
+#. translators: Number of reviews for a card by title
+#: lib/i18n/class-translation.php:13
+msgid "%1$s Reviews for %2$s"
+msgstr ""
+
+#. translators: Number of reviews for a card by title
+#: lib/i18n/class-translation.php:15
+msgid "%1$s Review for %2$s"
+msgstr ""
+
+#: lib/i18n/class-translation.php:16
+msgid "Loading"
+msgstr ""
+
+#: lib/i18n/class-translation.php:17
+msgid "View More"
+msgstr ""
+
+#. translators: Number of reviews
+#: lib/i18n/class-translation.php:19
+msgid "%s Review"
+msgstr ""
+
+#. translators: Number of reviews
+#: lib/i18n/class-translation.php:21
+msgid "%s Reviews"
+msgstr ""
+
+#: lib/i18n/class-translation.php:22
+#: lib/i18n/class-translation.php:35
+#: admin/ui/build/app.build.1.7.0.js:143336
+#: admin/ui/build/app.build.1.7.0.js:146348
+msgid "Review"
+msgstr ""
+
+#. translators: Rating for a card
+#: lib/i18n/class-translation.php:24
+msgid "%s Stars"
+msgstr ""
+
+#: lib/i18n/class-translation.php:25
+msgid "Stars"
+msgstr ""
+
+#: lib/i18n/class-translation.php:26
+msgid "Star"
+msgstr ""
+
+#: lib/i18n/class-translation.php:27
+#: admin/ui/build/app.build.1.7.0.js:143965
+#: admin/ui/build/app.build.1.7.0.js:147348
+#: admin/ui/build/app.build.1.7.0.js:149354
+#: admin/ui/build/app.build.1.7.0.js:149785
+#: admin/ui/build/app.build.1.7.0.js:152517
+msgid "Title"
+msgstr ""
+
+#: lib/i18n/class-translation.php:28
+msgid "Anonymous User"
+msgstr ""
+
+#: lib/i18n/class-translation.php:29
+msgid "No Title"
+msgstr ""
+
+#: lib/i18n/class-translation.php:30
+#: admin/ui/build/app.build.1.7.0.js:147360
+msgid "Content"
+msgstr ""
+
+#: lib/i18n/class-translation.php:31
+msgid "No Ratings"
+msgstr ""
+
+#: lib/i18n/class-translation.php:32
+#: admin/ui/build/app.build.1.7.0.js:153977
+msgid "Name"
+msgstr ""
+
+#: lib/i18n/class-translation.php:33
+#: admin/ui/build/app.build.1.7.0.js:143445
+msgid "Email"
+msgstr ""
+
+#: lib/i18n/class-translation.php:34
+msgid "Review Title"
+msgstr ""
+
+#: lib/i18n/class-translation.php:36
+msgid "To submit this review, I consent to the collection of this data."
+msgstr ""
+
+#: lib/i18n/class-translation.php:37
+msgid "Submit Review"
+msgstr ""
+
+#: lib/i18n/class-translation.php:38
+msgid "Submitting"
+msgstr ""
+
+#: lib/i18n/class-translation.php:39
+#: admin/ui/build/app.build.1.7.0.js:147397
+msgid "Update Review"
+msgstr ""
+
+#: lib/i18n/class-translation.php:40
+msgid "Thanks for the rating!"
+msgstr ""
+
+#: lib/i18n/class-translation.php:41
+msgid "Did you make this? Tell us about it!"
+msgstr ""
+
+#: lib/i18n/class-translation.php:42
+msgid "Leave a review"
+msgstr ""
+
+#: lib/i18n/class-translation.php:43
+msgid "Thanks for the review!"
+msgstr ""
+
+#: lib/i18n/class-translation.php:44
+#: lib/views/v1/big-image/shortcode-mv-create-print-button.php:14
+#: lib/views/v1/shortcode-mv-create-print-button.php:12
+#: admin/ui/build/app.build.1.7.0.js:135676
+msgid "Print"
+msgstr ""
+
+#: lib/i18n/class-translation.php:46
+#: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:23
+#: lib/views/v1/centered/shortcode-mv-create-nutrition.php:23
+#: lib/views/v1/dark/shortcode-mv-create-nutrition.php:21
+#: lib/views/v1/shortcode-mv-create-nutrition.php:21
+#: admin/ui/build/app.build.1.7.0.js:155391
+msgid "Serving Size"
+msgstr ""
+
+#: lib/i18n/class-translation.php:47
+#: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:26
+#: lib/views/v1/centered/shortcode-mv-create-nutrition.php:26
+#: lib/views/v1/dark/shortcode-mv-create-nutrition.php:24
+#: lib/views/v1/shortcode-mv-create-nutrition.php:24
+msgid "Amount Per Serving"
+msgstr ""
+
+#: lib/i18n/class-translation.php:53
+msgid "As an Amazon Associate and member of other affiliate programs, I earn from qualifying purchases."
+msgstr ""
+
+#: lib/i18n/class-translation.php:54
+#: lib/views/v1/shortcode-mv-create-supplies-diy.php:64
+#: admin/ui/build/app.build.1.7.0.js:138445
+#: admin/ui/build/app.build.1.7.0.js:138648
+#: admin/ui/build/app.build.1.7.0.js:138848
+#: admin/ui/build/app.build.1.7.0.js:139345
+#: admin/ui/build/app.build.1.7.0.js:140451
+#: admin/ui/build/app.build.1.7.0.js:147708
+msgid "Tools"
+msgstr ""
+
+#: lib/i18n/class-translation.php:55
+#: lib/views/v1/shortcode-mv-create-supplies-diy.php:3
+#: admin/ui/build/app.build.1.7.0.js:138445
+#: admin/ui/build/app.build.1.7.0.js:138648
+#: admin/ui/build/app.build.1.7.0.js:138848
+#: admin/ui/build/app.build.1.7.0.js:139345
+#: admin/ui/build/app.build.1.7.0.js:140451
+#: admin/ui/build/app.build.1.7.0.js:147657
+msgid "Materials"
+msgstr ""
+
+#: lib/i18n/class-translation.php:56
+#: lib/views/v1/shortcode-mv-create-supplies-recipe.php:4
+#: admin/ui/build/app.build.1.7.0.js:138445
+#: admin/ui/build/app.build.1.7.0.js:138648
+#: admin/ui/build/app.build.1.7.0.js:138848
+#: admin/ui/build/app.build.1.7.0.js:139345
+#: admin/ui/build/app.build.1.7.0.js:140451
+#: admin/ui/build/app.build.1.7.0.js:148645
+msgid "Ingredients"
+msgstr ""
+
+#: lib/i18n/class-translation.php:57
+#: lib/views/v1/shortcode-mv-create-instructions.php:7
+#: admin/ui/build/app.build.1.7.0.js:147759
+#: admin/ui/build/app.build.1.7.0.js:148710
+msgid "Instructions"
+msgstr ""
+
+#: lib/i18n/class-translation.php:58
+#: lib/views/v1/shortcode-mv-create-notes.php:3
+#: admin/ui/build/app.build.1.7.0.js:147803
+#: admin/ui/build/app.build.1.7.0.js:148754
+msgid "Notes"
+msgstr ""
+
+#. translators: %s: field name
+#: lib/images/class-images-api.php:26
+msgid "Missing Required %s"
+msgstr ""
+
+#. translators: %s: field name
+#: lib/images/class-images-api.php:28
+msgid "%s is a required field."
+msgstr ""
+
+#: lib/images/class-images-api.php:117
+msgid "Nothing to Update"
+msgstr ""
+
+#: lib/images/class-images-api.php:118
+msgid "Nothing in the current request has changed."
+msgstr ""
+
+#: lib/images/class-images-api.php:124
+msgid "Database Update Error"
+msgstr ""
+
+#: lib/images/class-images-api.php:199
+#: lib/images/class-images-api.php:224
+msgid "Resource Not Found"
+msgstr ""
+
+#: lib/images/class-images-api.php:200
+#: lib/images/class-images-api.php:225
+msgid "No image with that ID."
+msgstr ""
+
+#: lib/importer-compatibility/class-importer-compatibility.php:23
+msgid "The currently installed version of <strong>Mediavine Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated."
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:506
+msgid " calories"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:510
+msgid " grams carbohydrates"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:514
+msgid " milligrams cholesterol"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:518
+msgid " grams fat"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:522
+msgid " grams fiber"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:526
+msgid " grams protein"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:530
+msgid " grams saturated fat"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:538
+msgid " milligrams sodium"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:542
+msgid " grams sugar"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:546
+msgid " grams trans fat"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:550
+msgid " grams unsaturated fat"
+msgstr ""
+
+#: lib/nutrition/class-nutrition-api.php:61
+#: lib/nutrition/class-nutrition-api.php:95
+msgid "The Nutrition could not be found"
+msgstr ""
+
+#: lib/product-maps/class-products-map-api.php:91
+#: lib/products/class-products-api.php:127
+#: lib/products/class-products-api.php:211
+msgid "The Product could not be found"
+msgstr ""
+
+#: lib/product-maps/class-products-map-api.php:199
+msgid "A conflict occurred and the Product Maps could not be deleted"
+msgstr ""
+
+#: lib/products/class-amazon.php:239
+msgid "Unknown API Error"
+msgstr ""
+
+#: lib/products/class-amazon.php:242
+msgid "An error occurred, but no error data was provided by the API."
+msgstr ""
+
+#: lib/products/class-amazon.php:258
+#: lib/products/class-amazon.php:300
+#: lib/products/class-amazon.php:314
+#: lib/products/class-amazon.php:352
+msgid "Invalid Amazon Credentials"
+msgstr ""
+
+#: lib/products/class-amazon.php:261
+msgid "Your Access Key ID does not have Amazon's Product Advertising API access."
+msgstr ""
+
+#: lib/products/class-amazon.php:263
+#: lib/products/class-amazon.php:277
+#: lib/products/class-amazon.php:291
+msgid "Sign up for Amazon's Product Advertising API"
+msgstr ""
+
+#: lib/products/class-amazon.php:272
+#: lib/products/class-amazon.php:286
+msgid "Invalid Partner Tag"
+msgstr ""
+
+#: lib/products/class-amazon.php:275
+msgid "The partner tag is not mapped to a valid associate store with your access key."
+msgstr ""
+
+#: lib/products/class-amazon.php:289
+msgid "Your access key is not mapped to primary of approved associate store."
+msgstr ""
+
+#: lib/products/class-amazon.php:303
+msgid "Your Amazon Affiliates credentials appear to be incorrect. It is also possible they may still be provisioning, which normally takes around 24-48 hours. Please review your settings or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon.php:305
+#: lib/products/class-amazon.php:357
+msgid "Amazon Affiliates Settings"
+msgstr ""
+
+#: lib/products/class-amazon.php:317
+msgid "The request signature did not include all of the required components."
+msgstr ""
+
+#: lib/products/class-amazon.php:326
+msgid "Too Many Requests"
+msgstr ""
+
+#: lib/products/class-amazon.php:329
+msgid "The request was denied due to request throttling. Please take a break and reduce the number of requests made to the Amazon Product Advertising API. For some reason Amazon also gives this error if you haven't had three qualifying purchases through your affiliate account within the past 30 days."
+msgstr ""
+
+#: lib/products/class-amazon.php:331
+msgid "If this error still persists after at least an hour, and your account has had enough qualifying purchases, please contact Amazon support."
+msgstr ""
+
+#: lib/products/class-amazon.php:340
+msgid "request_expired"
+msgstr ""
+
+#: lib/products/class-amazon.php:343
+msgid "The request is past expiry date or the request date (either with 15 minute padding), or the request date occurs more than 15 minutes in the future."
+msgstr ""
+
+#: lib/products/class-amazon.php:355
+msgid "Your Amazon Affiliates Access Key ID or security token appear to be invalid. Please review your credentials."
+msgstr ""
+
+#: lib/products/class-amazon.php:366
+msgid "Invalid Parameter"
+msgstr ""
+
+#: lib/products/class-amazon.php:369
+msgid "Parameter is either invalid or missing. Please check your input and try again."
+msgstr ""
+
+#: lib/products/class-amazon.php:378
+msgid "Operation Unknown"
+msgstr ""
+
+#: lib/products/class-amazon.php:381
+msgid "The operation requested is invalid. Please verify that the operation name is typed correctly."
+msgstr ""
+
+#: lib/products/class-amazon.php:413
+msgid "Register to Access PRO Features"
+msgstr ""
+
+#: lib/products/class-amazon.php:416
+msgid "Create by Mediavine must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon.php:418
+msgid "Register Create by Mediavine"
+msgstr ""
+
+#: lib/products/class-amazon.php:426
+msgid "Amazon Affiliates Not Setup"
+msgstr ""
+
+#: lib/products/class-amazon.php:429
+msgid "Amazon Affiliates is not enabled or fully setup to process Amazon links. Please activate Amazon Affiliates or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon.php:431
+msgid "Activate Amazon Affiliates"
+msgstr ""
+
+#: lib/products/class-amazon.php:445
+#: lib/products/class-amazon.php:647
+msgid "Conflict with Another Plugin"
+msgstr ""
+
+#: lib/products/class-amazon.php:448
+msgid "Uh oh! It looks like another plugin is conflicting with Create's Amazon API Integration feature. We're working on a way to avoid these conflicts, but in the meantime, entering the product details manually is the easiest solution!"
+msgstr ""
+
+#: lib/products/class-amazon.php:450
+msgid "Contact create@mediavine.com for more information."
+msgstr ""
+
+#: lib/products/class-amazon.php:469
+msgid "Waiting for Amazon Affiliates Secret Access Key Provision"
+msgstr ""
+
+#. Translators: Remaining time
+#: lib/products/class-amazon.php:474
+msgid "Amazon Affiliates may still be provisioning. Expected time remaining: %s. Please manually add an image and title."
+msgstr ""
+
+#. Translators: Remaining time
+#: lib/products/class-amazon.php:612
+msgid " (Time remaining: %s)"
+msgstr ""
+
+#: lib/products/class-amazon.php:648
+msgid "Uh oh! Another plugin is conflicting with Create's Amazon API Integration feature. Please disable your other Amazon plugins that utilize Amazon's API in order to activate this feature in Create. Contact create@mediavine.com for more information."
+msgstr ""
+
+#: lib/products/class-products-api.php:99
+msgid "Title Not Found"
+msgstr ""
+
+#: lib/products/class-products-api.php:102
+msgid "The product is missing a title"
+msgstr ""
+
+#: lib/products/class-products-api.php:109
+msgid "URL Not Found"
+msgstr ""
+
+#: lib/products/class-products-api.php:112
+msgid "The product is missing a link"
+msgstr ""
+
+#: lib/products/class-products-api.php:286
+msgid "No Data Found"
+msgstr ""
+
+#: lib/products/class-products-api.php:288
+msgid "The Product link scrape did not turn up any results"
+msgstr ""
+
+#: lib/products/class-products-api.php:417
+msgid "A conflict occurred and the product could not be deleted"
+msgstr ""
+
+#: lib/relations/class-relations-api.php:35
+msgid "Unsafe Data"
+msgstr ""
+
+#: lib/relations/class-relations-api.php:131
+#: lib/supplies/class-supplies-api.php:57
+msgid "No Entries Found"
+msgstr ""
+
+#: lib/relations/class-relations-api.php:131
+msgid "No relations were found for the given create card"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:66
+msgid "Missing required fields"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:67
+msgid "Through no fault of yours, something is wrong"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:88
+msgid "Email is Invalid"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:89
+msgid "Email address provided is invalid"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:105
+msgid "Name cannot be a number"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:106
+msgid "Name of author cannot be a number"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:115
+msgid "Name is Required"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:116
+msgid "Name is required for reviews less than 4 Stars"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:125
+msgid "Email is Required"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:126
+msgid "Email is required for reviews less than 4 Stars"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:135
+msgid "Title is Required"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:136
+msgid "Title is required for reviews less than 4 Stars"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:145
+msgid "Message is Required"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:146
+msgid "Message is required for reviews less than 4 Stars"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:244
+#: lib/reviews/class-reviews-api.php:307
+#: lib/settings/class-settings-api.php:37
+#: lib/settings/class-settings-api.php:216
+msgid "Unsafe Content Submission"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:245
+#: lib/reviews/class-reviews-api.php:308
+#: lib/settings/class-settings-api.php:38
+#: lib/settings/class-settings-api.php:217
+msgid "You're submission includes unsafe characters"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:495
+msgid "A conflict occurred and the single review could not be deleted"
+msgstr ""
+
+#. translators: %s: reviewer's name
+#: lib/reviews/class-reviews-models.php:110
+msgid "Review from %s"
+msgstr ""
+
+#: lib/reviews/class-reviews.php:19
+msgid "Creation ID was not set in function call"
+msgstr ""
+
+#: lib/reviews/class-reviews.php:19
+msgid "A Creation ID was not included in the request"
+msgstr ""
+
+#: lib/reviews/class-reviews.php:24
+msgid "Creation ID value was not a number"
+msgstr ""
+
+#: lib/reviews/class-reviews.php:24
+msgid "A Creation ID varable was included but was non-numeric"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:30
+msgid "Default Access Role"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:31
+msgid "Select what user roles have access to edit Create Cards."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:32
+#: lib/settings-group/class-advanced.php:36
+msgid "Administrators"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:40
+msgid "Editors"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:44
+msgid "Authors"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:48
+msgid "Contributors"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:61
+msgid "Enable Hands-free Mode"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:62
+msgid "Adds a toggle to Create cards to allow readers to keep their screen awake while reading on supported devices."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:73
+msgid "Enable High Contrast"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:74
+msgid "By default, high contrast mode is disabled."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:75
+#: lib/settings-group/class-advanced.php:151
+#: lib/settings-group/class-advanced.php:187
+#: lib/settings-group/class-advanced.php:200
+#: lib/settings-group/class-display.php:120
+#: lib/settings-group/class-display.php:132
+#: lib/settings-group/class-display.php:144
+#: lib/settings-group/class-lists.php:62
+#: lib/settings-group/class-pro.php:122
+#: lib/settings-group/class-recipes.php:36
+#: lib/settings-group/class-recipes.php:61
+msgid "Disabled"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:85
+msgid "Default Copyright Attribution"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:86
+msgid "If left blank, the Create Card author will be displayed."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:97
+msgid "Override author"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:98
+msgid "Enabling this setting will cause the Default Copyright Attribution to display instead of the author."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:110
+msgid "Primary Heading Tag"
+msgstr ""
+
+#. translators: Link tags
+#: lib/settings-group/class-advanced.php:113
+msgid "While having %1$smultiple H1s on a page is approved by Google%2$s, many still recommend maintaining the page to only a single H1. This allows you to choose what tag you want for the primary heading, properly adjusting the heading hierarchy throughout the card."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:117
+msgid "H2"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:137
+msgid "Output JSON-LD Schema in head"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:138
+msgid "If enabled, Create will output the JSON-LD schema in the wp_head hook. If disabled, it will be output just before the card."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:139
+#: lib/settings-group/class-advanced.php:163
+#: lib/settings-group/class-advanced.php:175
+#: lib/settings-group/class-display.php:62
+#: lib/settings-group/class-display.php:108
+#: lib/settings-group/class-display.php:156
+#: lib/settings-group/class-lists.php:50
+#: lib/settings-group/class-recipes.php:24
+msgid "Enabled"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:149
+msgid "Use Enhanced Search"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:150
+msgid "Create by Mediavine has a search feature that allows users to match posts based on the content of the recipe cards included in the post. If you notice that this feature is causing an issue with other themes or plugins that modify the search query, you can disable this feature."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:161
+msgid "Autosave"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:162
+msgid "By default, we'll save your work as you edit, even if you haven't published your changes. If you disable this setting, we'll only save draft content if you specifically click the 'Save Draft' button."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:173
+msgid "Allow Reviews"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:174
+msgid "Unchecking this box will prevent users from being able to leave reviews on your recipe cards."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:185
+msgid "Display Review CTAs"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:186
+msgid "Checking this box will add prompts for users to leave reviews."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:198
+msgid "Enable Error Reporting"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:199
+msgid "Checking this box allows the plugin to automatically send useful error reports to the development team. (You may still be prompted to manually send error reports, even if this box is unchecked.)"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:210
+msgid "Global Affiliate Message"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:211
+msgid "Set the default affiliate disclaimer message with this text. Affiliate messaging can be overridden in individual posts."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:223
+#: admin/ui/build/app.build.1.7.0.js:159209
+msgid "Allowed Types"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:235
+msgid "Allowed Custom Post Types"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:236
+msgid "If enabled, will allow specific custom post types to be added to Lists"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:248
+msgid "Always Enable Review Popup"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:249
+msgid "If enabled, users leaving a star rating will see a popup modal prompting them to leave a review. Disabling this will not display the prompt if the left rating is 4 or higher."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:260
+msgid "Enable Public Reviews"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:272
+msgid "Comments Section"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:286
+msgid "Prevent Image Size Generation"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:287
+msgid "If enabled, will disable specific image sizes created by Create"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:22
+msgid "Enable Amazon Affiliates"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:23
+msgid ""
+"When enabled, recommended products in Create cards have the ability to pull data from Amazon, using the Product Advertising API Version 5.0 (PA API 5).\n"
+"\n"
+"\t\t\t\t\t\tYou will need to register with Amazon as an affiliate and use your own Product Advertising/Amazon Affiliates Access Key, Secret, and Store ID.\n"
+"\n"
+"\t\t\t\t\t\tImages will be pulled directly from Amazon and refreshed every 24 hours per their terms and conditions.\n"
+"\n"
+"\t\t\t\t\t\tChecking this box also acknowledges that a valid SSL certificate is required to use this feature."
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:43
+msgid "Amazon Affiliates Access Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:44
+msgid "The Amazon Affiliates Access Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:56
+msgid "Amazon Affiliates Secret Access Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:69
+msgid "Amazon Associate Tag"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:70
+msgid "The Amazon Associate Tag/Store ID for the US Marketplace (other countries will be supported in the future)"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:34
+msgid "Ad Density"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:35
+msgid "Choose the density of ads in a recipe card."
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:36
+#: lib/settings-group/class-control-panel.php:43
+msgid "Normal"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:39
+msgid "Single Ad"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:56
+msgid "List Items Between Ads"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:57
+msgid "Choose the number of list items between each ad in the card."
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:60
+msgid "Disable ads in lists"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:64
+msgid "2"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:68
+msgid "3"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:72
+msgid "4"
+msgstr ""
+
+#: lib/settings-group/class-control-panel.php:76
+msgid "5"
+msgstr ""
+
+#: lib/settings-group/class-display.php:30
+msgid "Photo Ratio"
+msgstr ""
+
+#: lib/settings-group/class-display.php:31
+msgid "Select an aspect ratio for photo display. Some card styles, such as Classy Circle, will ignore this setting."
+msgstr ""
+
+#: lib/settings-group/class-display.php:32
+#: lib/settings-group/class-display.php:35
+msgid "No fixed ratio"
+msgstr ""
+
+#: lib/settings-group/class-display.php:60
+msgid "Enable Print Thumbnails"
+msgstr ""
+
+#: lib/settings-group/class-display.php:61
+msgid "By default, card thumbnails will display in the print view. This can be disabled."
+msgstr ""
+
+#: lib/settings-group/class-display.php:72
+msgid "Pinterest Button Location"
+msgstr ""
+
+#: lib/settings-group/class-display.php:73
+msgid "Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right."
+msgstr ""
+
+#: lib/settings-group/class-display.php:74
+#: lib/settings-group/class-display.php:93
+msgid "Top Right"
+msgstr ""
+
+#: lib/settings-group/class-display.php:77
+msgid "Off"
+msgstr ""
+
+#: lib/settings-group/class-display.php:81
+msgid "Top Left"
+msgstr ""
+
+#: lib/settings-group/class-display.php:85
+msgid "Inside Top Left"
+msgstr ""
+
+#: lib/settings-group/class-display.php:89
+msgid "Inside Top Right"
+msgstr ""
+
+#: lib/settings-group/class-display.php:106
+msgid "Force Uppercase"
+msgstr ""
+
+#: lib/settings-group/class-display.php:107
+msgid "By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired."
+msgstr ""
+
+#: lib/settings-group/class-display.php:118
+msgid "Use Theme Body Font Size"
+msgstr ""
+
+#: lib/settings-group/class-display.php:119
+msgid "If enabled, the Create card body font size will match that of the theme."
+msgstr ""
+
+#: lib/settings-group/class-display.php:130
+msgid "Aggressive List CSS"
+msgstr ""
+
+#: lib/settings-group/class-display.php:131
+msgid "Some themes may remove bullets and numbers from lists. This forces them to display in Create by Mediavine Cards."
+msgstr ""
+
+#: lib/settings-group/class-display.php:142
+msgid "Aggressive Buttons CSS"
+msgstr ""
+
+#: lib/settings-group/class-display.php:143
+msgid "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style."
+msgstr ""
+
+#: lib/settings-group/class-display.php:154
+msgid "Center Full Width Cards"
+msgstr ""
+
+#: lib/settings-group/class-display.php:155
+msgid "When a card reaches its max width of 700px, center the card within the content area."
+msgstr ""
+
+#: lib/settings-group/class-display.php:166
+msgid "Card Style"
+msgstr ""
+
+#: lib/settings-group/class-display.php:167
+msgid "Simple Square"
+msgstr ""
+
+#: lib/settings-group/class-display.php:170
+msgid "Simple Square by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-display.php:174
+msgid "Simple Square<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-display.php:177
+msgid "Dark Simple Square by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-display.php:181
+msgid "Dark Simple Square<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-display.php:184
+msgid "Classy Circle by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-display.php:188
+msgid "Classy Circle<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-display.php:191
+msgid "Dark Classy Circle by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-display.php:195
+msgid "Dark Classy Circle<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-display.php:198
+msgid "Hero Image by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-display.php:202
+msgid "Hero Image<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:22
+msgid "Rounded Corners"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:23
+msgid "This value is used for buttons and other card elements."
+msgstr ""
+
+#: lib/settings-group/class-lists.php:24
+#: lib/settings-group/class-lists.php:35
+msgid "None"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:27
+msgid "High"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:31
+msgid "Low"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:48
+msgid "Open external list items in new tab"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:49
+msgid "Checking the box will open external list items in a new tab"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:60
+msgid "Open internal list items in new tab"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:61
+msgid "Checking the box will open internal list items in a new tab"
+msgstr ""
+
+#: lib/settings-group/class-lists.php:72
+msgid "Button Action Defaults"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:23
+msgid "Enable Jump To Recipe Button"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:24
+msgid ""
+"When enabled, use of a Jump Button means that readers will be able to bypass\n"
+"\t\t\t\t\t\tthe content of your blog post, including any in-content ads that would have\n"
+"\t\t\t\t\t\tearned income.\n"
+"\n"
+"\t\t\t\t\t\tTo mitigate some of this potential loss, when the button\n"
+"\t\t\t\t\t\tis pressed, our script will automatically optimize the Create card ad placements\n"
+"\t\t\t\t\t\tfor Mediavine publishers."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:44
+msgid "Jump To Recipe Button Text"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:57
+msgid "Jump To How-To Button Text"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:70
+msgid "Jump to Recipe Color"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:72
+#: lib/settings-group/class-pro.php:76
+msgid "Gray"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:80
+msgid "Custom Colors"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:93
+msgid "Jump to Recipe Button Style"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:95
+#: lib/settings-group/class-pro.php:99
+#: admin/ui/build/app.build.1.7.0.js:154015
+msgid "Link"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:103
+msgid "Hollow Button"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:107
+msgid "Solid Button"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:120
+msgid "Enable Social Footer"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:121
+msgid "Adds a call to action to the bottom of each card encouraging social sharing."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:132
+msgid "Social Sharing Service"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:133
+msgid "Select the social service to encourage."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:134
+#: lib/settings-group/class-pro.php:141
+msgid "Instagram"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:137
+msgid "Facebook"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:145
+msgid "Pinterest"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:159
+msgid "Facebook Username"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:160
+msgid "Enter your Facebook username to link the Facebook icon on Facebook social footer cards."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:172
+msgid "Instagram Username"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:173
+msgid "Enter your Instagram username to link the Instagram icon on Instagram social footer cards."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:185
+msgid "Pinterest Username"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:186
+msgid "Enter your Pinterest username to link the Pinterest icon on Pinterest social footer cards."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:193
+msgid "Did you make this recipe?"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:198
+msgid "Social Footer Heading - Recipe"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:199
+msgid "The title for the social footer on recipe cards. If left blank, \"Did you make this recipe?\" will display."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:211
+msgid "Social Footer Content - Recipe"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:212
+msgid "The content for the social footer on recipe cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:219
+msgid "Did you make this project?"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:224
+msgid "Social Footer Heading - How-To"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:225
+msgid "The title for the social footer on how-to cards. If left blank, \"Did you make this project?\" will display."
+msgstr ""
+
+#: lib/settings-group/class-pro.php:237
+msgid "Social Footer Content - How-To"
+msgstr ""
+
+#: lib/settings-group/class-pro.php:238
+msgid "The content for the social footer on how-to cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:22
+msgid "Use Nutrition"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:23
+msgid "Unchecking the box will remove nutrition inputs from the recipe card interface and hide nutrition data for all recipes."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:34
+msgid "Use Traditional Nutrition Display"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:35
+msgid "Checking the box will add a traditional nutrition display."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:46
+msgid "Calculated Nutrition Disclaimer"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:47
+msgid "If provided, this disclaimer will be automatically added to each recipe upon nutrition calculation."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:59
+msgid "Display Zero Values For Net Carbs And Sugar Alcohols"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:60
+msgid "Checking this box will display the Net Carbohydrate and Sugar Alcohols fields on recipe nutrition when they have a value of \"0\", which are hidden by default. The display of zero values can be overridden for individual recipes."
+msgstr ""
+
+#: lib/supplies/class-supplies-api.php:31
+msgid "A conflict occurred and the Supply could not be created"
+msgstr ""
+
+#: lib/supplies/class-supplies-api.php:57
+msgid "No Supplies were found for the given Creation"
+msgstr ""
+
+#: lib/supplies/class-supplies-api.php:81
+msgid "The Supply could not be found"
+msgstr ""
+
+#: lib/supplies/class-supplies-api.php:104
+msgid "A conflict occurred and the Supply could not be deleted"
+msgstr ""
+
+#: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:16
+#: lib/views/v1/centered/shortcode-mv-create-nutrition.php:16
+#: lib/views/v1/dark/shortcode-mv-create-nutrition.php:14
+#: lib/views/v1/shortcode-mv-create-nutrition.php:14
+msgid "Nutrition Information"
+msgstr ""
+
+#: lib/views/v1/shortcode-mv-create-list-circles.php:59
+#: lib/views/v1/shortcode-mv-create-list-grid.php:75
+#: lib/views/v1/shortcode-mv-create-list-hero.php:47
+#: lib/views/v1/shortcode-mv-create-list-numbered.php:72
+#: admin/ui/build/app.build.1.7.0.js:139859
+msgid "Photo Credit:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127091
+msgid "You can register"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127105
+msgid "here"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127105
+msgid "and get access to this feature. This is a free, one-time action."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127112
+msgid "Just confirm the email you used to register with."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127284
+msgid "Add Item"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127566
+msgid "You're all set!"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127566
+msgid "Thanks for confirming your email."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127584
+msgid "Log out"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127603
+msgid "Email sent."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127603
+msgid "Confirm your email in order to take full advantages of plugin features!"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127621
+msgid "I need to use a different email."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127729
+msgid "First Name *"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127793
+msgid "Email *"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127852
+msgid "I have read and agree to the"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127862
+msgid "terms of service."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127888
+msgid "I agree to receive marketing communications from Mediavine."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:127906
+msgid "Register"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128445
+msgid "Select an option from the dropdown"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128631
+msgid "Add term"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128639
+msgid "Something went wrong"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128932
+msgid "The url you entered seems to be invalid."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128959
+msgid "Please use expanded Amazon link."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128967
+msgid "We can't scrape Amazon short URLs. Please use the full link."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128977
+msgid "Learn how to get the full link"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:128989
+msgid "This url already exists!"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:129004
+msgid "Please check your ingredients."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:129017
+msgid "Servings should be a number."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:129946
+msgid "You can authenticate on the Mediavine Control Panel"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:129954
+msgid "settings page"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:130793
+msgid "Add one?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:130977
+msgid "Revert"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:131904
+msgid "You can reorder times by dragging."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132060
+msgid "Ranged times are not supported."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132232
+msgid "Unauthorized"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132281
+msgid "You do not have the correct permissions to access this page."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132288
+msgid "Please contact your administrator to edit this post."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132401
+#: admin/ui/build/app.build.1.7.0.js:132403
+msgid "Choose Image"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132673
+msgid "Instruction Schema Name Button"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132699
+msgid "Name this Step"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132728
+msgid "This inputs the How-To Step details needed for Guided Recipes"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132728
+msgid "This inputs the How-To Step details needed for How-To Schema"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132769
+msgid "Close"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:132785
+msgid "Submit"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:133938
+#: admin/ui/build/app.build.1.7.0.js:134914
+msgid "Post"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:133939
+#: admin/ui/build/app.build.1.7.0.js:134913
+msgid "Page"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:134915
+#: admin/ui/build/app.build.1.7.0.js:152847
+msgid "External"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:134950
+#: admin/ui/build/app.build.1.7.0.js:152340
+msgid "Get the Guide"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:134953
+#: admin/ui/build/app.build.1.7.0.js:134956
+#: admin/ui/build/app.build.1.7.0.js:134968
+#: admin/ui/build/app.build.1.7.0.js:134971
+#: admin/ui/build/app.build.1.7.0.js:152337
+msgid "Read More"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:135737
+msgid "Video Preview"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:136927
+msgid "Create Settings"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:136943
+msgid "Disable Jump To Recipe"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:136975
+#: admin/ui/build/app.build.1.7.0.js:143524
+#: admin/ui/build/app.build.1.7.0.js:144509
+#: admin/ui/build/app.build.1.7.0.js:146347
+msgid "Card"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:137412
+msgid "What would you like to create?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:137587
+msgid "What's the title of your"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:137640
+msgid "Title is required"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:137695
+msgid "Create a different card"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:138980
+#: admin/ui/build/app.build.1.7.0.js:139478
+#: admin/ui/build/app.build.1.7.0.js:139758
+#: admin/ui/build/app.build.1.7.0.js:140071
+msgid "Ad Preview"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:141362
+msgid "Nutrition Information:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:141706
+msgid "Please leave a comment on the blog or share a photo on "
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142439
+msgid "No matching cards."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142466
+msgid "You haven't added any cards yet."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142487
+#: admin/ui/build/app.build.1.7.0.js:143922
+msgid "Add New Card"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142771
+msgid "Products"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142799
+msgid "No products were found."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142825
+msgid "Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142857
+msgid "Sort by title"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:142943
+msgid "Cards"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143394
+msgid "User did not leave a review"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143417
+msgid "User"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143475
+#: admin/ui/build/app.build.1.7.0.js:143964
+#: admin/ui/build/app.build.1.7.0.js:144668
+msgid "Date"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143514
+msgid "ago"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143558
+#: admin/ui/build/app.build.1.7.0.js:159375
+msgid "Are you sure?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143600
+msgid "No matching reviews found"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143832
+msgid "Search for a title, ingredient, author, etc…"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143924
+#: admin/ui/build/app.build.1.7.0.js:143949
+msgid "Switch view"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:143962
+msgid "All"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144193
+#: admin/ui/build/app.build.1.7.0.js:144755
+#: admin/ui/build/app.build.1.7.0.js:144764
+msgid "Posts"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144229
+#: admin/ui/build/app.build.1.7.0.js:144800
+msgid "Not in a post"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144275
+msgid "Author:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144304
+msgid "Category:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144332
+#: admin/ui/build/app.build.1.7.0.js:144698
+msgid "Created:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144367
+#: admin/ui/build/app.build.1.7.0.js:144730
+msgid "Modified:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144622
+#: admin/ui/build/app.build.1.7.0.js:147557
+#: admin/ui/build/app.build.1.7.0.js:148505
+#: admin/ui/build/app.build.1.7.0.js:148998
+msgid "Author"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:144969
+msgid "Search for a card"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145229
+msgid "Prev"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145230
+msgid "Next"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145398
+msgid "Delete Item"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145644
+#: admin/ui/build/app.build.1.7.0.js:146829
+#: admin/ui/build/app.build.1.7.0.js:147076
+#: admin/ui/build/app.build.1.7.0.js:147386
+#: admin/ui/build/app.build.1.7.0.js:154871
+msgid "Cancel"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145661
+#: admin/ui/build/app.build.1.7.0.js:146846
+msgid "OK"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145701
+#: admin/ui/build/app.build.1.7.0.js:146884
+msgid "New Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145741
+msgid "Product fetch support is waiting."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145775
+#: admin/ui/build/app.build.1.7.0.js:146999
+#: admin/ui/build/app.build.1.7.0.js:156581
+msgid "Product URL"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145787
+msgid "Please register your plugin first"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145814
+#: admin/ui/build/app.build.1.7.0.js:147022
+msgid "Process"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145894
+msgid "Add Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:145939
+#: admin/ui/build/app.build.1.7.0.js:146957
+msgid "Results"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:146084
+msgid "Search for a product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:146117
+msgid "Add New Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:146320
+msgid "Search by review content"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147112
+msgid "Update Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147283
+msgid "Editing Review"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147337
+msgid "You have edited this review."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147344
+msgid "has edited this review."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147582
+#: admin/ui/build/app.build.1.7.0.js:147586
+msgid "Makes"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147621
+msgid "How-To Details"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147640
+#: admin/ui/build/app.build.1.7.0.js:148628
+msgid "Times"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147830
+#: admin/ui/build/app.build.1.7.0.js:148781
+msgid "Video"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147852
+#: admin/ui/build/app.build.1.7.0.js:148803
+msgid "Authenticate MCP to add Mediavine videos to your cards."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147894
+#: admin/ui/build/app.build.1.7.0.js:148873
+msgid "SEO &amp; Social Media"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147910
+#: admin/ui/build/app.build.1.7.0.js:148303
+#: admin/ui/build/app.build.1.7.0.js:148889
+msgid "Utilities"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:147926
+#: admin/ui/build/app.build.1.7.0.js:148319
+#: admin/ui/build/app.build.1.7.0.js:148905
+msgid "Custom Fields"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148166
+msgid "Layout"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148206
+msgid "Hide Title"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148234
+msgid "Hide Description"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148265
+msgid "List Details"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148350
+msgid "Hero"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148351
+msgid "Grid"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148352
+msgid "Circles"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148353
+msgid "Numbered"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148556
+msgid "Diet"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:148609
+msgid "Recipe Details"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149095
+#: admin/ui/build/app.build.1.7.0.js:152195
+msgid "Canonical Post"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149212
+#: admin/ui/build/app.build.1.7.0.js:149229
+#: admin/ui/build/app.build.1.7.0.js:150425
+msgid "Clone Card"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149220
+msgid "This will create an exact copy of the current card."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149421
+#: admin/ui/build/app.build.1.7.0.js:153600
+#: admin/ui/build/app.build.1.7.0.js:160227
+msgid "External link support is waiting."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149451
+msgid "+ Add Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149479
+msgid "Changing a product's link, title or image here will update the product across all Create Cards."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149833
+msgid "Description"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149952
+#: admin/ui/build/app.build.1.7.0.js:152015
+#: admin/ui/build/app.build.1.7.0.js:152025
+msgid "Button Action"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149960
+msgid "Provide a title."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:149966
+msgid "Brackets are not allowed in titles."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150028
+msgid "Diabetic"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150029
+msgid "Gluten-Free"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150030
+msgid "Halal"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150031
+msgid "Hindu"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150032
+msgid "Kosher"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150033
+msgid "Low-Calorie"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150034
+msgid "Low-Fat"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150035
+msgid "Low-Lactose"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150036
+msgid "Low-Salt"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150037
+msgid "Vegan"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150038
+msgid "Vegetarian"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150343
+msgid "Open menu"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150386
+msgid "Choose from existing"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150408
+msgid "See Reviews"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150730
+msgid "Save Draft"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150751
+msgid "Publish and Insert"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150751
+msgid "Publish"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150776
+msgid "Could not save data"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150800
+msgid "Editor"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150817
+#: admin/ui/build/app.build.1.7.0.js:155954
+msgid "Preview"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:150884
+msgid "BUG: tried saving an invalid type."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151037
+msgid "You have unsaved changes. Do you want to continue with your unsaved changes? Cancelling will delete the unsaved changes."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151148
+msgid "You have unsaved changes on this page. Are you sure you want to proceed?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151150
+msgid "Don't warn me again"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151151
+msgid "Move Through Cards"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151420
+msgid "Write instructions"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151745
+msgid "This item does not belong to a post and will not display to readers."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151756
+#: admin/ui/build/app.build.1.7.0.js:151792
+msgid "Description is required."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151821
+msgid "Thumbnail"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151912
+msgid "Extra Info (Max. 2)"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:151917
+msgid "Max. 2"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152063
+msgid "URL"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152108
+msgid "Photo Credit"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152162
+#: admin/ui/build/app.build.1.7.0.js:154048
+msgid "No-Follow"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152478
+msgid "+ List Item"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152490
+msgid "+ Custom Text"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152517
+msgid "Title this custom text"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152569
+msgid "Titles must be unique."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152724
+msgid "Custom Post Type:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152846
+msgid "Internal"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152907
+msgid "Search Options"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:152954
+msgid "Types:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153007
+msgid "Search:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153034
+msgid "Title Only"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153061
+msgid "Title and Content"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153183
+msgid "This URL has already been added."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153183
+msgid "No results found."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153277
+msgid "We can't scrape this URL. Would you like to add it manually?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153296
+msgid "Add Manually"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153364
+msgid "Done"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153573
+msgid "List Items"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153586
+msgid "Collapse"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:153927
+msgid "Add item to"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154132
+msgid "+ Add Item"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154145
+msgid "+ Add Group"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154180
+msgid "Name your group before adding another."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154557
+msgid "Write additional notes"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154820
+msgid "Disclaimer"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154882
+msgid "Confirm"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154939
+msgid "Calculated Nutrition"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154962
+msgid "Nutrition"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154984
+msgid "Automatic nutrition calculation is here!"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:154992
+msgid "Could not calculate nutrition for this recipe."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155048
+msgid "How many servings does this recipe make?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155079
+msgid "Calculating..."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155079
+msgid "Calculate"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155097
+msgid "Nutrition is not required, but providing at least calories is strongly recommended."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155114
+msgid "This data was provided and calculated by"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155114
+msgid "on"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155244
+msgid "Global Setting: Display Zeroes"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155244
+msgid "Global Setting: Do Not Display Zeros"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155245
+msgid "Do Not Display Zeros"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155246
+msgid "Display Zeros"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155354
+msgid "This field is not calculated by NutritionIX"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155380
+msgid "Choose whether to display zero values for Net Carbohydrates and Sugar Alcohols."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155392
+msgid "Number of Servings"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155406
+msgid "Net Carbs"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155412
+msgid "Display Zero Values"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155417
+#: admin/ui/build/app.build.1.7.0.js:155418
+#: admin/ui/build/app.build.1.7.0.js:155419
+#: admin/ui/build/app.build.1.7.0.js:155420
+#: admin/ui/build/app.build.1.7.0.js:155421
+#: admin/ui/build/app.build.1.7.0.js:155424
+#: admin/ui/build/app.build.1.7.0.js:155425
+#: admin/ui/build/app.build.1.7.0.js:155426
+#: admin/ui/build/app.build.1.7.0.js:155427
+#: admin/ui/build/app.build.1.7.0.js:155430
+#: admin/ui/build/app.build.1.7.0.js:155431
+msgid "grams"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155422
+#: admin/ui/build/app.build.1.7.0.js:155423
+msgid "milligrams"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155565
+msgid "This will force paragraphs to ordered lists, which is recommended for SEO. This action can be undone."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155583
+msgid "Optimize"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155588
+msgid "If you have made changes since optimizing, they will be reverted."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155611
+msgid "Undo"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:155980
+msgid "Item count:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156171
+msgid "frame"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156294
+#: admin/ui/build/app.build.1.7.0.js:156321
+msgid "Print Preview"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156302
+msgid "Preview how the card will be printed."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156584
+msgid "Enter a URL"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156624
+msgid "Clicking Process will scrape the title and image from the provided link."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156648
+msgid "Image"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:156862
+msgid "Select Product"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157046
+msgid "Keywords"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157050
+msgid "cookies, desserts, baking..."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157097
+msgid "Pinterest URL"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157124
+msgid "Pinterest Description"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157151
+msgid "Pinterest Image"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157266
+msgid "Schema Validation"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157274
+msgid "Check your content against Google's structured data testing utility. You may need to enable pop-ups."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157291
+msgid "Validate JSON-LD"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157302
+msgid "Rich Snippet"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157310
+msgid "This card has not been added to a post."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157475
+msgid "Shortcode"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157483
+msgid "You can copy and paste this shortcode into editors that support it."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157601
+msgid "Use Schema (LD+JSON)"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157885
+msgid "Display video?"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157963
+msgid "Video URL"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157965
+msgid "Paste URL from YouTube"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:157981
+msgid "Could not parse that link."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158019
+msgid "+ Add Mediavine Video"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158034
+msgid "Add YouTube Video"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158299
+msgid "Video Options"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158314
+msgid "Show video in card"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158344
+msgid "Aspect Ratio"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158375
+msgid "Volume"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158398
+msgid "Video data will be still be included in card schema. It's not recommended to include data that isn't visible to users, so only enable this setting if you're including the video elsewhere on the page."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158415
+msgid "Insert"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158430
+msgid "Choose a different video"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158488
+msgid "Search for a video"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158584
+msgid "Previous Page"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158605
+msgid "Next Page"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158621
+msgid "Insert Video"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158621
+msgid "Edit Video Settings"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158751
+msgid "Word Count:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158952
+msgid "Something went wrong with Create by Mediavine."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158965
+#: admin/ui/build/app.build.1.7.0.js:159035
+#: admin/ui/build/app.build.1.7.0.js:161051
+msgid "Refresh"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158970
+msgid "Something went wrong and Create has crashed!"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158970
+msgid "If refreshing the page doesn't work,"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158970
+msgid "let us know via the chat bubble in the lower-right corner!"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:158970
+msgid "please reach out to our support team by email: "
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159004
+msgid "Well, that shouldn't happen."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159043
+msgid "Fail Gif"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159063
+msgid "via Giphy"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159216
+msgid "If any types are selected, only they will be available for adding new cards. (Existing cards of disallowed types will still function properly.)"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159337
+#: admin/ui/build/app.build.1.7.0.js:159404
+msgid "Clear Amazon Affiliates Provision Lock"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159344
+msgid "This will remove the Amazon Affiliates provision lockout from Create. A provision normally takes around 24-48 hours after the Secret Key was generated. If Amazon Affiliates is still provisioning, your products still will not be processed. You will need to wait until the provision is complete."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159421
+#: admin/ui/build/app.build.1.7.0.js:160927
+msgid "Something went wrong."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159558
+msgid "The primary color will be used for your card's background, if the selected theme has a background."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159565
+msgid "The secondary color will be used for interface elements like buttons and stars."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159572
+msgid "Please be sure to enter a valid 3 or 6 digit Hex code."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159576
+msgid "The color you selected doesn't meet accessibility standards with the text color of the card theme you've selected."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159594
+msgid "Primary Color Contrast"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159630
+msgid "Use Defaults"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159658
+msgid "Disable"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159690
+msgid "Primary Color"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159733
+msgid "Secondary Color"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:159776
+msgid "Colors"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:160443
+msgid "(Default:"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:160910
+msgid "Republish Creations"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:160985
+msgid "Reset Browser Storage"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161010
+#: admin/ui/build/app.build.1.7.0.js:161092
+msgid "Reset"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161026
+msgid "Refresh Settings"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161034
+msgid ""
+"This button will refresh all your Create by Mediavine\n"
+"                          settings. Please proceed with caution."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161067
+msgid "Reset Settings"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161075
+msgid ""
+"This button will reset all your Create by Mediavine\n"
+"                          settings. Please proceed with caution."
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161142
+msgid "Display"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161145
+msgid "Advanced"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161154
+msgid "MVP"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161157
+msgid "Registration"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161160
+msgid "PRO"
+msgstr ""
+
+#: admin/ui/build/app.build.1.7.0.js:161164
+msgid "Affiliates"
+msgstr ""

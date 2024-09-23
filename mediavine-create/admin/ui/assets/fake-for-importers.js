@@ -1,0 +1,1 @@
+/* This is an empty file so Mediavine Recipe Importers can function until it is updated */

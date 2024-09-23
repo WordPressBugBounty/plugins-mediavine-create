@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards for Plugins">
+	<description>Generally-applicable sniffs for WordPress plugins</description>
+	<config name="installed_paths" value="vendor/wp-coding-standards/wpcs" />
+
+	<rule ref="WordPress-VIP">
+		<exclude name="WordPress.VIP.SuperGlobalInputUsage" />
+		<exclude name="WordPress.NamingConventions.ValidVariableName" />
+		<exclude name="WordPress.WP.AlternativeFunctions" />
+		<exclude name="WordPress.VIP.FileSystemWritesDisallow" />
+		<exclude name="WordPress.VIP.RestrictedFunctions" />
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.DirectQuery" />
+
+		<!-- DB interface uses one off calls run through API, no need to cache -->
+		<exclude name="WordPress.VIP.DirectDatabaseQuery.NoCaching" />
+
+		<!-- We want to prepare statements outside other $wpdb functions -->
+		<exclude name="WordPress.WP.PreparedSQL.NotPrepared" />
+
+		<!-- We're not using serialize/unserialize indiscriminately -->
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize" />
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize" />
+	</rule>
+
+	<rule ref="Generic.WhiteSpace.ScopeIndent">
+    <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
+	<exclude name="Squiz.PHP.CommentedOutCode.Found" />
+  </rule>
+
+	<!-- ads.txt requires file writes -->
+
+	<rule ref="WordPress.VIP.FileSystemWritesDisallow">
+		<exclude-pattern>*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files">
+		<exclude-pattern>*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid">
+		<exclude-pattern>*</exclude-pattern>
+	</rule>
+
+	<!-- WP AMP doesn't follow it's own rules -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS" />
+		</properties>
+	</rule>
+
+	<rule ref="Generic.WhiteSpace.ScopeIndent">
+		<exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
+		<exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect.Exact" />
+	</rule>
+
+	<!-- Check all PHP files in directory tree by default. -->
+	<arg name="extensions" value="php"/>
+	<file>.</file>
+
+	<!-- Show sniff codes in all reports -->
+	<arg value="s"/>
+
+	<!-- Ignore old files -->
+	<!-- <exclude-pattern>*/pub/*</exclude-pattern> -->
+	<exclude-pattern>tests/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>
