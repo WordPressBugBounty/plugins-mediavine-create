@@ -32,11 +32,9 @@ class Admin_Init extends Plugin {
 
 		self::$mcp_data = self::get_mcp_data();
 
-		$authors = get_users(
-			[
-				'capability' => 'authors',
-				'fields'     => [ 'display_name' ],
-			]
+		$args = array(
+			'capability' => [ 'edit_posts' ],
+			'fields'     => [ 'display_name' ],
 		);
 
 		// Capability queries were only introduced in WP 5.9.
@@ -44,6 +42,8 @@ class Admin_Init extends Plugin {
 			$args['who'] = 'authors';
 			unset( $args['capability'] );
 		}
+
+		$authors = get_users( $args );
 
 		$sanitized_authors = [];
 		foreach ( $authors as $author ) {

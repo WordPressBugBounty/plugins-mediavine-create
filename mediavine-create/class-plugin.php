@@ -15,9 +15,9 @@ use Mediavine\Settings;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '1.9.10';
+	const VERSION = '1.9.11';
 
-	const DB_VERSION = '1.9.10';
+	const DB_VERSION = '1.9.11';
 
 	const TEXT_DOMAIN = 'mediavine';
 

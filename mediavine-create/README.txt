@@ -155,6 +155,10 @@ Please report security bugs found in the source code of the Create by Mediavine 
 
 Log may include ticket numbers in [brackets] for internal reference.
 
+= 1.9.11 =
+* FIX: Fixes author dropdown to include WP author names
+* REMOVE: Removes unused code
+
 = 1.9.10 =
 * FIX: Re-adds edit review functionality after patching Reviews API endpoints
 
@@ -953,6 +957,9 @@ Changes
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.9.11 =
+* This update provides bug fixes to the plugin.
 
 = 1.9.10 =
 * This update brings back review editing.

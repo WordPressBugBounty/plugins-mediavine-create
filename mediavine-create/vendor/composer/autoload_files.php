@@ -9,7 +9,6 @@ return array(
     'e1cc6ef82d1b8aee856196c36d35dc78' => $vendorDir . '/mediavine/wordpress-support/src/helpers.php',
     'e69f7f6ee287b969198c3c9d6777bd38' => $vendorDir . '/symfony/polyfill-intl-normalizer/bootstrap.php',
     '25072dd6e2470089de65ae7bf11d3109' => $vendorDir . '/symfony/polyfill-php72/bootstrap.php',
-    'bda24f59d7a3a75993aec917eda2b203' => $vendorDir . '/kernl/kernl-update-checker/load-v4p10.php',
     'f89bcc331585eba8b0a1b09ac1ccb401' => $vendorDir . '/mediavine/wordpress-router/src/helpers.php',
     'f598d06aa772fa33d905e87be6398fb1' => $vendorDir . '/symfony/polyfill-intl-idn/bootstrap.php',
     '3143a7f83d5fa03eb5c0cdcbfb9efa8c' => $baseDir . '/lib/functions.php',

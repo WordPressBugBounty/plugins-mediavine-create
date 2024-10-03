@@ -4,13 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit01c5acfb00de3cd85026f9c81248a985
+class ComposerStaticInit0d772a20e836f734861e149b461194a2
 {
     public static $files = array (
         'e1cc6ef82d1b8aee856196c36d35dc78' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/helpers.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
-        'bda24f59d7a3a75993aec917eda2b203' => __DIR__ . '/..' . '/kernl/kernl-update-checker/load-v4p10.php',
         'f89bcc331585eba8b0a1b09ac1ccb401' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/helpers.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '3143a7f83d5fa03eb5c0cdcbfb9efa8c' => __DIR__ . '/../..' . '/lib/functions.php',
@@ -359,9 +358,9 @@ class ComposerStaticInit01c5acfb00de3cd85026f9c81248a985
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit01c5acfb00de3cd85026f9c81248a985::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit01c5acfb00de3cd85026f9c81248a985::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit01c5acfb00de3cd85026f9c81248a985::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit0d772a20e836f734861e149b461194a2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit0d772a20e836f734861e149b461194a2::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit0d772a20e836f734861e149b461194a2::$classMap;
 
         }, null, ClassLoader::class);
     }

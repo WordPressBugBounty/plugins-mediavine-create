@@ -9,7 +9,7 @@
  * Plugin Name:       Create by Mediavine
  * Plugin URI:        https://www.mediavine.com/mediavine-create/
  * Description:       Create custom recipe cards to be displayed in posts.
- * Version:           1.9.10
+ * Version:           1.9.11
  * Requires at least: 5.2
  * Requires PHP:      7.2
  *
@@ -28,9 +28,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Autoload via Composer.
 require_once __DIR__ . '/vendor/autoload.php';
-
-// Run update checker.
-# USE WP DIRECTORY [SwapKernlTask replaces this in other builds.]
 
 // Environment.
 define( 'MV_CREATE_URL', plugin_dir_url( __FILE__ ) );
