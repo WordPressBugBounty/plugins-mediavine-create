@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.9.12
+FIX: Recipe card ratings display in structured data
+FIX: Mediavine video selection works with new Mediavine videos endpoint, and video thumbnails display correctly
+
 ## 1.3.22
 FIX: The previous version's contentUrl fix didn't fix videos that were attached several months ago, now it does :)
 

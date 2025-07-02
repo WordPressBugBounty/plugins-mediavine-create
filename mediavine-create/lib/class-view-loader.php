@@ -12,7 +12,7 @@ class View_Loader {
 	public static function get_instance( $plugin_path ) {
 		if ( null === self::$instance ) {
 			self::$plugin_path = $plugin_path;
-			self::$instance    = new self;
+			self::$instance    = new self();
 		}
 
 		return self::$instance;
@@ -204,7 +204,7 @@ class View_Loader {
 		ob_start();
 
 		if ( file_exists( $view_file ) ) {
-			include( $view_file );
+			include $view_file;
 		}
 
 		$view = ob_get_clean();

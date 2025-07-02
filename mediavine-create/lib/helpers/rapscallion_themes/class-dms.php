@@ -3,7 +3,6 @@
 
 namespace Mediavine\Create;
 
-
 class Dms extends Rascal_Theme {
 	protected $slug = 'dms';
 

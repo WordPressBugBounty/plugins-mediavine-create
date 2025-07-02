@@ -10,7 +10,7 @@ class Creations_Plugins extends Creations {
 
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
@@ -26,9 +26,9 @@ class Creations_Plugins extends Creations {
 	/**
 	 * Hook run when comment with rating from Comment Rating Field is updated
 	 *
-	 * @param int $comment_id Comment ID
+	 * @param int   $comment_id Comment ID
 	 * @param array $group Comment Rating Field group and settings
-	 * @param int $rating Rating from comment
+	 * @param int   $rating Rating from comment
 	 * @return void
 	 */
 	public function update_creation_rating_from_comment_rating_field( $comment_id, $group, $rating ) {

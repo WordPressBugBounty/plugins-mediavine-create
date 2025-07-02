@@ -10,6 +10,7 @@ if ( ! class_exists( 'Mediavine\Create\Plugin' ) ) {
 
 class JSON_LD_Runtime extends Plugin {
 
+	public $json_ld_types;
 	public static $instance = null;
 
 	/**
@@ -19,7 +20,7 @@ class JSON_LD_Runtime extends Plugin {
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
@@ -148,7 +149,7 @@ class JSON_LD_Runtime extends Plugin {
 	 * Checks if a post matches the canonical post of a card.
 	 *
 	 * @param array $creation Published creation card data
-	 * @param int $post_id Id of the post to check against
+	 * @param int   $post_id Id of the post to check against
 	 * @return boolean
 	 */
 	public function is_post_not_canonical( $creation, $post_id ) {
@@ -238,7 +239,7 @@ class JSON_LD_Runtime extends Plugin {
 	 * Builds the JSON-LD schema output.
 	 *
 	 * @param array $creations List of creations in an `id` => `published_data` format
-	 * @param int $post_id ID of the current post
+	 * @param int   $post_id ID of the current post
 	 * @param array $card_order List of the order of the cards within a post
 	 * @return string JSON-LD output within a <script> tag
 	 */

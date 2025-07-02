@@ -3,7 +3,6 @@
 
 namespace Mediavine\Create;
 
-
 class Bloom extends Rascal_Plugin {
 	protected $slug        = 'bloom';
 	protected $class_check = [ 'ET_Bloom' ];

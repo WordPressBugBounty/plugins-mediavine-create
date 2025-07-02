@@ -9,7 +9,7 @@ class Reviews_Models extends Reviews {
 
 		// SECURITY CHECKED: This query is properly prepared.
 		$reviews_avg_statement = $wpdb->prepare( "SELECT AVG(rating) FROM `$review_table` WHERE creation = %d", $creation_id );
-		$avg                   = $wpdb->get_var( $reviews_avg_statement );
+		$avg                   = $wpdb->get_var( $reviews_avg_statement ) ?: 0;
 
 		// Round to the nearest decimal
 		$rounded_avg = round( $avg, 1 );
@@ -23,7 +23,7 @@ class Reviews_Models extends Reviews {
 
 		// SECURITY CHECKED: This query is properly prepared.
 		$reviews_count_statement = $wpdb->prepare( "SELECT COUNT(*) FROM `$review_table` WHERE creation = %d", $creation_id );
-		$count                   = $wpdb->get_var( $reviews_count_statement );
+		$count                   = $wpdb->get_var( $reviews_count_statement ) ?: 0;
 
 		return $count;
 	}

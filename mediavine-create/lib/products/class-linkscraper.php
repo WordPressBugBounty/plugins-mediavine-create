@@ -3,6 +3,9 @@
 namespace Mediavine\Create;
 
 class LinkScraper {
+	private $defaults;
+	private $methods;
+
 	/**
 	 * @param array $defaults Default values for responses.
 	 * @param array $methods  Extra methods to try, in addition to OpenGraph and others.

@@ -1,7 +1,7 @@
 <?php
 namespace Mediavine\Create;
 
-use Mediavine\WordPress\Support\Arr;
+use Mediavine\Create\Helpers\Arr;
 
 /**
  * DBI functions for Products Map
@@ -38,7 +38,7 @@ class Products_Map extends Plugin {
 
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;

@@ -29,7 +29,7 @@ class Help {
 	 * //    'a' => 'apple',
 	 * // );
 	 *
-	 * @param array $keys array of keys to check
+	 * @param array        $keys array of keys to check
 	 * @param array|object $data array or object to check against
 	 * @return array $return_data
 	 */

@@ -5,6 +5,11 @@ namespace Mediavine\Create;
  * Class for our custom content blocks
  */
 final class Custom_Content {
+
+	private $namespace;
+	private $label;
+	private $nonce_key;
+
 	/**
 	 * Construct the object with necessary properties and run hooks
 	 *

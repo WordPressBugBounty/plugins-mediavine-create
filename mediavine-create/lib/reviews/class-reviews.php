@@ -27,12 +27,10 @@ class Reviews extends Plugin {
 	public static function get_reviews( $creation_id, $args = [] ) {
 		if ( ! isset( $creation_id ) ) {
 			return new \WP_Error( 'no_value', __( 'Creation ID was not set in function call', 'mediavine' ), [ 'message' => __( 'A Creation ID was not included in the request', 'mediavine' ) ] );
-;
 		}
 
 		if ( ! is_numeric( $creation_id ) ) {
 			return new \WP_Error( 'non_numeric', __( 'Creation ID value was not a number', 'mediavine' ), [ 'message' => __( 'A Creation ID variable was included but was non-numeric', 'mediavine' ) ] );
-;
 		}
 
 		$limit  = 50;

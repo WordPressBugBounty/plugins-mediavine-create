@@ -4,13 +4,10 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0d772a20e836f734861e149b461194a2
+class ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8
 {
     public static $files = array (
-        'e1cc6ef82d1b8aee856196c36d35dc78' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/helpers.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
-        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
-        'f89bcc331585eba8b0a1b09ac1ccb401' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/helpers.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '3143a7f83d5fa03eb5c0cdcbfb9efa8c' => __DIR__ . '/../..' . '/lib/functions.php',
         'f3e530ebc4108df23bcf81276ae7a128' => __DIR__ . '/../..' . '/lib/functions-feature-flags.php',
@@ -29,7 +26,6 @@ class ComposerStaticInit0d772a20e836f734861e149b461194a2
     public static $prefixLengthsPsr4 = array (
         'S' => 
         array (
-            'Symfony\\Polyfill\\Php72\\' => 23,
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
         ),
@@ -44,10 +40,6 @@ class ComposerStaticInit0d772a20e836f734861e149b461194a2
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Php72\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
-        ),
         'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
@@ -265,6 +257,7 @@ class ComposerStaticInit0d772a20e836f734861e149b461194a2
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\StreamWrapper' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/StreamWrapper.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\UploadedFile' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/UploadedFile.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Uri' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Uri.php',
+        'Mediavine\\Create\\GuzzleHttp\\Psr7\\UriComparator' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/UriComparator.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\UriNormalizer' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/UriNormalizer.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\UriResolver' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/UriResolver.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Utils' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Utils.php',
@@ -275,6 +268,9 @@ class ComposerStaticInit0d772a20e836f734861e149b461194a2
         'Mediavine\\Create\\GuzzleHttp\\UriTemplate' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/UriTemplate.php',
         'Mediavine\\Create\\GuzzleHttp\\Utils' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Utils.php',
         'Mediavine\\Create\\Help' => __DIR__ . '/../..' . '/lib/helpers/class-help.php',
+        'Mediavine\\Create\\Helpers\\Arr' => __DIR__ . '/../..' . '/lib/helpers/class-arr.php',
+        'Mediavine\\Create\\Helpers\\Collection' => __DIR__ . '/../..' . '/lib/helpers/class-collection.php',
+        'Mediavine\\Create\\Helpers\\Str' => __DIR__ . '/../..' . '/lib/helpers/class-str.php',
         'Mediavine\\Create\\Images' => __DIR__ . '/../..' . '/lib/images/class-images.php',
         'Mediavine\\Create\\Images_API' => __DIR__ . '/../..' . '/lib/images/class-images-api.php',
         'Mediavine\\Create\\Images_Models' => __DIR__ . '/../..' . '/lib/images/class-images-models.php',
@@ -334,33 +330,20 @@ class ComposerStaticInit0d772a20e836f734861e149b461194a2
         'Mediavine\\Settings' => __DIR__ . '/../..' . '/lib/settings/class-settings.php',
         'Mediavine\\Settings_API' => __DIR__ . '/../..' . '/lib/settings/class-settings-api.php',
         'Mediavine\\View_Loader' => __DIR__ . '/../..' . '/lib/class-view-loader.php',
-        'Mediavine\\WordPress\\Router\\API\\Route' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/api/class-route.php',
-        'Mediavine\\WordPress\\Router\\App' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/class-app.php',
-        'Mediavine\\WordPress\\Router\\Exceptions\\RestResponseException' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/rest-response-exception.php',
-        'Mediavine\\WordPress\\Router\\Middleware' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/class-middleware.php',
-        'Mediavine\\WordPress\\Router\\Page\\Route' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/page/class-route.php',
-        'Mediavine\\WordPress\\Router\\Router' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/class-router.php',
-        'Mediavine\\WordPress\\Router\\RouterConfiguration' => __DIR__ . '/..' . '/mediavine/wordpress-router/src/Config/class-router-configuration.php',
-        'Mediavine\\WordPress\\Support\\Arr' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/Arr.php',
-        'Mediavine\\WordPress\\Support\\Collection' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/Collection.php',
-        'Mediavine\\WordPress\\Support\\Configuration' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/Configuration.php',
-        'Mediavine\\WordPress\\Support\\Contracts\\ConfigurationRepository' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/contracts/ConfigurationRepository.php',
-        'Mediavine\\WordPress\\Support\\Str' => __DIR__ . '/..' . '/mediavine/wordpress-support/src/Str.php',
         'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Idn' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Idn.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Info' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Info.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\DisallowedRanges' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/DisallowedRanges.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\Regex' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/Regex.php',
         'Symfony\\Polyfill\\Intl\\Normalizer\\Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Normalizer.php',
-        'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0d772a20e836f734861e149b461194a2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0d772a20e836f734861e149b461194a2::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit0d772a20e836f734861e149b461194a2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8::$classMap;
 
         }, null, ClassLoader::class);
     }

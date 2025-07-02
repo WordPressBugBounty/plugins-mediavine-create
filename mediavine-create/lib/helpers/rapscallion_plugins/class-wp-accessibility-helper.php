@@ -3,7 +3,6 @@
 
 namespace Mediavine\Create;
 
-
 class Wp_Accessibility_Helper extends Rascal_Plugin {
 	protected $slug           = 'wp-accessibility-helper';
 	protected $function_check = [ 'wp_access_helper_create_container' ];

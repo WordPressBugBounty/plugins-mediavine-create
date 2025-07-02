@@ -3,7 +3,7 @@ namespace Mediavine\Create;
 
 use Mediavine\Settings;
 
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Str;
 
 /**
  * Handles all Create-specific hooks
@@ -141,7 +141,7 @@ class Creations_Views_Hooks extends Creations_Views {
 
 		if ( empty( $args['print'] ) && $schema_display && ! empty( $args['creation']['json_ld'] ) ) {
 			$json_ld_output = '<script type="application/ld+json">' . $args['creation']['json_ld'] . '</script>';
-			$allowed_tags   = [ 'script' => [ 'type'  => true ] ];
+			$allowed_tags   = [ 'script' => [ 'type' => true ] ];
 
 			echo wp_kses( $json_ld_output, $allowed_tags );
 		}
@@ -155,7 +155,7 @@ class Creations_Views_Hooks extends Creations_Views {
 	 * been removed from the list, preventing the JSON+LD generation from overwriting the value
 	 * in the database.
 	 *
-	 * @param array $args the whole $args variable
+	 * @param array   $args the whole $args variable
 	 * @param boolean $schema_display
 	 * @return boolean $should_schema_display
 	 */

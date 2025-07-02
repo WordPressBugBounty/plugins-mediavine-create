@@ -17,7 +17,7 @@ class API_Services {
 
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->set_defaults();
 		}
 		return self::$instance;
@@ -367,7 +367,7 @@ class API_Services {
 	 * Build schema for an endpoint.
 	 *
 	 * @param string $title
-	 * @param array $properties
+	 * @param array  $properties
 	 * @return array
 	 */
 	public static function build_schema( $title, $properties ) {

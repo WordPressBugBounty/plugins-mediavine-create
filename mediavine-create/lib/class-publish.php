@@ -2,8 +2,8 @@
 namespace Mediavine\Create;
 
 use Mediavine\MV_DBI;
-use Mediavine\WordPress\Support\Arr;
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Arr;
+use Mediavine\Create\Helpers\Str;
 
 class Publish extends Plugin {
 
@@ -47,7 +47,7 @@ class Publish extends Plugin {
 		$publish_queue_option = get_option( 'mv_publish_queue' );
 
 		if ( ! empty( $publish_queue_option ) ) {
-			$publish_queue = json_decode( $publish_queue_option, true );
+			$publish_queue = json_decode( $publish_queue_option ?: '[]', true );
 		}
 
 		if ( in_array( $creation->id, $publish_queue, true ) ) {
@@ -62,7 +62,7 @@ class Publish extends Plugin {
 			update_option( 'mv_publish_queue', wp_json_encode( $publish_queue ) );
 		}
 
-		if ( empty( $creation->published ) || ! is_array( json_decode( $creation->published, true ) ) ) {
+		if ( empty( $creation->published ) || ! is_array( json_decode( $creation->published ?: '{}', true ) ) ) {
 			$should_republish = true;
 		}
 
@@ -77,7 +77,7 @@ class Publish extends Plugin {
 	 * Repairs list links on a Create list
 	 *
 	 * @param object $creation Create card data
-	 * @param bool $should_republish Current $should_republish value to potentially be passed on
+	 * @param bool   $should_republish Current $should_republish value to potentially be passed on
 	 * @return bool True if data updated and republish should happen, false if it doesn't need to happen
 	 */
 	private static function list_link_repair( $creation, $should_republish ) {
@@ -88,7 +88,7 @@ class Publish extends Plugin {
 
 		$metadata = [];
 		if ( ! empty( $creation->metadata ) ) {
-			$metadata = json_decode( $creation->metadata, true );
+			$metadata = json_decode( $creation->metadata ?: '{}', true );
 		}
 
 		if ( ! empty( $metadata['list_link_repaired'] ) ) {
@@ -147,7 +147,7 @@ class Publish extends Plugin {
 		) {
 			return $should_republish;
 		}
-		$associated_posts = json_decode( $creation->associated_posts, true );
+		$associated_posts = json_decode( $creation->associated_posts ?: '[]', true );
 		$associated_posts = wp_json_encode( array_map( 'strval', $associated_posts ) );
 
 		$updated_creation = self::$models_v2->mv_creations->update_without_modified_date(
@@ -160,7 +160,7 @@ class Publish extends Plugin {
 			return $should_republish;
 		}
 
-		$metadata                                  = json_decode( $creation->metadata, true );
+		$metadata                                  = json_decode( $creation->metadata ?: '{}', true );
 		$metadata['fixed_associated_posts_column'] = true;
 		self::$models_v2->mv_creations->update_without_modified_date(
 			[
@@ -178,7 +178,7 @@ class Publish extends Plugin {
 			return $should_republish;
 		}
 
-		$associated_posts = ! empty( $creation->associated_posts ) ? json_decode( $creation->associated_posts, true ) : [];
+		$associated_posts = ! empty( $creation->associated_posts ) ? json_decode( $creation->associated_posts ?: '[]', true ) : [];
 		if ( empty( $associated_posts ) || in_array( $creation->canonical_post_id, $associated_posts, true ) ) {
 			return $should_republish;
 		}
@@ -216,13 +216,13 @@ class Publish extends Plugin {
 	 * bad page redirects.
 	 *
 	 * @param object $creation Full creation data
-	 * @param bool $should_republish Previous republish value
+	 * @param bool   $should_republish Previous republish value
 	 * @return bool True if we should republish or the previous value if no changes are to be made
 	 */
-	static public function fix_create_slug( $creation, $should_republish ) {
+	public static function fix_create_slug( $creation, $should_republish ) {
 		$metadata = [];
 		if ( ! empty( $creation->metadata ) ) {
-			$metadata = json_decode( $creation->metadata, true );
+			$metadata = json_decode( $creation->metadata ?: '{}', true );
 		}
 
 		if ( ! empty( $metadata['slug_repaired'] ) ) {
@@ -296,13 +296,13 @@ class Publish extends Plugin {
 	 * Removes previously associated revisions from a Create card
 	 *
 	 * @param object $creation Create card data
-	 * @param bool $should_republish Current $should_republish value to potentially be passed on
+	 * @param bool   $should_republish Current $should_republish value to potentially be passed on
 	 * @return bool True if data updated and republish should happen, false if it doesn't need to happen
 	 */
 	private static function remove_associated_post_revisions( $creation, $should_republish ) {
 		$metadata = [];
 		if ( ! empty( $creation->metadata ) ) {
-			$metadata = json_decode( $creation->metadata, true );
+			$metadata = json_decode( $creation->metadata ?: '{}', true );
 		}
 
 		if ( ! empty( $metadata['revisions_removed'] ) ) {
@@ -311,7 +311,7 @@ class Publish extends Plugin {
 
 		$associated_posts = [];
 		if ( ! empty( $creation->associated_posts ) ) {
-			$associated_posts = json_decode( $creation->associated_posts );
+			$associated_posts = json_decode( $creation->associated_posts ?: '[]', true );
 		}
 
 		foreach ( $associated_posts as $key => $associated_post ) {
@@ -420,7 +420,7 @@ class Publish extends Plugin {
 			remove_filter( 'query', [ $dbi, 'allow_null' ] );
 		}
 
-		$metadata                        = json_decode( $creation->metadata, true );
+		$metadata                        = json_decode( $creation->metadata ?: '{}', true );
 		$metadata['fixed_ratings_dates'] = true;
 
 		// Update creation with new metadata and associated posts
@@ -437,7 +437,7 @@ class Publish extends Plugin {
 	/**
 	 * Add Creations to republish queue.
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 *
 	 * @return void|bool|array|\WP_REST_Response
@@ -478,14 +478,14 @@ class Publish extends Plugin {
 		if ( empty( $action_queues ) ) {
 			return;
 		}
-		$action_queues = json_decode( $action_queues, true );
+		$action_queues = json_decode( $action_queues ?: '[]', true );
 		foreach ( $action_queues as $key => $name ) {
 			$queue = get_option( 'mv_' . $name . '_queue' );
 			if ( false === $queue || empty( $queue ) || 'null' === $queue ) {
 				unset( $action_queues[ $key ] );
 				continue;
 			}
-			$queued_ids = json_decode( $queue, true );
+			$queued_ids = json_decode( $queue ?: '[]', true );
 			if ( ! in_array( (string) $id, $queued_ids, true ) ) {
 				continue;
 			}
@@ -513,7 +513,7 @@ class Publish extends Plugin {
 		$queue_option = get_option( $option );
 
 		if ( ! empty( $queue_option ) ) {
-			$queue = json_decode( $queue_option, true );
+			$queue = json_decode( $queue_option ?: '[]', true );
 		}
 
 		foreach ( $creation_ids as $id ) {
@@ -533,7 +533,7 @@ class Publish extends Plugin {
 		$queue        = [];
 
 		if ( ! empty( $queue_option ) ) {
-			$queue = json_decode( $queue_option, true );
+			$queue = json_decode( $queue_option ?: '[]', true );
 		}
 		$queue[] = $name;
 
@@ -552,7 +552,7 @@ class Publish extends Plugin {
 		$publish_queue_option = get_option( 'mv_publish_queue' );
 
 		if ( ! empty( $publish_queue_option ) ) {
-			$publish_queue = json_decode( $publish_queue_option, true );
+			$publish_queue = json_decode( $publish_queue_option ?: '[]', true );
 		}
 
 		foreach ( $creation_ids as $an_id ) {
@@ -701,11 +701,11 @@ class Publish extends Plugin {
 		$creation->instructions = html_entity_decode( $creation->instructions );
 
 		if ( ( 'diy' === $creation->type ) || ( 'recipe' === $creation->type ) ) {
-			$dom = new \DOMDocument;
+			$dom = new \DOMDocument();
 			if ( function_exists( 'libxml_use_internal_errors' ) ) {
 				libxml_use_internal_errors( true );
 			}
-			$load = $dom->loadHTML( mb_convert_encoding( $creation->instructions, 'HTML-ENTITIES', 'UTF-8' ) );
+			$load = $dom->loadHTML( htmlentities( $creation->instructions, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' ) );
 			if ( function_exists( 'libxml_use_internal_errors' ) ) {
 				libxml_use_internal_errors( false );
 			}
@@ -744,7 +744,7 @@ class Publish extends Plugin {
 	public static function prepare_posts( $creation ) {
 		$associated_posts = [];
 		if ( ! empty( $creation->associated_posts ) ) {
-			$associated_posts = json_decode( $creation->associated_posts );
+			$associated_posts = json_decode( $creation->associated_posts ?: '[]', true );
 			foreach ( $associated_posts as &$post ) {
 				$post = [
 					'id'    => $post,

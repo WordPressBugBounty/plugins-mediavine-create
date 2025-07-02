@@ -12,7 +12,7 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;

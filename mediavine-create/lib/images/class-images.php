@@ -4,8 +4,8 @@ namespace Mediavine\Create;
 use Mediavine\Models;
 use Mediavine\MV_DBI;
 use Mediavine\Permissions;
-use Mediavine\WordPress\Support\Arr;
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Arr;
+use Mediavine\Create\Helpers\Str;
 use WP_REST_Server;
 
 class Images {
@@ -75,11 +75,11 @@ class Images {
 	public static function load_missing_wp_functions() {
 		// if used as part of a queue, maybe require_once would be better?
 		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
-			include( ABSPATH . 'wp-admin/includes/image.php' );
+			include ABSPATH . 'wp-admin/includes/image.php';
 		}
 
 		if ( ! function_exists( 'wp_get_current_user' ) ) {
-			include( ABSPATH . 'wp-includes/pluggable.php' );
+			include ABSPATH . 'wp-includes/pluggable.php';
 		}
 	}
 
@@ -87,7 +87,7 @@ class Images {
 	/**
 	 * Defer image size generation
 	 *
-	 * @param int $image_id Attachment image ID
+	 * @param int   $image_id Attachment image ID
 	 * @param array $img_sizes Array of Created-supported image sizes. @see Creations_Views::add_images_to_creation()
 	 *
 	 * @return bool|void
@@ -129,7 +129,7 @@ class Images {
 	 *
 	 * Image sizes can be filtered with mv_intermediate_image_sizes_advanced
 	 *
-	 * @param int|string $image_id Attachment ID of the thumbnail
+	 * @param int|string                 $image_id Attachment ID of the thumbnail
 	 * @param array  List of image sizes
 	 * @param array Attachment meta-data
 	 *
@@ -201,7 +201,7 @@ class Images {
 	 * Get the Create image sizes
 	 *
 	 * @param array $img_sizes
-	 * @param int $image_id
+	 * @param int   $image_id
 	 */
 	public static function get_mv_intermediate_image_sizes( $img_sizes, $image_id ) {
 
@@ -275,7 +275,7 @@ class Images {
 	 * @param array|string $image Image array with 'image_url', 'image_srcset'
 	 *                      (optional), and 'image_srcset_sizes' (optional).
 	 *                      String also accepted with just image URL.
-	 * @param string $image_alt_text Image alt text
+	 * @param string       $image_alt_text Image alt text
 	 *
 	 * @return string HTML <img> tag
 	 */
@@ -409,9 +409,9 @@ class Images {
 	/**
 	 * Finds the highest available resolution with the correct ratio
 	 *
-	 * @param int $img_id Image ID
+	 * @param int    $img_id Image ID
 	 * @param string $img_size Un-suffixed size resolution to test against
-	 * @param array $available_sizes (Optional) List of sizes to test against
+	 * @param array  $available_sizes (Optional) List of sizes to test against
 	 * @return  string                    Highest possible resolution image size
 	 */
 	public static function get_highest_available_image_size( $img_id, $img_size, $available_sizes = null ) {
@@ -468,8 +468,8 @@ class Images {
 	 * unfortunately have to deal with the performance hit, but should be rare
 	 *
 	 * @param int|string $image_id ID of the image to check
-	 * @param array $create_image_sizes Sizes to be generated if they exist
-	 * @param boolean $return Return the $image_meta
+	 * @param array      $create_image_sizes Sizes to be generated if they exist
+	 * @param boolean    $return Return the $image_meta
 	 * @return array|void Image meta if $return is true
 	 */
 	public static function check_image_size( $image_id, $create_image_sizes = [], $size = 'mv_create_1x1', $return = false ) {

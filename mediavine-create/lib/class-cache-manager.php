@@ -5,7 +5,7 @@ namespace Mediavine;
 class Cache_Manager {
 	/**
 	 * Clears single post cache on a variety of caching plugins
-	 * @param  int  $id  Id of the post
+	 * @param  int $id  Id of the post
 	 * @return void
 	 */
 	public static function clear_single_by_id( $id ) {
@@ -60,7 +60,7 @@ class Cache_Manager {
 
 	/**
 	 * Clears post cache on a single post or an array of posts
-	 * @param  int|array  $post_id_or_ids  Id or an array of the post(s) to clear cache
+	 * @param  int|array $post_id_or_ids  Id or an array of the post(s) to clear cache
 	 * @return void
 	 */
 	public static function clear_by_id( $post_id_or_ids = [] ) {

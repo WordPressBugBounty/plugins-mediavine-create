@@ -2,10 +2,20 @@
 
 namespace Mediavine\Create;
 
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Str;
 
+/**
+ * Class JSON_LD_Types
+ *
+ * @package Mediavine\Create
+ */
 class JSON_LD_Types {
 
+	/**
+	 * The JSON-LD types instance.
+	 *
+	 * @var JSON_LD_Types|null
+	 */
 	public static $instance = null;
 
 	/**
@@ -13,14 +23,22 @@ class JSON_LD_Types {
 	 */
 	private $json_ld_helpers;
 
+	/**
+	 * Gets the JSON-LD types instance.
+	 *
+	 * @return JSON_LD_Types
+	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
 	}
 
+	/**
+	 * Initializes the JSON-LD types instance.
+	 */
 	public function init() {
 		$this->json_ld_helpers = new JSON_LD_Helpers();
 	}
@@ -119,6 +137,10 @@ class JSON_LD_Types {
 						'ratingValue' => 'rating',
 						'reviewCount' => 'rating_count',
 					],
+				],
+				'review'          => [
+					'type' => 'reviews',
+					'map'  => 'id',
 				],
 				'url'             => [
 					'type'  => 'string',
@@ -237,6 +259,10 @@ class JSON_LD_Types {
 						'reviewCount' => 'rating_count',
 					],
 				],
+				'review'             => [
+					'type' => 'reviews',
+					'map'  => 'id',
+				],
 				'url'                => [
 					'type'  => 'string',
 					'map'   => 'canonical_post_id',
@@ -292,11 +318,11 @@ class JSON_LD_Types {
 	/**
 	 * Runs the value through several filters, opening expansion possibilities.
 	 *
-	 * @param  mixed $value Value to be filtered
+	 * @param  mixed  $value Value to be filtered
 	 * @param  string $schema_type type of schema (e.g. string, integer, time)
 	 * @param  string $schema_prop property name of the schema item
-	 * @param  array $json_ld The current build of the JSON-LD array
-	 * @param  array $creation The full creation array for relationships
+	 * @param  array  $json_ld The current build of the JSON-LD array
+	 * @param  array  $creation The full creation array for relationships
 	 * @return mixed Value after filters run
 	 */
 	public function filter_json_ld_value( $value, $schema_type, $schema_prop, $json_ld, $creation = [] ) {
@@ -310,9 +336,9 @@ class JSON_LD_Types {
 	/**
 	 * Adds the @type property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $type Type of card
-	 * @param array $schema_types Schema types map
+	 * @param array  $schema_types Schema types map
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_type( $json_ld, $type, $schema_types ) {
@@ -328,11 +354,11 @@ class JSON_LD_Types {
 	/**
 	 * Adds the author property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
-	 * @param array $flags Any flags to alter schema value
+	 * @param array  $creation Creation card data
+	 * @param array  $flags Any flags to alter schema value
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_author( $json_ld, $value, $schema_prop, $creation, $flags = [] ) {
@@ -349,11 +375,11 @@ class JSON_LD_Types {
 	/**
 	 * Adds a date property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
-	 * @param array $flags Any flags to alter schema value
+	 * @param array  $creation Creation card data
+	 * @param array  $flags Any flags to alter schema value
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_date( $json_ld, $value, $schema_prop, $creation, $flags = [] ) {
@@ -361,7 +387,7 @@ class JSON_LD_Types {
 		$date  = strtotime( $value );
 
 		if ( ! empty( $date ) ) {
-			$date                    = date( 'Y-m-d', $date );
+			$date                    = gmdate( 'Y-m-d', $date );
 			$json_ld[ $schema_prop ] = $date;
 		}
 
@@ -371,10 +397,10 @@ class JSON_LD_Types {
 	/**
 	 * Adds a duration property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_duration( $json_ld, $value, $schema_prop, $creation ) {
@@ -393,11 +419,11 @@ class JSON_LD_Types {
 	/**
 	 * Adds an image property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
-	 * @param array $value Value to add to schema property
+	 * @param array  $json_ld Current JSON-LD data
+	 * @param array  $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $map_info Mapping array of needle and haystack
-	 * @param array $creation Creation card data
+	 * @param array  $map_info Mapping array of needle and haystack
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_image( $json_ld, $value, $schema_prop, $map_info, $creation ) {
@@ -452,11 +478,11 @@ class JSON_LD_Types {
 	/**
 	 * Adds an image property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
-	 * @param array $value Values to add to schema property
+	 * @param array  $json_ld Current JSON-LD data
+	 * @param array  $value Values to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $map_info Mapping array of needle and haystack
-	 * @param array $creation Creation card data
+	 * @param array  $map_info Mapping array of needle and haystack
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_list( $json_ld, $value, $schema_prop, $map_info, $creation ) {
@@ -492,10 +518,10 @@ class JSON_LD_Types {
 	/**
 	 * Adds a nutrition property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_nutrition( $json_ld, $value, $schema_prop, $creation ) {
@@ -575,10 +601,10 @@ class JSON_LD_Types {
 	/**
 	 * Adds a rating property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_rating( $json_ld, $value, $schema_prop, $creation ) {
@@ -595,13 +621,72 @@ class JSON_LD_Types {
 	}
 
 	/**
+	 * Adds reviews to JSON-LD data.
+	 *
+	 * @param array  $json_ld Current JSON-LD data
+	 * @param mixed  $creation_id Creation ID
+	 * @param string $schema_prop Schema property name
+	 * @param array  $creation Full creation data
+	 * @return array Updated JSON-LD data
+	 */
+	public function add_json_ld_reviews( $json_ld, $creation_id, $schema_prop, $creation ) {
+		// Get reviews for this creation
+		$reviews = \Mediavine\Create\Reviews::get_reviews( $creation_id, [ 'limit' => 100 ] );
+		
+		if ( is_wp_error( $reviews ) || empty( $reviews ) ) {
+			return $json_ld;
+		}
+
+		$review_array = [];
+		
+		foreach ( $reviews as $review ) {
+			// Skip reviews without content or very low ratings
+			if ( empty( $review->review_content ) && $review->rating < 4 ) {
+				continue;
+			}
+			
+			$review_item = [
+				'@type'         => 'Review',
+				'author'        => [
+					'@type' => 'Person',
+					'name'  => ! empty( $review->author_name ) ? $review->author_name : __( 'Anonymous', 'mediavine' ),
+				],
+				'datePublished' => gmdate( 'c', strtotime( $review->created ) ),
+				'reviewRating'  => [
+					'@type'       => 'Rating',
+					'ratingValue' => strval( $review->rating ),
+					'bestRating'  => '5',
+					'worstRating' => '1',
+				],
+			];
+			
+			if ( ! empty( $review->review_content ) ) {
+				$review_item['reviewBody'] = wp_kses( $review->review_content, [] );
+			}
+			
+			if ( ! empty( $review->review_title ) ) {
+				$review_item['name'] = wp_kses( $review->review_title, [] );
+			}
+			
+			$review_array[] = $review_item;
+		}
+		
+		if ( ! empty( $review_array ) ) {
+			$review_array      = $this->filter_json_ld_value( $review_array, 'reviews', $schema_prop, $json_ld, $creation );
+			$json_ld['review'] = $review_array;
+		}
+
+		return $json_ld;
+	}
+
+	/**
 	 * Adds a step property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
-	 * @param array $flags Any flags to alter schema value
+	 * @param array  $creation Creation card data
+	 * @param array  $flags Any flags to alter schema value
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_step( $json_ld, $value, $schema_prop, $creation, $flags = [] ) {
@@ -614,12 +699,11 @@ class JSON_LD_Types {
 		$value = $this->filter_json_ld_value( $value, 'step', $schema_prop, $json_ld, $creation );
 
 		// Build DOMDocument with blank steps array
-		$dom = new \DOMDocument;
+		$dom = new \DOMDocument();
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( true );
 		}
-		$load = $dom->loadHTML( mb_convert_encoding( do_shortcode( $value ), 'HTML-ENTITIES', 'UTF-8' ) );
-
+		$load = $dom->loadHTML( htmlentities( do_shortcode( $value ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' ) );
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( false );
 		}
@@ -679,11 +763,11 @@ class JSON_LD_Types {
 	/**
 	 * Adds a property that's a string to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $value Value to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
-	 * @param array $flags Any flags to alter schema value
+	 * @param array  $creation Creation card data
+	 * @param array  $flags Any flags to alter schema value
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_string( $json_ld, $value, $schema_prop, $creation, $flags = [] ) {
@@ -701,6 +785,16 @@ class JSON_LD_Types {
 		return $json_ld;
 	}
 
+	/**
+	 * Adds an integer property to JSON-LD data.
+	 *
+	 * @param array  $json_ld Current JSON-LD data
+	 * @param string $value Value to add to schema property
+	 * @param string $schema_prop Name of schema property
+	 * @param array  $creation Creation card data
+	 * @param array  $flags Any flags to alter schema value
+	 * @return array Updated JSON-LD data
+	 */
 	public function add_json_ld_integer( $json_ld, $value, $schema_prop, $creation, $flags = [] ) {
 		$value = $this->filter_json_ld_value( $value, 'integer', $schema_prop, $json_ld, $creation );
 
@@ -728,10 +822,10 @@ class JSON_LD_Types {
 	/**
 	 * Adds a video property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
+	 * @param array  $json_ld Current JSON-LD data
 	 * @param string $mv_video JSON string data of Mediavine video data
 	 * @param string $ext_video JSON string data of external video data
-	 * @param array $creation Creation card data
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_video( $json_ld, $mv_video, $ext_video, $creation ) {
@@ -783,7 +877,7 @@ class JSON_LD_Types {
 			if ( ! empty( $value['uploadDate'] ) ) {
 				$video['uploadDate'] = $value['uploadDate'];
 			} elseif ( ! empty( $creation['modified'] ) ) {
-				$video['uploadDate'] = date( 'c', strtotime( $creation['modified'] ) );
+				$video['uploadDate'] = gmdate( 'c', strtotime( $creation['modified'] ) );
 			}
 		} elseif ( $ext_video ) {
 			$value = (array) json_decode( $ext_video, true );
@@ -807,10 +901,10 @@ class JSON_LD_Types {
 	/**
 	 * Adds a itemListElement property to JSON-LD data.
 	 *
-	 * @param array $json_ld Current JSON-LD data
-	 * @param array $item_list Item list data to add to schema property
+	 * @param array  $json_ld Current JSON-LD data
+	 * @param array  $item_list Item list data to add to schema property
 	 * @param string $schema_prop Name of schema property
-	 * @param array $creation Creation card data
+	 * @param array  $creation Creation card data
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_item_list( $json_ld, $item_list, $schema_prop, $creation = [] ) {
@@ -858,7 +952,7 @@ class JSON_LD_Types {
 				'position' => $position,
 				'url'      => $permalink,
 			];
-			$position            = $position + 1;
+			++$position;
 		}
 
 		$item_list_element          = $this->filter_json_ld_value( $item_list_element, 'item_list', $schema_prop, $json_ld, $creation );

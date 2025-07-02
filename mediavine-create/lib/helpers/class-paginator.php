@@ -1,7 +1,7 @@
 <?php
 namespace Mediavine\Create;
 
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Str;
 
 class Paginator {
 
@@ -9,8 +9,8 @@ class Paginator {
 	 * Get links with required fields from a table.
 	 *
 	 * @param string $table
-	 * @param array $fields
-	 * @param mixed $id
+	 * @param array  $fields
+	 * @param mixed  $id
 	 * @param string $id_column
 	 * @return array
 	 */

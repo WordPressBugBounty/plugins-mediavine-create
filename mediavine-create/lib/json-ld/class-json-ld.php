@@ -2,8 +2,18 @@
 
 namespace Mediavine\Create;
 
+/**
+ * Class JSON_LD
+ *
+ * @package Mediavine\Create
+ */
 class JSON_LD {
 
+	/**
+	 * The JSON-LD instance.
+	 *
+	 * @var JSON_LD|null
+	 */
 	public static $instance = null;
 
 	/**
@@ -23,7 +33,7 @@ class JSON_LD {
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
@@ -43,11 +53,11 @@ class JSON_LD {
 	 * Adds the JSON-LD property based on the type of schema property.
 	 *
 	 * @param string $schema_type Type of schema property to build
-	 * @param array $schema_prop Schema property to add to JSON-LD
-	 * @param array $schema_map Map of schema properties with their associated types
-	 * @param array $creation Creations data
-	 * @param array $json_ld Current JSON-LD data
-	 * @param array $schema_flags Flags to manipulate schema property output
+	 * @param array  $schema_prop Schema property to add to JSON-LD
+	 * @param array  $schema_map Map of schema properties with their associated types
+	 * @param array  $creation Creations data
+	 * @param array  $json_ld Current JSON-LD data
+	 * @param array  $schema_flags Flags to manipulate schema property output
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_based_on_type( $schema_type, $schema_prop, $schema_map, $creation, $json_ld, $schema_flags ) {
@@ -121,6 +131,11 @@ class JSON_LD {
 			case 'item_list':
 				$json_ld = $this->json_ld_types->add_json_ld_item_list( $json_ld, $creation['list_items'], $schema_prop, $creation );
 				break;
+			case 'reviews':
+				if ( isset( $creation[ $schema_map ] ) ) {
+					$json_ld = $this->json_ld_types->add_json_ld_reviews( $json_ld, $creation[ $schema_map ], $schema_prop, $creation );
+				}
+				break;
 			default:
 				break;
 		}
@@ -131,7 +146,7 @@ class JSON_LD {
 	/**
 	 * Builds the JSON-LD for a card.
 	 *
-	 * @param array $creation Creation data
+	 * @param array  $creation Creation data
 	 * @param string $type Type of card to build schema for
 	 * @return array JSON-LD output
 	 */

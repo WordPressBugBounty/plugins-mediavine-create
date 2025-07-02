@@ -8,6 +8,7 @@ use Mediavine\Settings;
  */
 class Products extends Plugin {
 
+
 	/**
 	 * Instance of Products class
 	 * @var null|Products
@@ -82,7 +83,7 @@ class Products extends Plugin {
 	 * @return Products
 	 */
 	public static function get_instance() {
-		if ( null === self::$instance ) {
+		 if ( null === self::$instance ) {
 			self::$instance = new self();
 			self::$instance->init();
 		}
@@ -98,32 +99,32 @@ class Products extends Plugin {
 	 * @return \stdClass
 	 */
 	public static function prepare_product_thumbnail( $product ) {
-		if ( empty( $product['thumbnail_id'] ) && ! empty( $product['external_thumbnail_url'] ) ) {
+		if ( empty($product['thumbnail_id']) && ! empty($product['external_thumbnail_url']) ) {
 			return $product;
 		}
 
 		// If the type is the product map, we need to get the true product's asin
-		if ( ! empty( $product['type'] ) && 'product_map' === $product['type'] ) {
-			$true_product = self::$models_v2->mv_products->select_one( $product['product_id'] );
-			if ( ! empty( $true_product ) && property_exists( $true_product, 'asin' ) ) {
+		if ( ! empty($product['type']) && 'product_map' === $product['type'] ) {
+			$true_product = self::$models_v2->mv_products->select_one($product['product_id']);
+			if ( ! empty($true_product) && property_exists($true_product, 'asin') ) {
 				$product['asin'] = $true_product->asin;
 			}
 		}
 
 		// Attempt to create a new thumbnail, but only if no ASIN
-		$has_asin = Amazon::get_instance()->get_asin_from_link( $product['link'] );
-		if ( ! empty( $product['remote_thumbnail_uri'] ) && empty( $product['asin'] ) && ! $has_asin ) {
+		$has_asin = Amazon::get_instance()->get_asin_from_link($product['link']);
+		if ( ! empty($product['remote_thumbnail_uri']) && empty($product['asin']) && ! $has_asin ) {
 			// Some results won't include protocol -or- use relative URLs, so we coerce these to absolute URLs.
-			if ( strpos( $product['remote_thumbnail_uri'], 'http' ) === false ) {
-				if ( strpos( $product['remote_thumbnail_uri'], '//' ) === 0 ) { // Only catch at beginning
+			if ( strpos($product['remote_thumbnail_uri'], 'http') === false ) {
+				if ( strpos($product['remote_thumbnail_uri'], '//') === 0 ) { // Only catch at beginning
 					$product['remote_thumbnail_uri'] = 'http:' . $product['remote_thumbnail_uri'];
 				} else {
-					$parsed_url                      = parse_url( $product['remote_thumbnail_uri'] );
+					$parsed_url                      = parse_url($product['remote_thumbnail_uri']);
 					$product['remote_thumbnail_uri'] = 'http://' . $parsed_url['host'] . $product['remote_thumbnail_uri'];
 				}
 			}
 
-			$thumbnail_id            = Images::get_attachment_id_from_url( $product['remote_thumbnail_uri'] );
+			$thumbnail_id            = Images::get_attachment_id_from_url($product['remote_thumbnail_uri']);
 			$product['thumbnail_id'] = $thumbnail_id;
 		}
 
@@ -138,16 +139,16 @@ class Products extends Plugin {
 	 * @return object|null
 	 */
 	public static function restore_product_images( $creation ) {
-		if ( empty( $creation ) ) {
+		if ( empty($creation) ) {
 			return $creation;
 		}
 
-		$metadata = json_decode( $creation->metadata, true );
-		if ( empty( $metadata ) ) {
+		$metadata = json_decode($creation->metadata ?: '{}', true);
+		if ( empty($metadata) ) {
 			$metadata = [];
 		}
 
-		if ( isset( $metadata['product_images_restored'] ) && $metadata['product_images_restored'] ) {
+		if ( isset($metadata['product_images_restored']) && $metadata['product_images_restored'] ) {
 			return $creation;
 		}
 
@@ -166,19 +167,19 @@ class Products extends Plugin {
 				continue;
 			}
 
-			if ( ! isset( $product->link ) ) {
+			if ( ! isset($product->link) ) {
 				continue;
 			}
 
-			$data = $scraper->scrape( $product->link );
-			if ( ! isset( $data['remote_thumbnail_uri'] ) ) {
+			$data = $scraper->scrape($product->link);
+			if ( ! isset($data['remote_thumbnail_uri']) ) {
 				continue;
 			}
 			$product->remote_thumbnail_uri = $data['remote_thumbnail_uri'];
-			unset( $product->thumbnail_id );
+			unset($product->thumbnail_id);
 
-			$product = self::prepare_product_thumbnail( (array) $product );
-			$updated = self::$models_v2->mv_products_map->update( (array) $product );
+			$product = self::prepare_product_thumbnail( (array) $product);
+			$updated = self::$models_v2->mv_products_map->update( (array) $product);
 			if ( $updated ) {
 				$changed = true;
 			}
@@ -186,9 +187,9 @@ class Products extends Plugin {
 
 		if ( $changed ) {
 			$metadata['product_images_restored'] = true;
-			$creation->metadata                  = wp_json_encode( $metadata );
-			$creation                            = self::$models_v2->mv_creations->update_without_modified_date( (array) $creation );
-			return \Mediavine\Create\Creations::publish_creation( $creation->id );
+			$creation->metadata                  = wp_json_encode($metadata);
+			$creation                            = self::$models_v2->mv_creations->update_without_modified_date( (array) $creation);
+			return \Mediavine\Create\Creations::publish_creation($creation->id);
 		}
 
 		return $creation;
@@ -210,12 +211,12 @@ class Products extends Plugin {
 		$this->amazon       = Amazon::get_instance();
 		$this->api          = new Products_API();
 
-		add_filter( 'mv_custom_schema', [ $this, 'custom_schema' ] );
-		add_action( 'rest_api_init', [ $this, 'routes' ] );
-		add_filter( 'mv_dbi_after_update_' . $this->table_name, [ $this, 'cascade_after_update' ] );
-		add_action( 'init', [ $this, 'refresh_product_images' ] );
-		add_action( 'init', [ $this, 'step_amazon_queue' ] );
-		add_action( 'mv_create_setting_updated_mv_create_paapi_secret_key', [ $this, 'lock_amazon_queue' ] );
+		add_filter('mv_custom_schema', [ $this, 'custom_schema' ]);
+		add_action('rest_api_init', [ $this, 'routes' ]);
+		add_filter('mv_dbi_after_update_' . $this->table_name, [ $this, 'cascade_after_update' ]);
+		add_action('init', [ $this, 'refresh_product_images' ]);
+		add_action('init', [ $this, 'step_amazon_queue' ]);
+		add_action('mv_create_setting_updated_mv_create_paapi_secret_key', [ $this, 'lock_amazon_queue' ]);
 	}
 
 	/**
@@ -223,23 +224,23 @@ class Products extends Plugin {
 	 * @return false|void
 	 */
 	public function refresh_product_images() {
-		remove_action( 'mv_dbi_after_update_mv_products', [ self::get_instance(), 'cascade_after_update' ] );
+	  remove_action('mv_dbi_after_update_mv_products', [ self::get_instance(), 'cascade_after_update' ]);
 		$transient = 'mv_amazon_expiring_products';
-		if ( get_transient( $transient ) ) {
+		if ( get_transient($transient) ) {
 			return false;
 		}
 
 		$three_hours       = 3 * 60 * 60;
-		$amazon_rate_limit = apply_filters( 'mv_create_amazon_rate_limit', $three_hours );
-		$expiring          = $this->get_expiring_products( $amazon_rate_limit );
-		if ( empty( $expiring ) ) {
+		$amazon_rate_limit = apply_filters('mv_create_amazon_rate_limit', $three_hours);
+		$expiring          = $this->get_expiring_products($amazon_rate_limit);
+		if ( empty($expiring) ) {
 			return false;
 		}
 
-		$expiring = array_column( $expiring, 'id' );
-		$this->amazon_queue->push_many( $expiring );
+		$expiring = array_column($expiring, 'id');
+		$this->amazon_queue->push_many($expiring);
 
-		set_transient( $transient, time(), $amazon_rate_limit );
+		set_transient($transient, time(), $amazon_rate_limit);
 	}
 
 	/**
@@ -247,15 +248,15 @@ class Products extends Plugin {
 	 * @return void
 	 */
 	public function lock_amazon_queue() {
-		$timeout = 2 * DAY_IN_SECONDS;
-		$this->amazon_queue->lock( $timeout );
+	   $timeout = 2 * DAY_IN_SECONDS;
+		$this->amazon_queue->lock($timeout);
 
 		// Also set provision transient
 		$transient = 'mv_create_amazon_provision';
-		set_transient( $transient, true, $timeout );
+		set_transient($transient, true, $timeout);
 
 		// Clear transient complete setting
-		Settings::delete_setting( $transient . '_complete' );
+		Settings::delete_setting($transient . '_complete');
 	}
 
 	/**
@@ -263,9 +264,9 @@ class Products extends Plugin {
 	 * @return false|mixed|void|null
 	 */
 	public function step_amazon_queue() {
-		// Only run the queue if Amazon is setup
+	   // Only run the queue if Amazon is setup
 		if ( $this->amazon->amazon_affiliates_setup() ) {
-			return $this->amazon_queue->step( [ $this, 'build_amazon_data' ] );
+			return $this->amazon_queue->step([ $this, 'build_amazon_data' ]);
 		}
 	}
 
@@ -274,16 +275,16 @@ class Products extends Plugin {
 	 * @return void
 	 */
 	public function initial_queue_products() {
-		global $wpdb;
-		$table       = self::$models_v2->mv_products->table_name;
-		$query       = "SELECT id FROM $table WHERE link LIKE '%amazon.%'";
+	  global $wpdb;
+		$table = self::$models_v2->mv_products->table_name;
+		$query = "SELECT id FROM $table WHERE link LIKE '%amazon.%'";
 		// linter complains about prepared method not being used, but there's nothing to prepare
-		$product_ids = $wpdb->get_col( $query ); // @phpcs:ignore
-		if ( empty( $product_ids ) ) {
+		$product_ids = $wpdb->get_col($query); // @phpcs:ignore
+		if ( empty($product_ids) ) {
 			return;
 		}
 
-		$this->amazon_queue->push_many( $product_ids );
+		$this->amazon_queue->push_many($product_ids);
 	}
 
 	/**
@@ -293,29 +294,29 @@ class Products extends Plugin {
 	 * @return false|void
 	 */
 	public function build_amazon_data( $product_id ) {
-		$product = (array) self::$models_v2->mv_products->select_one_by_id( $product_id );
-		if ( empty( $product ) ) {
+		$product = (array) self::$models_v2->mv_products->select_one_by_id($product_id);
+		if ( empty($product) ) {
 			return false;
 		}
 
-		if ( is_wp_error( $product ) ) {
+		if ( is_wp_error($product) ) {
 			return false;
 		}
 
-		if ( empty( $product['asin'] ) ) {
-			$product['asin'] = $this->amazon->get_asin_from_link( $product['link'] );
+		if ( empty($product['asin']) ) {
+			$product['asin'] = $this->amazon->get_asin_from_link($product['link']);
 		}
 
-		$result = $this->amazon->get_products_by_asin( $product['asin'] );
+		$result = $this->amazon->get_products_by_asin($product['asin']);
 
 		// Move on if empty or is an error
-		if ( empty( $result ) || is_wp_error( $result ) ) {
+		if ( empty($result) || is_wp_error($result) ) {
 			return false;
 		}
 
 		$product['external_thumbnail_url'] = $result[ $product['asin'] ]['external_thumbnail_url'];
 		$product['expires']                = $result[ $product['asin'] ]['expires'];
-		self::$models_v2->mv_products->update( $product );
+		self::$models_v2->mv_products->update($product);
 	}
 
 	/**
@@ -330,26 +331,26 @@ class Products extends Plugin {
 
 		$update_values = [];
 
-		if ( isset( $product->title ) ) {
+		if ( isset($product->title) ) {
 			$update_values['title'] = $product->title;
 		}
 
 		// We want to update null values as well, so checking if property exists
-		if ( property_exists( $product, 'thumbnail_id' ) ) {
+		if ( property_exists($product, 'thumbnail_id') ) {
 			$update_values['thumbnail_id'] = $product->thumbnail_id;
 		}
 
-		if ( isset( $product->link ) ) {
+		if ( isset($product->link) ) {
 			$update_values['link'] = $product->link;
 		}
 
-		add_filter( 'query', [ self::$models_v2->mv_products, 'allow_null' ] );
+		add_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
 		$updated = $wpdb->update(
 			$wpdb->prefix . 'mv_products_map',
 			$update_values,
 			[ 'product_id' => $product->id ]
 		);
-		remove_filter( 'query', [ self::$models_v2->mv_products, 'allow_null' ] );
+		remove_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
 
 		$result = self::$models_v2->mv_products_map->find(
 			[
@@ -366,7 +367,7 @@ class Products extends Plugin {
 			$ids[] = $item->creation;
 		}
 
-		\Mediavine\Create\Publish::update_publish_queue( $ids );
+		\Mediavine\Create\Publish::update_publish_queue($ids);
 
 		return $product;
 	}
@@ -398,11 +399,11 @@ class Products extends Plugin {
 		$products_map = $wpdb->prefix . 'mv_products_map';
 
 		// SECURITY CHECKED: This query is properly prepared.
-		$sql          = "SELECT $creations.type, $creations.object_id, $creations.id, $creations.title FROM $creations JOIN $products_map ON $creations.id = $products_map.creation WHERE $products_map.product_id = %d;";
-		$prepared     = $wpdb->prepare( $sql, $product_id );
-		$creations    = $wpdb->get_results( $prepared );
+		$sql       = "SELECT $creations.type, $creations.object_id, $creations.id, $creations.title FROM $creations JOIN $products_map ON $creations.id = $products_map.creation WHERE $products_map.product_id = %d;";
+		$prepared  = $wpdb->prepare($sql, $product_id);
+		$creations = $wpdb->get_results($prepared);
 
-		return count( $creations ) ? $creations : [];
+		return count($creations) ? $creations : [];
 	}
 
 
@@ -419,11 +420,11 @@ class Products extends Plugin {
 			return $products;
 		}
 
-		$product_maps = (array) self::$models_v2->mv_products_map->find( [
+		$product_maps = (array) self::$models_v2->mv_products_map->find([
 			'where' => [
 				'creation' => $creation_id,
 			],
-		] );
+		]);
 
 		foreach ( $product_maps as $product_map ) {
 			foreach ( $products as $index => $product ) {
@@ -431,7 +432,7 @@ class Products extends Plugin {
 					continue;
 				}
 
-				unset( $products[ $index ] );
+				unset($products[ $index ]);
 			}
 		}
 
@@ -446,13 +447,13 @@ class Products extends Plugin {
 	 * @return array of products expiring
 	 */
 	public function get_expiring_products( $within = 10800, $limit = 50 ) {
-		$timestamp = date( 'Y-m-d H:i:s', strtotime( "+{$within} seconds" ) );
+		$timestamp = date('Y-m-d H:i:s', strtotime("+{$within} seconds"));
 		$model     = self::$models_v2->mv_products;
 
-		$model->set_select( '*' )
-			->set_order_by( 'expires' )
-			->set_order( 'ASC' )
-			->set_limit( $limit );
+		$model->set_select('*')
+			->set_order_by('expires')
+			->set_order('ASC')
+			->set_limit($limit);
 
 		$products = self::$models_v2->mv_products->where(
 			[
@@ -472,29 +473,33 @@ class Products extends Plugin {
 	 * @return void
 	 */
 	public function routes() {
-		$namespace = $this->api_root . '/' . $this->api_version;
+	  $namespace = $this->api_root . '/' . $this->api_version;
 
 		register_rest_route(
-			$namespace, '/products', [
+			$namespace,
+			'/products',
+			[
 				[
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => function( \WP_REST_Request $request ) {
+					'callback'            => function ( \WP_REST_Request $request ) {
 						return \Mediavine\Create\API_Services::middleware(
 							[
 								[ self::$api_services, 'process_pagination' ],
 								[ $this->api, 'find' ],
-							], $request
+							],
+							$request
 						);
 					},
 					'permission_callback' => [ self::$api_services, 'permitted' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => function( \WP_REST_Request $request ) {
+					'callback'            => function ( \WP_REST_Request $request ) {
 						return \Mediavine\Create\API_Services::middleware(
 							[
 								[ $this->api, 'upsert' ],
-							], $request
+							],
+							$request
 						);
 					},
 					'permission_callback' => [ self::$api_services, 'permitted' ],
@@ -503,7 +508,9 @@ class Products extends Plugin {
 		);
 
 		register_rest_route(
-			$namespace, '/products/scrape', [
+			$namespace,
+			'/products/scrape',
+			[
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => function ( \WP_REST_Request $request ) {
@@ -520,7 +527,9 @@ class Products extends Plugin {
 		);
 
 		register_rest_route(
-			$namespace, '/products/scrape-non-amazon', [
+			$namespace,
+			'/products/scrape-non-amazon',
+			[
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => function ( \WP_REST_Request $request ) {
@@ -537,7 +546,9 @@ class Products extends Plugin {
 		);
 
 		register_rest_route(
-			$namespace, '/products/reset-amazon-thumbnails', [
+			$namespace,
+			'/products/reset-amazon-thumbnails',
+			[
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => function ( \WP_REST_Request $request ) {
@@ -554,7 +565,9 @@ class Products extends Plugin {
 		);
 
 		register_rest_route(
-			$namespace, '/products/reset-amazon-provision', [
+			$namespace,
+			'/products/reset-amazon-provision',
+			[
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => function ( \WP_REST_Request $request ) {
@@ -571,15 +584,18 @@ class Products extends Plugin {
 		);
 
 		register_rest_route(
-			$namespace, '/products/(?P<id>\d+)', [
+			$namespace,
+			'/products/(?P<id>\d+)',
+			[
 				[
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => function( \WP_REST_Request $request ) {
+					'callback'            => function ( \WP_REST_Request $request ) {
 						return \Mediavine\Create\API_Services::middleware(
 							[
 								[ $this->api, 'find_one' ],
 								[ $this->api, 'get_pagination_links' ],
-							], $request
+							],
+							$request
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
@@ -587,11 +603,12 @@ class Products extends Plugin {
 				],
 				[
 					'methods'             => \WP_REST_Server::DELETABLE,
-					'callback'            => function( \WP_REST_Request $request ) {
+					'callback'            => function ( \WP_REST_Request $request ) {
 						return \Mediavine\Create\API_Services::middleware(
 							[
 								[ $this->api, 'destroy' ],
-							], $request
+							],
+							$request
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
@@ -612,6 +629,5 @@ class Products extends Plugin {
 				],
 			]
 		);
-
 	}
 }

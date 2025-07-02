@@ -5,8 +5,8 @@ namespace Mediavine\Create;
 use Mediavine\Create\API_Services;
 use Mediavine\MV_DBI;
 use Mediavine\Settings;
-use Mediavine\WordPress\Support\Str;
-use Mediavine\WordPress\Support\Arr;
+use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Helpers\Arr;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Search for related content. Adds internal or external links to a List card
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return array|\WP_Error|\WP_REST_Response
@@ -57,7 +57,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				$query_args['select']         = [ 'id as relation_id', 'canonical_post_id', 'description', 'title', "'card' AS content_type", 'type AS secondary_type', 'thumbnail_id' ];
 			}
 
-			$allowed_post_types = json_decode( Settings::get_setting( 'mv_create_allowed_cpt_types' ), true );
+			$allowed_post_types = json_decode(Settings::get_setting('mv_create_allowed_cpt_types') ?: '[]', true);
 			if ( empty( $allowed_post_types ) ) {
 				$allowed_post_types = array_map( 'esc_attr', [ 'post', 'page' ] );
 			} else {
@@ -115,7 +115,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Read Card relations
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return \WP_Error|\WP_REST_Response
@@ -160,10 +160,10 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Normalizes the relations data so it can be associated with a card.
 		 *
-		 * @param array $data Data of all relations to be added to card
-		 * @param int $creation_id ID of creation
+		 * @param array  $data Data of all relations to be added to card
+		 * @param int    $creation_id ID of creation
 		 * @param string $type Type of data added to card
-		 * @param array $existing_data Array containing existing asins and original relations data
+		 * @param array  $existing_data Array containing existing asins and original relations data
 		 * @return array List of relations and any error data
 		 */
 		public function normalize_relations_data( $data, $creation_id, $type, $existing_data ) {
@@ -226,7 +226,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Set relations for a card
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 * @todo Add unit test for this method
 		 * @return \WP_REST_Response
@@ -379,7 +379,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				return $relation;
 			}
 
-			$meta = json_decode( $relation['meta'] );
+			$meta = json_decode($relation['meta'] ?: '{}');
 
 			// reassign external_thumbnail_url
 			$img = wp_get_attachment_image_src( $relation['thumbnail_id'], 'full' );
@@ -419,9 +419,9 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		 * Find the previous ASIN in $existing_asins, if it doesn't exist, scrape the URL for the meta data
 		 *
 		 * @param string $asin ASIN to be scraped
-		 * @param array $existing_asins Array of existing ASINs to check against
+		 * @param array  $existing_asins Array of existing ASINs to check against
 		 * @param Amazon $amazon_scraper Amazon scraper class instance
-		 * @param array $original_relations Original relations to pull meta from if the key does exist
+		 * @param array  $original_relations Original relations to pull meta from if the key does exist
 		 *
 		 * @return array|\WP_Error JSON decoded Amazon metadata or WP_Error if the link can't be scraped
 		 */
@@ -449,7 +449,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				return [];
 			}
 
-			return json_decode( $original_relations[ $key ]->meta, true );
+			return json_decode($original_relations[ $key ]->meta ?: '{}', true);
 		}
 	}
 }

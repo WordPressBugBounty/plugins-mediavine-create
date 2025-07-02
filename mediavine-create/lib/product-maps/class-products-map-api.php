@@ -1,8 +1,8 @@
 <?php
 namespace Mediavine\Create;
 
-use Mediavine\WordPress\Support\Arr;
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Arr;
+use Mediavine\Create\Helpers\Str;
 
 /**
  * Endpoints for our v1 Products Map API
@@ -236,7 +236,7 @@ class Products_Map_API extends Products {
 	/**
 	 * Find productions associated with a given creation
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 *
 	 * @return \WP_REST_Response
@@ -271,7 +271,7 @@ class Products_Map_API extends Products {
 	/**
 	 * Remove a specified product map
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 *
 	 * @return \WP_Error|\WP_REST_Response

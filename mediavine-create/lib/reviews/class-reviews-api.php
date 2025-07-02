@@ -7,13 +7,15 @@ class Reviews_API extends Reviews {
 
 	private static $instance = null;
 
+	private $Reviews;
+
 	/**
 	 * Get Instance of Object
 	 * @return Reviews_API
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -51,6 +53,7 @@ class Reviews_API extends Reviews {
 		$more_required = false;
 		$error         = false;
 		$errors        = [];
+		$new_review    = [];
 
 		$more_required = $rating_status['more_required'];
 
@@ -158,7 +161,6 @@ class Reviews_API extends Reviews {
 			'error'  => $error,
 			'errors' => $errors,
 		];
-
 	}
 
 	/**
@@ -226,7 +228,6 @@ class Reviews_API extends Reviews {
 				'more_required' => true,
 			];
 		}
-
 	}
 
 	/**
@@ -299,10 +300,10 @@ class Reviews_API extends Reviews {
 		}
 
 		// Get current review to check handshake
-		$review = self::$models_v2->mv_reviews->select_one( (int) $params['id'] );
+		$review    = self::$models_v2->mv_reviews->select_one( (int) $params['id'] );
 		$handshake = ( ! empty( $review->handshake ) ) ? (int) $review->handshake : false;
 
-		if ( !empty( $params['handshake'] ) && (int) $params['handshake'] === $handshake ) {
+		if ( ! empty( $params['handshake'] ) && (int) $params['handshake'] === $handshake ) {
 			return true;
 		}
 
@@ -340,7 +341,7 @@ class Reviews_API extends Reviews {
 			return new \WP_Error(
 				'rest_forbidden',
 				__( 'You are not authorized to edit this review.', 'mediavine' ),
-				[ 'status'  => 401 ]
+				[ 'status' => 401 ]
 			);
 		}
 
@@ -426,7 +427,7 @@ class Reviews_API extends Reviews {
 				return new \WP_Error(
 					'rest_forbidden',
 					__( 'You are not allowed to view all reviews.', 'mediavine' ),
-					[ 'status'  => 401 ]
+					[ 'status' => 401 ]
 				);
 			}
 
@@ -436,7 +437,7 @@ class Reviews_API extends Reviews {
 				return new \WP_Error(
 					'creation_not_public',
 					__( 'This creation is not associated with a public post.', 'mediavine' ),
-					[ 'status'  => 401 ]
+					[ 'status' => 401 ]
 				);
 			}
 		}
@@ -594,6 +595,4 @@ class Reviews_API extends Reviews {
 	function init() {
 		$this->Reviews = new Reviews_Models();
 	}
-
 }
-

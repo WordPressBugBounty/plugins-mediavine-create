@@ -1,5 +1,6 @@
 <?php
 namespace Mediavine\Create;
+
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\SyncEmitter;

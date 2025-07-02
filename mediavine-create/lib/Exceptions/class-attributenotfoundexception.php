@@ -19,7 +19,7 @@ class AttributeNotFoundException extends \RuntimeException {
 	/**
 	 * Set the affected attribute.
 	 *
-	 * @param  string   $attribute
+	 * @param  string $attribute
 	 * @return $this
 	 */
 	public function set_attribute( $attribute ) {

@@ -45,7 +45,7 @@ class Relations extends Plugin {
 
 	public static function get_instance() {
 		if ( null === self::$instance ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
@@ -214,7 +214,7 @@ class Relations extends Plugin {
 			}
 
 			if ( ! empty( ( $relation->asin ) ) ) {
-				$meta = json_decode( $relation->meta );
+				$meta = json_decode($relation->meta ?: '{}');
 				if ( $meta ) {
 					$relation->thumbnail_uri = $meta->external_thumbnail_url;
 				}
@@ -311,7 +311,7 @@ class Relations extends Plugin {
 		}
 
 		if ( ! empty( $creation->associated_posts ) ) {
-			$associated_posts = json_decode( $creation->associated_posts );
+			$associated_posts = json_decode($creation->associated_posts ?: '[]');
 			$relation->posts  = [];
 
 			if ( $associated_posts ) {

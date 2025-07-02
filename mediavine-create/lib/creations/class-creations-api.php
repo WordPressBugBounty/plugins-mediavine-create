@@ -5,8 +5,6 @@ use Mediavine\MV_DBI;
 use Mediavine\Settings;
 use \WP_REST_Request as Request;
 use \WP_REST_Response as Response;
-use \WP_Error as Error;
-use Mediavine\WordPress\Support\Str;
 
 /**
  * Endpoints for our v1 Creations API
@@ -93,8 +91,8 @@ class Creations_API extends Creations {
 		if ( ! empty( $data['type'] ) && 'list' === $data['type'] && Theme_Checker::is_trellis() && function_exists( 'mv_trellis_purge_page_critical_css' ) ) {
 			$card = self::$models_v2->mv_creations->find_one( $data['id'] );
 			if ( $card->layout !== $data['layout'] ) {
-				$associated_posts = '[]' !== $data['associated_posts'] && ! empty( $data['associated_posts'] )
-					? array_map( 'intval', json_decode( $data['associated_posts'] ) )
+				$associated_posts = array_map('intval', json_decode($data['associated_posts'] ?: '[]'))
+					? array_map( 'intval', json_decode($data['associated_posts'] ?: '[]') )
 					: [];
 				$associated_posts = ! empty( $associated_posts ) ? \get_posts( [ 'include' => $associated_posts ] ) : [];
 				foreach ( $associated_posts as $post ) {
@@ -130,7 +128,7 @@ class Creations_API extends Creations {
 		unset( $updated->json_ld );
 
 		$data                  = self::$api_services->prepare_item_for_response( $updated, $request );
-		$data['custom_fields'] = json_decode( $data['custom_fields'] );
+		$data['custom_fields'] = json_decode($data['custom_fields'] ?: '{}');
 		$response              = API_Services::set_response_data( $data, $response );
 
 		$response->set_status( 200 );
@@ -196,7 +194,7 @@ class Creations_API extends Creations {
 		}
 
 		if ( ! empty( $response->data->custom_fields ) ) {
-			$response->data->custom_fields = json_decode( $response->data->custom_fields );
+			$response->data->custom_fields = json_decode($response->data->custom_fields ?: '{}');
 		}
 
 		// Send a total count of results based on the search params
@@ -237,7 +235,7 @@ class Creations_API extends Creations {
 		$creation->category_name       = self::$api_services->get_term_name( $creation->category );
 		$creation->secondary_term_name = self::$api_services->get_term_name( $creation->secondary_term );
 
-		$posts = json_decode( $creation->associated_posts );
+		$posts = json_decode($creation->associated_posts ?: '[]');
 		if ( $posts && count( $posts ) ) {
 			$posts           = array_values( array_unique( $posts ) );
 			$creation->posts = array_map(
@@ -268,7 +266,7 @@ class Creations_API extends Creations {
 	/**
 	 * Get pagination details for create cards neighboring given card.
 	 *
-	 * @param Request $request
+	 * @param Request  $request
 	 * @param Response $response
 	 * @return Response $response
 	 */
@@ -329,11 +327,11 @@ class Creations_API extends Creations {
 
 		$associated_posts = [];
 		if ( ! empty( $creation->associated_posts ) ) {
-			$associated_posts = json_decode( $creation->associated_posts );
+			$associated_posts = json_decode( $creation->associated_posts ?: '[]' );
 			foreach ( $associated_posts as &$post ) {
 				$post = [
 					'id'    => $post,
-					'title' => htmlentities( get_the_title( $post ) ),
+					'title' => htmlentities( get_the_title( $post ) ?: '' ),
 				];
 			}
 		}
@@ -360,7 +358,7 @@ class Creations_API extends Creations {
 		$creation = static::bind_creation_relationships( $creation );
 
 		if ( ! empty( $creation->custom_fields ) ) {
-			$creation->custom_fields = json_decode( $creation->custom_fields );
+			$creation->custom_fields = json_decode($creation->custom_fields ?: '{}');
 		}
 
 		unset( $creation->published );
@@ -397,7 +395,7 @@ class Creations_API extends Creations {
 	/**
 	 * Duplicate a given creation by id.
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 * @return \WP_REST_Response $response
 	 */
@@ -432,7 +430,7 @@ class Creations_API extends Creations {
 			$creation->rating_count,
 			$creation->json_ld
 		);
-		$metadata = json_decode( $creation->metadata, true );
+		$metadata = json_decode($creation->metadata ?: '{}', true);
 		// set some historical data on the duplicated card
 		$metadata['history']['duplicated'] = [
 			'from_creation' => $creation_id,
@@ -526,7 +524,7 @@ class Creations_API extends Creations {
 	}
 
 	public function remove_from_previous_import( $creation ) {
-		$metadata = json_decode( $creation->metadata, true );
+		$metadata = json_decode($creation->metadata ?: '{}', true);
 		// If the creation wasn't imported, get outta here, ya punk!
 		if ( empty( $metadata['import'] ) || empty( $metadata['import']['importer'] ) ) {
 			return;
@@ -535,7 +533,7 @@ class Creations_API extends Creations {
 		$import = $metadata['import'];
 		// Grab the imported recipes setting and convert it from json
 		$json    = Settings::get_setting( 'mv_recipe_imported_recipes' );
-		$decoded = json_decode( $json, true );
+		$decoded = json_decode($json ?: '{}', true);
 		// Filter the previously imported recipes and get rid of the creation
 		// with the same original id and importer type.
 		// We have to check the importer type because original_id is _not_ unique.
@@ -576,7 +574,7 @@ class Creations_API extends Creations {
 	 *
 	 * Lists all Creations of the given type. Optionally search published data for text.
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 * @return array index of Creations
 	 */

@@ -15,9 +15,9 @@ use Mediavine\Settings;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '1.9.11';
+	const VERSION = '1.9.12';
 
-	const DB_VERSION = '1.9.11';
+	const DB_VERSION = '1.9.12';
 
 	const TEXT_DOMAIN = 'mediavine';
 
@@ -144,7 +144,7 @@ class Plugin {
 			// 2. New CPTs need to be added to options but NOT to saved values — this should already be handled by $this->get_custom_post_types()
 
 			$values        = array_keys( $allowed_post_types );
-			$stored_values = json_decode( $settings[ $cpt_field ]->value );
+			$stored_values = json_decode($settings[ $cpt_field ]->value ?: '{}');
 
 			if ( ! is_array( $stored_values ) ) {
 				return $settings;
@@ -201,7 +201,7 @@ class Plugin {
 			return;
 		}
 
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		/**
 		 * Runs just before the plugin saves its new version to the database.
@@ -252,9 +252,9 @@ class Plugin {
 		// initialize Admin_Notices
 		\Mediavine\Create\Admin_Notices::get_instance();
 
-		self::$views         = \Mediavine\View_Loader::get_instance( MV_CREATE_DIR );
-		self::$api_services  = \Mediavine\Create\API_Services::get_instance();
-		self::$models_v2     = \Mediavine\MV_DBI::get_models(
+		self::$views        = \Mediavine\View_Loader::get_instance( MV_CREATE_DIR );
+		self::$api_services = \Mediavine\Create\API_Services::get_instance();
+		self::$models_v2    = \Mediavine\MV_DBI::get_models(
 			[
 				'mv_images',
 				'mv_nutrition',
@@ -526,7 +526,7 @@ class Plugin {
 	function update_services_api() {
 		global $wp_version;
 		$php_version       = PHP_VERSION;
-		$create_version    = Plugin::VERSION;
+		$create_version    = self::VERSION;
 		$api_token_setting = \Mediavine\Settings::get_settings( 'mv_create_api_token' );
 
 		if ( ! $api_token_setting ) {
@@ -539,7 +539,7 @@ class Plugin {
 			return;
 		}
 
-		$token_data = json_decode( base64_decode( $token_values[1] ) );
+		$token_data = json_decode(base64_decode($token_values[1]) ?: '{}');
 
 		if ( ! isset( $token_data->site_id ) ) {
 			return;
@@ -598,7 +598,7 @@ class Plugin {
 				$meta    = wp_prepare_attachment_for_js( $a['id'] );
 				$alt     = $meta['alt'];
 				$title   = $meta['title'];
-				$options = json_decode( $a['options'] );
+				$options = json_decode($a['options'] ?: '{}');
 
 				$class = 'align' . esc_attr( $options->alignment ) . ' size-' . esc_attr( $options->size ) . ' wp-image-' . $a['id'];
 				$class = apply_filters( 'get_image_tag_class', $class, $a['id'], $options->alignment, $options->size );
@@ -654,11 +654,11 @@ class Plugin {
 	 * }
 	 * ```
 	 *
-	 * @param   array  $settings  Current list of settings before running create settings
+	 * @param   array $settings  Current list of settings before running create settings
 	 * @return  array             List of settings after migrated changes made
 	 */
 	public function update_settings( $settings ) {
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		// Update incorrect card style slug of mv_create to square (Remove Jan 2020)
 		if ( version_compare( $last_plugin_version, '1.4.8', '<' ) ) {
@@ -674,7 +674,7 @@ class Plugin {
 		$creation  = $creations->find_one_by_id( $id );
 
 		if ( ! empty( $creation->video ) ) {
-			$video_data         = json_decode( $creation->video );
+			$video_data         = json_decode($creation->video ?: '{}');
 			$make_the_call      = false;
 			$video_data_changed = false;
 			$update_data        = [
@@ -708,7 +708,7 @@ class Plugin {
 			if ( $make_the_call && $video_data->slug ) {
 				$api_data = file_get_contents( 'https://embed.mediavine.com/oembed/?url=https%3A%2F%2Fvideo.mediavine.com%2Fvideos%2F' . $video_data->slug );
 				if ( $api_data ) {
-					$new_video_data = json_decode( $api_data );
+					$new_video_data = json_decode($api_data ?: '{}');
 
 					if ( ! empty( $new_video_data->duration ) ) {
 						$video_data->duration = 'PT' . $new_video_data->duration . 'S';
@@ -731,7 +731,7 @@ class Plugin {
 				$creation->video      = wp_json_encode( $video_data );
 				$update_data['video'] = $creation->video;
 				if ( ! empty( $creation->json_ld ) ) {
-					$json_ld     = json_decode( $creation->json_ld );
+					$json_ld     = json_decode($creation->json_ld ?: '{}');
 					$upload_date = $json_ld->video->uploadDate;
 					if ( ! empty( $video_data->rawData->uploadDate ) ) {
 						$upload_date = $video_data->rawData->uploadDate;
@@ -750,7 +750,7 @@ class Plugin {
 					$update_data['json_ld'] = $creation->json_ld;
 
 					if ( ! empty( $creation->published ) ) {
-						$published_data           = json_decode( $creation->published );
+						$published_data           = json_decode($creation->published ?: '{}');
 						$published_data->video    = $creation->json_ld;
 						$update_data['published'] = wp_json_encode( $published_data );
 					}
@@ -772,7 +772,7 @@ class Plugin {
 	 */
 	public function update_queue() {
 		$creations           = new MV_DBI( 'mv_creations' );
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		// add version compares here
 		// use `Publish::selective_update_queue( $creation_ids, 'fix_name' );` to selectively update
@@ -805,24 +805,16 @@ class Plugin {
 		global $wpdb;
 		$creations = new \Mediavine\MV_DBI( 'mv_creations' );
 		$creations->set_limit( 10000 );
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
+		$republish_ids       = [];
 
-		// Remove trailing comma from time_display values that appeared for unknown reasons (Remove February 2021)
-		if ( version_compare( $last_plugin_version, '1.7.2', '<' ) ) {
-			$cards = $creations->where( [ 'time_display', 'LIKE', '%,' ] );
-			foreach ( $cards as $card ) {
-				$card->time_display = trim( $card->time_display, ',' );
-				$creations->update(
-					[
-						'id'           => $card->id,
-						'time_display' => $card->time_display,
-					]
-				);
-			}
-			$ids = array_values( wp_list_pluck( $cards, 'id' ) );
-			if ( ! empty( $ids ) ) {
-				\Mediavine\Create\Publish::update_publish_queue( $ids );
-			}
+		// Republish cards with rating_count > 0 (Remove January 2026)
+		if ( version_compare( $last_plugin_version, '1.9.12', '<' ) ) {
+			$cards = $creations->where( [ 'rating_count', '>', 0 ] );
+			array_push( $republish_ids, array_values( wp_list_pluck( $cards, 'id' ) ) );
+		}
+		if ( ! empty( $republish_ids ) ) {
+			\Mediavine\Create\Publish::update_publish_queue( $republish_ids );
 		}
 	}
 
@@ -871,7 +863,7 @@ class Plugin {
 	 */
 	public function update_reviews_table() {
 		global $wpdb;
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		if ( version_compare( $last_plugin_version, '1.2.0', '<' ) ) {
 			// Not all users had the plugin when `recipe_id` was a column in the `mv_reviews` table.
@@ -907,7 +899,7 @@ class Plugin {
 	 */
 	public function fix_cloned_ratings() {
 		global $wpdb;
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		if ( version_compare( $last_plugin_version, '1.3.20', '<' ) ) {
 			// SECURITY CHECKED: Nothing in this query can be sanitized.
@@ -935,7 +927,7 @@ class Plugin {
 	 */
 	public function fix_cookbook_canonical_post_ids() {
 		global $wpdb;
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		if ( version_compare( $last_plugin_version, '1.4.6', '<' ) ) {
 			// SECURITY CHECKED: Nothing in this query can be sanitized.
@@ -946,8 +938,8 @@ class Plugin {
 			$ids       = [];
 			foreach ( $creations as $creation ) {
 				$post     = get_post( $creation['canonical_post_id'] );
-				$metadata = json_decode( $creation['metadata'] );
-				$posts    = json_decode( $creation['associated_posts'] );
+				$metadata = json_decode($creation['metadata'] ?: '{}');
+				$posts    = json_decode($creation['associated_posts'] ?: '[]');
 				if ( 'cookbook_recipe' === $post->post_type && ! empty( $posts ) ) {
 					$creation['canonical_post_id'] = $posts[0];
 				}
@@ -970,7 +962,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function add_initial_revision_to_cards() {
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		if ( version_compare( $last_plugin_version, '1.4.11', '<' ) ) {
 			Publish::add_all_to_publish_queue();
@@ -987,7 +979,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function queue_existing_amazon_products() {
-		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 
 		if ( version_compare( $last_plugin_version, '1.5.4', '<' ) ) {
 			$Products = Products::get_instance();
@@ -1110,7 +1102,7 @@ class Plugin {
 			$arr[] = [
 				'slug'         => 'mv_create_nutrition_disclaimer',
 				'label'        => __( 'Custom Nutrition Disclaimer', 'mediavine' ),
-				'instructions' => __( 'Example: Nutrition information isn’t always accurate.', 'mediavine' ),
+				'instructions' => __( 'Example: Nutrition information isn\'t always accurate.', 'mediavine' ),
 				'type'         => 'textarea',
 				'card'         => 'recipe',
 			];

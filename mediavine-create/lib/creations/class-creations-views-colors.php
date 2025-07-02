@@ -32,7 +32,7 @@ class Creations_Views_Colors extends Creations_Views {
 	/**
 	 * Mixes a color with white
 	 *
-	 * @param string $color
+	 * @param string  $color
 	 * @param integer $percent
 	 *
 	 * @return string
@@ -44,7 +44,7 @@ class Creations_Views_Colors extends Creations_Views {
 	/**
 	 * Mixes a color with black
 	 *
-	 * @param string $color
+	 * @param string  $color
 	 * @param integer $percent
 	 *
 	 * @return string
@@ -85,7 +85,7 @@ class Creations_Views_Colors extends Creations_Views {
 	 * Return rgba(r, g, b, a) CSS color format
 	 *
 	 * @param string $color Hex color code
-	 * @param int $fraction Alpha transparency percentage. Value between 0 and 1
+	 * @param int    $fraction Alpha transparency percentage. Value between 0 and 1
 	 *
 	 * @return string
 	 */
@@ -129,7 +129,7 @@ class Creations_Views_Colors extends Creations_Views {
 
 	/**
 	 * Convert an RGB color to a hex color
-	 * @param array[$red, $green, $blue] $color RGB color code array
+	 * @param array[ $red, $green, $blue] $color RGB color code array
 	 *
 	 * @return string
 	 */

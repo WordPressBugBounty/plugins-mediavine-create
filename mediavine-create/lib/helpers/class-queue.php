@@ -167,7 +167,7 @@ class Queue {
 	 * Push an item on to the queue if it is not found in the queue
 	 *
 	 * @param mixed $item
-	 * @param bool $force If true, do not check if the item exists before putting it on the queue
+	 * @param bool  $force If true, do not check if the item exists before putting it on the queue
 	 * @return mixed Returns false if item is not added, otherwise returns the updated queue property
 	 */
 	public function push( $item, $force = false ) {
@@ -184,7 +184,7 @@ class Queue {
 	 * Push an item on to the queue if it is not found in the queue
 	 *
 	 * @param array $item
-	 * @param bool $force If true, do not check if the item exists before putting it on the queue
+	 * @param bool  $force If true, do not check if the item exists before putting it on the queue
 	 * @return mixed Returns false if item is not added, otherwise returns the updated queue property
 	 */
 	public function push_many( $items, $force = false ) {

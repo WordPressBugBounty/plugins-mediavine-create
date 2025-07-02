@@ -1,6 +1,6 @@
 <?php
-$video          = (array) json_decode( $args['creation']['video'] );
-$external_video = (array) json_decode( $args['creation']['external_video'] );
+$video          = (array) json_decode( $args['creation']['video'] ?: '{}' );
+$external_video = (array) json_decode( $args['creation']['external_video'] ?: '{}' );
 
 if ( ( ! empty( $video['include'] ) || ! empty( $video['display'] ) ) && ! $args['print'] && class_exists( '\Mediavine\MCP\Video' ) ) { ?>
 	<div class="mv-create-video">

@@ -1,8 +1,8 @@
 <?php
 namespace Mediavine\Create;
 
-use Mediavine\WordPress\Support\Str;
-use Mediavine\WordPress\Support\Arr;
+use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Helpers\Arr;
 
 /**
  * Plugin Checker class
@@ -70,7 +70,7 @@ class Plugin_Checker {
 				continue;
 			}
 
-			$rascal_instance = new $rascal_class;
+			$rascal_instance = new $rascal_class();
 			$rascal_instance->init();
 
 		}
@@ -96,7 +96,7 @@ class Plugin_Checker {
 			return false;
 		}
 		// Make sure this is included so `is_plugin_active()` works
-		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		/**
 		 * Filters the plugin slugs and class names to check for active plugins

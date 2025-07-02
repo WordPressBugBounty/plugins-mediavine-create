@@ -3,7 +3,7 @@
 namespace Mediavine\Create;
 
 use Mediavine\Create\Amazon\ProductAdvertisingAPI\v1\com\amazon\paapi5\v1\ItemsResult;
-use Mediavine\WordPress\Support\Arr;
+use Mediavine\Create\Helpers\Arr;
 use Mediavine\Create\Amazon\ProductAdvertisingAPI\v1\ApiException;
 use Mediavine\Create\Amazon\ProductAdvertisingAPI\v1\Configuration;
 use Mediavine\Create\Amazon\ProductAdvertisingAPI\v1\com\amazon\paapi5\v1\PartnerType;
@@ -46,7 +46,7 @@ class Amazon {
 	 */
 	public static function get_instance() {
 		if ( is_null( self::$instance ) ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
@@ -541,7 +541,7 @@ class Amazon {
 	/**
 	 * Converts seconds to readable time
 	 *
-	 * @param int $input_seconds Seconds
+	 * @param int     $input_seconds Seconds
 	 * @param boolean $display_seconds Should seconds be displayed or just minutes and hours
 	 * @return string Human readable time
 	 */

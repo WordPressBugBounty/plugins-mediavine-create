@@ -3,8 +3,8 @@ namespace Mediavine\Create;
 
 use \WP_REST_Request as Request;
 use \WP_REST_Response as Response;
-use Mediavine\WordPress\Support\Arr;
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Arr;
+use Mediavine\Create\Helpers\Str;
 
 /**
  * Products_API class
@@ -350,7 +350,7 @@ class Products_API extends Products {
 	/**
 	 * Scrape NON-AMAZON product url for data
 	 *
-	 * @param Request $request
+	 * @param Request  $request
 	 * @param Response $response
 	 *
 	 * @return array|\WP_Error|Response
@@ -443,7 +443,7 @@ class Products_API extends Products {
 			$result['thumbnail_id']         = null;
 			$result['thumbnail_uri']        = $result['external_thumbnail_url'];
 			$result['remote_thumbnail_uri'] = $result['external_thumbnail_url'];
-			$result['title'] = $result['title'];
+			$result['title']                = $result['title'];
 		}
 
 		$response = API_Services::set_response_data( $result, $response );

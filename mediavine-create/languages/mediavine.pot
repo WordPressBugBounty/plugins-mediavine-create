@@ -1,214 +1,224 @@
-# Copyright (C) 2021 Mediavine
+# Copyright (C) 2025 Mediavine
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create by Mediavine 1.7.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/create\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Project-Id-Version: Create by Mediavine 1.9.12\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/project\n"
+"Last-Translator:  \n"
+"Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-12-10T20:44:53+00:00\n"
+"POT-Creation-Date: 2025-06-27T15:07:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.5.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
 
 #. Plugin Name of the plugin
-#: admin/class-admin-init.php:294
-#: admin/class-admin-init.php:350
+#: mediavine-create.php
+#: admin/class-admin-init.php:356
+#: admin/class-admin-init.php:425
 msgid "Create by Mediavine"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: mediavine-create.php
 msgid "https://www.mediavine.com/mediavine-create/"
 msgstr ""
 
 #. Description of the plugin
+#: mediavine-create.php
 msgid "Create custom recipe cards to be displayed in posts."
 msgstr ""
 
 #. Author of the plugin
+#: mediavine-create.php
 msgid "Mediavine"
 msgstr ""
 
 #. Author URI of the plugin
+#: mediavine-create.php
 msgid "https://www.mediavine.com/"
 msgstr ""
 
-#: admin/class-admin-init.php:242
-#: class-plugin.php:1166
-#: admin/ui/build/app.build.1.7.0.js:142650
-#: admin/ui/build/app.build.1.7.0.js:161148
+#: admin/class-admin-init.php:304
+#: class-plugin.php:1168
+#: admin/ui/build/app.build.1.9.12.js:143348
+#: admin/ui/build/app.build.1.9.12.js:162767
 msgid "Recipes"
 msgstr ""
 
-#: admin/class-admin-init.php:243
-#: class-plugin.php:1173
-#: admin/ui/build/app.build.1.7.0.js:142651
+#: admin/class-admin-init.php:305
+#: class-plugin.php:1175
+#: admin/ui/build/app.build.1.9.12.js:143349
 msgid "How-Tos"
 msgstr ""
 
-#: admin/class-admin-init.php:269
+#: admin/class-admin-init.php:331
 #: lib/i18n/class-translation.php:52
 #: lib/views/v1/shortcode-mv-create-products.php:66
-#: admin/ui/build/app.build.1.7.0.js:141580
-#: admin/ui/build/app.build.1.7.0.js:147861
-#: admin/ui/build/app.build.1.7.0.js:148812
+#: admin/ui/build/app.build.1.9.12.js:142269
+#: admin/ui/build/app.build.1.9.12.js:148633
+#: admin/ui/build/app.build.1.9.12.js:149619
 msgid "Recommended Products"
 msgstr ""
 
-#: admin/class-admin-init.php:270
+#: admin/class-admin-init.php:332
 msgid "User Reviews"
 msgstr ""
 
-#: admin/class-admin-init.php:285
-#: admin/class-admin-init.php:293
+#: admin/class-admin-init.php:347
+#: admin/class-admin-init.php:355
 msgid "Create by Mediavine Plugin Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:286
+#: admin/class-admin-init.php:348
 msgid "Settings"
 msgstr ""
 
-#: class-plugin.php:290
+#: class-plugin.php:295
 msgid "Create"
 msgstr ""
 
-#: class-plugin.php:437
+#: class-plugin.php:442
 msgid "Measurement System"
 msgstr ""
 
-#: class-plugin.php:438
+#: class-plugin.php:443
 msgid "Force a default measurement system (or choose \"Any\" to allow either)."
 msgstr ""
 
-#: class-plugin.php:442
+#: class-plugin.php:447
 msgid "Metric"
 msgstr ""
 
-#: class-plugin.php:446
+#: class-plugin.php:451
 msgid "Imperial"
 msgstr ""
 
-#: class-plugin.php:450
+#: class-plugin.php:455
 msgid "Any"
 msgstr ""
 
-#: class-plugin.php:470
+#: class-plugin.php:475
 msgid "Product Registration"
 msgstr ""
 
-#: class-plugin.php:471
+#: class-plugin.php:476
 msgid "In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs."
 msgstr ""
 
-#: class-plugin.php:495
+#: class-plugin.php:500
 msgid "Enabled Debugging"
 msgstr ""
 
-#: class-plugin.php:496
+#: class-plugin.php:501
 msgid "Enable this setting to send all error log data to Sentry for the Publisher Engineering team to debug. This reduces the need for FTP and should be used in lieu of debug log/error log files."
 msgstr ""
 
-#: class-plugin.php:832
+#: class-plugin.php:829
 msgid "Thanks for installing Create by Mediavine!"
 msgstr ""
 
 #. translators: %1$s: linked importer plugin
-#: class-plugin.php:836
+#: class-plugin.php:833
+#, php-format
 msgid "If you're moving from another recipe plugin, you can also download and install our %1$s."
 msgstr ""
 
-#: class-plugin.php:837
+#: class-plugin.php:834
 msgid "importer plugin"
 msgstr ""
 
-#: class-plugin.php:1096
+#: class-plugin.php:1098
 msgid "CSS Class"
 msgstr ""
 
-#: class-plugin.php:1097
+#: class-plugin.php:1099
 msgid "Add an additional CSS class to this card."
 msgstr ""
 
-#: class-plugin.php:1102
+#: class-plugin.php:1104
 msgid "Custom Nutrition Disclaimer"
 msgstr ""
 
-#: class-plugin.php:1103
-msgid "Example: Nutrition information isn’t always accurate."
+#: class-plugin.php:1105
+msgid "Example: Nutrition information isn't always accurate."
 msgstr ""
 
-#: class-plugin.php:1109
+#: class-plugin.php:1111
 msgid "Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1110
+#: class-plugin.php:1112
 msgid "Override the default affiliate message for this card."
 msgstr ""
 
-#: class-plugin.php:1116
+#: class-plugin.php:1118
 msgid "Show Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1117
+#: class-plugin.php:1119
 msgid "Check this box to display an affiliate message on this List."
 msgstr ""
 
-#: class-plugin.php:1126
+#: class-plugin.php:1128
 msgid "Social Footer Icon"
 msgstr ""
 
-#: class-plugin.php:1127
+#: class-plugin.php:1129
 msgid "Override the default social footer icon for this card."
 msgstr ""
 
-#: class-plugin.php:1140
+#: class-plugin.php:1142
 msgid "Social Footer Heading"
 msgstr ""
 
-#: class-plugin.php:1141
+#: class-plugin.php:1143
 msgid "Override the default social footer heading for this card."
 msgstr ""
 
-#: class-plugin.php:1147
+#: class-plugin.php:1149
 msgid "Social Footer Content"
 msgstr ""
 
-#: class-plugin.php:1148
+#: class-plugin.php:1150
 msgid "Override the default social footer content for this card."
 msgstr ""
 
-#: class-plugin.php:1165
-#: admin/ui/build/app.build.1.7.0.js:133935
-#: admin/ui/build/app.build.1.7.0.js:134910
-#: admin/ui/build/app.build.1.7.0.js:137003
+#: class-plugin.php:1167
+#: admin/ui/build/app.build.1.9.12.js:134615
+#: admin/ui/build/app.build.1.9.12.js:135590
+#: admin/ui/build/app.build.1.9.12.js:137692
 msgid "Recipe"
 msgstr ""
 
-#: class-plugin.php:1172
-#: admin/ui/build/app.build.1.7.0.js:133936
-#: admin/ui/build/app.build.1.7.0.js:134912
-#: admin/ui/build/app.build.1.7.0.js:137004
+#: class-plugin.php:1174
+#: admin/ui/build/app.build.1.9.12.js:134616
+#: admin/ui/build/app.build.1.9.12.js:135592
+#: admin/ui/build/app.build.1.9.12.js:137693
 msgid "How-To"
 msgstr ""
 
-#: class-plugin.php:1179
-#: admin/ui/build/app.build.1.7.0.js:133937
-#: admin/ui/build/app.build.1.7.0.js:134911
-#: admin/ui/build/app.build.1.7.0.js:137129
+#: class-plugin.php:1181
+#: admin/ui/build/app.build.1.9.12.js:134617
+#: admin/ui/build/app.build.1.9.12.js:135591
+#: admin/ui/build/app.build.1.9.12.js:137818
 msgid "List"
 msgstr ""
 
-#: class-plugin.php:1180
-#: admin/ui/build/app.build.1.7.0.js:142652
-#: admin/ui/build/app.build.1.7.0.js:161151
+#: class-plugin.php:1182
+#: admin/ui/build/app.build.1.9.12.js:143350
+#: admin/ui/build/app.build.1.9.12.js:162770
 msgid "Lists"
 msgstr ""
 
 #: lib/api/v1/creations-args.php:14
 msgid "ID of the card being referenced."
+msgstr ""
+
+#: lib/api/v1/creations-args.php:33
+msgid "Slug of the setting being referenced."
 msgstr ""
 
 #: lib/api/v1/creations-schema.php:8
@@ -259,96 +269,96 @@ msgstr ""
 msgid "Fully qualified URL of post."
 msgstr ""
 
-#: lib/class-api-services.php:59
-#: lib/class-api-services.php:74
+#: lib/class-api-services.php:69
+#: lib/class-api-services.php:84
 msgid "Bad Request"
 msgstr ""
 
-#: lib/class-api-services.php:60
+#: lib/class-api-services.php:70
 msgid "Missing required input"
 msgstr ""
 
-#: lib/class-api-services.php:75
+#: lib/class-api-services.php:85
 msgid "We're missing important information"
 msgstr ""
 
-#: lib/class-custom-content.php:114
+#: lib/class-custom-content.php:129
 msgid "Content Blocks"
 msgstr ""
 
-#: lib/class-custom-content.php:118
+#: lib/class-custom-content.php:133
 msgid "Meta Boxes"
 msgstr ""
 
 #: lib/class-publish.php:15
-#: lib/class-publish.php:578
+#: lib/class-publish.php:580
 #: lib/nutrition/class-nutrition-api.php:61
 #: lib/nutrition/class-nutrition-api.php:95
-#: lib/product-maps/class-products-map-api.php:91
-#: lib/products/class-products-api.php:125
-#: lib/products/class-products-api.php:209
+#: lib/product-maps/class-products-map-api.php:151
+#: lib/products/class-products-api.php:132
+#: lib/products/class-products-api.php:225
 #: lib/supplies/class-supplies-api.php:81
 msgid "Entry Not Found"
 msgstr ""
 
 #: lib/class-publish.php:16
-#: lib/class-publish.php:578
+#: lib/class-publish.php:580
 msgid "The Creation could not be found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:21
+#: lib/creations/class-creations-api.php:23
 msgid "Missing required field: [title]"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:26
+#: lib/creations/class-creations-api.php:28
 msgid "Missing required field: [type]"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:44
+#: lib/creations/class-creations-api.php:46
 #: lib/supplies/class-supplies-api.php:31
 msgid "Entry Not Created"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:44
+#: lib/creations/class-creations-api.php:46
 msgid "A conflict occurred and the Creation could not be created"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:91
+#: lib/creations/class-creations-api.php:121
 msgid "Entry Not Updated"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:91
+#: lib/creations/class-creations-api.php:121
 msgid "A conflict occurred and the Creation could not be updated"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:289
+#: lib/creations/class-creations-api.php:319
 msgid "The Create Card could not be found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:321
-#: lib/creations/class-creations-api.php:382
+#: lib/creations/class-creations-api.php:351
+#: lib/creations/class-creations-api.php:412
 msgid "Creation not found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:351
-#: lib/product-maps/class-products-map-api.php:199
-#: lib/products/class-products-api.php:415
-#: lib/reviews/class-reviews-api.php:495
+#: lib/creations/class-creations-api.php:381
+#: lib/product-maps/class-products-map-api.php:285
+#: lib/products/class-products-api.php:562
+#: lib/reviews/class-reviews-api.php:589
 #: lib/supplies/class-supplies-api.php:104
 msgid "Entry Could Not Be Deleted"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:351
+#: lib/creations/class-creations-api.php:381
 msgid "A conflict occurred and the Creation could not be deleted"
 msgstr ""
 
-#: lib/creations/class-creations-jump-to-recipe.php:365
+#: lib/creations/class-creations-jump-to-recipe.php:368
 #: lib/settings-group/class-pro.php:39
 #: lib/settings-group/class-pro.php:46
 msgid "Jump to Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-jump-to-recipe.php:367
+#: lib/creations/class-creations-jump-to-recipe.php:370
 #: lib/settings-group/class-pro.php:52
 #: lib/settings-group/class-pro.php:59
 msgid "Jump to How-To"
@@ -358,67 +368,69 @@ msgstr ""
 msgid "Disable Jump-to-Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:67
+#: lib/creations/class-creations-views.php:71
 msgid "Facebook Page:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:71
+#: lib/creations/class-creations-views.php:75
 msgid "Instagram:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:75
+#: lib/creations/class-creations-views.php:79
 msgid "Pinterest Profile:"
 msgstr ""
 
 #. Translators: Type of card. Will output either 'recipe' or 'project'
-#: lib/creations/class-creations-views.php:539
+#: lib/creations/class-creations-views.php:546
+#, php-format
 msgid "Did you make this %s?"
 msgstr ""
 
 #. Translators: Social Service name with link
-#: lib/creations/class-creations-views.php:558
+#: lib/creations/class-creations-views.php:565
+#, php-format
 msgid "Please leave a comment on the blog or share a photo on %s"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:726
-#: admin/ui/build/app.build.1.7.0.js:134947
-#: admin/ui/build/app.build.1.7.0.js:152339
+#: lib/creations/class-creations-views.php:734
+#: admin/ui/build/app.build.1.9.12.js:135627
+#: admin/ui/build/app.build.1.9.12.js:153202
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:728
+#: lib/creations/class-creations-views.php:736
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:730
-#: admin/ui/build/app.build.1.7.0.js:134965
-#: admin/ui/build/app.build.1.7.0.js:152337
+#: lib/creations/class-creations-views.php:738
+#: admin/ui/build/app.build.1.9.12.js:135645
+#: admin/ui/build/app.build.1.9.12.js:153200
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:751
-#: lib/creations/class-creations-views.php:1300
-#: lib/creations/class-creations.php:683
+#: lib/creations/class-creations-views.php:759
+#: lib/creations/class-creations-views.php:1308
+#: lib/creations/class-creations.php:763
 msgid "Prep Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:757
-#: lib/creations/class-creations.php:684
+#: lib/creations/class-creations-views.php:765
+#: lib/creations/class-creations.php:764
 msgid "Active Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:763
-#: lib/creations/class-creations-views.php:1302
-#: lib/creations/class-creations.php:685
+#: lib/creations/class-creations-views.php:771
+#: lib/creations/class-creations-views.php:1310
+#: lib/creations/class-creations.php:765
 msgid "Additional Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:769
-#: lib/creations/class-creations-views.php:1322
+#: lib/creations/class-creations-views.php:777
+#: lib/creations/class-creations-views.php:1330
 msgid "Total Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:773
+#: lib/creations/class-creations-views.php:781
 #: lib/i18n/class-translation.php:45
 #: lib/views/v1/big-image/shortcode-mv-create-title.php:12
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:19
@@ -428,203 +440,203 @@ msgstr ""
 #: lib/views/v1/dark/shortcode-mv-create-nutrition.php:17
 #: lib/views/v1/shortcode-mv-create-nutrition.php:17
 #: lib/views/v1/shortcode-mv-create-title.php:4
-#: admin/ui/build/app.build.1.7.0.js:148530
-#: admin/ui/build/app.build.1.7.0.js:148534
+#: admin/ui/build/app.build.1.9.12.js:149297
+#: admin/ui/build/app.build.1.9.12.js:149301
 msgid "Yield"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:777
+#: lib/creations/class-creations-views.php:785
 #: lib/i18n/class-translation.php:51
 #: lib/views/v1/shortcode-mv-create-footer.php:36
-#: admin/ui/build/app.build.1.7.0.js:144645
-#: admin/ui/build/app.build.1.7.0.js:149922
+#: admin/ui/build/app.build.1.9.12.js:145375
+#: admin/ui/build/app.build.1.9.12.js:150786
 msgid "Category"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:781
-#: lib/creations/class-creations-views.php:953
+#: lib/creations/class-creations-views.php:789
+#: lib/creations/class-creations-views.php:961
 #: lib/i18n/class-translation.php:59
-#: admin/ui/build/app.build.1.7.0.js:155393
+#: admin/ui/build/app.build.1.9.12.js:156306
 msgid "Calories"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:785
-#: lib/creations/class-creations-views.php:1184
+#: lib/creations/class-creations-views.php:793
+#: lib/creations/class-creations-views.php:1192
 #: lib/i18n/class-translation.php:48
-#: admin/ui/build/app.build.1.7.0.js:149928
+#: admin/ui/build/app.build.1.9.12.js:150792
 msgid "Cuisine"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:790
-#: lib/creations/class-creations-views.php:1187
+#: lib/creations/class-creations-views.php:798
+#: lib/creations/class-creations-views.php:1195
 #: lib/i18n/class-translation.php:49
-#: admin/ui/build/app.build.1.7.0.js:149934
+#: admin/ui/build/app.build.1.9.12.js:150798
 msgid "Project Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:793
-#: admin/ui/build/app.build.1.7.0.js:149946
+#: lib/creations/class-creations-views.php:801
+#: admin/ui/build/app.build.1.9.12.js:150810
 msgid "Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:796
-#: lib/creations/class-creations-views.php:1330
-#: admin/ui/build/app.build.1.7.0.js:149940
+#: lib/creations/class-creations-views.php:804
+#: lib/creations/class-creations-views.php:1338
+#: admin/ui/build/app.build.1.9.12.js:150804
 msgid "Difficulty"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:958
+#: lib/creations/class-creations-views.php:966
 #: lib/i18n/class-translation.php:60
-#: admin/ui/build/app.build.1.7.0.js:155394
+#: admin/ui/build/app.build.1.9.12.js:156307
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:963
+#: lib/creations/class-creations-views.php:971
 #: lib/i18n/class-translation.php:61
-#: admin/ui/build/app.build.1.7.0.js:155395
+#: admin/ui/build/app.build.1.9.12.js:156308
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:968
+#: lib/creations/class-creations-views.php:976
 #: lib/i18n/class-translation.php:62
-#: admin/ui/build/app.build.1.7.0.js:155396
+#: admin/ui/build/app.build.1.9.12.js:156309
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:973
+#: lib/creations/class-creations-views.php:981
 #: lib/i18n/class-translation.php:63
-#: admin/ui/build/app.build.1.7.0.js:155397
+#: admin/ui/build/app.build.1.9.12.js:156310
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:978
+#: lib/creations/class-creations-views.php:986
 #: lib/i18n/class-translation.php:64
-#: admin/ui/build/app.build.1.7.0.js:155398
+#: admin/ui/build/app.build.1.9.12.js:156311
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:983
+#: lib/creations/class-creations-views.php:991
 #: lib/i18n/class-translation.php:65
-#: admin/ui/build/app.build.1.7.0.js:155399
+#: admin/ui/build/app.build.1.9.12.js:156312
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:988
+#: lib/creations/class-creations-views.php:996
 #: lib/i18n/class-translation.php:66
-#: admin/ui/build/app.build.1.7.0.js:155400
+#: admin/ui/build/app.build.1.9.12.js:156313
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:993
+#: lib/creations/class-creations-views.php:1001
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:998
+#: lib/creations/class-creations-views.php:1006
 #: lib/i18n/class-translation.php:68
-#: admin/ui/build/app.build.1.7.0.js:155401
+#: admin/ui/build/app.build.1.9.12.js:156314
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1003
+#: lib/creations/class-creations-views.php:1011
 #: lib/i18n/class-translation.php:69
-#: admin/ui/build/app.build.1.7.0.js:155402
+#: admin/ui/build/app.build.1.9.12.js:156315
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1008
+#: lib/creations/class-creations-views.php:1016
 #: lib/i18n/class-translation.php:70
-#: admin/ui/build/app.build.1.7.0.js:155407
+#: admin/ui/build/app.build.1.9.12.js:156320
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1013
+#: lib/creations/class-creations-views.php:1021
 #: lib/i18n/class-translation.php:71
-#: admin/ui/build/app.build.1.7.0.js:155403
+#: admin/ui/build/app.build.1.9.12.js:156316
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1182
+#: lib/creations/class-creations-views.php:1190
 #: lib/i18n/class-translation.php:50
-#: admin/ui/build/app.build.1.7.0.js:144577
+#: admin/ui/build/app.build.1.9.12.js:145307
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1301
-#: lib/creations/class-creations.php:690
+#: lib/creations/class-creations-views.php:1309
+#: lib/creations/class-creations.php:770
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1334
+#: lib/creations/class-creations-views.php:1342
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1381
+#: lib/creations/class-creations-views.php:1389
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1382
+#: lib/creations/class-creations-views.php:1390
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1385
+#: lib/creations/class-creations-views.php:1393
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1386
+#: lib/creations/class-creations-views.php:1394
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1389
+#: lib/creations/class-creations-views.php:1397
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1390
+#: lib/creations/class-creations-views.php:1398
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1393
-#: lib/products/class-amazon.php:558
+#: lib/creations/class-creations-views.php:1401
+#: lib/products/class-amazon.php:560
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1394
-#: lib/products/class-amazon.php:559
+#: lib/creations/class-creations-views.php:1402
+#: lib/products/class-amazon.php:561
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1397
-#: lib/products/class-amazon.php:563
+#: lib/creations/class-creations-views.php:1405
+#: lib/products/class-amazon.php:565
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1398
-#: lib/products/class-amazon.php:564
-#: admin/ui/build/app.build.1.7.0.js:132068
+#: lib/creations/class-creations-views.php:1406
+#: lib/products/class-amazon.php:566
+#: admin/ui/build/app.build.1.9.12.js:132748
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1401
-#: lib/products/class-amazon.php:575
+#: lib/creations/class-creations-views.php:1409
+#: lib/products/class-amazon.php:577
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1402
-#: lib/products/class-amazon.php:576
+#: lib/creations/class-creations-views.php:1410
+#: lib/products/class-amazon.php:578
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1591
+#: lib/creations/class-creations-views.php:1604
 msgid "No Card with ID found"
 msgstr ""
 
 #: lib/creations/class-creations-wp-content.php:9
-#: admin/ui/build/app.build.1.7.0.js:137632
+#: admin/ui/build/app.build.1.9.12.js:138321
 msgid "Create Card"
 msgstr ""
 
 #: lib/creations/class-creations-wp-content.php:10
-#: admin/ui/build/app.build.1.7.0.js:142519
+#: admin/ui/build/app.build.1.9.12.js:143217
 msgid "Create Cards"
 msgstr ""
 
@@ -633,203 +645,227 @@ msgstr ""
 #: lib/creations/class-creations-wp-content.php:18
 #: lib/creations/class-creations-wp-content.php:22
 #: lib/creations/class-creations-wp-content.php:115
+#, php-format
 msgid "Add New %1$s"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:20
 #: lib/creations/class-creations-wp-content.php:109
+#, php-format
 msgid "Edit %1$s"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:24
 #: lib/creations/class-creations-wp-content.php:111
+#, php-format
 msgid "View %1$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:26
+#, php-format
 msgid "View %2$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:28
 #: lib/creations/class-creations-wp-content.php:99
+#, php-format
 msgid "Search %2$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:30
 #: lib/creations/class-creations-wp-content.php:125
+#, php-format
 msgid "No %2$s found"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:32
+#, php-format
 msgid "No %2$s found in trash"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:34
 #: lib/creations/class-creations-wp-content.php:107
+#, php-format
 msgid "Parent %2$s:"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:36
 #: lib/creations/class-creations-wp-content.php:103
+#, php-format
 msgid "All %2$s"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:38
+#, php-format
 msgid "%1$s Archives"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:40
+#, php-format
 msgid "%1$s Attributes"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:42
+#, php-format
 msgid "Insert into %1$s"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:44
+#, php-format
 msgid "Uploaded to this %1$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:46
+#, php-format
 msgid "Filter %2$s list"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:48
+#, php-format
 msgid "%2$s list navigation"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:50
+#, php-format
 msgid "%2$s list"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:101
+#, php-format
 msgid "Popular %2$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:105
+#, php-format
 msgid "Parent %2$s"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:113
+#, php-format
 msgid "Update %1$s"
 msgstr ""
 
 #. translators: %1$s: post type name
 #: lib/creations/class-creations-wp-content.php:117
+#, php-format
 msgid "New %1$s Name"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:119
+#, php-format
 msgid "Separate %2$s with commas"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:121
+#, php-format
 msgid "Add or remove %2$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:123
+#, php-format
 msgid "Choose from the most used %2$s"
 msgstr ""
 
 #. translators: %2$s: post type name
 #: lib/creations/class-creations-wp-content.php:127
+#, php-format
 msgid "No %2$s"
 msgstr ""
 
-#: lib/creations/class-creations.php:175
+#: lib/creations/class-creations.php:197
 msgid "Create Card Square (Small)"
 msgstr ""
 
-#: lib/creations/class-creations.php:182
+#: lib/creations/class-creations.php:204
 msgid "Create Card Square"
 msgstr ""
 
-#: lib/creations/class-creations.php:189
+#: lib/creations/class-creations.php:211
 msgid "Create Card Square (Medium High)"
 msgstr ""
 
-#: lib/creations/class-creations.php:196
+#: lib/creations/class-creations.php:218
 msgid "Create Card Square (High Res)"
 msgstr ""
 
-#: lib/creations/class-creations.php:203
+#: lib/creations/class-creations.php:225
 msgid "Create Card 4:3 (Small)"
 msgstr ""
 
-#: lib/creations/class-creations.php:210
+#: lib/creations/class-creations.php:232
 msgid "Create Card 4:3"
 msgstr ""
 
-#: lib/creations/class-creations.php:217
+#: lib/creations/class-creations.php:239
 msgid "Create Card 4:3 (High Res)"
 msgstr ""
 
-#: lib/creations/class-creations.php:224
+#: lib/creations/class-creations.php:246
 msgid "Create Card 3:4 (Small)"
 msgstr ""
 
-#: lib/creations/class-creations.php:231
+#: lib/creations/class-creations.php:253
 msgid "Create Card 3:4"
 msgstr ""
 
-#: lib/creations/class-creations.php:238
+#: lib/creations/class-creations.php:260
 msgid "Create Card 3:4 (High Res)"
 msgstr ""
 
-#: lib/creations/class-creations.php:245
+#: lib/creations/class-creations.php:267
 msgid "Create Card 16:9 (Small)"
 msgstr ""
 
-#: lib/creations/class-creations.php:252
+#: lib/creations/class-creations.php:274
 msgid "Create Card 16:9"
 msgstr ""
 
-#: lib/creations/class-creations.php:259
+#: lib/creations/class-creations.php:281
 msgid "Create Card 16:9 (High Res)"
 msgstr ""
 
-#: lib/creations/class-creations.php:267
+#: lib/creations/class-creations.php:289
 msgid "Create Card No Ratio"
 msgstr ""
 
-#: lib/creations/class-creations.php:274
+#: lib/creations/class-creations.php:296
 msgid "Create Card Vertical Pin"
 msgstr ""
 
-#: lib/creations/class-creations.php:525
+#: lib/creations/class-creations.php:572
 msgid "Post ID was not set in function call"
 msgstr ""
 
-#: lib/creations/class-creations.php:525
+#: lib/creations/class-creations.php:572
 msgid "A Post ID was not included in the request"
 msgstr ""
 
-#: lib/creations/class-creations.php:529
+#: lib/creations/class-creations.php:576
 msgid "Post ID value was not a number"
 msgstr ""
 
-#: lib/creations/class-creations.php:529
+#: lib/creations/class-creations.php:576
 msgid "A Post ID varable was included but was non-numeric"
 msgstr ""
 
@@ -838,58 +874,61 @@ msgid "An error occurred with the request."
 msgstr ""
 
 #. translators: Link to learn about enabling permalinks
-#: lib/functions-version-check.php:104
+#: lib/functions-version-check.php:106
+#, php-format
 msgid "<strong>Create by Mediavine</strong> uses the WordPress REST API to power its functionality. In order for this to work properly, pretty permalinks must be enabled.<br><br>%1$s"
 msgstr ""
 
-#. translators: Link to learn about enabling permalinks
-#: lib/functions-version-check.php:105
+#: lib/functions-version-check.php:107
 msgid "Learn about enabling permalinks"
 msgstr ""
 
 #. translators: Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
-#: lib/functions-version-check.php:133
+#: lib/functions-version-check.php:128
+#, php-format
 msgid "<strong>Create by Mediavine</strong> requires PHP version %1$s or higher, but recommends %2$s or higher. This site is running PHP version %3$s.<br><br>%4$s."
 msgstr ""
 
-#: lib/functions-version-check.php:137
-#: lib/functions-version-check.php:166
+#: lib/functions-version-check.php:132
+#: lib/functions-version-check.php:161
 msgid "Learn about updating PHP"
 msgstr ""
 
 #. translators: Required WP version number; Current WP version number
-#: lib/functions-version-check.php:148
+#: lib/functions-version-check.php:143
+#, php-format
 msgid "<strong>Create by Mediavine</strong> requires WordPress %1$s or higher. This site is running WordPress %2$s. Please update WordPress to activate <strong>Create by Mediavine</strong>."
 msgstr ""
 
-#: lib/functions-version-check.php:151
-#: lib/functions-version-check.php:180
+#: lib/functions-version-check.php:146
+#: lib/functions-version-check.php:175
 msgid "Learn about updating WordPress"
 msgstr ""
 
 #. translators: Date within styled tag; Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
-#: lib/functions-version-check.php:161
+#: lib/functions-version-check.php:156
+#, php-format
 msgid "Starting %1$s, <strong>Create by Mediavine</strong> will require PHP version %2$s, but recommends %3$s or higher. This site is running PHP version %4$s. To maintain compatibility with <strong>Create by Mediavine</strong>, please upgrade your PHP version.<br><br>%5$s."
 msgstr ""
 
-#. translators: Date within styled tag; Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
-#. translators: Date within styled tag; Required WP version number
-#: lib/functions-version-check.php:162
-#: lib/functions-version-check.php:177
+#: lib/functions-version-check.php:157
+#: lib/functions-version-check.php:172
 msgid "January 2021"
 msgstr ""
 
 #. translators: Date within styled tag; Required WP version number
-#: lib/functions-version-check.php:176
+#: lib/functions-version-check.php:171
+#, php-format
 msgid "Starting %1$s, WordPress %2$s will be required for all functionality, however keeping WordPress up-to-date at the latest version is still recommended. To maintain future compatibility with <strong>Create by Mediavine</strong>, please update WordPress."
 msgstr ""
 
-#: lib/functions-version-check.php:186
+#: lib/functions-version-check.php:181
 msgid "<strong>Create by Mediavine</strong> has been deactivated."
 msgstr ""
 
 #. translators: a list of disabled PHP extensions
-#: lib/functions-version-check.php:212
+#: lib/functions-version-check.php:207
+#, php-format
 msgid "<strong>Create by Mediavine</strong> requires the following disabled PHP extensions in order to function properly: <code>%1$s</code>.<br/><br/>Your hosting environment does not currently have these enabled.<br/><br/>Please contact your hosting provider and ask them to ensure these extensions are enabled."
 msgstr ""
 
@@ -902,12 +941,12 @@ msgid "Comments & Reviews"
 msgstr ""
 
 #: lib/i18n/class-translation.php:9
-#: admin/ui/build/app.build.1.7.0.js:143315
+#: admin/ui/build/app.build.1.9.12.js:144013
 msgid "Rating"
 msgstr ""
 
 #: lib/i18n/class-translation.php:10
-#: admin/ui/build/app.build.1.7.0.js:143281
+#: admin/ui/build/app.build.1.9.12.js:143979
 msgid "Reviews"
 msgstr ""
 
@@ -917,11 +956,13 @@ msgstr ""
 
 #. translators: Number of reviews for a card by title
 #: lib/i18n/class-translation.php:13
+#, php-format
 msgid "%1$s Reviews for %2$s"
 msgstr ""
 
 #. translators: Number of reviews for a card by title
 #: lib/i18n/class-translation.php:15
+#, php-format
 msgid "%1$s Review for %2$s"
 msgstr ""
 
@@ -935,23 +976,26 @@ msgstr ""
 
 #. translators: Number of reviews
 #: lib/i18n/class-translation.php:19
+#, php-format
 msgid "%s Review"
 msgstr ""
 
 #. translators: Number of reviews
 #: lib/i18n/class-translation.php:21
+#, php-format
 msgid "%s Reviews"
 msgstr ""
 
 #: lib/i18n/class-translation.php:22
 #: lib/i18n/class-translation.php:35
-#: admin/ui/build/app.build.1.7.0.js:143336
-#: admin/ui/build/app.build.1.7.0.js:146348
+#: admin/ui/build/app.build.1.9.12.js:144034
+#: admin/ui/build/app.build.1.9.12.js:147121
 msgid "Review"
 msgstr ""
 
 #. translators: Rating for a card
 #: lib/i18n/class-translation.php:24
+#, php-format
 msgid "%s Stars"
 msgstr ""
 
@@ -964,11 +1008,11 @@ msgid "Star"
 msgstr ""
 
 #: lib/i18n/class-translation.php:27
-#: admin/ui/build/app.build.1.7.0.js:143965
-#: admin/ui/build/app.build.1.7.0.js:147348
-#: admin/ui/build/app.build.1.7.0.js:149354
-#: admin/ui/build/app.build.1.7.0.js:149785
-#: admin/ui/build/app.build.1.7.0.js:152517
+#: admin/ui/build/app.build.1.9.12.js:144663
+#: admin/ui/build/app.build.1.9.12.js:148125
+#: admin/ui/build/app.build.1.9.12.js:150209
+#: admin/ui/build/app.build.1.9.12.js:150649
+#: admin/ui/build/app.build.1.9.12.js:153380
 msgid "Title"
 msgstr ""
 
@@ -981,7 +1025,7 @@ msgid "No Title"
 msgstr ""
 
 #: lib/i18n/class-translation.php:30
-#: admin/ui/build/app.build.1.7.0.js:147360
+#: admin/ui/build/app.build.1.9.12.js:148137
 msgid "Content"
 msgstr ""
 
@@ -990,12 +1034,12 @@ msgid "No Ratings"
 msgstr ""
 
 #: lib/i18n/class-translation.php:32
-#: admin/ui/build/app.build.1.7.0.js:153977
+#: admin/ui/build/app.build.1.9.12.js:154846
 msgid "Name"
 msgstr ""
 
 #: lib/i18n/class-translation.php:33
-#: admin/ui/build/app.build.1.7.0.js:143445
+#: admin/ui/build/app.build.1.9.12.js:144143
 msgid "Email"
 msgstr ""
 
@@ -1016,7 +1060,7 @@ msgid "Submitting"
 msgstr ""
 
 #: lib/i18n/class-translation.php:39
-#: admin/ui/build/app.build.1.7.0.js:147397
+#: admin/ui/build/app.build.1.9.12.js:148174
 msgid "Update Review"
 msgstr ""
 
@@ -1039,7 +1083,7 @@ msgstr ""
 #: lib/i18n/class-translation.php:44
 #: lib/views/v1/big-image/shortcode-mv-create-print-button.php:14
 #: lib/views/v1/shortcode-mv-create-print-button.php:12
-#: admin/ui/build/app.build.1.7.0.js:135676
+#: admin/ui/build/app.build.1.9.12.js:136356
 msgid "Print"
 msgstr ""
 
@@ -1048,7 +1092,7 @@ msgstr ""
 #: lib/views/v1/centered/shortcode-mv-create-nutrition.php:23
 #: lib/views/v1/dark/shortcode-mv-create-nutrition.php:21
 #: lib/views/v1/shortcode-mv-create-nutrition.php:21
-#: admin/ui/build/app.build.1.7.0.js:155391
+#: admin/ui/build/app.build.1.9.12.js:156304
 msgid "Serving Size"
 msgstr ""
 
@@ -1066,58 +1110,60 @@ msgstr ""
 
 #: lib/i18n/class-translation.php:54
 #: lib/views/v1/shortcode-mv-create-supplies-diy.php:64
-#: admin/ui/build/app.build.1.7.0.js:138445
-#: admin/ui/build/app.build.1.7.0.js:138648
-#: admin/ui/build/app.build.1.7.0.js:138848
-#: admin/ui/build/app.build.1.7.0.js:139345
-#: admin/ui/build/app.build.1.7.0.js:140451
-#: admin/ui/build/app.build.1.7.0.js:147708
+#: admin/ui/build/app.build.1.9.12.js:139134
+#: admin/ui/build/app.build.1.9.12.js:139337
+#: admin/ui/build/app.build.1.9.12.js:139537
+#: admin/ui/build/app.build.1.9.12.js:140034
+#: admin/ui/build/app.build.1.9.12.js:141140
+#: admin/ui/build/app.build.1.9.12.js:148480
 msgid "Tools"
 msgstr ""
 
 #: lib/i18n/class-translation.php:55
 #: lib/views/v1/shortcode-mv-create-supplies-diy.php:3
-#: admin/ui/build/app.build.1.7.0.js:138445
-#: admin/ui/build/app.build.1.7.0.js:138648
-#: admin/ui/build/app.build.1.7.0.js:138848
-#: admin/ui/build/app.build.1.7.0.js:139345
-#: admin/ui/build/app.build.1.7.0.js:140451
-#: admin/ui/build/app.build.1.7.0.js:147657
+#: admin/ui/build/app.build.1.9.12.js:139134
+#: admin/ui/build/app.build.1.9.12.js:139337
+#: admin/ui/build/app.build.1.9.12.js:139537
+#: admin/ui/build/app.build.1.9.12.js:140034
+#: admin/ui/build/app.build.1.9.12.js:141140
+#: admin/ui/build/app.build.1.9.12.js:148429
 msgid "Materials"
 msgstr ""
 
 #: lib/i18n/class-translation.php:56
 #: lib/views/v1/shortcode-mv-create-supplies-recipe.php:4
-#: admin/ui/build/app.build.1.7.0.js:138445
-#: admin/ui/build/app.build.1.7.0.js:138648
-#: admin/ui/build/app.build.1.7.0.js:138848
-#: admin/ui/build/app.build.1.7.0.js:139345
-#: admin/ui/build/app.build.1.7.0.js:140451
-#: admin/ui/build/app.build.1.7.0.js:148645
+#: admin/ui/build/app.build.1.9.12.js:139134
+#: admin/ui/build/app.build.1.9.12.js:139337
+#: admin/ui/build/app.build.1.9.12.js:139537
+#: admin/ui/build/app.build.1.9.12.js:140034
+#: admin/ui/build/app.build.1.9.12.js:141140
+#: admin/ui/build/app.build.1.9.12.js:149439
 msgid "Ingredients"
 msgstr ""
 
 #: lib/i18n/class-translation.php:57
-#: lib/views/v1/shortcode-mv-create-instructions.php:7
-#: admin/ui/build/app.build.1.7.0.js:147759
-#: admin/ui/build/app.build.1.7.0.js:148710
+#: lib/views/v1/shortcode-mv-create-instructions.php:12
+#: admin/ui/build/app.build.1.9.12.js:148531
+#: admin/ui/build/app.build.1.9.12.js:149517
 msgid "Instructions"
 msgstr ""
 
 #: lib/i18n/class-translation.php:58
-#: lib/views/v1/shortcode-mv-create-notes.php:3
-#: admin/ui/build/app.build.1.7.0.js:147803
-#: admin/ui/build/app.build.1.7.0.js:148754
+#: lib/views/v1/shortcode-mv-create-notes.php:5
+#: admin/ui/build/app.build.1.9.12.js:148575
+#: admin/ui/build/app.build.1.9.12.js:149561
 msgid "Notes"
 msgstr ""
 
 #. translators: %s: field name
 #: lib/images/class-images-api.php:26
+#, php-format
 msgid "Missing Required %s"
 msgstr ""
 
 #. translators: %s: field name
 #: lib/images/class-images-api.php:28
+#, php-format
 msgid "%s is a required field."
 msgstr ""
 
@@ -1147,48 +1193,52 @@ msgstr ""
 msgid "The currently installed version of <strong>Mediavine Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated."
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:506
+#: lib/json-ld/class-json-ld-types.php:532
 msgid " calories"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:510
+#: lib/json-ld/class-json-ld-types.php:536
 msgid " grams carbohydrates"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:514
+#: lib/json-ld/class-json-ld-types.php:540
 msgid " milligrams cholesterol"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:518
+#: lib/json-ld/class-json-ld-types.php:544
 msgid " grams fat"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:522
+#: lib/json-ld/class-json-ld-types.php:548
 msgid " grams fiber"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:526
+#: lib/json-ld/class-json-ld-types.php:552
 msgid " grams protein"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:530
+#: lib/json-ld/class-json-ld-types.php:556
 msgid " grams saturated fat"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:538
+#: lib/json-ld/class-json-ld-types.php:564
 msgid " milligrams sodium"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:542
+#: lib/json-ld/class-json-ld-types.php:568
 msgid " grams sugar"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:546
+#: lib/json-ld/class-json-ld-types.php:572
 msgid " grams trans fat"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:550
+#: lib/json-ld/class-json-ld-types.php:576
 msgid " grams unsaturated fat"
+msgstr ""
+
+#: lib/json-ld/class-json-ld-types.php:652
+msgid "Anonymous"
 msgstr ""
 
 #: lib/nutrition/class-nutrition-api.php:61
@@ -1196,13 +1246,13 @@ msgstr ""
 msgid "The Nutrition could not be found"
 msgstr ""
 
-#: lib/product-maps/class-products-map-api.php:91
-#: lib/products/class-products-api.php:127
-#: lib/products/class-products-api.php:211
+#: lib/product-maps/class-products-map-api.php:151
+#: lib/products/class-products-api.php:134
+#: lib/products/class-products-api.php:227
 msgid "The Product could not be found"
 msgstr ""
 
-#: lib/product-maps/class-products-map-api.php:199
+#: lib/product-maps/class-products-map-api.php:285
 msgid "A conflict occurred and the Product Maps could not be deleted"
 msgstr ""
 
@@ -1322,7 +1372,7 @@ msgid "Activate Amazon Affiliates"
 msgstr ""
 
 #: lib/products/class-amazon.php:445
-#: lib/products/class-amazon.php:647
+#: lib/products/class-amazon.php:649
 msgid "Conflict with Another Plugin"
 msgstr ""
 
@@ -1340,43 +1390,47 @@ msgstr ""
 
 #. Translators: Remaining time
 #: lib/products/class-amazon.php:474
+#, php-format
 msgid "Amazon Affiliates may still be provisioning. Expected time remaining: %s. Please manually add an image and title."
 msgstr ""
 
 #. Translators: Remaining time
-#: lib/products/class-amazon.php:612
+#: lib/products/class-amazon.php:614
+#, php-format
 msgid " (Time remaining: %s)"
 msgstr ""
 
-#: lib/products/class-amazon.php:648
+#: lib/products/class-amazon.php:650
 msgid "Uh oh! Another plugin is conflicting with Create's Amazon API Integration feature. Please disable your other Amazon plugins that utilize Amazon's API in order to activate this feature in Create. Contact create@mediavine.com for more information."
 msgstr ""
 
-#: lib/products/class-products-api.php:99
+#: lib/products/class-products-api.php:106
 msgid "Title Not Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:102
+#: lib/products/class-products-api.php:109
 msgid "The product is missing a title"
 msgstr ""
 
-#: lib/products/class-products-api.php:109
+#: lib/products/class-products-api.php:116
 msgid "URL Not Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:112
+#: lib/products/class-products-api.php:119
 msgid "The product is missing a link"
 msgstr ""
 
-#: lib/products/class-products-api.php:286
+#: lib/products/class-products-api.php:317
+#: lib/products/class-products-api.php:412
 msgid "No Data Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:288
+#: lib/products/class-products-api.php:319
+#: lib/products/class-products-api.php:414
 msgid "The Product link scrape did not turn up any results"
 msgstr ""
 
-#: lib/products/class-products-api.php:417
+#: lib/products/class-products-api.php:564
 msgid "A conflict occurred and the product could not be deleted"
 msgstr ""
 
@@ -1384,108 +1438,121 @@ msgstr ""
 msgid "Unsafe Data"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:131
+#: lib/relations/class-relations-api.php:132
 #: lib/supplies/class-supplies-api.php:57
 msgid "No Entries Found"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:131
+#: lib/relations/class-relations-api.php:132
 msgid "No relations were found for the given create card"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:66
+#: lib/reviews/class-reviews-api.php:69
 msgid "Missing required fields"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:67
+#: lib/reviews/class-reviews-api.php:70
 msgid "Through no fault of yours, something is wrong"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:88
+#: lib/reviews/class-reviews-api.php:95
 msgid "Email is Invalid"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:89
+#: lib/reviews/class-reviews-api.php:96
 msgid "Email address provided is invalid"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:105
+#: lib/reviews/class-reviews-api.php:112
 msgid "Name cannot be a number"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:106
+#: lib/reviews/class-reviews-api.php:113
 msgid "Name of author cannot be a number"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:115
+#: lib/reviews/class-reviews-api.php:122
 msgid "Name is Required"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:116
+#: lib/reviews/class-reviews-api.php:123
 msgid "Name is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:125
+#: lib/reviews/class-reviews-api.php:132
 msgid "Email is Required"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:126
+#: lib/reviews/class-reviews-api.php:133
 msgid "Email is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:135
+#: lib/reviews/class-reviews-api.php:142
 msgid "Title is Required"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:136
+#: lib/reviews/class-reviews-api.php:143
 msgid "Title is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:145
+#: lib/reviews/class-reviews-api.php:152
 msgid "Message is Required"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:146
+#: lib/reviews/class-reviews-api.php:153
 msgid "Message is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:244
-#: lib/reviews/class-reviews-api.php:307
+#: lib/reviews/class-reviews-api.php:249
+#: lib/reviews/class-reviews-api.php:329
 #: lib/settings/class-settings-api.php:37
 #: lib/settings/class-settings-api.php:216
 msgid "Unsafe Content Submission"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:245
-#: lib/reviews/class-reviews-api.php:308
+#: lib/reviews/class-reviews-api.php:250
+#: lib/reviews/class-reviews-api.php:330
 #: lib/settings/class-settings-api.php:38
 #: lib/settings/class-settings-api.php:217
 msgid "You're submission includes unsafe characters"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:495
+#: lib/reviews/class-reviews-api.php:343
+msgid "You are not authorized to edit this review."
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:429
+msgid "You are not allowed to view all reviews."
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:439
+msgid "This creation is not associated with a public post."
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:589
 msgid "A conflict occurred and the single review could not be deleted"
 msgstr ""
 
 #. translators: %s: reviewer's name
-#: lib/reviews/class-reviews-models.php:110
+#: lib/reviews/class-reviews-models.php:112
+#, php-format
 msgid "Review from %s"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:19
+#: lib/reviews/class-reviews.php:29
 msgid "Creation ID was not set in function call"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:19
+#: lib/reviews/class-reviews.php:29
 msgid "A Creation ID was not included in the request"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:24
+#: lib/reviews/class-reviews.php:33
 msgid "Creation ID value was not a number"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:24
-msgid "A Creation ID varable was included but was non-numeric"
+#: lib/reviews/class-reviews.php:33
+msgid "A Creation ID variable was included but was non-numeric"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:30
@@ -1565,6 +1632,7 @@ msgstr ""
 
 #. translators: Link tags
 #: lib/settings-group/class-advanced.php:113
+#, php-format
 msgid "While having %1$smultiple H1s on a page is approved by Google%2$s, many still recommend maintaining the page to only a single H1. This allows you to choose what tag you want for the primary heading, properly adjusting the heading hierarchy throughout the card."
 msgstr ""
 
@@ -1640,7 +1708,7 @@ msgid "Set the default affiliate disclaimer message with this text. Affiliate me
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:223
-#: admin/ui/build/app.build.1.7.0.js:159209
+#: admin/ui/build/app.build.1.9.12.js:160642
 msgid "Allowed Types"
 msgstr ""
 
@@ -1653,11 +1721,11 @@ msgid "If enabled, will allow specific custom post types to be added to Lists"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:248
-msgid "Always Enable Review Popup"
+msgid "Allow Anonymous Ratings"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:249
-msgid "If enabled, users leaving a star rating will see a popup modal prompting them to leave a review. Disabling this will not display the prompt if the left rating is 4 or higher."
+msgid "If enabled, 4 and 5 star reviews will be submitted when the star is clicked. Users leaving a star rating will then see a popup modal prompting them to leave an optional review. Disabling this will not sumbit the rating until after the review has been added. The prompt will still display."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:260
@@ -1711,48 +1779,31 @@ msgstr ""
 msgid "The Amazon Associate Tag/Store ID for the US Marketplace (other countries will be supported in the future)"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:34
-msgid "Ad Density"
-msgstr ""
-
-#: lib/settings-group/class-control-panel.php:35
-msgid "Choose the density of ads in a recipe card."
-msgstr ""
-
-#: lib/settings-group/class-control-panel.php:36
-#: lib/settings-group/class-control-panel.php:43
-msgid "Normal"
-msgstr ""
-
-#: lib/settings-group/class-control-panel.php:39
-msgid "Single Ad"
-msgstr ""
-
-#: lib/settings-group/class-control-panel.php:56
+#: lib/settings-group/class-control-panel.php:31
 msgid "List Items Between Ads"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:57
+#: lib/settings-group/class-control-panel.php:32
 msgid "Choose the number of list items between each ad in the card."
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:60
+#: lib/settings-group/class-control-panel.php:35
 msgid "Disable ads in lists"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:64
+#: lib/settings-group/class-control-panel.php:39
 msgid "2"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:68
+#: lib/settings-group/class-control-panel.php:43
 msgid "3"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:72
+#: lib/settings-group/class-control-panel.php:47
 msgid "4"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:76
+#: lib/settings-group/class-control-panel.php:51
 msgid "5"
 msgstr ""
 
@@ -1860,6 +1911,7 @@ msgstr ""
 
 #. translators: credit name and url
 #: lib/settings-group/class-display.php:174
+#, php-format
 msgid "Simple Square<br>by %s"
 msgstr ""
 
@@ -1869,6 +1921,7 @@ msgstr ""
 
 #. translators: credit name and url
 #: lib/settings-group/class-display.php:181
+#, php-format
 msgid "Dark Simple Square<br>by %s"
 msgstr ""
 
@@ -1878,6 +1931,7 @@ msgstr ""
 
 #. translators: credit name and url
 #: lib/settings-group/class-display.php:188
+#, php-format
 msgid "Classy Circle<br>by %s"
 msgstr ""
 
@@ -1887,6 +1941,7 @@ msgstr ""
 
 #. translators: credit name and url
 #: lib/settings-group/class-display.php:195
+#, php-format
 msgid "Dark Classy Circle<br>by %s"
 msgstr ""
 
@@ -1896,6 +1951,7 @@ msgstr ""
 
 #. translators: credit name and url
 #: lib/settings-group/class-display.php:202
+#, php-format
 msgid "Hero Image<br>by %s"
 msgstr ""
 
@@ -1982,7 +2038,7 @@ msgstr ""
 
 #: lib/settings-group/class-pro.php:95
 #: lib/settings-group/class-pro.php:99
-#: admin/ui/build/app.build.1.7.0.js:154015
+#: admin/ui/build/app.build.1.9.12.js:154884
 msgid "Link"
 msgstr ""
 
@@ -2146,1252 +2202,1262 @@ msgstr ""
 #: lib/views/v1/shortcode-mv-create-list-grid.php:75
 #: lib/views/v1/shortcode-mv-create-list-hero.php:47
 #: lib/views/v1/shortcode-mv-create-list-numbered.php:72
-#: admin/ui/build/app.build.1.7.0.js:139859
+#: admin/ui/build/app.build.1.9.12.js:140548
 msgid "Photo Credit:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127091
+#: admin/ui/build/app.build.1.9.12.js:127753
 msgid "You can register"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127105
+#: admin/ui/build/app.build.1.9.12.js:127767
 msgid "here"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127105
+#: admin/ui/build/app.build.1.9.12.js:127767
 msgid "and get access to this feature. This is a free, one-time action."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127112
+#: admin/ui/build/app.build.1.9.12.js:127774
 msgid "Just confirm the email you used to register with."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127284
+#: admin/ui/build/app.build.1.9.12.js:127949
 msgid "Add Item"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127566
+#: admin/ui/build/app.build.1.9.12.js:128246
 msgid "You're all set!"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127566
+#: admin/ui/build/app.build.1.9.12.js:128246
 msgid "Thanks for confirming your email."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127584
+#: admin/ui/build/app.build.1.9.12.js:128264
 msgid "Log out"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127603
+#: admin/ui/build/app.build.1.9.12.js:128283
 msgid "Email sent."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127603
+#: admin/ui/build/app.build.1.9.12.js:128283
 msgid "Confirm your email in order to take full advantages of plugin features!"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127621
+#: admin/ui/build/app.build.1.9.12.js:128301
 msgid "I need to use a different email."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127729
+#: admin/ui/build/app.build.1.9.12.js:128409
 msgid "First Name *"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127793
+#: admin/ui/build/app.build.1.9.12.js:128473
 msgid "Email *"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127852
+#: admin/ui/build/app.build.1.9.12.js:128532
 msgid "I have read and agree to the"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127862
+#: admin/ui/build/app.build.1.9.12.js:128542
 msgid "terms of service."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127888
+#: admin/ui/build/app.build.1.9.12.js:128568
 msgid "I agree to receive marketing communications from Mediavine."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:127906
+#: admin/ui/build/app.build.1.9.12.js:128586
 msgid "Register"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128445
+#: admin/ui/build/app.build.1.9.12.js:129125
 msgid "Select an option from the dropdown"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128631
+#: admin/ui/build/app.build.1.9.12.js:129311
 msgid "Add term"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128639
+#: admin/ui/build/app.build.1.9.12.js:129319
 msgid "Something went wrong"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128932
+#: admin/ui/build/app.build.1.9.12.js:129612
 msgid "The url you entered seems to be invalid."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128959
+#: admin/ui/build/app.build.1.9.12.js:129639
 msgid "Please use expanded Amazon link."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128967
+#: admin/ui/build/app.build.1.9.12.js:129647
 msgid "We can't scrape Amazon short URLs. Please use the full link."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128977
+#: admin/ui/build/app.build.1.9.12.js:129657
 msgid "Learn how to get the full link"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:128989
+#: admin/ui/build/app.build.1.9.12.js:129669
 msgid "This url already exists!"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:129004
+#: admin/ui/build/app.build.1.9.12.js:129684
 msgid "Please check your ingredients."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:129017
+#: admin/ui/build/app.build.1.9.12.js:129697
 msgid "Servings should be a number."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:129946
+#: admin/ui/build/app.build.1.9.12.js:130626
 msgid "You can authenticate on the Mediavine Control Panel"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:129954
+#: admin/ui/build/app.build.1.9.12.js:130634
 msgid "settings page"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:130793
+#: admin/ui/build/app.build.1.9.12.js:131473
 msgid "Add one?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:130977
+#: admin/ui/build/app.build.1.9.12.js:131657
 msgid "Revert"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:131904
+#: admin/ui/build/app.build.1.9.12.js:132584
 msgid "You can reorder times by dragging."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132060
+#: admin/ui/build/app.build.1.9.12.js:132740
 msgid "Ranged times are not supported."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132232
+#: admin/ui/build/app.build.1.9.12.js:132912
 msgid "Unauthorized"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132281
+#: admin/ui/build/app.build.1.9.12.js:132961
 msgid "You do not have the correct permissions to access this page."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132288
+#: admin/ui/build/app.build.1.9.12.js:132968
 msgid "Please contact your administrator to edit this post."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132401
-#: admin/ui/build/app.build.1.7.0.js:132403
+#: admin/ui/build/app.build.1.9.12.js:133081
+#: admin/ui/build/app.build.1.9.12.js:133083
 msgid "Choose Image"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132673
+#: admin/ui/build/app.build.1.9.12.js:133353
 msgid "Instruction Schema Name Button"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132699
+#: admin/ui/build/app.build.1.9.12.js:133379
 msgid "Name this Step"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132728
+#: admin/ui/build/app.build.1.9.12.js:133408
 msgid "This inputs the How-To Step details needed for Guided Recipes"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132728
+#: admin/ui/build/app.build.1.9.12.js:133408
 msgid "This inputs the How-To Step details needed for How-To Schema"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132769
+#: admin/ui/build/app.build.1.9.12.js:133449
 msgid "Close"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:132785
+#: admin/ui/build/app.build.1.9.12.js:133465
 msgid "Submit"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:133938
-#: admin/ui/build/app.build.1.7.0.js:134914
+#: admin/ui/build/app.build.1.9.12.js:134618
+#: admin/ui/build/app.build.1.9.12.js:135594
 msgid "Post"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:133939
-#: admin/ui/build/app.build.1.7.0.js:134913
+#: admin/ui/build/app.build.1.9.12.js:134619
+#: admin/ui/build/app.build.1.9.12.js:135593
 msgid "Page"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:134915
-#: admin/ui/build/app.build.1.7.0.js:152847
+#: admin/ui/build/app.build.1.9.12.js:135595
+#: admin/ui/build/app.build.1.9.12.js:153710
 msgid "External"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:134950
-#: admin/ui/build/app.build.1.7.0.js:152340
+#: admin/ui/build/app.build.1.9.12.js:135630
+#: admin/ui/build/app.build.1.9.12.js:153203
 msgid "Get the Guide"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:134953
-#: admin/ui/build/app.build.1.7.0.js:134956
-#: admin/ui/build/app.build.1.7.0.js:134968
-#: admin/ui/build/app.build.1.7.0.js:134971
-#: admin/ui/build/app.build.1.7.0.js:152337
+#: admin/ui/build/app.build.1.9.12.js:135633
+#: admin/ui/build/app.build.1.9.12.js:135636
+#: admin/ui/build/app.build.1.9.12.js:135648
+#: admin/ui/build/app.build.1.9.12.js:135651
+#: admin/ui/build/app.build.1.9.12.js:153200
 msgid "Read More"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:135737
+#: admin/ui/build/app.build.1.9.12.js:136417
 msgid "Video Preview"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:136927
+#: admin/ui/build/app.build.1.9.12.js:137616
 msgid "Create Settings"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:136943
+#: admin/ui/build/app.build.1.9.12.js:137632
 msgid "Disable Jump To Recipe"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:136975
-#: admin/ui/build/app.build.1.7.0.js:143524
-#: admin/ui/build/app.build.1.7.0.js:144509
-#: admin/ui/build/app.build.1.7.0.js:146347
+#: admin/ui/build/app.build.1.9.12.js:137664
+#: admin/ui/build/app.build.1.9.12.js:144222
+#: admin/ui/build/app.build.1.9.12.js:145239
+#: admin/ui/build/app.build.1.9.12.js:147120
 msgid "Card"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:137412
+#: admin/ui/build/app.build.1.9.12.js:138101
 msgid "What would you like to create?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:137587
+#: admin/ui/build/app.build.1.9.12.js:138276
 msgid "What's the title of your"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:137640
+#: admin/ui/build/app.build.1.9.12.js:138329
 msgid "Title is required"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:137695
+#: admin/ui/build/app.build.1.9.12.js:138384
 msgid "Create a different card"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:138980
-#: admin/ui/build/app.build.1.7.0.js:139478
-#: admin/ui/build/app.build.1.7.0.js:139758
-#: admin/ui/build/app.build.1.7.0.js:140071
+#: admin/ui/build/app.build.1.9.12.js:139669
+#: admin/ui/build/app.build.1.9.12.js:140167
+#: admin/ui/build/app.build.1.9.12.js:140447
+#: admin/ui/build/app.build.1.9.12.js:140760
 msgid "Ad Preview"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:141362
+#: admin/ui/build/app.build.1.9.12.js:142051
 msgid "Nutrition Information:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:141706
+#: admin/ui/build/app.build.1.9.12.js:142404
 msgid "Please leave a comment on the blog or share a photo on "
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142439
+#: admin/ui/build/app.build.1.9.12.js:143137
 msgid "No matching cards."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142466
+#: admin/ui/build/app.build.1.9.12.js:143164
 msgid "You haven't added any cards yet."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142487
-#: admin/ui/build/app.build.1.7.0.js:143922
+#: admin/ui/build/app.build.1.9.12.js:143185
+#: admin/ui/build/app.build.1.9.12.js:144620
 msgid "Add New Card"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142771
+#: admin/ui/build/app.build.1.9.12.js:143469
 msgid "Products"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142799
+#: admin/ui/build/app.build.1.9.12.js:143497
 msgid "No products were found."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142825
+#: admin/ui/build/app.build.1.9.12.js:143523
 msgid "Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142857
+#: admin/ui/build/app.build.1.9.12.js:143555
 msgid "Sort by title"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:142943
+#: admin/ui/build/app.build.1.9.12.js:143641
 msgid "Cards"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143394
+#: admin/ui/build/app.build.1.9.12.js:144092
 msgid "User did not leave a review"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143417
+#: admin/ui/build/app.build.1.9.12.js:144115
 msgid "User"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143475
-#: admin/ui/build/app.build.1.7.0.js:143964
-#: admin/ui/build/app.build.1.7.0.js:144668
+#: admin/ui/build/app.build.1.9.12.js:144173
+#: admin/ui/build/app.build.1.9.12.js:144662
+#: admin/ui/build/app.build.1.9.12.js:145400
 msgid "Date"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143514
+#: admin/ui/build/app.build.1.9.12.js:144212
 msgid "ago"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143558
-#: admin/ui/build/app.build.1.7.0.js:159375
+#: admin/ui/build/app.build.1.9.12.js:144256
+#: admin/ui/build/app.build.1.9.12.js:160808
 msgid "Are you sure?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143600
+#: admin/ui/build/app.build.1.9.12.js:144298
 msgid "No matching reviews found"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143832
+#: admin/ui/build/app.build.1.9.12.js:144530
 msgid "Search for a title, ingredient, author, etc…"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143924
-#: admin/ui/build/app.build.1.7.0.js:143949
+#: admin/ui/build/app.build.1.9.12.js:144622
+#: admin/ui/build/app.build.1.9.12.js:144647
 msgid "Switch view"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:143962
+#: admin/ui/build/app.build.1.9.12.js:144660
 msgid "All"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144193
-#: admin/ui/build/app.build.1.7.0.js:144755
-#: admin/ui/build/app.build.1.7.0.js:144764
+#: admin/ui/build/app.build.1.9.12.js:144892
+#: admin/ui/build/app.build.1.9.12.js:145487
+#: admin/ui/build/app.build.1.9.12.js:145496
 msgid "Posts"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144229
-#: admin/ui/build/app.build.1.7.0.js:144800
+#: admin/ui/build/app.build.1.9.12.js:144928
+#: admin/ui/build/app.build.1.9.12.js:145532
 msgid "Not in a post"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144275
+#: admin/ui/build/app.build.1.9.12.js:144976
+#: admin/ui/build/app.build.1.9.12.js:145005
 msgid "Author:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144304
+#: admin/ui/build/app.build.1.9.12.js:145034
 msgid "Category:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144332
-#: admin/ui/build/app.build.1.7.0.js:144698
+#: admin/ui/build/app.build.1.9.12.js:145063
+#: admin/ui/build/app.build.1.9.12.js:145430
 msgid "Created:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144367
-#: admin/ui/build/app.build.1.7.0.js:144730
+#: admin/ui/build/app.build.1.9.12.js:145098
+#: admin/ui/build/app.build.1.9.12.js:145462
 msgid "Modified:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144622
-#: admin/ui/build/app.build.1.7.0.js:147557
-#: admin/ui/build/app.build.1.7.0.js:148505
-#: admin/ui/build/app.build.1.7.0.js:148998
+#: admin/ui/build/app.build.1.9.12.js:145352
+#: admin/ui/build/app.build.1.9.12.js:148330
+#: admin/ui/build/app.build.1.9.12.js:149272
+#: admin/ui/build/app.build.1.9.12.js:149813
 msgid "Author"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:144969
+#: admin/ui/build/app.build.1.9.12.js:145742
 msgid "Search for a card"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145229
+#: admin/ui/build/app.build.1.9.12.js:146002
 msgid "Prev"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145230
+#: admin/ui/build/app.build.1.9.12.js:146003
 msgid "Next"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145398
+#: admin/ui/build/app.build.1.9.12.js:146171
 msgid "Delete Item"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145644
-#: admin/ui/build/app.build.1.7.0.js:146829
-#: admin/ui/build/app.build.1.7.0.js:147076
-#: admin/ui/build/app.build.1.7.0.js:147386
-#: admin/ui/build/app.build.1.7.0.js:154871
+#: admin/ui/build/app.build.1.9.12.js:146417
+#: admin/ui/build/app.build.1.9.12.js:147602
+#: admin/ui/build/app.build.1.9.12.js:147851
+#: admin/ui/build/app.build.1.9.12.js:148163
+#: admin/ui/build/app.build.1.9.12.js:155780
 msgid "Cancel"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145661
-#: admin/ui/build/app.build.1.7.0.js:146846
+#: admin/ui/build/app.build.1.9.12.js:146434
+#: admin/ui/build/app.build.1.9.12.js:147619
 msgid "OK"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145701
-#: admin/ui/build/app.build.1.7.0.js:146884
+#: admin/ui/build/app.build.1.9.12.js:146474
+#: admin/ui/build/app.build.1.9.12.js:147658
 msgid "New Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145741
+#: admin/ui/build/app.build.1.9.12.js:146514
 msgid "Product fetch support is waiting."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145775
-#: admin/ui/build/app.build.1.7.0.js:146999
-#: admin/ui/build/app.build.1.7.0.js:156581
+#: admin/ui/build/app.build.1.9.12.js:146548
+#: admin/ui/build/app.build.1.9.12.js:147773
+#: admin/ui/build/app.build.1.9.12.js:157597
 msgid "Product URL"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145787
+#: admin/ui/build/app.build.1.9.12.js:146560
 msgid "Please register your plugin first"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145814
-#: admin/ui/build/app.build.1.7.0.js:147022
+#: admin/ui/build/app.build.1.9.12.js:146587
+#: admin/ui/build/app.build.1.9.12.js:147796
 msgid "Process"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145894
+#: admin/ui/build/app.build.1.9.12.js:146667
 msgid "Add Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:145939
-#: admin/ui/build/app.build.1.7.0.js:146957
+#: admin/ui/build/app.build.1.9.12.js:146712
+#: admin/ui/build/app.build.1.9.12.js:147731
 msgid "Results"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:146084
+#: admin/ui/build/app.build.1.9.12.js:146857
 msgid "Search for a product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:146117
+#: admin/ui/build/app.build.1.9.12.js:146890
 msgid "Add New Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:146320
+#: admin/ui/build/app.build.1.9.12.js:147093
 msgid "Search by review content"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147112
+#: admin/ui/build/app.build.1.9.12.js:147887
 msgid "Update Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147283
+#: admin/ui/build/app.build.1.9.12.js:148060
 msgid "Editing Review"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147337
+#: admin/ui/build/app.build.1.9.12.js:148114
 msgid "You have edited this review."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147344
+#: admin/ui/build/app.build.1.9.12.js:148121
 msgid "has edited this review."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147582
-#: admin/ui/build/app.build.1.7.0.js:147586
+#: admin/ui/build/app.build.1.9.12.js:148355
+#: admin/ui/build/app.build.1.9.12.js:148359
 msgid "Makes"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147621
+#: admin/ui/build/app.build.1.9.12.js:148393
 msgid "How-To Details"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147640
-#: admin/ui/build/app.build.1.7.0.js:148628
+#: admin/ui/build/app.build.1.9.12.js:148412
+#: admin/ui/build/app.build.1.9.12.js:149422
 msgid "Times"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147830
-#: admin/ui/build/app.build.1.7.0.js:148781
+#: admin/ui/build/app.build.1.9.12.js:148602
+#: admin/ui/build/app.build.1.9.12.js:149588
 msgid "Video"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147852
-#: admin/ui/build/app.build.1.7.0.js:148803
+#: admin/ui/build/app.build.1.9.12.js:148624
+#: admin/ui/build/app.build.1.9.12.js:149610
 msgid "Authenticate MCP to add Mediavine videos to your cards."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147894
-#: admin/ui/build/app.build.1.7.0.js:148873
-msgid "SEO &amp; Social Media"
+#: admin/ui/build/app.build.1.9.12.js:148666
+#: admin/ui/build/app.build.1.9.12.js:149689
+msgid "SEO & Social Media"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147910
-#: admin/ui/build/app.build.1.7.0.js:148303
-#: admin/ui/build/app.build.1.7.0.js:148889
+#: admin/ui/build/app.build.1.9.12.js:148682
+#: admin/ui/build/app.build.1.9.12.js:149074
+#: admin/ui/build/app.build.1.9.12.js:149705
 msgid "Utilities"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:147926
-#: admin/ui/build/app.build.1.7.0.js:148319
-#: admin/ui/build/app.build.1.7.0.js:148905
+#: admin/ui/build/app.build.1.9.12.js:148698
+#: admin/ui/build/app.build.1.9.12.js:149090
+#: admin/ui/build/app.build.1.9.12.js:149721
 msgid "Custom Fields"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148166
+#: admin/ui/build/app.build.1.9.12.js:148937
 msgid "Layout"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148206
+#: admin/ui/build/app.build.1.9.12.js:148977
 msgid "Hide Title"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148234
+#: admin/ui/build/app.build.1.9.12.js:149005
 msgid "Hide Description"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148265
+#: admin/ui/build/app.build.1.9.12.js:149036
 msgid "List Details"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148350
+#: admin/ui/build/app.build.1.9.12.js:149121
 msgid "Hero"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148351
+#: admin/ui/build/app.build.1.9.12.js:149122
 msgid "Grid"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148352
+#: admin/ui/build/app.build.1.9.12.js:149123
 msgid "Circles"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148353
+#: admin/ui/build/app.build.1.9.12.js:149124
 msgid "Numbered"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148556
+#: admin/ui/build/app.build.1.9.12.js:149323
 msgid "Diet"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:148609
+#: admin/ui/build/app.build.1.9.12.js:149403
 msgid "Recipe Details"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149095
-#: admin/ui/build/app.build.1.7.0.js:152195
+#: admin/ui/build/app.build.1.9.12.js:149910
+#: admin/ui/build/app.build.1.9.12.js:153058
 msgid "Canonical Post"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149212
-#: admin/ui/build/app.build.1.7.0.js:149229
-#: admin/ui/build/app.build.1.7.0.js:150425
+#: admin/ui/build/app.build.1.9.12.js:150027
+#: admin/ui/build/app.build.1.9.12.js:150044
+#: admin/ui/build/app.build.1.9.12.js:151289
 msgid "Clone Card"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149220
+#: admin/ui/build/app.build.1.9.12.js:150035
 msgid "This will create an exact copy of the current card."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149421
-#: admin/ui/build/app.build.1.7.0.js:153600
-#: admin/ui/build/app.build.1.7.0.js:160227
+#: admin/ui/build/app.build.1.9.12.js:150281
+#: admin/ui/build/app.build.1.9.12.js:154463
+#: admin/ui/build/app.build.1.9.12.js:161660
 msgid "External link support is waiting."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149451
+#: admin/ui/build/app.build.1.9.12.js:150311
 msgid "+ Add Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149479
+#: admin/ui/build/app.build.1.9.12.js:150343
 msgid "Changing a product's link, title or image here will update the product across all Create Cards."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149833
+#: admin/ui/build/app.build.1.9.12.js:150697
 msgid "Description"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149952
-#: admin/ui/build/app.build.1.7.0.js:152015
-#: admin/ui/build/app.build.1.7.0.js:152025
+#: admin/ui/build/app.build.1.9.12.js:150816
+#: admin/ui/build/app.build.1.9.12.js:152878
+#: admin/ui/build/app.build.1.9.12.js:152888
 msgid "Button Action"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149960
+#: admin/ui/build/app.build.1.9.12.js:150824
 msgid "Provide a title."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:149966
+#: admin/ui/build/app.build.1.9.12.js:150830
 msgid "Brackets are not allowed in titles."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150028
+#: admin/ui/build/app.build.1.9.12.js:150892
 msgid "Diabetic"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150029
+#: admin/ui/build/app.build.1.9.12.js:150893
 msgid "Gluten-Free"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150030
+#: admin/ui/build/app.build.1.9.12.js:150894
 msgid "Halal"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150031
+#: admin/ui/build/app.build.1.9.12.js:150895
 msgid "Hindu"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150032
+#: admin/ui/build/app.build.1.9.12.js:150896
 msgid "Kosher"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150033
+#: admin/ui/build/app.build.1.9.12.js:150897
 msgid "Low-Calorie"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150034
+#: admin/ui/build/app.build.1.9.12.js:150898
 msgid "Low-Fat"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150035
+#: admin/ui/build/app.build.1.9.12.js:150899
 msgid "Low-Lactose"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150036
+#: admin/ui/build/app.build.1.9.12.js:150900
 msgid "Low-Salt"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150037
+#: admin/ui/build/app.build.1.9.12.js:150901
 msgid "Vegan"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150038
+#: admin/ui/build/app.build.1.9.12.js:150902
 msgid "Vegetarian"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150343
+#: admin/ui/build/app.build.1.9.12.js:151207
 msgid "Open menu"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150386
+#: admin/ui/build/app.build.1.9.12.js:151250
 msgid "Choose from existing"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150408
+#: admin/ui/build/app.build.1.9.12.js:151272
 msgid "See Reviews"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150730
+#: admin/ui/build/app.build.1.9.12.js:151593
 msgid "Save Draft"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150751
+#: admin/ui/build/app.build.1.9.12.js:151614
 msgid "Publish and Insert"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150751
+#: admin/ui/build/app.build.1.9.12.js:151614
 msgid "Publish"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150776
+#: admin/ui/build/app.build.1.9.12.js:151639
 msgid "Could not save data"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150800
+#: admin/ui/build/app.build.1.9.12.js:151663
 msgid "Editor"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150817
-#: admin/ui/build/app.build.1.7.0.js:155954
+#: admin/ui/build/app.build.1.9.12.js:151680
+#: admin/ui/build/app.build.1.9.12.js:156867
 msgid "Preview"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:150884
+#: admin/ui/build/app.build.1.9.12.js:151747
 msgid "BUG: tried saving an invalid type."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151037
+#: admin/ui/build/app.build.1.9.12.js:151900
 msgid "You have unsaved changes. Do you want to continue with your unsaved changes? Cancelling will delete the unsaved changes."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151148
+#: admin/ui/build/app.build.1.9.12.js:152011
 msgid "You have unsaved changes on this page. Are you sure you want to proceed?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151150
+#: admin/ui/build/app.build.1.9.12.js:152013
 msgid "Don't warn me again"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151151
+#: admin/ui/build/app.build.1.9.12.js:152014
 msgid "Move Through Cards"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151420
+#: admin/ui/build/app.build.1.9.12.js:152283
 msgid "Write instructions"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151745
+#: admin/ui/build/app.build.1.9.12.js:152608
 msgid "This item does not belong to a post and will not display to readers."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151756
-#: admin/ui/build/app.build.1.7.0.js:151792
+#: admin/ui/build/app.build.1.9.12.js:152619
+#: admin/ui/build/app.build.1.9.12.js:152655
 msgid "Description is required."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151821
+#: admin/ui/build/app.build.1.9.12.js:152684
 msgid "Thumbnail"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151912
+#: admin/ui/build/app.build.1.9.12.js:152775
 msgid "Extra Info (Max. 2)"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:151917
+#: admin/ui/build/app.build.1.9.12.js:152780
 msgid "Max. 2"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152063
+#: admin/ui/build/app.build.1.9.12.js:152926
 msgid "URL"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152108
+#: admin/ui/build/app.build.1.9.12.js:152971
 msgid "Photo Credit"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152162
-#: admin/ui/build/app.build.1.7.0.js:154048
+#: admin/ui/build/app.build.1.9.12.js:153025
+#: admin/ui/build/app.build.1.9.12.js:154917
 msgid "No-Follow"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152478
+#: admin/ui/build/app.build.1.9.12.js:153341
 msgid "+ List Item"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152490
+#: admin/ui/build/app.build.1.9.12.js:153353
 msgid "+ Custom Text"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152517
+#: admin/ui/build/app.build.1.9.12.js:153380
 msgid "Title this custom text"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152569
+#: admin/ui/build/app.build.1.9.12.js:153432
 msgid "Titles must be unique."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152724
+#: admin/ui/build/app.build.1.9.12.js:153587
 msgid "Custom Post Type:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152846
+#: admin/ui/build/app.build.1.9.12.js:153709
 msgid "Internal"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152907
+#: admin/ui/build/app.build.1.9.12.js:153770
 msgid "Search Options"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:152954
+#: admin/ui/build/app.build.1.9.12.js:153817
 msgid "Types:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153007
+#: admin/ui/build/app.build.1.9.12.js:153870
 msgid "Search:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153034
+#: admin/ui/build/app.build.1.9.12.js:153897
 msgid "Title Only"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153061
+#: admin/ui/build/app.build.1.9.12.js:153924
 msgid "Title and Content"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153183
+#: admin/ui/build/app.build.1.9.12.js:154046
 msgid "This URL has already been added."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153183
+#: admin/ui/build/app.build.1.9.12.js:154046
 msgid "No results found."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153277
+#: admin/ui/build/app.build.1.9.12.js:154140
 msgid "We can't scrape this URL. Would you like to add it manually?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153296
+#: admin/ui/build/app.build.1.9.12.js:154159
 msgid "Add Manually"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153364
+#: admin/ui/build/app.build.1.9.12.js:154227
 msgid "Done"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153573
+#: admin/ui/build/app.build.1.9.12.js:154436
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153586
+#: admin/ui/build/app.build.1.9.12.js:154449
 msgid "Collapse"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:153927
+#: admin/ui/build/app.build.1.9.12.js:154792
 msgid "Add item to"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154132
+#: admin/ui/build/app.build.1.9.12.js:155001
 msgid "+ Add Item"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154145
+#: admin/ui/build/app.build.1.9.12.js:155014
 msgid "+ Add Group"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154180
+#: admin/ui/build/app.build.1.9.12.js:155049
 msgid "Name your group before adding another."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154557
+#: admin/ui/build/app.build.1.9.12.js:155428
 msgid "Write additional notes"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154820
+#: admin/ui/build/app.build.1.9.12.js:155729
 msgid "Disclaimer"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154882
+#: admin/ui/build/app.build.1.9.12.js:155791
 msgid "Confirm"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154939
+#: admin/ui/build/app.build.1.9.12.js:155852
 msgid "Calculated Nutrition"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154962
+#: admin/ui/build/app.build.1.9.12.js:155875
 msgid "Nutrition"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154984
+#: admin/ui/build/app.build.1.9.12.js:155897
 msgid "Automatic nutrition calculation is here!"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:154992
+#: admin/ui/build/app.build.1.9.12.js:155905
 msgid "Could not calculate nutrition for this recipe."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155048
+#: admin/ui/build/app.build.1.9.12.js:155961
 msgid "How many servings does this recipe make?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155079
+#: admin/ui/build/app.build.1.9.12.js:155992
 msgid "Calculating..."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155079
+#: admin/ui/build/app.build.1.9.12.js:155992
 msgid "Calculate"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155097
+#: admin/ui/build/app.build.1.9.12.js:156010
 msgid "Nutrition is not required, but providing at least calories is strongly recommended."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155114
+#: admin/ui/build/app.build.1.9.12.js:156027
 msgid "This data was provided and calculated by"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155114
+#: admin/ui/build/app.build.1.9.12.js:156027
 msgid "on"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155244
+#: admin/ui/build/app.build.1.9.12.js:156157
 msgid "Global Setting: Display Zeroes"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155244
+#: admin/ui/build/app.build.1.9.12.js:156157
 msgid "Global Setting: Do Not Display Zeros"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155245
+#: admin/ui/build/app.build.1.9.12.js:156158
 msgid "Do Not Display Zeros"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155246
+#: admin/ui/build/app.build.1.9.12.js:156159
 msgid "Display Zeros"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155354
+#: admin/ui/build/app.build.1.9.12.js:156267
 msgid "This field is not calculated by NutritionIX"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155380
+#: admin/ui/build/app.build.1.9.12.js:156293
 msgid "Choose whether to display zero values for Net Carbohydrates and Sugar Alcohols."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155392
+#: admin/ui/build/app.build.1.9.12.js:156305
 msgid "Number of Servings"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155406
+#: admin/ui/build/app.build.1.9.12.js:156319
 msgid "Net Carbs"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155412
+#: admin/ui/build/app.build.1.9.12.js:156325
 msgid "Display Zero Values"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155417
-#: admin/ui/build/app.build.1.7.0.js:155418
-#: admin/ui/build/app.build.1.7.0.js:155419
-#: admin/ui/build/app.build.1.7.0.js:155420
-#: admin/ui/build/app.build.1.7.0.js:155421
-#: admin/ui/build/app.build.1.7.0.js:155424
-#: admin/ui/build/app.build.1.7.0.js:155425
-#: admin/ui/build/app.build.1.7.0.js:155426
-#: admin/ui/build/app.build.1.7.0.js:155427
-#: admin/ui/build/app.build.1.7.0.js:155430
-#: admin/ui/build/app.build.1.7.0.js:155431
+#: admin/ui/build/app.build.1.9.12.js:156330
+#: admin/ui/build/app.build.1.9.12.js:156331
+#: admin/ui/build/app.build.1.9.12.js:156332
+#: admin/ui/build/app.build.1.9.12.js:156333
+#: admin/ui/build/app.build.1.9.12.js:156334
+#: admin/ui/build/app.build.1.9.12.js:156337
+#: admin/ui/build/app.build.1.9.12.js:156338
+#: admin/ui/build/app.build.1.9.12.js:156339
+#: admin/ui/build/app.build.1.9.12.js:156340
+#: admin/ui/build/app.build.1.9.12.js:156343
+#: admin/ui/build/app.build.1.9.12.js:156344
 msgid "grams"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155422
-#: admin/ui/build/app.build.1.7.0.js:155423
+#: admin/ui/build/app.build.1.9.12.js:156335
+#: admin/ui/build/app.build.1.9.12.js:156336
 msgid "milligrams"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155565
+#: admin/ui/build/app.build.1.9.12.js:156478
 msgid "This will force paragraphs to ordered lists, which is recommended for SEO. This action can be undone."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155583
+#: admin/ui/build/app.build.1.9.12.js:156496
 msgid "Optimize"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155588
+#: admin/ui/build/app.build.1.9.12.js:156501
 msgid "If you have made changes since optimizing, they will be reverted."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155611
+#: admin/ui/build/app.build.1.9.12.js:156524
 msgid "Undo"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:155980
+#: admin/ui/build/app.build.1.9.12.js:156893
 msgid "Item count:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156171
+#: admin/ui/build/app.build.1.9.12.js:157084
 msgid "frame"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156294
-#: admin/ui/build/app.build.1.7.0.js:156321
+#: admin/ui/build/app.build.1.9.12.js:157207
+#: admin/ui/build/app.build.1.9.12.js:157234
 msgid "Print Preview"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156302
+#: admin/ui/build/app.build.1.9.12.js:157215
 msgid "Preview how the card will be printed."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156584
+#: admin/ui/build/app.build.1.9.12.js:157600
 msgid "Enter a URL"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156624
+#: admin/ui/build/app.build.1.9.12.js:157640
 msgid "Clicking Process will scrape the title and image from the provided link."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156648
+#: admin/ui/build/app.build.1.9.12.js:157664
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:156862
+#: admin/ui/build/app.build.1.9.12.js:157939
 msgid "Select Product"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157046
+#: admin/ui/build/app.build.1.9.12.js:157963
+msgid "Search"
+msgstr ""
+
+#: admin/ui/build/app.build.1.9.12.js:158145
 msgid "Keywords"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157050
+#: admin/ui/build/app.build.1.9.12.js:158149
 msgid "cookies, desserts, baking..."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157097
+#: admin/ui/build/app.build.1.9.12.js:158196
 msgid "Pinterest URL"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157124
+#: admin/ui/build/app.build.1.9.12.js:158223
 msgid "Pinterest Description"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157151
+#: admin/ui/build/app.build.1.9.12.js:158250
 msgid "Pinterest Image"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157266
+#: admin/ui/build/app.build.1.9.12.js:158365
 msgid "Schema Validation"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157274
+#: admin/ui/build/app.build.1.9.12.js:158373
 msgid "Check your content against Google's structured data testing utility. You may need to enable pop-ups."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157291
+#: admin/ui/build/app.build.1.9.12.js:158390
 msgid "Validate JSON-LD"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157302
+#: admin/ui/build/app.build.1.9.12.js:158401
 msgid "Rich Snippet"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157310
+#: admin/ui/build/app.build.1.9.12.js:158409
 msgid "This card has not been added to a post."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157475
+#: admin/ui/build/app.build.1.9.12.js:158574
 msgid "Shortcode"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157483
+#: admin/ui/build/app.build.1.9.12.js:158582
 msgid "You can copy and paste this shortcode into editors that support it."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157601
+#: admin/ui/build/app.build.1.9.12.js:158700
 msgid "Use Schema (LD+JSON)"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157885
+#: admin/ui/build/app.build.1.9.12.js:158984
 msgid "Display video?"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157963
+#: admin/ui/build/app.build.1.9.12.js:159062
 msgid "Video URL"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157965
+#: admin/ui/build/app.build.1.9.12.js:159064
 msgid "Paste URL from YouTube"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:157981
+#: admin/ui/build/app.build.1.9.12.js:159080
 msgid "Could not parse that link."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158019
+#: admin/ui/build/app.build.1.9.12.js:159118
 msgid "+ Add Mediavine Video"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158034
+#: admin/ui/build/app.build.1.9.12.js:159133
 msgid "Add YouTube Video"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158299
+#: admin/ui/build/app.build.1.9.12.js:159399
 msgid "Video Options"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158314
+#: admin/ui/build/app.build.1.9.12.js:159414
 msgid "Show video in card"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158344
+#: admin/ui/build/app.build.1.9.12.js:159444
 msgid "Aspect Ratio"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158375
+#: admin/ui/build/app.build.1.9.12.js:159475
 msgid "Volume"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158398
+#: admin/ui/build/app.build.1.9.12.js:159498
 msgid "Video data will be still be included in card schema. It's not recommended to include data that isn't visible to users, so only enable this setting if you're including the video elsewhere on the page."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158415
+#: admin/ui/build/app.build.1.9.12.js:159515
 msgid "Insert"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158430
+#: admin/ui/build/app.build.1.9.12.js:159530
 msgid "Choose a different video"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158488
+#: admin/ui/build/app.build.1.9.12.js:159589
 msgid "Search for a video"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158584
+#: admin/ui/build/app.build.1.9.12.js:159684
 msgid "Previous Page"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158605
+#: admin/ui/build/app.build.1.9.12.js:159704
 msgid "Next Page"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158621
+#: admin/ui/build/app.build.1.9.12.js:159720
 msgid "Insert Video"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158621
+#: admin/ui/build/app.build.1.9.12.js:159720
 msgid "Edit Video Settings"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158751
+#: admin/ui/build/app.build.1.9.12.js:159841
 msgid "Word Count:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158952
+#: admin/ui/build/app.build.1.9.12.js:160385
 msgid "Something went wrong with Create by Mediavine."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158965
-#: admin/ui/build/app.build.1.7.0.js:159035
-#: admin/ui/build/app.build.1.7.0.js:161051
+#: admin/ui/build/app.build.1.9.12.js:160398
+#: admin/ui/build/app.build.1.9.12.js:160468
+#: admin/ui/build/app.build.1.9.12.js:162615
 msgid "Refresh"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158970
+#: admin/ui/build/app.build.1.9.12.js:160403
 msgid "Something went wrong and Create has crashed!"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158970
+#: admin/ui/build/app.build.1.9.12.js:160403
 msgid "If refreshing the page doesn't work,"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158970
+#: admin/ui/build/app.build.1.9.12.js:160403
 msgid "let us know via the chat bubble in the lower-right corner!"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:158970
+#: admin/ui/build/app.build.1.9.12.js:160403
 msgid "please reach out to our support team by email: "
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159004
+#: admin/ui/build/app.build.1.9.12.js:160437
 msgid "Well, that shouldn't happen."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159043
+#: admin/ui/build/app.build.1.9.12.js:160476
 msgid "Fail Gif"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159063
+#: admin/ui/build/app.build.1.9.12.js:160496
 msgid "via Giphy"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159216
+#: admin/ui/build/app.build.1.9.12.js:160649
 msgid "If any types are selected, only they will be available for adding new cards. (Existing cards of disallowed types will still function properly.)"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159337
-#: admin/ui/build/app.build.1.7.0.js:159404
+#: admin/ui/build/app.build.1.9.12.js:160770
+#: admin/ui/build/app.build.1.9.12.js:160837
 msgid "Clear Amazon Affiliates Provision Lock"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159344
+#: admin/ui/build/app.build.1.9.12.js:160777
 msgid "This will remove the Amazon Affiliates provision lockout from Create. A provision normally takes around 24-48 hours after the Secret Key was generated. If Amazon Affiliates is still provisioning, your products still will not be processed. You will need to wait until the provision is complete."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159421
-#: admin/ui/build/app.build.1.7.0.js:160927
+#: admin/ui/build/app.build.1.9.12.js:160854
+#: admin/ui/build/app.build.1.9.12.js:162368
 msgid "Something went wrong."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159558
+#: admin/ui/build/app.build.1.9.12.js:160991
 msgid "The primary color will be used for your card's background, if the selected theme has a background."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159565
+#: admin/ui/build/app.build.1.9.12.js:160998
 msgid "The secondary color will be used for interface elements like buttons and stars."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159572
+#: admin/ui/build/app.build.1.9.12.js:161005
 msgid "Please be sure to enter a valid 3 or 6 digit Hex code."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159576
+#: admin/ui/build/app.build.1.9.12.js:161009
 msgid "The color you selected doesn't meet accessibility standards with the text color of the card theme you've selected."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159594
+#: admin/ui/build/app.build.1.9.12.js:161027
 msgid "Primary Color Contrast"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159630
+#: admin/ui/build/app.build.1.9.12.js:161063
 msgid "Use Defaults"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159658
+#: admin/ui/build/app.build.1.9.12.js:161091
 msgid "Disable"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159690
+#: admin/ui/build/app.build.1.9.12.js:161123
 msgid "Primary Color"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159733
+#: admin/ui/build/app.build.1.9.12.js:161166
 msgid "Secondary Color"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:159776
+#: admin/ui/build/app.build.1.9.12.js:161209
 msgid "Colors"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:160443
+#: admin/ui/build/app.build.1.9.12.js:161876
 msgid "(Default:"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:160910
+#: admin/ui/build/app.build.1.9.12.js:162351
 msgid "Republish Creations"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:160985
-msgid "Reset Browser Storage"
+#: admin/ui/build/app.build.1.9.12.js:162385
+msgid "We recently put the ad technology for your Create cards into the Mediavine Dashboard. Head over to Settings > In-Content Ads to make any changes."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161010
-#: admin/ui/build/app.build.1.7.0.js:161092
-msgid "Reset"
+#: admin/ui/build/app.build.1.9.12.js:162513
+msgid "Clear Browser Storage"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161026
+#: admin/ui/build/app.build.1.9.12.js:162546
+msgid "Clear"
+msgstr ""
+
+#: admin/ui/build/app.build.1.9.12.js:162582
 msgid "Refresh Settings"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161034
-msgid ""
-"This button will refresh all your Create by Mediavine\n"
-"                          settings. Please proceed with caution."
+#: admin/ui/build/app.build.1.9.12.js:162590
+msgid "This button will refresh all your Create by Mediavine settings. Your current settings will not change, but new settings may appear and deprecated settings may be removed."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161067
+#: admin/ui/build/app.build.1.9.12.js:162651
 msgid "Reset Settings"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161075
+#: admin/ui/build/app.build.1.9.12.js:162659
 msgid ""
 "This button will reset all your Create by Mediavine\n"
-"                          settings. Please proceed with caution."
+"                              settings. Please proceed with caution."
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161142
+#: admin/ui/build/app.build.1.9.12.js:162684
+msgid "Reset"
+msgstr ""
+
+#: admin/ui/build/app.build.1.9.12.js:162761
 msgid "Display"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161145
+#: admin/ui/build/app.build.1.9.12.js:162764
 msgid "Advanced"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161154
+#: admin/ui/build/app.build.1.9.12.js:162773
 msgid "MVP"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161157
+#: admin/ui/build/app.build.1.9.12.js:162776
 msgid "Registration"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161160
+#: admin/ui/build/app.build.1.9.12.js:162779
 msgid "PRO"
 msgstr ""
 
-#: admin/ui/build/app.build.1.7.0.js:161164
+#: admin/ui/build/app.build.1.9.12.js:162783
 msgid "Affiliates"
 msgstr ""

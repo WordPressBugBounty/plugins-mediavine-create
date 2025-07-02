@@ -5,7 +5,7 @@ namespace Mediavine;
 use Mediavine\Create\API_Services;
 use Mediavine\Create\Plugin;
 use Mediavine\Create\Theme_Checker;
-use Mediavine\WordPress\Support\Arr;
+use Mediavine\Create\Helpers\Arr;
 
 if ( class_exists( 'Mediavine\Settings' ) ) {
 

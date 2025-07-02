@@ -17,7 +17,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Create Supplies entry
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return \WP_Error|\WP_REST_Response
@@ -40,7 +40,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Find and return supplies for a given creation
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return \WP_Error|\WP_REST_Response
@@ -68,7 +68,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Find one supply
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return \WP_Error|\WP_REST_Response
@@ -91,7 +91,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Destroy a specific supply
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return \WP_Error|\WP_REST_Response
@@ -113,7 +113,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Set supplies for a given creation
 		 *
-		 * @param \WP_REST_Request $request
+		 * @param \WP_REST_Request  $request
 		 * @param \WP_REST_Response $response
 		 *
 		 * @return \WP_REST_Response

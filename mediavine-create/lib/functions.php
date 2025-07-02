@@ -28,8 +28,8 @@ function mv_create_table_exists( $table_name, $prefix = '' ) {
  * Manually log an error in Sentry.
  *
  * @param string $message the message we want to log (can be formatted with `print_f` style placeholders)
- * @param array $message_params if `$message` is formatted, this is an array of values to replace format markers
- * @param array $data an array of contextual data -- must be associative, not numeric
+ * @param array  $message_params if `$message` is formatted, this is an array of values to replace format markers
+ * @param array  $data an array of contextual data -- must be associative, not numeric
  * @param string $level the log level (debug, info, warning, error, fatal)
  *
  * Example: mv_create_log( 'this is a %', ['serious problem'], ['someVar' => 'had an issue'], $level = 'error');
@@ -42,25 +42,9 @@ function mv_create_log( $message, $message_params = [], $data = [], $level = 'in
 }
 
 /**
- * Manually log an exception in Sentry.
- *
- * @param \Exception $e
- * @param array $data contextual data -- must be associative, not numeric
- * @return string uuid of Sentry event
- */
-function mv_create_log_exception( \Exception $e, $data = [] ) {
-	// ensure this function can be used anywhere in the plugin
-	if ( ! class_exists( 'Mediavine\Create\MV_Sentry' ) ) {
-		require_once MV_CREATE_DIR . 'vendor/autoload.php';
-	}
-
-	return \Mediavine\Create\MV_Sentry::log_exception( $e, $data );
-}
-
-/**
  * Gets a list of reviews by creation_id
  * @param integer $creation_id ID of Creation from which you want reviews.
- * @param array $args limit and offset to get max number or paginate (default 50, 0)
+ * @param array   $args limit and offset to get max number or paginate (default 50, 0)
  * @return array Returns an array of objects
  */
 function mv_create_get_reviews( $creation_id, $args = [] ) {
@@ -73,7 +57,7 @@ function mv_create_get_reviews( $creation_id, $args = [] ) {
  * Can be filtered by card type.
  *
  * @param integer $post_id ID of WP Post from which you want a list of Associated Creations.
- * @param array $filter_types Array of card types to filter by. And empty array will display all card types.
+ * @param array   $filter_types Array of card types to filter by. And empty array will display all card types.
  * @return array Returns an array of objects
  */
 function mv_get_post_creations( $post_id, $filter_types = [] ) {
@@ -106,8 +90,8 @@ function mv_create_get_creation( $id, $published = false ) {
  * Get a custom field registered to a creation
  *
  * @since 1.1.0
- * @param {string} $slug   Custom field slug
- * @param {number} $id     Creation ID
+ * @param {string}                        $slug   Custom field slug
+ * @param {number}                        $id     Creation ID
  * @param {mixed}          Value of field
  */
 function mv_create_get_field( $id, $slug ) {
@@ -144,7 +128,7 @@ function mv_create_theme_support( $version ) {
  * Display a JTR button
  *
  * @param integer $id Creation ID. Optional
- * @param string $type Creation Type. Optional
+ * @param string  $type Creation Type. Optional
  */
 function mv_create_jtr_button( $id = null, $type = null ) {
 	global $post;

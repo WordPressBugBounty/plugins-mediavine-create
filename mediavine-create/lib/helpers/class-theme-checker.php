@@ -1,8 +1,8 @@
 <?php
 namespace Mediavine\Create;
 
-use Mediavine\WordPress\Support\Str;
-use Mediavine\WordPress\Support\Arr;
+use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Helpers\Arr;
 
 class Theme_Checker {
 
@@ -87,7 +87,7 @@ class Theme_Checker {
 				continue;
 			}
 
-			$rascal_instance = new $rascal_class;
+			$rascal_instance = new $rascal_class();
 			$rascal_instance->init();
 		}
 	}
@@ -128,9 +128,9 @@ class Theme_Checker {
 	/**
 	 * Checks if a theme supports specific args to a feature.
 	 *
-	 * @param string $feature The feature to check
+	 * @param string       $feature The feature to check
 	 * @param string|array $args Extra arguments to be checked against certain features
-	 * @param string $operator Defaults to 'OR'. Only other option is 'AND'
+	 * @param string       $operator Defaults to 'OR'. Only other option is 'AND'
 	 * @return bool Does the theme have support
 	 */
 	public static function current_theme_supports_args( $feature, $args, $operator = 'OR' ) {

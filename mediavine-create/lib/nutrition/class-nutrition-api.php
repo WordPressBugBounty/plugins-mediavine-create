@@ -5,7 +5,7 @@ class Nutrition_API extends Nutrition {
 
 	/**
 	 * Validate nutrition info. Stub method for now
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 *
 	 * @return \WP_REST_Response
@@ -17,7 +17,7 @@ class Nutrition_API extends Nutrition {
 	/**
 	 * Add nutrition data to a recipe card
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 *
 	 * @return \WP_Error|\WP_REST_Response
@@ -70,7 +70,7 @@ class Nutrition_API extends Nutrition {
 	/**
 	 * Find nutrition data for recipe card
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request  $request
 	 * @param \WP_REST_Response $response
 	 *
 	 * @return \WP_Error|\WP_REST_Response

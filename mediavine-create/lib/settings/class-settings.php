@@ -86,11 +86,11 @@ class Settings {
 
 	/**
 	 * Migrates a setting from an old to a new value
-	 * @param   array   $settings   Current list of settings
-	 * @param   string  $slug       Slug to check
-	 * @param   string  $old_value  Current value you want to check against
-	 * @param   string  $new_value  New value you want
-	 * @param   string  $callback   Callback to be run
+	 * @param   array  $settings   Current list of settings
+	 * @param   string $slug       Slug to check
+	 * @param   string $old_value  Current value you want to check against
+	 * @param   string $new_value  New value you want
+	 * @param   string $callback   Callback to be run
 	 * @return  array               List of settings after migrated change made
 	 */
 	public static function migrate_setting_value( array $settings, $slug, $old_value, $new_value, $callback = null ) {
@@ -113,10 +113,10 @@ class Settings {
 
 	/**
 	 * Migrates a setting slug to a new slug
-	 * @param   array   $settings  Current list of settings
-	 * @param   string  $old_slug  Current sug to be replaced
-	 * @param   string  $new_slug  New slug you want
-	 * @param   string  $callback  Callback to be run
+	 * @param   array  $settings  Current list of settings
+	 * @param   string $old_slug  Current sug to be replaced
+	 * @param   string $new_slug  New slug you want
+	 * @param   string $callback  Callback to be run
 	 * @return  array              List of settings after migrated change made
 	 */
 	public static function migrate_setting_slug( array $settings, $old_slug, $new_slug, $callback = null ) {
@@ -133,7 +133,7 @@ class Settings {
 			if ( isset( $settings_slugs[ $new_slug ] ) ) {
 				$settings[ $settings_slugs[ $new_slug ] ]['value'] = $old_slug_value;
 			}
-			\Mediavine\Settings::delete_setting( $old_slug );
+			self::delete_setting( $old_slug );
 		}
 
 		return $settings;
@@ -207,7 +207,7 @@ class Settings {
 		if ( ! empty( $setting->value ) ) {
 			$setting->value = str_replace( '\n', "\n", $setting->value );
 		}
-		$data = maybe_unserialize( $setting->data );
+		$data = json_decode($setting->data ?: '{}');
 		if ( gettype( $data ) === 'string' ) {
 			$data = json_decode( $setting->data );
 			if ( gettype( $data ) === 'string' ) {
@@ -221,8 +221,8 @@ class Settings {
 	/**
 	 * Retreives all settings, or by a specific criteria
 	 *
-	 * @param string $setting_slug Setting slug to retreive
-	 * @param string $setting_group Settings of a particular group to retreive
+	 * @param string  $setting_slug Setting slug to retreive
+	 * @param string  $setting_group Settings of a particular group to retreive
 	 * @param boolean $force_reset Should the settings be force pulled from the database, updating the retreived settings
 	 * @return object|array Setting opject for a single setting, and the array for a group or all settings
 	 */
@@ -310,7 +310,7 @@ class Settings {
 	 * @return mixed|null Value from the setting or default setting or null if no setting found
 	 */
 	public static function get_setting( $setting_slug, $default_setting = null ) {
-		$setting = \Mediavine\Settings::get_settings( $setting_slug );
+		$setting = self::get_settings( $setting_slug );
 
 		if ( isset( $setting->value ) ) {
 			return $setting->value;
@@ -325,11 +325,11 @@ class Settings {
 
 	static function update_setting( $slug, $new_value ) {
 		// Get the current setting so we have data for update
-		$setting = (array) \Mediavine\Settings::get_settings( $slug );
+		$setting = (array) self::get_settings( $slug );
 
 		// Update setting with new value
 		$setting['value'] = $new_value;
-		\Mediavine\Settings::$models->mv_settings->upsert( $setting );
+		self::$models->mv_settings->upsert( $setting );
 	}
 
 	/**

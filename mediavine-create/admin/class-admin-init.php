@@ -32,10 +32,10 @@ class Admin_Init extends Plugin {
 
 		self::$mcp_data = self::get_mcp_data();
 
-		$args = array(
+		$args = [
 			'capability' => [ 'edit_posts' ],
 			'fields'     => [ 'display_name' ],
-		);
+		];
 
 		// Capability queries were only introduced in WP 5.9.
 		if ( version_compare( $GLOBALS['wp_version'], '5.9', '<' ) ) {
@@ -207,7 +207,7 @@ class Admin_Init extends Plugin {
 
 		// If no verisons found, then we have something funny or spoofed, so add CSS fix anyway.
 		if ( empty( $versions[1] ) ) {
-			echo "<style>div[data-slate-editor]{-webkit-user-modify: read-write !important;}</style>";
+			echo '<style>div[data-slate-editor]{-webkit-user-modify: read-write !important;}</style>';
 
 			return;
 		}
@@ -215,7 +215,7 @@ class Admin_Init extends Plugin {
 		// Only add CSS fix if Chrome version is 105 or greater.
 		foreach ( $versions[1] as $version ) {
 			if ( version_compare( (int) $version, 105, '>=' ) ) {
-				echo "<style>div[data-slate-editor]{-webkit-user-modify: read-write !important;}</style>";
+				echo '<style>div[data-slate-editor]{-webkit-user-modify: read-write !important;}</style>';
 			}
 		}
 	}

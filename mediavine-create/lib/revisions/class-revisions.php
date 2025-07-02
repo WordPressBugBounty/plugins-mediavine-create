@@ -24,7 +24,7 @@ class Revisions extends Plugin {
 
 	public static function get_instance() {
 		if ( is_null( self::$instance ) ) {
-			self::$instance = new self;
+			self::$instance = new self();
 			self::$instance->init();
 		}
 		return self::$instance;
@@ -50,7 +50,7 @@ class Revisions extends Plugin {
 	 *
 	 * Add the new published data as a revision.
 	 *
-	 * @param int $creation_id
+	 * @param int    $creation_id
 	 * @param string $published_data
 	 * @return object created record
 	 */

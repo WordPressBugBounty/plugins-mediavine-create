@@ -9,9 +9,9 @@
  * Plugin Name:       Create by Mediavine
  * Plugin URI:        https://www.mediavine.com/mediavine-create/
  * Description:       Create custom recipe cards to be displayed in posts.
- * Version:           1.9.11
- * Requires at least: 5.2
- * Requires PHP:      7.2
+ * Version:           1.9.12
+ * Requires at least: 6.0
+ * Requires PHP:      7.4
  *
  * Author:            Mediavine
  * Author URI:        https://www.mediavine.com/

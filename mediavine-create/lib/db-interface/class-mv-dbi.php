@@ -2,8 +2,8 @@
 namespace Mediavine;
 
 use WP_Error;
-use Mediavine\WordPress\Support\Arr;
-use Mediavine\WordPress\Support\Str;
+use Mediavine\Create\Helpers\Arr;
+use Mediavine\Create\Helpers\Str;
 
 class MV_DBI {
 
@@ -123,7 +123,7 @@ class MV_DBI {
 			$custom_table_name       = $wpdb->prefix . $table['table_name'];
 			$custom_table_sql        = $table['sql'];
 			$create_custom_table_sql = "CREATE TABLE $custom_table_name ( $custom_table_sql ) $charset_collate;";
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 			$new_table = dbDelta( $create_custom_table_sql );
 			$error     = self::handle_error( $new_table );
 			if ( is_wp_error( $error ) ) {
@@ -299,7 +299,7 @@ class MV_DBI {
 	/**
 	 * Normalizes data to only return data that exists as cols within table
 	 *
-	 * @param array $data Data to be normalized
+	 * @param array   $data Data to be normalized
 	 * @param boolean $allow_null Are null values allowed
 	 * @return array Normalized data
 	 */
@@ -639,7 +639,7 @@ class MV_DBI {
 	 *
 	 * @param array $data
 	 * @param array $where_array
-	 * @param bool $modify_date
+	 * @param bool  $modify_date
 	 *
 	 * @return WP_Error|null
 	 */
@@ -717,9 +717,9 @@ class MV_DBI {
 	/**
 	 * Update a DB record without updating the modified date
 	 *
-	 * @param array $data
+	 * @param array              $data
 	 * @param array|integer|null $args an array of args or an integer id of the item being updated
-	 * @param boolean $return_updated returns the updated record if true
+	 * @param boolean            $return_updated returns the updated record if true
 	 * @return object|array|\WP_Error|null
 	 */
 	public function update_without_modified_date( $data, $args = null, $return_updated = true, $modify_date = false ) {
@@ -729,10 +729,10 @@ class MV_DBI {
 	/**
 	 * Update a DB record
 	 *
-	 * @param array $data
+	 * @param array              $data
 	 * @param array|integer|null $args an array of args or an integer id of the item being updated
-	 * @param boolean $return_updated returns the updated record if true
-	 * @param boolean $modify_date whether or not to update the `modified` date column
+	 * @param boolean            $return_updated returns the updated record if true
+	 * @param boolean            $modify_date whether or not to update the `modified` date column
 	 * @return object|array|\WP_Error|null
 	 */
 	public function update( $data, $args = null, $return_updated = true, $modify_date = true ) {
@@ -971,13 +971,13 @@ class MV_DBI {
 		if ( isset( $args['prepared_statement'] ) ) {
 			// There is an exception for specific tables used by our importers.
 			// Convert their prepared_statements to new SQL preparation.
-			$allowed_tables = [
+			$allowed_tables        = [
 				'posts', // Purr Recipe Cards, Simple Recipes Pro, WP Tasty
 				'amd_zlrecipe_recipes', // Zip Recipes, ZipList Recipes
 			];
 			$uses_importers_tables = in_array( $this->short_name, $allowed_tables );
 			if ( $uses_importers_tables ) {
-				$args['sql'] = $args['prepared_statement'];
+				$args['sql']    = $args['prepared_statement'];
 				$args['params'] = [];
 			}
 
@@ -1158,8 +1158,8 @@ class MV_DBI {
 	 * Retrieve an entire SQL result set from the database
 	 * @deprecated Use $this->find() instead
 	 *
-	 * @param  array  $args                Array containing basic SQL arguments
-	 * @param  array  $prepared_statement Optional. Prepared SQL statement
+	 * @param  array $args                Array containing basic SQL arguments
+	 * @param  array $prepared_statement Optional. Prepared SQL statement
 	 * @return object Database query results
 	 *
 	 * TODO: Make this function use $this->find
@@ -1204,9 +1204,9 @@ class MV_DBI {
 	 * Add a basic where clause to the query.
 	 *
 	 * @param  string|array $column
-	 * @param  mixed   $operator
-	 * @param  mixed   $value
-	 * @param  string  $after any SQL to insert after (LIMIT, ORDER, etc.)
+	 * @param  mixed        $operator
+	 * @param  mixed        $value
+	 * @param  string       $after any SQL to insert after (LIMIT, ORDER, etc.)
 	 * @return array|\WP_Error
 	 */
 	public function where( $column, $operator = '=', $value = null, $after = '' ) {
@@ -1582,7 +1582,7 @@ class MV_DBI {
 
 	/**
 	 * Overrides the default offset value of 0
-	 * @param integer|null `$offset` New offset value
+	 * @param integer|null ` $offset` New offset value
 	 * @return MV_DBI
 	 */
 	public function set_offset( $offset = null ) {
