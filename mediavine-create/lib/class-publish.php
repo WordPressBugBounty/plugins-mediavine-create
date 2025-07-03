@@ -705,7 +705,7 @@ class Publish extends Plugin {
 			if ( function_exists( 'libxml_use_internal_errors' ) ) {
 				libxml_use_internal_errors( true );
 			}
-			$load = $dom->loadHTML( htmlentities( $creation->instructions, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' ) );
+			$load = $dom->loadHTML( htmlspecialchars_decode( utf8_decode( htmlentities( $creation->instructions, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false ) ) ) );
 			if ( function_exists( 'libxml_use_internal_errors' ) ) {
 				libxml_use_internal_errors( false );
 			}

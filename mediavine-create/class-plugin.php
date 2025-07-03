@@ -15,9 +15,9 @@ use Mediavine\Settings;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '1.9.12';
+	const VERSION = '1.9.13';
 
-	const DB_VERSION = '1.9.12';
+	const DB_VERSION = '1.9.13';
 
 	const TEXT_DOMAIN = 'mediavine';
 
@@ -807,6 +807,12 @@ class Plugin {
 		$creations->set_limit( 10000 );
 		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 		$republish_ids       = [];
+
+		// Republish cards with instructions that contain HTML entities (Remove January 2026)
+		if ( version_compare( $last_plugin_version, '1.9.13', '<' ) ) {
+			$cards = $creations->where( [ 'instructions', 'LIKE', '%&%' ] );
+			array_push( $republish_ids, array_values( wp_list_pluck( $cards, 'id' ) ) );
+		}
 
 		// Republish cards with rating_count > 0 (Remove January 2026)
 		if ( version_compare( $last_plugin_version, '1.9.12', '<' ) ) {

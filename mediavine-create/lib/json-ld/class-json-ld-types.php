@@ -703,7 +703,8 @@ class JSON_LD_Types {
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( true );
 		}
-		$load = $dom->loadHTML( htmlentities( do_shortcode( $value ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' ) );
+		// Use UTF-8 encoding declaration to properly handle UTF-8 content
+		$load = $dom->loadHTML( htmlspecialchars_decode( utf8_decode( htmlentities( do_shortcode( $value ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false ) ) ) );
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( false );
 		}
