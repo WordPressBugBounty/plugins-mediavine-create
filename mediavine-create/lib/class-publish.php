@@ -705,7 +705,10 @@ class Publish extends Plugin {
 			if ( function_exists( 'libxml_use_internal_errors' ) ) {
 				libxml_use_internal_errors( true );
 			}
-			$load = $dom->loadHTML( htmlspecialchars_decode( utf8_decode( htmlentities( $creation->instructions, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false ) ) ) );
+			// Load HTML with UTF-8 encoding support
+			// Wrap content in a container to preserve structure and ensure UTF-8
+			$html_content = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><div>' . $creation->instructions . '</div>';
+			$load = $dom->loadHTML( $html_content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 			if ( function_exists( 'libxml_use_internal_errors' ) ) {
 				libxml_use_internal_errors( false );
 			}
@@ -722,8 +725,25 @@ class Publish extends Plugin {
 				++$i;
 			}
 
-			// Remove the doctype when saving
-			$creation->instructions = preg_replace( '~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i', '', $dom->saveHTML() );
+			// Save HTML and extract only the content we need
+			$xpath = new \DOMXPath($dom);
+			$wrapper = $xpath->query('//div')->item(0);
+			
+			if ( $wrapper ) {
+				// Get the inner HTML of our wrapper div
+				$output = '';
+				foreach ( $wrapper->childNodes as $child ) {
+					$output .= $dom->saveHTML( $child );
+				}
+				$creation->instructions = trim( $output );
+			} else {
+				// Fallback to original method
+				$output = $dom->saveHTML();
+				$output = preg_replace( '~<meta[^>]*>\s*~i', '', $output );
+				$output = preg_replace( '~</?div[^>]*>\s*~i', '', $output );
+				$output = preg_replace( '~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i', '', $output );
+				$creation->instructions = trim( $output );
+			}
 		}
 
 		return $creation;

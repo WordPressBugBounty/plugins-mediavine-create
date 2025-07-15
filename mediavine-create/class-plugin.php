@@ -15,9 +15,9 @@ use Mediavine\Settings;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '1.9.13';
+	const VERSION = '1.9.14';
 
-	const DB_VERSION = '1.9.13';
+	const DB_VERSION = '1.9.14';
 
 	const TEXT_DOMAIN = 'mediavine';
 
@@ -322,7 +322,6 @@ class Plugin {
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_settings' ], 30 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_shapes' ], 35 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'republish_queue' ], 40 );
-		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_queue' ], 45 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_reviews_table' ], 50 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'importer_admin_notice' ], 60 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'fix_cloned_ratings' ], 70 );
@@ -763,36 +762,6 @@ class Plugin {
 	}
 
 	/**
-	 * Updates cards based on various queues and actions.
-	 *
-	 * Always check for less than current version as this is run before the version is updated.
-	 * Add estimated removal date (around 6 months).
-	 *
-	 * @return void
-	 */
-	public function update_queue() {
-		$creations           = new MV_DBI( 'mv_creations' );
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		// add version compares here
-		// use `Publish::selective_update_queue( $creation_ids, 'fix_name' );` to selectively update
-		// add an action in the plugin `init` method under `fixes` where the action name is `mv_[fix_name]_queue_action`
-
-		// FIX VIDEO DESCRIPTIONS -- Remove May 2020
-		if ( version_compare( $last_plugin_version, '1.5.4', '<' ) ) {
-			// get creation IDS
-			$args = [
-				'select' => [ 'id' ],
-				'limit'  => 10000,
-			];
-			$ids  = array_values( wp_list_pluck( $creations->find( $args ), 'id' ) );
-			if ( ! empty( $ids ) ) {
-				Publish::selective_update_queue( $ids, 'fix_video_description' );
-			}
-		}
-	}
-
-	/**
 	 * Republishes create cards depending on plugin version
 	 *
 	 * Always check for less than current version as this is run before the version is updated
@@ -809,8 +778,8 @@ class Plugin {
 		$republish_ids       = [];
 
 		// Republish cards with instructions that contain HTML entities (Remove January 2026)
-		if ( version_compare( $last_plugin_version, '1.9.13', '<' ) ) {
-			$cards = $creations->where( [ 'instructions', 'LIKE', '%&%' ] );
+		if ( version_compare( $last_plugin_version, '1.9.14', '<' ) ) {
+			$cards = $creations->where( [ 'published', 'LIKE', '%&lt;%' ] );
 			array_push( $republish_ids, array_values( wp_list_pluck( $cards, 'id' ) ) );
 		}
 
