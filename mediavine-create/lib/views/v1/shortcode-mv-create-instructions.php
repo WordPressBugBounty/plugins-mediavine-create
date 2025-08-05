@@ -1,6 +1,13 @@
-<?php if ( ! empty( $args['creation']['instructions'] ) ) {
+<?php 
+/**
+ * Instructions are now cleaned during publishing to remove empty Slate editor artifacts
+ * and have schema IDs properly injected. Minimal processing needed here.
+ */
+if ( ! empty( $args['creation']['instructions'] ) ) {
 	$instructions = $args['creation']['instructions'];
-	$sanitized    = str_replace( '<p><br></p>', '', $instructions );
+	
+	// Only minimal cleanup needed for legacy content compatibility
+	$sanitized = str_replace( '<p><br></p>', '', $instructions );
 ?>
 	<?php if ( empty( $args['print'] ) ) { ?>
 	<div class="mv-create-hands-free"></div>

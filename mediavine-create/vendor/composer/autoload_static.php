@@ -270,6 +270,8 @@ class ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8
         'Mediavine\\Create\\Help' => __DIR__ . '/../..' . '/lib/helpers/class-help.php',
         'Mediavine\\Create\\Helpers\\Arr' => __DIR__ . '/../..' . '/lib/helpers/class-arr.php',
         'Mediavine\\Create\\Helpers\\Collection' => __DIR__ . '/../..' . '/lib/helpers/class-collection.php',
+        'Mediavine\\Create\\Helpers\\Instructions_Cleaner' => __DIR__ . '/../..' . '/lib/helpers/class-instructions-cleaner.php',
+        'Mediavine\\Create\\Helpers\\Schema_Id_Injector' => __DIR__ . '/../..' . '/lib/helpers/class-schema-id-injector.php',
         'Mediavine\\Create\\Helpers\\Str' => __DIR__ . '/../..' . '/lib/helpers/class-str.php',
         'Mediavine\\Create\\Images' => __DIR__ . '/../..' . '/lib/images/class-images.php',
         'Mediavine\\Create\\Images_API' => __DIR__ . '/../..' . '/lib/images/class-images-api.php',

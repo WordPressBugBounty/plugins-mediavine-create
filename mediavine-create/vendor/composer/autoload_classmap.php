@@ -205,6 +205,8 @@ return array(
     'Mediavine\\Create\\Help' => $baseDir . '/lib/helpers/class-help.php',
     'Mediavine\\Create\\Helpers\\Arr' => $baseDir . '/lib/helpers/class-arr.php',
     'Mediavine\\Create\\Helpers\\Collection' => $baseDir . '/lib/helpers/class-collection.php',
+    'Mediavine\\Create\\Helpers\\Instructions_Cleaner' => $baseDir . '/lib/helpers/class-instructions-cleaner.php',
+    'Mediavine\\Create\\Helpers\\Schema_Id_Injector' => $baseDir . '/lib/helpers/class-schema-id-injector.php',
     'Mediavine\\Create\\Helpers\\Str' => $baseDir . '/lib/helpers/class-str.php',
     'Mediavine\\Create\\Images' => $baseDir . '/lib/images/class-images.php',
     'Mediavine\\Create\\Images_API' => $baseDir . '/lib/images/class-images-api.php',

@@ -698,52 +698,23 @@ class Publish extends Plugin {
 	}
 
 	public static function prepare_instructions( $creation ) {
-		$creation->instructions = html_entity_decode( $creation->instructions );
-
-		if ( ( 'diy' === $creation->type ) || ( 'recipe' === $creation->type ) ) {
-			$dom = new \DOMDocument();
-			if ( function_exists( 'libxml_use_internal_errors' ) ) {
-				libxml_use_internal_errors( true );
-			}
-			// Load HTML with UTF-8 encoding support
-			// Wrap content in a container to preserve structure and ensure UTF-8
-			$html_content = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><div>' . $creation->instructions . '</div>';
-			$load = $dom->loadHTML( $html_content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-			if ( function_exists( 'libxml_use_internal_errors' ) ) {
-				libxml_use_internal_errors( false );
-			}
-			if ( ! $load ) {
-				return $creation;
-			}
-
-			$lis = $dom->getElementsByTagName( 'li' );
-			$i   = 1; // start at 1 because it's outputting HTML for instructions, so step 1 should be `mv_create_123_1`
-
-			foreach ( $lis as $li ) {
-				// the schema outputs the anchor as `mv_create_123_1`, so we do the same here
-				$li->setAttribute( 'id', "mv_create_{$creation->id}_{$i}" );
-				++$i;
-			}
-
-			// Save HTML and extract only the content we need
-			$xpath = new \DOMXPath($dom);
-			$wrapper = $xpath->query('//div')->item(0);
-			
-			if ( $wrapper ) {
-				// Get the inner HTML of our wrapper div
-				$output = '';
-				foreach ( $wrapper->childNodes as $child ) {
-					$output .= $dom->saveHTML( $child );
-				}
-				$creation->instructions = trim( $output );
-			} else {
-				// Fallback to original method
-				$output = $dom->saveHTML();
-				$output = preg_replace( '~<meta[^>]*>\s*~i', '', $output );
-				$output = preg_replace( '~</?div[^>]*>\s*~i', '', $output );
-				$output = preg_replace( '~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i', '', $output );
-				$creation->instructions = trim( $output );
-			}
+		// Clean up empty tags from Slate editor
+		$cleaned_instructions = \Mediavine\Create\Helpers\Instructions_Cleaner::clean_instructions( $creation->instructions, $creation->id );
+		
+		if ( null === $cleaned_instructions ) {
+			$creation->instructions = null;
+			return $creation;
+		}
+		
+		// Apply HTML entity decoding
+		$creation->instructions = html_entity_decode( $cleaned_instructions );
+		
+		// Add schema IDs for recipe and DIY cards only
+		if ( in_array( $creation->type, [ 'recipe', 'diy' ] ) ) {
+			$creation->instructions = \Mediavine\Create\Helpers\Schema_Id_Injector::add_schema_ids( 
+				$creation->instructions, 
+				$creation->id 
+			);
 		}
 
 		return $creation;

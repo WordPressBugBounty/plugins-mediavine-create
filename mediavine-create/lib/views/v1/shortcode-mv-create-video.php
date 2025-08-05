@@ -4,7 +4,7 @@ $external_video = (array) json_decode( $args['creation']['external_video'] ?: '{
 
 if ( ( ! empty( $video['include'] ) || ! empty( $video['display'] ) ) && ! $args['print'] && class_exists( '\Mediavine\MCP\Video' ) ) { ?>
 	<div class="mv-create-video">
-		<?php echo '[mv_video key=' . esc_attr( $video['key'] ) . ' volume=' . esc_attr( $video['volume'] ) . ' aspectRatio=' . esc_attr( $video['aspectRatio'] ) . ' jsonld="false"]'; ?>
+		<?php echo '[mv_video key=' . esc_attr( $video['key'] ) . ' volume=' . esc_attr( $video['volume'] ) . ' ratio=' . esc_attr( $video['aspectRatio'] ) . ' jsonld="false"]'; ?>
 	</div>
 	<?php
 }
