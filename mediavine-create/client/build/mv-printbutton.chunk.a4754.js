@@ -1,0 +1,2 @@
+"use strict";(self.mvCreateJsonp=self.mvCreateJsonp||[]).push([[68],{999:(t,e,r)=>{r.r(e),r.d(e,{default:()=>a});const a=t=>Array.prototype.forEach.call(t,t=>{t.addEventListener("click",e=>{e.preventDefault();const r=t.getAttribute("data-mv-print");window.open(r,"_blank")})})}}]);
+//# sourceMappingURL=mv-printbutton.chunk.a4754.js.map

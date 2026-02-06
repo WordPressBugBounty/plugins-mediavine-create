@@ -379,13 +379,19 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				return $relation;
 			}
 
-			$meta = json_decode($relation['meta'] ?: '{}');
+			$meta = json_decode( $relation['meta'] ?: '{}' );
+
+			// Ensure $meta is an object (json_decode can return array if meta contains [])
+			if ( ! is_object( $meta ) ) {
+				$meta = (object) [];
+			}
 
 			// reassign external_thumbnail_url
 			$img = wp_get_attachment_image_src( $relation['thumbnail_id'], 'full' );
 
 			// no point in overwriting if the urls already match
-			if ( ! empty( $img[0] ) && $img[0] !== $meta->external_thumbnail_url ) {
+			$current_url = $meta->external_thumbnail_url ?? null;
+			if ( ! empty( $img[0] ) && $img[0] !== $current_url ) {
 				$meta->external_thumbnail_url = $img[0];
 				$meta->expires                = null;
 
@@ -446,7 +452,12 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			// if key DOES exist, use that entry's meta data
 			// otherwise return if the keys don't match with the original
 			if ( empty( $original_relations[ $key ]->meta ) ) {
-				return [];
+				// Return associative array (not empty []) so json_encode produces "{}" not "[]"
+				// Include expected keys that scrape_amazon_link accesses
+				return [
+					'expires'                => null,
+					'external_thumbnail_url' => null,
+				];
 			}
 
 			return json_decode($original_relations[ $key ]->meta ?: '{}', true);

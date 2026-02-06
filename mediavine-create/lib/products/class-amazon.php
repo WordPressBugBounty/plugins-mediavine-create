@@ -413,9 +413,9 @@ class Amazon {
 				__( 'Register to Access PRO Features', 'mediavine' ),
 				[
 					'status'    => 401,
-					'message'   => __( 'Create by Mediavine must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title.', 'mediavine' ),
+					'message'   => __( 'Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title.', 'mediavine' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_api' ),
-					'link_text' => __( 'Register Create by Mediavine', 'mediavine' ),
+					'link_text' => __( 'Register Create', 'mediavine' ),
 				]
 			);
 		}
@@ -446,8 +446,8 @@ class Amazon {
 				[
 					'status'    => 501,
 					'message'   => __( "Uh oh! It looks like another plugin is conflicting with Create's Amazon API Integration feature. We're working on a way to avoid these conflicts, but in the meantime, entering the product details manually is the easiest solution!", 'mediavine' ),
-					'link_url'  => 'mailto:create@mediavine.com',
-					'link_text' => __( 'Contact create@mediavine.com for more information.', 'mediavine' ),
+					'link_url'  => 'mailto:support@create.studio',
+					'link_text' => __( 'Contact support@create.studio for more information.', 'mediavine' ),
 				]
 			);
 		}
@@ -647,7 +647,7 @@ class Amazon {
 		$affiliates_notice->data  = [
 			'type'         => 'notice',
 			'label'        => __( 'Conflict with Another Plugin', 'mediavine' ),
-			'instructions' => __( "Uh oh! Another plugin is conflicting with Create's Amazon API Integration feature. Please disable your other Amazon plugins that utilize Amazon's API in order to activate this feature in Create. Contact create@mediavine.com for more information.", 'mediavine' ),
+			'instructions' => __( "Uh oh! Another plugin is conflicting with Create's Amazon API Integration feature. Please disable your other Amazon plugins that utilize Amazon's API in order to activate this feature in Create. Contact support@create.studio for more information.", 'mediavine' ),
 		];
 		$affiliates_notice->group = 'mv_create_affiliates';
 		$affiliates_notice->order = 1;

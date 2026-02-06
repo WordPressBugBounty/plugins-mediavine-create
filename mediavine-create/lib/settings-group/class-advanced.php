@@ -147,7 +147,7 @@ class Advanced implements Settings_Group {
 				'data'  => [
 					'type'         => 'checkbox',
 					'label'        => __( 'Use Enhanced Search', 'mediavine' ),
-					'instructions' => __( 'Create by Mediavine has a search feature that allows users to match posts based on the content of the recipe cards included in the post. If you notice that this feature is causing an issue with other themes or plugins that modify the search query, you can disable this feature.', 'mediavine' ),
+					'instructions' => __( 'Create has a search feature that allows users to match posts based on the content of the recipe cards included in the post. If you notice that this feature is causing an issue with other themes or plugins that modify the search query, you can disable this feature.', 'mediavine' ),
 					'default'      => __( 'Disabled', 'mediavine' ),
 				],
 			],
@@ -183,7 +183,7 @@ class Advanced implements Settings_Group {
 				'data'  => [
 					'type'         => 'checkbox',
 					'label'        => __( 'Display Review CTAs', 'mediavine' ),
-					'instructions' => __( 'Checking this box will add prompts for users to leave reviews.', 'mediavine' ), // @todo this can/SHOULD be reworded better
+					'instructions' => __( 'Display prompts encouraging site visitors to leave reviews.', 'mediavine' ),
 					'default'      => __( 'Disabled', 'mediavine' ),
 					'dependent_on' => Plugin::$settings_group . '_allow_reviews',
 				],
@@ -270,7 +270,6 @@ class Advanced implements Settings_Group {
 				'data'  => [
 					'type'         => 'text',
 					'label'        => __( 'Comments Section', 'mediavine' ),
-					// TODO: Add a link to help.mediavine.com
 					'instructions' => __( 'Add the DOM selector of your comments section. (In most themes, this will be "#comments".)' ),
 					'default'      => '#comments',
 					'dependent_on' => Plugin::$settings_group . '_enable_public_reviews',

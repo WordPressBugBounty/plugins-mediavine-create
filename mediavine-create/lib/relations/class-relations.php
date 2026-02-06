@@ -102,7 +102,10 @@ class Relations extends Plugin {
 		// Everything needs a thumbnail
 		if ( ! empty( $relation->thumbnail_id ) ) {
 			if ( 'gallery' === $layout ) {
-				Images::check_image_size( $relation->thumbnail_id, [], $size );
+				// Skip synchronous image processing during REST API requests to avoid timeouts
+				if ( ! defined('REST_REQUEST') || ! REST_REQUEST ) {
+					Images::check_image_size( $relation->thumbnail_id, [], $size );
+				}
 			}
 			return \wp_get_attachment_image_url( $relation->thumbnail_id, $size );
 		}
@@ -215,7 +218,8 @@ class Relations extends Plugin {
 
 			if ( ! empty( ( $relation->asin ) ) ) {
 				$meta = json_decode($relation->meta ?: '{}');
-				if ( $meta ) {
+				// Ensure $meta is an object (json_decode can return array if meta contains [])
+				if ( is_object( $meta ) && ! empty( $meta->external_thumbnail_url ) ) {
 					$relation->thumbnail_uri = $meta->external_thumbnail_url;
 				}
 			}

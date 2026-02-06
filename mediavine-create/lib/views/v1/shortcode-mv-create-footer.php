@@ -13,7 +13,27 @@ if ( ! empty( $args['creation']['create_settings'] ) ) {
 <div class="mv-create-footer-flexbox">
 
 	<?php if ( $copyright ) { ?>
-		<div class="mv-create-copy">&copy; <?php echo wp_kses_post( $copyright ); ?></div>
+		<?php
+		/**
+		 * Filter the copyright/author HTML output in Create cards
+		 *
+		 * This filter allows developers to customize the copyright/author section,
+		 * such as converting it to a link to the author's page.
+		 *
+		 * @param string $copyright_html The HTML for the copyright section
+		 * @param string $copyright      The copyright/author text
+		 * @param array  $args           The card arguments including full creation data
+		 *
+		 * @since 1.10.2
+		 */
+		$copyright_html = apply_filters(
+			'mv_create_copyright_html',
+			'<div class="mv-create-copy">&copy; ' . wp_kses_post( $copyright ) . '</div>',
+			$copyright,
+			$args
+		);
+		echo wp_kses_post( $copyright_html );
+		?>
 	<?php } ?>
 
 	<div class="mv-create-categories">

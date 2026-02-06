@@ -1,9 +1,9 @@
-=== Create by Mediavine ===
-Contributors: mediavine
-Donate link: https://www.mediavine.com
+=== Create ===
+Contributors: mischiefmarmot
+Donate link: https://create.studio
 Tags: recipe, recipe card, how to, schema, seo
-Requires at least: 6.3
-Tested up to: 6.8.2
+Requires at least: 6.5
+Tested up to: 6.8.3
 Requires PHP: 7.4
 Stable tag: trunk
 License: GPLv2 or later
@@ -25,15 +25,13 @@ Now you can craft multiple Google Schema.org types using just one plugin.
 
 Now: Automatically calculate nutritional data for your recipes for free.
 
-[youtube https://www.youtube.com/watch?v=OmtqDGi3Nc4]
-
 = Create is for... =
 
 **Recipes** — Easily import content from other plugins. Includes free nutrition calculator and video embeds.
 **Lists and round-ups** — Showcase images, links and more in a user-friendly manner.
 **How-to guides** — Display beautiful printable materials lists, instructions and videos for DIYs, crafts and more.
 
-= Create by Mediavine was built with the following in mind: =
+= Create was built with the following in mind: =
 **1. Speed**
 Lightweight, with our strong focus on site speed
 
@@ -65,34 +63,34 @@ Responsively designed to engage the majority of your audience
 
 = Minimum Requirements =
 
-* PHP version 5.4.45 or greater (PHP 7.2 or greater is recommended)
-* MySQL version 5.5 or greater (MySQL 5.6 or greater is recommended)
+* PHP version 7.4 or greater
+* MySQL version 6.5 or greater
 
 = Automatic Installation =
 
 1. Go to Plugins > Add New
-1. Type "Create by Mediavine" in the search field and click "Search Plugins"
+1. Type "Create" in the search field and click "Search Plugins"
 1. Click "Install Now" to install and then click "Activate"
-1. Go to Settings > Create by Mediavine and choose your card style
-1. [Register your Create plugin](https://help.mediavine.com/create-by-mediavine/how-to-register-your-create-plugin)
-1. If using another recipe card plugin and you'd like to import your recipes from that plugin, [download and install the Mediavine Recipe Importers utility](https://www.mediavine.com/mediavine-recipe-importers-download)
+1. Go to Settings > Create and choose your card style
+1. [Register your Create plugin](https://help.create.studio/en/articles/8916417)
+1. If using another recipe card plugin and you'd like to import your recipes from that plugin, [download and install the Recipe Importers utility](https://create.studio/downloads/create-recipe-importers.zip)
 
 = Manual Installation =
 
-1. [Download a copy of the "Create by Mediavine" plugin](https://downloads.wordpress.org/plugin/mediavine-create.latest-stable.zip)
+1. [Download a copy of the "Create" plugin](https://downloads.wordpress.org/plugin/mediavine-create.latest-stable.zip)
 1. Upload `mediavine-create` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the "Plugins" menu in WordPress
-1. Go to Settings > Create by Mediavine and choose your card style
-1. [Register your Create plugin](https://help.mediavine.com/create-by-mediavine/how-to-register-your-create-plugin)
-1. If using another recipe card plugin and you'd like to import your recipes from that plugin, [download and install the Mediavine Recipe Importers utility](https://www.mediavine.com/mediavine-recipe-importers-download)
+1. Go to Settings > Create and choose your card style
+1. [Register your Create plugin](https://help.create.studio/en/articles/8916417)
+1. If using another recipe card plugin and you'd like to import your recipes from that plugin, [download and install the Recipe Importers utility](https://create.studio/downloads/create-recipe-importers.zip)
 
-For more, please see our [help center](https://help.mediavine.com/create-by-mediavine).
+For more, please see our [help center](https://help.create.studio).
 
 == Frequently Asked Questions ==
 
 = How do I import my existing recipes? =
 
-[Download and install the Mediavine Recipe Importers utility](https://www.mediavine.com/mediavine-recipe-importers-download)
+[Download and install the Recipe Importers utility](https://create.studio/downloads/create-recipe-importers.zip)
 
 = Which recipe card plugins does the importer support?
 
@@ -121,7 +119,7 @@ Yes! Nutritional data is an important part of Schema, which search engines love 
 
 Nutrition facts can be manually entered for a recipe. They will also transfer over if the recipe already contains it.
 
-We also provide automatic nutrition calculation through our partnership with [Nutritionix](http://nutritionix.com/). [Learn more about this feature](http://help.mediavine.com/create-by-mediavine/auto-calculate-nutrition-with-create-by-mediavine).
+We also provide automatic nutrition calculation with [API Ninjas Nutrition](https://api-ninjas.com/api/nutrition). [Learn more about this feature](https://help.create.studio/en/articles/8914561).
 
 = How much does it cost? =
 
@@ -130,7 +128,7 @@ Create is free to the blogging community at large. You do not need to be a Media
 There may be features in the future that would need a license for a fee, but the core functionalities will always remain free and supported for everyone — including plugin updates to keep Create in compliance with WordPress releases.
 
 = Where do I report security bugs found in this plugin? =
-Please report security bugs found in the source code of the Create by Mediavine plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/mediavine-create). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+Please report security bugs found in the source code of the Create plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/mediavine-create). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Screenshots ==
 
@@ -153,6 +151,38 @@ Please report security bugs found in the source code of the Create by Mediavine 
 
 == Changelog ==
 
+= 1.10.5 =
+* FIX: Resolve PHP 8.x fatal error when saving list relations with empty or array-type meta fields
+
+= 1.10.4 =
+* FIX: Restore soft returns (Shift+Enter line breaks) in WYSIWYG instructions editor
+
+= 1.10.3 =
+* FIX: Restore Slate editor CSS fix for Chrome 105+ to prevent cursor jumping in WYSIWYG editors
+
+= 1.10.2 =
+* FEATURE: Add "Rating" sort option to card collections that uses weighted rating (Bayesian average)
+* ENHANCEMENT: Display star ratings and review counts in card grid and list views
+* FIX: Restrict admin script enqueuing to Create-specific pages to prevent variable conflicts with other plugins and resolve Gutenberg block registration issues
+* FIX: Classic editor toolbar buttons display correctly in Code tab editor
+* FIX: Build output wrapped with IIFE wrapper to prevent strict mode variable leakage
+
+= 1.10.1 =
+* FEATURE: Add "Posts" dropdown navigation to card editor to easily navigate to a card's parent posts
+* ENHANCEMENT: Include descriptions from external links and posts when building Lists
+* FIX: Automatically republish cards with missing `<ol>` and `<ul>` tags in instructions
+* FIX: Retain `href`/link in Instructions when editing a card
+* FIX: Improve WordPress 6.5+ compatibility by using traditional script enqueuing
+* FIX: Skip synchronous image processing during REST API requests to prevent timeouts on list card saves
+* FIX: Adds checks in color mixing functions to prevent PHP 8+ fatal errors (thanks Peter/Deep Roots Hosting!)
+* FIX: Resolve "spastic" editing and unusability in detail ingredient editor
+
+
+= 1.9.16 =
+* FEATURE: Change to new ownership!
+* ENHANCEMENT: Upgrade to PHP 7.4, Node 18 & 22 for modern features
+* ENHANCEMENT: Upgrade to WordPress 6.5 for modern features
+
 = 1.9.15 =
 * FIX: Improved instructions processing with robust DOM handling
 * FIX: Fixed Mediavine video aspect ratio
@@ -163,16 +193,3 @@ Please report security bugs found in the source code of the Create by Mediavine 
 = 1.9.12 =
 * FIX: Recipe card ratings display in structured data
 * FIX: Mediavine video selection works with new Mediavine videos endpoint, and video thumbnails display correctly
-
-= 1.9.11 =
-* FIX: Fixes author dropdown to include WP author names
-* REMOVE: Removes unused code
-
-= 1.9.10 =
-* FIX: Re-adds edit review functionality after patching Reviews API endpoints
-
-= 1.9.9 =
-* FIX: Patches potential sensitive data exposure vulnerability through Reviews API
-
-= 1.9.8 =
-* FIX: Patches potential XSS security vulnerability

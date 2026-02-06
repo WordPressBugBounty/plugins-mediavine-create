@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'mediavine/mediavine-create',
-        'pretty_version' => 'dev-main',
-        'version' => 'dev-main',
-        'reference' => 'c52903f85673970b138de15b1ba30d417b3a3544',
+        'pretty_version' => 'dev-release/1.10.5',
+        'version' => 'dev-release/1.10.5',
+        'reference' => '6e86160b740313147fc245421a4f87da90e8616e',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -38,9 +38,9 @@
             'dev_requirement' => false,
         ),
         'mediavine/mediavine-create' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => 'c52903f85673970b138de15b1ba30d417b3a3544',
+            'pretty_version' => 'dev-release/1.10.5',
+            'version' => 'dev-release/1.10.5',
+            'reference' => '6e86160b740313147fc245421a4f87da90e8616e',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

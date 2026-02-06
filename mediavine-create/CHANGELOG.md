@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.9.16
+FIX: Prevent block re-registration errors in test environments
+FIX: Improve DOM content extraction for LIBXML_HTML_NOIMPLIED
+FIX: Relax validation to handle DOM restructuring of HTML fragments
+FIX: Respect 'Enable Error Reporting' setting for DOM processing diagnostic logs
+
+## 1.9.15
+FIX: Improved instructions processing with robust DOM handling
+FIX: Fixed Mediavine video aspect ratio
+
 ## 1.9.14
 FIX: Greek characters properly render in instructions
 

@@ -15,9 +15,9 @@ use Mediavine\Settings;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '1.9.15';
+	const VERSION = '1.10.5';
 
-	const DB_VERSION = '1.9.15';
+	const DB_VERSION = '1.10.5';
 
 	const TEXT_DOMAIN = 'mediavine';
 
@@ -34,6 +34,10 @@ class Plugin {
 	public $api_route = 'mv-create';
 
 	public $api_version = 'v1';
+
+	public static $services_api_url = 'https://create.studio/api/v1';
+
+	public static $create_studio_base_url = 'https://create.studio';
 
 	public static $db_interface = null;
 
@@ -328,6 +332,7 @@ class Plugin {
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'fix_cookbook_canonical_post_ids' ], 80 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'add_initial_revision_to_cards' ], 85 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'queue_existing_amazon_products' ], 90 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_services_api' ], 95 );
 
 		// Fixes
 		add_action( 'mv_fix_video_description_queue_action', [ $this, 'fix_video_description' ] );
@@ -381,7 +386,6 @@ class Plugin {
 		$Images->step_queue();
 
 		Revisions::get_instance();
-		Data_Sync::get_instance();
 
 		$JSON_LD = JSON_LD::get_instance();
 
@@ -559,7 +563,7 @@ class Plugin {
 		}
 
 		$result = wp_remote_post(
-			'https://create-api.mediavine.com/api/v1/sites/' . $token_data->site_id, [
+			'https://create.studio/api/v1/sites/' . $token_data->site_id, [
 				'headers' => [
 					'Content-Type'  => 'application/json; charset=utf-8',
 					'Authorization' => 'bearer ' . $api_token_setting->value,
@@ -788,6 +792,36 @@ class Plugin {
 			$cards = $creations->where( [ 'rating_count', '>', 0 ] );
 			$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $cards, 'id' ) ) );
 		}
+
+		// Republish cards with orphaned <li> tags in instructions (Remove February 2026)
+		if ( version_compare( $last_plugin_version, '1.10.1', '<' ) ) {
+			// Query for cards where published instructions start with <li> (orphaned list items)
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$orphaned_list_cards = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id FROM {$wpdb->prefix}mv_creations
+					WHERE published IS NOT NULL
+					AND published != ''
+					AND JSON_EXTRACT(published, '$.instructions') LIKE %s
+					AND (
+						JSON_EXTRACT(published, '$.instructions') NOT LIKE %s
+						OR LOCATE('<li', JSON_UNQUOTE(JSON_EXTRACT(published, '$.instructions'))) <
+							COALESCE(NULLIF(LOCATE('<ol', JSON_UNQUOTE(JSON_EXTRACT(published, '$.instructions'))), 0), 999999)
+					)
+					AND (
+						JSON_EXTRACT(published, '$.instructions') NOT LIKE %s
+						OR LOCATE('<li', JSON_UNQUOTE(JSON_EXTRACT(published, '$.instructions'))) <
+							COALESCE(NULLIF(LOCATE('<ul', JSON_UNQUOTE(JSON_EXTRACT(published, '$.instructions'))), 0), 999999)
+					)",
+					'%<li%',
+					'%<ol%',
+					'%<ul%'
+				)
+			);
+			if ( ! empty( $orphaned_list_cards ) ) {
+				$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $orphaned_list_cards, 'id' ) ) );
+			}
+		}
 		if ( ! empty( $republish_ids ) ) {
 			\Mediavine\Create\Publish::update_publish_queue( $republish_ids );
 		}
@@ -801,12 +835,12 @@ class Plugin {
 	public function importer_admin_notice_display() {
 		printf(
 			'<div class="notice notice-info"><p><strong>%1$s</strong></p><p>%2$s</p></div>',
-			wp_kses_post( __( 'Thanks for installing Create by Mediavine!', 'mediavine' ) ),
+			wp_kses_post( __( 'Thanks for installing Create!', 'mediavine' ) ),
 			wp_kses_post(
 				sprintf(
 					/* translators: %1$s: linked importer plugin */
 					__( 'If you\'re moving from another recipe plugin, you can also download and install our %1$s.', 'mediavine' ),
-					'<a href="https://www.mediavine.com/mediavine-recipe-importers-download" target="_blank">' . __( 'importer plugin', 'mediavine' ) . '</a>'
+					'<a href="https://create.studio/downloads/create-recipe-importers.zip" target="_blank">' . __( 'importer plugin', 'mediavine' ) . '</a>'
 				)
 			)
 		);

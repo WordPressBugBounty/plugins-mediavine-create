@@ -128,7 +128,7 @@ class Display implements Settings_Group {
 				'data'  => [
 					'type'         => 'checkbox',
 					'label'        => __( 'Aggressive List CSS', 'mediavine' ),
-					'instructions' => __( 'Some themes may remove bullets and numbers from lists. This forces them to display in Create by Mediavine Cards.', 'mediavine' ),
+					'instructions' => __( 'Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards.', 'mediavine' ),
 					'default'      => __( 'Disabled', 'mediavine' ),
 				],
 			],

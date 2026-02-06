@@ -155,6 +155,13 @@ class Creations_API extends Creations {
 
 		if ( empty( $params['order_by'] ) ) {
 			$query_args['order_by'] = 'created';
+		} elseif ( 'rating' === $params['order_by'] ) {
+			// Use weighted rating (Bayesian average) that considers both rating value and count
+			// Formula: (v/(v+m)) * R + (m/(v+m)) * C
+			// where v = rating_count, m = minimum votes (5), R = rating, C = mean rating (4.0)
+			// This ensures that a 5-star rating with 1 review ranks lower than a 4.9-star with 50 reviews
+			// CASE statement ensures cards with NULL ratings are pushed to the bottom (0 weighted score)
+			$query_args['order_by'] = 'CASE WHEN rating IS NULL OR rating_count IS NULL OR rating_count = 0 THEN 0 ELSE ((rating_count / (rating_count + 5)) * rating + (5 / (rating_count + 5)) * 4.0) END';
 		}
 
 		if ( isset( $params['search'] ) ) {
@@ -182,7 +189,10 @@ class Creations_API extends Creations {
 			foreach ( $creations as $creation ) {
 				$creation                = static::bind_creation_relationships( $creation );
 				$creation->id            = intval( $creation->id );
-				$creation->thumbnail_uri = \wp_get_attachment_url( $creation->thumbnail_id );
+				// thumbnail_uri is already set in bind_creation_relationships, but ensure it's set for backwards compatibility
+				if ( ! isset( $creation->thumbnail_uri ) ) {
+					$creation->thumbnail_uri = ! empty( $creation->thumbnail_id ) ? \wp_get_attachment_url( $creation->thumbnail_id ) : '';
+				}
 				if ( isset( $creation->canonical_post_id ) ) {
 					$creation->canonical_post_permalink = get_permalink( $creation->canonical_post_id );
 				}
@@ -231,11 +241,11 @@ class Creations_API extends Creations {
 			$product->thumbnail_uri = Products_Map::get_correct_thumbnail_src( $product );
 		}
 
-		$creation->thumbnail_uri       = \wp_get_attachment_url( $creation->thumbnail_id );
-		$creation->category_name       = self::$api_services->get_term_name( $creation->category );
-		$creation->secondary_term_name = self::$api_services->get_term_name( $creation->secondary_term );
+		$creation->thumbnail_uri       = ! empty( $creation->thumbnail_id ) ? \wp_get_attachment_url( $creation->thumbnail_id ) : '';
+		$creation->category_name       = self::$api_services->get_term_name( $creation->category ?? null );
+		$creation->secondary_term_name = self::$api_services->get_term_name( $creation->secondary_term ?? null );
 
-		$posts = json_decode($creation->associated_posts ?: '[]');
+		$posts = json_decode( $creation->associated_posts ?? '[]' );
 		if ( $posts && count( $posts ) ) {
 			$posts           = array_values( array_unique( $posts ) );
 			$creation->posts = array_map(

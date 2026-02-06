@@ -702,7 +702,10 @@ class Creations_Views extends Creations {
 					}
 
 					// Generate thumbnail if it doesn't exist
-					Images::check_image_size($item['thumbnail_id'], $img_sizes);
+					// Skip synchronous image processing during REST API requests to avoid timeouts
+					if ( ! defined('REST_REQUEST') || ! REST_REQUEST ) {
+						Images::check_image_size($item['thumbnail_id'], $img_sizes);
+					}
 					$highest_res_image = Images::get_highest_available_image_size($item['thumbnail_id'], $thumbnail_image_size);
 
 					$item['thumbnail_url'] = wp_get_attachment_image(
@@ -1747,7 +1750,8 @@ class Creations_Views extends Creations {
 		}
 
 		$meta = json_decode($item['meta'] ?: '{}');
-		if ( empty($meta->external_thumbnail_url) ) {
+		// Ensure $meta is an object (json_decode can return array if meta contains [])
+		if ( ! is_object($meta) || empty($meta->external_thumbnail_url) ) {
 			return '';
 		}
 
@@ -1766,7 +1770,8 @@ class Creations_Views extends Creations {
 		}
 
 		$meta = json_decode($item['meta'] ?: '{}');
-		if ( empty($meta->description) ) {
+		// Ensure $meta is an object (json_decode can return array if meta contains [])
+		if ( ! is_object($meta) || empty($meta->description) ) {
 			return '';
 		}
 

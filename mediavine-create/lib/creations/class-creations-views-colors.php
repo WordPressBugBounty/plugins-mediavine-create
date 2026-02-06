@@ -17,6 +17,8 @@ class Creations_Views_Colors extends Creations_Views {
 	}
 
 	public static function mix( $color1, $color2, $percent = 50 ) {
+		if (empty($color1) && !empty($color2)) { $color1 = $color2; }
+		elseif (empty($color2) && !empty($color1)) { $color2 = $color1; }
 		$first  = self::to_rgb( $color1 );
 		$second = self::to_rgb( $color2 );
 
@@ -91,6 +93,7 @@ class Creations_Views_Colors extends Creations_Views {
 	 */
 	public static function to_rgba( $color, $fraction = 1 ) {
 		$rgba   = self::to_rgb( $color );
+		if (!is_array($rgba)) { return array(); }
 		$rgba[] = self::alpha( $fraction );
 
 		// use %s for alpha to prevent precision issues

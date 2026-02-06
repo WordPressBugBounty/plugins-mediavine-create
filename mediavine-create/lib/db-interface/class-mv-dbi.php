@@ -542,13 +542,6 @@ class MV_DBI {
 	}
 
 	/**
-	 * @todo Remove method. This isn't being used
-	 */
-	public function after_select( $data ) {
-		return $data;
-	}
-
-	/**
 	 * Inserts new row into custom table
 	 *
 	 * @param  array $data Data to be inserted
@@ -1448,73 +1441,6 @@ class MV_DBI {
 		$delete = $this->delete( $object_id );
 
 		return self::handle_error( $delete, true );
-	}
-
-	/**
-	 * Appends a new item to an existing item
-	 *
-	 * @todo Evaluate if this method is even necessary. The method that calls this method is not being used anywhere in the code-base
-	 *
-	 * @param mixed $item
-	 * @param mixed $new_item
-	 * @param mixed $relationships
-	 *
-	 * @return mixed
-	 */
-	public function append_relationships( $item, $new_item, $relationships ) {
-		$all_relationships = $relationships;
-
-		if ( ! empty( $item->object_id ) ) {
-			$item_permalink = get_the_permalink( $item->object_id );
-			$post_title     = get_the_title( $item->object_id );
-			$post_type      = get_post_type( $item->object_id );
-
-			$all_relationships[ $post_type ]                            = [];
-			$all_relationships[ $post_type ]['attributes']['id']        = $item->object_id;
-			$all_relationships[ $post_type ]['attributes']['title']     = $post_title;
-			$all_relationships[ $post_type ]['attributes']['permalink'] = $item_permalink;
-		}
-
-		if ( ! empty( $all_relationships ) ) {
-			$new_item['relationships'] = $all_relationships;
-		}
-
-		return $new_item;
-	}
-
-	/**
-	 * Prepare item
-	 *
-	 * @todo Remove this method. It is leftovers from Indexes and is not being used anywhere in the code-base
-	 *
-	 * @param mixed $item
-	 * @param array $relationships
-	 *
-	 * @return mixed
-	 */
-	public function prepare_item( $item, $relationships = [] ) {
-		$new_item = [];
-
-		$new_item['type'] = $item->type;
-		$new_item['id']   = intval( $item->id );
-		unset( $item->id );
-		unset( $item->type );
-		foreach ( $item as $key => $value ) {
-			$new_item['attributes'][ $key ] = '';
-			// 0 and '0' should be allowed
-			if ( $item->{$key} || ( 0 === $item->{$key} ) || ( '0' === $item->{$key} ) ) {
-				$new_item['attributes'][ $key ] = $value;
-			}
-
-			// Make dates UNIX timestamps
-			if ( in_array( $key, [ 'created', 'modified', 'published' ], true ) ) {
-				$new_item['attributes'][ $key ] = mysql2date( 'U', $value );
-			}
-		}
-
-		$new_item = $this->append_relationships( $item, $new_item, $relationships );
-
-		return $new_item;
 	}
 
 	/**

@@ -24,12 +24,12 @@ class ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8
     );
 
     public static $prefixLengthsPsr4 = array (
-        'S' => 
+        'S' =>
         array (
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
         ),
-        'M' => 
+        'M' =>
         array (
             'Mediavine\\Create\\Psr\\Http\\Message\\' => 34,
             'Mediavine\\Create\\GuzzleHttp\\Psr7\\' => 33,
@@ -40,31 +40,31 @@ class ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
         ),
-        'Symfony\\Polyfill\\Intl\\Idn\\' => 
+        'Symfony\\Polyfill\\Intl\\Idn\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
         ),
-        'Mediavine\\Create\\Psr\\Http\\Message\\' => 
+        'Mediavine\\Create\\Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src',
         ),
-        'Mediavine\\Create\\GuzzleHttp\\Psr7\\' => 
+        'Mediavine\\Create\\GuzzleHttp\\Psr7\\' =>
         array (
             0 => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src',
         ),
-        'Mediavine\\Create\\GuzzleHttp\\Promise\\' => 
+        'Mediavine\\Create\\GuzzleHttp\\Promise\\' =>
         array (
             0 => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/promises/src',
         ),
-        'Mediavine\\Create\\GuzzleHttp\\' => 
+        'Mediavine\\Create\\GuzzleHttp\\' =>
         array (
             0 => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src',
         ),
-        'Mediavine\\Create\\Amazon\\ProductAdvertisingAPI\\v1\\' => 
+        'Mediavine\\Create\\Amazon\\ProductAdvertisingAPI\\v1\\' =>
         array (
             0 => __DIR__ . '/../..' . '/scoped-vendor/mediavine/paapi5-php-sdk/src',
         ),
@@ -182,7 +182,6 @@ class ComposerStaticInitc8f8b9384e2622287158b9b59b29a6d8
         'Mediavine\\Create\\Creations_Views_Hooks' => __DIR__ . '/../..' . '/lib/creations/class-creations-views-hooks.php',
         'Mediavine\\Create\\Creations_WP_Content' => __DIR__ . '/../..' . '/lib/creations/class-creations-wp-content.php',
         'Mediavine\\Create\\Custom_Content' => __DIR__ . '/../..' . '/lib/class-custom-content.php',
-        'Mediavine\\Create\\Data_Sync' => __DIR__ . '/../..' . '/lib/class-data-sync.php',
         'Mediavine\\Create\\Dms' => __DIR__ . '/../..' . '/lib/helpers/rapscallion_themes/class-dms.php',
         'Mediavine\\Create\\Exceptions\\AttributeNotFoundException' => __DIR__ . '/../..' . '/lib/Exceptions/class-attributenotfoundexception.php',
         'Mediavine\\Create\\Exceptions\\ModelNotFoundException' => __DIR__ . '/../..' . '/lib/Exceptions/class-modelnotfoundexception.php',

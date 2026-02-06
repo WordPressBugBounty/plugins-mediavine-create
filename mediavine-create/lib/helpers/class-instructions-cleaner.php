@@ -163,14 +163,20 @@ class Instructions_Cleaner {
 
 	/**
 	 * Log instructions cleaning failures for debugging
-	 * 
+	 *
 	 * @param string $failure_type Type of cleaning failure
 	 * @param int    $creation_id Creation ID for context
 	 * @param string $details Details about the failure
 	 */
 	private static function log_cleaning_failure( $failure_type, $creation_id, $details ) {
-		// Only log if WP_DEBUG is enabled
+		// Only log if WP_DEBUG is enabled AND error logging is enabled in settings
 		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+
+		// Check if error logging is enabled in Create settings
+		$enable_logging = \Mediavine\Settings::get_setting( 'mv_create_enable_logging' );
+		if ( ! $enable_logging ) {
 			return;
 		}
 

@@ -171,7 +171,21 @@ class Admin_Init extends Plugin {
 		$mv_create_url_params = apply_filters( 'mv_create_url_params', self::$mv_create_url_params );
 
 		foreach ( $mv_create_url_params as $url_param_to_check ) {
-			if ( strpos( $current_url, $url_param_to_check ) ) {
+			if ( strpos( $current_url, $url_param_to_check ) !== false ) {
+				return true;
+			}
+		}
+
+		// For post.php and post-new.php, check if it's a built-in post type (post, page, etc.)
+		// Load the script on built-in post types to allow adding Create cards to posts
+		if ( strpos( $current_url, 'post.php' ) !== false || strpos( $current_url, 'post-new.php' ) !== false ) {
+			$screen = get_current_screen();
+			if ( $screen && isset( $screen->post_type ) ) {
+				$post_type = get_post_type_object( $screen->post_type );
+				// Load script if post type is built-in (not a custom post type)
+				if ( $post_type && false === $post_type->_builtin ) {
+					return false;
+				}
 				return true;
 			}
 		}
@@ -238,44 +252,38 @@ class Admin_Init extends Plugin {
 
 		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
 			$script_url = '//localhost:3000/app.build.' . self::VERSION . '.js';
-			wp_enqueue_script( 'mv_create_dev_runtime', '//localhost:3000/runtime.build.' . self::VERSION . '.js', [], self::VERSION, true );
-			wp_enqueue_script( 'mv_create_dev_vendor', '//localhost:3000/vendor.build.' . self::VERSION . '.js', [], self::VERSION, true );
 		}
 
 		if ( $this::is_create_admin_url() ) {
 			wp_enqueue_media();
+
+			$deps = ['lodash'];
+			if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
+				$deps = array_merge( $deps, [ 'wp-plugins', 'wp-i18n', 'wp-element' ] );
+			}
+
+			wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '/mv-create.js', $fake_script_url, $deps, self::VERSION, true );
+
+			wp_localize_script( Plugin::PLUGIN_DOMAIN . '/mv-create.js', 'MV_CREATE', self::localization() );
+
+			// Use traditional script enqueuing (Script Modules API not used)
+			wp_register_script(
+				Plugin::PLUGIN_DOMAIN . '-script',
+				$script_url,
+				$deps,
+				self::VERSION,
+				true
+			);
+
+			if ( ! wp_script_is( 'mv-blocks' ) ) {
+				wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine', plugin_dir_path( __DIR__ ) . 'languages/' );
+				wp_enqueue_script( Plugin::PLUGIN_DOMAIN . 'create-const' );
+				wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
+			}
+
+			// Add CSS to fix Chrome editor if needed
+			$this->add_slate_chrome_fix();
 		}
-		wp_enqueue_script( 'mv_raven', 'https://cdn.ravenjs.com/3.25.2/raven.min.js', [], self::VERSION, true );
-		wp_enqueue_style( 'mv-create-card/css' );
-
-		$deps = [ 'mv_raven' ];
-
-
-		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
-			$deps = array_merge( $deps, [ 'wp-plugins', 'wp-i18n', 'wp-element' ] );
-		}
-
-		wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '/mv-create.js', $fake_script_url, $deps, self::VERSION, true );
-
-		wp_register_script(
-			Plugin::PLUGIN_DOMAIN .
-			'-script',
-			$script_url,
-			$deps,
-			self::VERSION,
-			true
-		);
-
-		wp_localize_script( Plugin::PLUGIN_DOMAIN . '/mv-create.js', 'MV_CREATE', self::localization() );
-
-		if ( ! wp_script_is( 'mv-blocks' ) ) {
-			wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine', plugin_dir_path( __DIR__ ) . 'languages/' );
-			wp_enqueue_script( Plugin::PLUGIN_DOMAIN . 'create-const' );
-			wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
-		}
-
-		// Add CSS to fix Chrome editor if needed
-		$this->add_slate_chrome_fix( $deps );
 	}
 
 	function admin_head() {
@@ -344,7 +352,7 @@ class Admin_Init extends Plugin {
 
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
-			__( 'Create by Mediavine Plugin Settings', 'mediavine' ),
+			__( 'Create Plugin Settings', 'mediavine' ),
 			__( 'Settings', 'mediavine' ),
 			'manage_options',
 			'settings',
@@ -352,8 +360,8 @@ class Admin_Init extends Plugin {
 		);
 
 		add_options_page(
-			__( 'Create by Mediavine Plugin Settings', 'mediavine' ),
-			__( 'Create by Mediavine', 'mediavine' ),
+			__( 'Create Plugin Settings', 'mediavine' ),
+			__( 'Create', 'mediavine' ),
 			'manage_options',
 			'mv_settings',
 			[ $this, 'menu_page' ]
@@ -431,6 +439,75 @@ class Admin_Init extends Plugin {
 		}
 	}
 
+	/**
+	 * Register Gutenberg blocks server-side
+	 */
+	function register_gutenberg_blocks() {
+		// Get allowed types from settings
+		$allowed_shapes = \Mediavine\Settings::get_setting( 'mv_create_allowed_types' );
+		$allowed_shapes = json_decode( $allowed_shapes );
+
+		// Default to all types if none specified
+		if ( empty( $allowed_shapes ) ) {
+			$allowed_shapes = ['recipe', 'list', 'diy'];
+		}
+
+		// Register blocks for each allowed type
+		foreach ( $allowed_shapes as $type ) {
+			$block_name = "mv/{$type}";
+
+			// Skip if block is already registered (prevents re-registration in test environments)
+			if ( \WP_Block_Type_Registry::get_instance()->is_registered( $block_name ) ) {
+				continue;
+			}
+
+			register_block_type( $block_name, [
+				'editor_script' => Plugin::PLUGIN_DOMAIN . '-script',
+				'render_callback' => [ $this, 'render_block' ],
+				'attributes' => [
+					'id' => [
+						'type' => 'number',
+					],
+					'title' => [
+						'type' => 'string',
+						'default' => '',
+					],
+					'thumbnail_uri' => [
+						'type' => 'string',
+						'default' => '',
+					],
+					'type' => [
+						'type' => 'string',
+						'default' => $type,
+					],
+					'layout' => [
+						'type' => 'string',
+					],
+				],
+			] );
+		}
+	}
+	
+	/**
+	 * Render callback for Gutenberg blocks
+	 */
+	function render_block( $attributes ) {
+		$id = isset( $attributes['id'] ) ? $attributes['id'] : '';
+		$title = isset( $attributes['title'] ) ? $attributes['title'] : '';
+		$thumbnail = isset( $attributes['thumbnail_uri'] ) ? $attributes['thumbnail_uri'] : '';
+		$type = isset( $attributes['type'] ) ? $attributes['type'] : 'recipe';
+		$layout = isset( $attributes['layout'] ) ? $attributes['layout'] : '';
+		
+		// Build shortcode
+		$shortcode = "[mv_create key=\"{$id}\" type=\"{$type}\" title=\"{$title}\" thumbnail=\"{$thumbnail}\"";
+		if ( !empty( $layout ) ) {
+			$shortcode .= " layout=\"{$layout}\"";
+		}
+		$shortcode .= "]";
+		
+		return $shortcode;
+	}
+
 	function init() {
 		global $wp_version;
 		// version-check for filter compatibility
@@ -444,6 +521,7 @@ class Admin_Init extends Plugin {
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ], 11 );
 		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		add_action( 'media_buttons', [ $this, 'media_buttons' ] );
+		add_action( 'init', [ $this, 'register_gutenberg_blocks' ] );
 		add_filter( $block_categories_filter, [ $this, 'block_categories' ], 10, 1 );
 	}
 

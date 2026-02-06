@@ -117,7 +117,6 @@ return array(
     'Mediavine\\Create\\Creations_Views_Hooks' => $baseDir . '/lib/creations/class-creations-views-hooks.php',
     'Mediavine\\Create\\Creations_WP_Content' => $baseDir . '/lib/creations/class-creations-wp-content.php',
     'Mediavine\\Create\\Custom_Content' => $baseDir . '/lib/class-custom-content.php',
-    'Mediavine\\Create\\Data_Sync' => $baseDir . '/lib/class-data-sync.php',
     'Mediavine\\Create\\Dms' => $baseDir . '/lib/helpers/rapscallion_themes/class-dms.php',
     'Mediavine\\Create\\Exceptions\\AttributeNotFoundException' => $baseDir . '/lib/Exceptions/class-attributenotfoundexception.php',
     'Mediavine\\Create\\Exceptions\\ModelNotFoundException' => $baseDir . '/lib/Exceptions/class-modelnotfoundexception.php',

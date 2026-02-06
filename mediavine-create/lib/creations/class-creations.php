@@ -939,6 +939,31 @@ class Creations extends Plugin {
 	}
 
 	/**
+	 * Get the path to the bundle CSS file, handling both versioned and hashed filenames
+	 *
+	 * @return string The CSS file URL
+	 */
+	private static function get_bundle_css_url() {
+		$build_dir = MV_CREATE_DIR . 'client/build/';
+
+		// First try to find version-specific file
+		$versioned_file = 'bundle.' . Plugin::VERSION . '.css';
+		if ( file_exists( $build_dir . $versioned_file ) ) {
+			return Plugin::assets_url() . 'client/build/' . $versioned_file;
+		}
+
+		// Fall back to scanning for hashed bundle.*.css file
+		$files = glob( $build_dir . 'bundle.*.css' );
+		if ( ! empty( $files ) ) {
+			$file = basename( $files[0] );
+			return Plugin::assets_url() . 'client/build/' . $file;
+		}
+
+		// Default fallback
+		return Plugin::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.css';
+	}
+
+	/**
 	 * Renders the preview of the card along with theme styles
 	 *
 	 * @param \WP_REST_Request $request  API Request
@@ -959,7 +984,7 @@ class Creations extends Plugin {
 			// phpcs:disable
 			?>
 			<link rel="stylesheet"
-				href="<?php echo esc_attr(Plugin::assets_url() . 'client/build/card-all.' . Plugin::VERSION . '.css'); ?>">
+				href="<?php echo esc_attr(self::get_bundle_css_url()); ?>">
 			<?php
 			// phpcs:enable
 			?>

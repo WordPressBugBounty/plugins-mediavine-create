@@ -59,9 +59,10 @@ class Schema_Id_Injector {
 		}
 
 		try {
-			// Load HTML with proven Strategy 1 (Direct with XML encoding)
-			$load = $dom->loadHTML( '<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-			
+			// Load HTML with UTF-8 encoding prefix but without LIBXML_HTML_NOIMPLIED
+			// LIBXML_HTML_NOIMPLIED strips wrapper tags like <ol> and <ul>, causing ordered lists to become unordered
+			$load = $dom->loadHTML( '<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NODEFDTD );
+
 			if ( ! $load ) {
 				self::log_dom_failure( 'dom_load_failed', $creation_id, 'Failed to load HTML into DOM' );
 				return false;
@@ -264,17 +265,17 @@ class Schema_Id_Injector {
 		}
 
 		// Check 5: Validate HTML structure integrity
-		$original_open_tags = preg_match_all( '/<(ol|ul|li)[^>]*>/i', $original_html );
-		$original_close_tags = preg_match_all( '/<\/(ol|ul|li)>/i', $original_html );
-		$output_open_tags = preg_match_all( '/<(ol|ul|li)[^>]*>/i', $output );
-		$output_close_tags = preg_match_all( '/<\/(ol|ul|li)>/i', $output );
+		// Count list-related tags to ensure structure is preserved
+		$original_li_tags = preg_match_all( '/<li[^>]*>/i', $original_html );
+		$output_li_tags = preg_match_all( '/<li[^>]*>/i', $output );
 
-		// Should have roughly the same number of open/close tags
-		if ( $original_open_tags !== $output_open_tags || $original_close_tags !== $output_close_tags ) {
+		// The key validation is that all <li> tags are preserved
+		// Outer <ol>/<ul> tags may be stripped by extraction, which is acceptable
+		if ( $original_li_tags > 0 && $output_li_tags !== $original_li_tags ) {
 			return [
 				'valid' => false,
-				'reason' => sprintf( 'Check 5 failed: Tag count mismatch - Original: %d open, %d close | Output: %d open, %d close', 
-					$original_open_tags, $original_close_tags, $output_open_tags, $output_close_tags )
+				'reason' => sprintf( 'Check 5 failed: List item count mismatch - Original: %d <li> tags, Output: %d <li> tags',
+					$original_li_tags, $output_li_tags )
 			];
 		}
 
@@ -284,6 +285,27 @@ class Schema_Id_Injector {
 			return [
 				'valid' => false,
 				'reason' => 'Check 6 failed: No schema IDs were added to list items'
+			];
+		}
+
+		// Check 7: Verify list wrapper tags are preserved (ol/ul)
+		// If input had <ol> or <ul> tags, output should still have them
+		$original_has_ol = preg_match( '/<ol[^>]*>/i', $original_html );
+		$original_has_ul = preg_match( '/<ul[^>]*>/i', $original_html );
+		$output_has_ol = preg_match( '/<ol[^>]*>/i', $output );
+		$output_has_ul = preg_match( '/<ul[^>]*>/i', $output );
+
+		if ( $original_has_ol && ! $output_has_ol ) {
+			return [
+				'valid' => false,
+				'reason' => 'Check 7 failed: Original had <ol> tag but output does not - wrapper tags were stripped'
+			];
+		}
+
+		if ( $original_has_ul && ! $output_has_ul ) {
+			return [
+				'valid' => false,
+				'reason' => 'Check 7 failed: Original had <ul> tag but output does not - wrapper tags were stripped'
 			];
 		}
 
@@ -325,7 +347,7 @@ class Schema_Id_Injector {
 
 		// Check 3: libxml version compatibility
 		if ( defined( 'LIBXML_VERSION' ) && LIBXML_VERSION < 20707 ) {
-			// libxml < 2.7.7 has issues with LIBXML_HTML_NOIMPLIED
+			// libxml < 2.7.7 has issues with certain HTML5 parsing features
 			return [
 				'safe' => false,
 				'reason' => "libxml version too old (" . LIBXML_VERSION . " < 20707)"
@@ -415,14 +437,20 @@ class Schema_Id_Injector {
 
 	/**
 	 * Log DOM processing failures for debugging
-	 * 
+	 *
 	 * @param string $failure_type Type of DOM failure
 	 * @param int    $creation_id Creation ID for context
 	 * @param string $details Details about the failure
 	 */
 	private static function log_dom_failure( $failure_type, $creation_id, $details ) {
-		// Only log if WP_DEBUG is enabled
+		// Only log if WP_DEBUG is enabled AND error logging is enabled in settings
 		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+
+		// Check if error logging is enabled in Create settings
+		$enable_logging = \Mediavine\Settings::get_setting( 'mv_create_enable_logging' );
+		if ( ! $enable_logging ) {
 			return;
 		}
 
@@ -439,13 +467,13 @@ class Schema_Id_Injector {
 
 	/**
 	 * Extract content from DOM body element
-	 * 
+	 *
 	 * @param \DOMDocument $dom DOM document
 	 * @return string Extracted HTML content
 	 */
 	private static function extract_content_from_body( $dom ) {
 		try {
-			// Try to extract from body element first
+			// Try body element first (standard DOM structure)
 			$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( $body && $body->hasChildNodes() ) {
 				$output = '';
@@ -454,8 +482,22 @@ class Schema_Id_Injector {
 				}
 				return trim( $output );
 			}
-			
-			// Fallback: extract from document element and clean
+
+			// Fallback: content might be direct children of documentElement
+			if ( $dom->documentElement && $dom->documentElement->hasChildNodes() ) {
+				$output = '';
+				foreach ( $dom->documentElement->childNodes as $child ) {
+					$output .= $dom->saveHTML( $child );
+				}
+				// Clean up the <?xml> declaration if it leaked through
+				$output = preg_replace( '~^<\?xml[^>]*>\s*~i', '', $output );
+				$output = trim( $output );
+				if ( ! empty( $output ) ) {
+					return $output;
+				}
+			}
+
+			// Fallback: extract from HTML element and clean
 			$html_elem = $dom->getElementsByTagName( 'html' )->item( 0 );
 			if ( $html_elem ) {
 				$result = trim( $dom->saveHTML( $html_elem ) );
@@ -464,12 +506,13 @@ class Schema_Id_Injector {
 				$result = preg_replace( '~<body[^>]*>(.*?)</body>~is', '$1', $result );
 				return trim( $result );
 			}
-			
+
 			// Ultimate fallback: full document with aggressive cleanup
 			$output = $dom->saveHTML();
+			$output = preg_replace( '~^<\?xml[^>]*>\s*~i', '', $output );
 			$output = preg_replace( '~<(?:!DOCTYPE|/?(?:html|head|body|meta))[^>]*>\s*~i', '', $output );
 			return trim( $output );
-			
+
 		} catch ( \Exception $e ) {
 			return '';
 		}

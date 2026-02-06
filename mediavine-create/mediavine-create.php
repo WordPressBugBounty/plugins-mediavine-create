@@ -2,19 +2,19 @@
 /**
  * The plugin bootstrap file
  *
- * @link              https://www.mediavine.com/
- * @since             1.0.0
+ * @link              https://create.studio/
+ * @since             1.9.16
  *
  * @wordpress-plugin
- * Plugin Name:       Create by Mediavine
- * Plugin URI:        https://www.mediavine.com/mediavine-create/
+ * Plugin Name:       Create
+ * Plugin URI:        https://create.studio/plugin
  * Description:       Create custom recipe and how to cards to be displayed in posts.
- * Version:           1.9.15
- * Requires at least: 6.3
+ * Version:           1.10.5
+ * Requires at least: 6.5
  * Requires PHP:      7.4
  *
- * Author:            Mediavine
- * Author URI:        https://www.mediavine.com/
+ * Author:            Mischief Marmot
+ * Author URI:        https://create.studio/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mediavine

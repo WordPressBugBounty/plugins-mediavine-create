@@ -1,16 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <title>Create UI</title>
     <script>
       window.wp = {
-        blocks: {}
-      }
+        blocks: {},
+        i18n: {
+          __: (text) => text,
+        },
+      };
+      window.MV_CREATE = {
+        __ADMIN_URL__: "http://localhost:3000",
+        __USER__: {
+          current_user_authorized: true,
+        },
+        __META_BLOCKS__: [],
+        __ALLOWED_TYPES__: [["recipe", "list", "diy"]],
+      };
     </script>
   </head>
   <body>
-    <div>Hi! Your app is running. If you can see this, you probably want to be in your WordPress admin instead.</div>
-  <script src="http://localhost:3000/app.build.1.9.15.js"></script></body>
+    <div id="wpbody">
+      Hi! Your app is running. If you can see this, you probably want to be in
+      your WordPress admin instead.
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

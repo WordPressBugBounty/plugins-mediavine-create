@@ -379,7 +379,7 @@ class Products_API extends Products {
 			if ( empty( $asin ) ) {
 				$api_token_setting = \Mediavine\Settings::get_settings( 'mv_create_api_token' );
 				$scraped           = wp_remote_post(
-					'https://create-api.mediavine.com/api/v1/scraper/scrape', [
+					self::$services_api_url . '/scraper/scrape', [
 						'headers' => [
 							'Content-Type'  => 'application/json; charset=utf-8',
 							'Authorization' => 'bearer ' . $api_token_setting->value,
@@ -445,6 +445,7 @@ class Products_API extends Products {
 			$result['remote_thumbnail_uri'] = $result['external_thumbnail_url'];
 			$result['title']                = $result['title'];
 		}
+		error_log('scrape_non_amazon result: ' . print_r($result, true));
 
 		$response = API_Services::set_response_data( $result, $response );
 		$response->set_status( 200 );

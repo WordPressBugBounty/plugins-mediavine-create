@@ -224,7 +224,7 @@ function mv_create_add_action_links( $links ) {
 		'<a href="' . admin_url( 'options-general.php?page=mv_settings' ) . '">Settings</a>',
 	];
 	if ( \Mediavine\Create\Plugin_Checker::is_mcp_active() ) {
-		$create_links[] = '<a href="https://help.mediavine.com">Support</a>';
+		$create_links[] = '<a href="https://help.create.studio">Support</a>';
 	}
 
 	return array_merge( $links, $create_links );
@@ -233,7 +233,7 @@ function mv_create_add_action_links( $links ) {
 function mv_create_plugin_info_links( $links, $file ) {
 	if ( strpos( $file, 'mediavine-create.php' ) !== false ) {
 		$new_links = [
-			'importers' => '<a href="https://www.mediavine.com/mediavine-recipe-importers-download" target="_blank">Download Mediavine Recipe Importers Plugin</a>',
+			'importers' => '<a href="https://create.studio/downloads/create-recipe-importers.zip" target="_blank">Download Mediavine Recipe Importers Plugin</a>',
 		];
 		$links     = array_merge( $links, $new_links );
 	}
