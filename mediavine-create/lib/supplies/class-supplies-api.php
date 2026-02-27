@@ -34,6 +34,12 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			$response = API_Services::set_response_data( $data, $response );
 			$response->set_status( 201 );
 
+			// Invalidate unit conversion cache when an ingredient supply is created.
+			if ( ! empty( $supply->creation ) && 'ingredient' === ( $supply->type ?? '' ) ) {
+				$creation = (object) [ 'id' => $supply->creation ];
+				Unit_Conversion::get_instance()->invalidate_cache( $creation );
+			}
+
 			return $response;
 		}
 
@@ -137,6 +143,12 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				$supply['creation'] = $creation_id;
 				$supply             = self::$models_v2->mv_supplies->create( $supply );
 				$supply             = self::$api_services->prepare_item_for_response( $supply, $request );
+			}
+
+			// Invalidate unit conversion cache when ingredients are updated.
+			if ( 'ingredient' === $type ) {
+				$creation = (object) [ 'id' => $creation_id ];
+				Unit_Conversion::get_instance()->invalidate_cache( $creation );
 			}
 
 			$response = API_Services::set_response_data( $data, $response );

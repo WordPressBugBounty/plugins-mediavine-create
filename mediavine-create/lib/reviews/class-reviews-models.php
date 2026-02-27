@@ -151,8 +151,35 @@ class Reviews_Models extends Reviews {
 				created datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 				modified datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 				handshake text,
+				has_responses tinyint(1) DEFAULT 0,
+				response_count int DEFAULT 0,
+				last_response_date datetime,
+				notify_responses tinyint(1) DEFAULT 1,
+				is_featured tinyint(1) DEFAULT 0,
 				PRIMARY KEY  (id),
-				KEY creation (creation)",
+				KEY creation (creation),
+				KEY is_featured (is_featured)",
+		];
+
+		$review_responses_table = $this->review_table . '_responses';
+
+		$custom_tables[] = [
+			'version'    => self::DB_VERSION,
+			'table_name' => $review_responses_table,
+			'sql'        => "
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				review_id bigint(20) NOT NULL,
+				author_name text,
+				author_email text,
+				author_id bigint(20),
+				content longtext,
+				is_admin_response tinyint(1) DEFAULT 0,
+				created datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				modified datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				status varchar(20) DEFAULT 'approved',
+				PRIMARY KEY  (id),
+				KEY review_id (review_id),
+				KEY created (created)",
 		];
 
 		return $custom_tables;

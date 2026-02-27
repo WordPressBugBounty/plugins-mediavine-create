@@ -1127,6 +1127,9 @@ class MV_DBI {
 			$results = $wpdb->get_results( $build_sql . $order_sql );
 		}
 
+		// Reset select to default to avoid polluting subsequent queries
+		$this->select = '*';
+
 		$results = $this->after_find( $results );
 
 		return self::handle_error( $results, true );

@@ -12,5 +12,5 @@ return array(
     'Mediavine\\Create\\GuzzleHttp\\Psr7\\' => array($baseDir . '/scoped-vendor/guzzlehttp/psr7/src'),
     'Mediavine\\Create\\GuzzleHttp\\Promise\\' => array($baseDir . '/scoped-vendor/guzzlehttp/promises/src'),
     'Mediavine\\Create\\GuzzleHttp\\' => array($baseDir . '/scoped-vendor/guzzlehttp/guzzle/src'),
-    'Mediavine\\Create\\Amazon\\ProductAdvertisingAPI\\v1\\' => array($baseDir . '/scoped-vendor/mediavine/paapi5-php-sdk/src'),
+    'Mediavine\\Create\\Amazon\\ProductAdvertisingAPI\\v1\\' => array($baseDir . '/scoped-vendor/traydigita/paapi5-php-sdk/src'),
 );

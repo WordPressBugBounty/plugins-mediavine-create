@@ -162,45 +162,60 @@ class Display implements Settings_Group {
 				'group' => Plugin::$settings_group . '_display',
 				'order' => 90,
 				'data'  => [
-					'type'    => 'image_select',
+					'type'    => 'theme_select',
 					'label'   => __( 'Card Style', 'mediavine' ),
 					'default' => __( 'Simple Square', 'mediavine' ),
 					'options' => [
 						[
+							'label' => __( 'Editorial', 'mediavine' ),
+							'value' => 'editorial',
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-editorial.webp' ),
+							'title' => __( 'Editorial<br>by Mischief Marmot', 'mediavine' ),
+							'gated' => true,
+						],
+						[
+							'label' => __( 'Modern Elegant', 'mediavine' ),
+							'value' => 'modern',
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-modern.webp' ),
+							'title' => __( 'Modern Elegant<br>by Mischief Marmot', 'mediavine' ),
+							'gated' => true,
+						],
+						[
+							'label' => __( 'Hero Image by Purr Design', 'mediavine' ),
+							'value' => 'big-image',
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-big-image.webp' ),
+							/* translators: credit name and url */
+							'title' => sprintf( __( 'Hero Image<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
+						],
+						[
 							'label' => __( 'Simple Square by Purr Design', 'mediavine' ),
 							'value' => 'square',
-							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-default.png' ),
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-default.webp' ),
 							/* translators: credit name and url */
 							'title' => sprintf( __( 'Simple Square<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
 							'label' => __( 'Dark Simple Square by Purr Design', 'mediavine' ),
 							'value' => 'dark',
-							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-dark.png' ),
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-dark.webp' ),
 							/* translators: credit name and url */
 							'title' => sprintf( __( 'Dark Simple Square<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
 							'label' => __( 'Classy Circle by Purr Design', 'mediavine' ),
 							'value' => 'centered',
-							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-centered.png' ),
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-centered.webp' ),
 							/* translators: credit name and url */
 							'title' => sprintf( __( 'Classy Circle<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
 							'label' => __( 'Dark Classy Circle by Purr Design', 'mediavine' ),
 							'value' => 'centered-dark',
-							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-centered-dark.png' ),
+							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-centered-dark.webp' ),
 							/* translators: credit name and url */
 							'title' => sprintf( __( 'Dark Classy Circle<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
-						[
-							'label' => __( 'Hero Image by Purr Design', 'mediavine' ),
-							'value' => 'big-image',
-							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-big-image.png' ),
-							/* translators: credit name and url */
-							'title' => sprintf( __( 'Hero Image<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
-						],
+						
 					],
 				],
 			],

@@ -30,7 +30,7 @@ return [
 			])
 			->in("vendor/guzzlehttp")
 			->in("vendor/ralouphie")
-			->in("vendor/mediavine/paapi5-php-sdk")
+			->in("vendor/traydigita/paapi5-php-sdk")
 			->in("vendor/psr")
 			->name("*.php"),
 	],
@@ -44,7 +44,7 @@ return [
 	"patchers" => [
 		function (string $filePath, string $prefix, string $content) {
 			if (
-				false !== strpos($filePath, "vendor/mediavine/paapi5-php-sdk/")
+				false !== strpos($filePath, "vendor/traydigita/paapi5-php-sdk/")
 			) {
 				$prefix = str_replace("\\", "\\\\\\\\", $prefix);
 				$content = preg_replace(
@@ -54,7 +54,7 @@ return [
 				);
 			}
 
-			if (strpos($filePath, 'vendor/mediavine/paapi5-php-sdk/src/com/amazon/paapi5/v1/GetItemsRequest.php') !== false) {
+			if (strpos($filePath, 'vendor/traydigita/paapi5-php-sdk/src/com/amazon/paapi5/v1/GetItemsRequest.php') !== false) {
 				$content = preg_replace(
 					'/public function offsetExists\([^)]*\)/',
 					'#[\ReturnTypeWillChange]' . PHP_EOL . '    public function offsetExists($offset)',

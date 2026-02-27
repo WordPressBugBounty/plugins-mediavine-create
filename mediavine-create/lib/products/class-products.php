@@ -10,6 +10,12 @@ class Products extends Plugin {
 
 
 	/**
+	 * Products table database version
+	 * Increment this when changing the products table schema
+	 */
+	const PRODUCTS_DB_VERSION = '2.0.2';
+
+	/**
 	 * Instance of Products class
 	 * @var null|Products
 	 */
@@ -51,6 +57,7 @@ class Products extends Plugin {
 	 */
 	public $schema = [
 		'title'                  => 'text',
+		'description'            => 'text',
 		'link'                   => 'text',
 		'thumbnail_id'           => 'bigint(20)',
 		'asin'                   => 'varchar(10)',
@@ -322,6 +329,9 @@ class Products extends Plugin {
 	/**
 	 * Process product after update
 	 *
+	 * Cascades product updates to both products_map and relations tables,
+	 * then triggers republish of affected creation cards.
+	 *
 	 * @param array|object $product Product to modify after update
 	 *
 	 * @return array|object
@@ -344,14 +354,39 @@ class Products extends Plugin {
 			$update_values['link'] = $product->link;
 		}
 
-		add_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
-		$updated = $wpdb->update(
-			$wpdb->prefix . 'mv_products_map',
-			$update_values,
-			[ 'product_id' => $product->id ]
-		);
-		remove_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+		// Cascade updates to products_map table
+		if ( ! empty( $update_values ) ) {
+			add_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+			$wpdb->update(
+				$wpdb->prefix . 'mv_products_map',
+				$update_values,
+				[ 'product_id' => $product->id ]
+			);
+			remove_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+		}
 
+		// Cascade updates to relations table (for list items)
+		// The relations table uses 'url' instead of 'link'
+		$relations_values = $update_values;
+		if ( isset( $relations_values['link'] ) ) {
+			$relations_values['url'] = $relations_values['link'];
+			unset( $relations_values['link'] );
+		}
+
+		if ( ! empty( $relations_values ) ) {
+			add_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+			$wpdb->update(
+				$wpdb->prefix . 'mv_relations',
+				$relations_values,
+				[
+					'relation_id'  => $product->id,
+					'content_type' => 'product',
+				]
+			);
+			remove_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+		}
+
+		// Collect creation IDs from products_map
 		$result = self::$models_v2->mv_products_map->find(
 			[
 				'select' => [ 'creation' ],
@@ -367,7 +402,27 @@ class Products extends Plugin {
 			$ids[] = $item->creation;
 		}
 
-		\Mediavine\Create\Publish::update_publish_queue($ids);
+		// Collect creation IDs from relations (list items)
+		$relations_result = self::$models_v2->mv_relations->find(
+			[
+				'select' => [ 'creation' ],
+				'where'  => [
+					'relation_id'  => $product->id,
+					'content_type' => 'product',
+				],
+			]
+		);
+
+		foreach ( $relations_result as $relation ) {
+			$ids[] = $relation->creation;
+		}
+
+		// Remove duplicates and trigger republish
+		$ids = array_unique( $ids );
+
+		if ( ! empty( $ids ) ) {
+			\Mediavine\Create\Publish::update_publish_queue($ids);
+		}
 
 		return $product;
 	}
@@ -380,7 +435,7 @@ class Products extends Plugin {
 	 */
 	public function custom_schema( $tables ) {
 		$tables[] = [
-			'version'    => self::DB_VERSION,
+			'version'    => self::PRODUCTS_DB_VERSION,
 			'table_name' => $this->table_name,
 			'schema'     => $this->schema,
 		];
@@ -582,6 +637,24 @@ class Products extends Plugin {
 				],
 			]
 		);
+
+		// Debug endpoint for testing Amazon API error messages (only in development)
+		// Completely open when WP_DEBUG is true - only returns mock error data, no security risk
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			register_rest_route(
+				$namespace,
+				'/products/debug-amazon-error',
+				[
+					[
+						'methods'             => \WP_REST_Server::READABLE,
+						'callback'            => function ( \WP_REST_Request $request ) {
+							return $this->api->debug_amazon_error( $request, new \WP_REST_Response() );
+						},
+						'permission_callback' => '__return_true',
+					],
+				]
+			);
+		}
 
 		register_rest_route(
 			$namespace,

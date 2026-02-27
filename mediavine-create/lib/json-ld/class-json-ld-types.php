@@ -914,45 +914,62 @@ class JSON_LD_Types {
 		$position          = 0;
 		$types             = [ 'external', 'card' ];
 
+		// Get the canonical post URL for the list (used for text item fragments)
+		$list_canonical_url = null;
+		if ( ! empty( $creation['canonical_post_id'] ) ) {
+			$list_canonical_url = get_the_permalink( $creation['canonical_post_id'] );
+		}
+
 		foreach ( $item_list as $item ) {
 			// Convert array to object if necessary
 			if ( ! is_object( $item ) ) {
 				$item = (object) $item;
 			}
 
-			// exclude custom text fields from JSON schema
+			// Handle text items with fragment URLs
 			if ( 'text' === $item->content_type ) {
-				continue;
+				// Text items need the list's canonical URL with a fragment identifier
+				if ( empty( $list_canonical_url ) || empty( $item->id ) ) {
+					continue;
+				}
+				$permalink = $list_canonical_url . '#create-list-item-' . $item->id;
+			} else {
+				// Get the correct permalink for linked items
+				$permalink = null;
+				if ( $item->url ) {
+					$permalink = $item->url;
+				} elseif ( ! empty( $item->canonical_post_id ) ) {
+					$permalink = get_the_permalink( $item->canonical_post_id );
+				} elseif ( ! in_array( $item->content_type, $types, true ) ) {
+					$permalink = get_the_permalink( $item->relation_id );
+				}
+
+				// No valid permalink, so move on
+				if ( empty( $permalink ) || ! wp_http_validate_url( $permalink ) ) {
+					continue;
+				}
+
+				// Don't add external URLs to JSON-LD
+				$permalink_host = parse_url( $permalink );
+				// If the link is a subdomain, we want to keep it in the JSON-LD
+				// If the link is neither a subdomain nor the primary domain, skip it
+				if ( ! Str::contains( $current_host['host'], $permalink_host['host'] ) && ! Str::is( $current_host['host'], $permalink_host['host'] ) ) {
+					continue;
+				}
 			}
 
-			// Get the correct permalink
-			$permalink = null;
-			if ( $item->url ) {
-				$permalink = $item->url;
-			} elseif ( ! empty( $item->canonical_post_id ) ) {
-				$permalink = get_the_permalink( $item->canonical_post_id );
-			} elseif ( ! in_array( $item->content_type, $types, true ) ) {
-				$permalink = get_the_permalink( $item->relation_id );
-			}
-
-			// No valid permalink, so move on
-			if ( empty( $permalink ) || ! wp_http_validate_url( $permalink ) ) {
-				continue;
-			}
-
-			// Don't add external URLs to JSON-LD
-			$permalink_host = parse_url( $permalink );
-			// If the link is a subdomain, we want to keep it in the JSON-LD
-			// If the link is neither a subdomain nor the primary domain, skip it
-			if ( ! Str::contains( $current_host['host'], $permalink_host['host'] ) && ! Str::is( $current_host['host'], $permalink_host['host'] ) ) {
-				continue;
-			}
-
-			$item_list_element[] = [
+			$list_item = [
 				'@type'    => 'ListItem',
 				'position' => $position,
 				'url'      => $permalink,
 			];
+
+			// Add name if available
+			if ( ! empty( $item->title ) ) {
+				$list_item['name'] = $item->title;
+			}
+
+			$item_list_element[] = $list_item;
 			++$position;
 		}
 

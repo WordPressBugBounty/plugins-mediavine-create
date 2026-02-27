@@ -20,11 +20,13 @@ class Supplies extends Plugin {
 			'key'  => true,
 		],
 		'original_text' => 'longtext',
+		'item'          => 'longtext',
 		'note'          => 'longtext',
 		'link'          => 'longtext',
 		'`group`'       => 'longtext',
 		'position'      => 'mediumint(9)',
 		'amount'        => 'longtext',
+		'unit'          => 'longtext',
 		'max_amount'    => 'longtext',
 		'nofollow'      => [
 			'type'    => 'tinyint(1)',

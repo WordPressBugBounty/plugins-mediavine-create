@@ -1,5 +1,27 @@
 <?php
 if ( ! $args['print'] ) {
+	// Determine display mode - check card override first, then global setting
+	$display_mode = ! empty( $args['creation']['products_display_mode'] )
+		? $args['creation']['products_display_mode']
+		: \Mediavine\Settings::get_setting( 'mv_create_products_display_mode', 'gallery' );
+
+	// Pro gate: fall back to gallery if not Pro and list mode is selected
+	if ( 'list' === $display_mode && ! \Mediavine\Create\Plugin::is_pro() ) {
+		$display_mode = 'gallery';
+	}
+
+	// If display mode is 'list', use the list template
+	if ( 'list' === $display_mode ) {
+		include __DIR__ . '/shortcode-mv-create-products-list.php';
+		return;
+	}
+
+	// Gallery mode (default) - continue with existing rendering
+	// Get section title - check card override first, then global setting
+	$section_title = ! empty( $args['creation']['products_section_title'] )
+		? $args['creation']['products_section_title']
+		: \Mediavine\Settings::get_setting( 'mv_create_products_section_title', __( 'Recommended Products', 'mediavine' ) );
+
 	$has_products = false;
 	// Default the affiliate message to the text stored in the global settings. Then check for the existence of a
 	// custom field overriding the affiliate message. If it exists, use the custom field for this card.
@@ -63,7 +85,7 @@ if ( ! $args['print'] ) {
 	if ( $has_products ) {
 		?>
 		<div class="mv-create-products">
-			<h2 class="mv-create-products-title mv-create-title-secondary"><?php esc_html_e( 'Recommended Products', 'mediavine' ); ?></h2>
+			<h2 class="mv-create-products-title mv-create-title-secondary"><?php echo esc_html( $section_title ); ?></h2>
 
 			<?php if ( $affiliate_message ) { ?>
 				<p class="mv-create-affiliate-disclaimer"><?php echo esc_html( $affiliate_message ); ?></p>

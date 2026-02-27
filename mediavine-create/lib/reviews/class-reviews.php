@@ -10,11 +10,16 @@ class Reviews extends Plugin {
 
 	public $reviews_api = null;
 
+	public $review_responses_api = null;
+
 	function init() {
 		$this->reviews_api = Reviews_API::get_instance();
 		$this->reviews_api->init();
+		$this->review_responses_api = Review_Responses_API::get_instance();
+		$this->review_responses_api->init();
 		add_filter( 'allowed_http_origin', '__return_true' );
 		add_action( 'rest_api_init', [ $this, 'reviews_routes' ] );
+		add_action( 'rest_api_init', [ $this, 'review_responses_routes' ] );
 	}
 
 	/**
@@ -96,6 +101,66 @@ class Reviews extends Plugin {
 				[
 					'methods'             => 'DELETE',
 					'callback'            => [ $this->reviews_api, 'delete_single_review' ],
+					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
+					'permission_callback' => function () {
+						return \Mediavine\Permissions::is_user_authorized();
+					},
+				],
+			]
+		);
+
+	}
+
+	function review_responses_routes() {
+
+		$route_namespace = $this->api_route . '/' . $this->api_version;
+
+		register_rest_route(
+			$route_namespace, '/reviews/(?P<review_id>\d+)/responses', [
+				[
+					'methods'             => 'GET',
+					'callback'            => [ $this->review_responses_api, 'get_review_responses' ],
+					'args'                => [
+						'review_id' => [
+							'required'          => true,
+							'validate_callback' => function( $param ) {
+								return is_numeric( $param );
+							},
+						],
+					],
+					'permission_callback' => '__return_true',
+				],
+				[
+					'methods'             => 'POST',
+					'callback'            => [ $this->review_responses_api, 'create_response_api' ],
+					'args'                => [
+						'review_id' => [
+							'required'          => true,
+							'validate_callback' => function( $param ) {
+								return is_numeric( $param );
+							},
+						],
+					],
+					'permission_callback' => function () {
+						return \Mediavine\Permissions::is_user_authorized();
+					},
+				],
+			]
+		);
+
+		register_rest_route(
+			$route_namespace, '/responses/(?P<id>\d+)', [
+				[
+					'methods'             => 'POST',
+					'callback'            => [ $this->review_responses_api, 'update_response' ],
+					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
+					'permission_callback' => function () {
+						return \Mediavine\Permissions::is_user_authorized();
+					},
+				],
+				[
+					'methods'             => 'DELETE',
+					'callback'            => [ $this->review_responses_api, 'delete_response_api' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
 					'permission_callback' => function () {
 						return \Mediavine\Permissions::is_user_authorized();

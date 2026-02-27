@@ -4,13 +4,9 @@
 		method="get"
 		target="_blank"
 		action="<?php echo esc_html( get_rest_url( null, '/mv-create/v1/creations/' . $args['creation']['id'] . '/print' ) ); ?>"
-		>
-		<button
+		><button
 			class="mv-create-button mv-create-print-button"
 			data-mv-print="<?php echo esc_html( get_rest_url( null, '/mv-create/v1/creations/' . $args['creation']['id'] . '/print' ) ); ?>"
-		>
-			<?php esc_html_e( 'Print', 'mediavine' ); ?>
-		</button>
-	</form>
+		><?php esc_html_e( 'Print', 'mediavine' ); ?></button></form>
 <?php
 }

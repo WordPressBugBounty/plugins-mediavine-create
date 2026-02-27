@@ -124,6 +124,8 @@ class Creations_API extends Creations {
 		if ( ! empty( $updated->type ) ) {
 			do_action( 'mv_post_update_' . $updated->type . '_card', $updated );
 		}
+		// Set is_published flag before unsetting the published data
+		$updated->is_published = ! empty( $updated->published );
 		unset( $updated->published );
 		unset( $updated->json_ld );
 
@@ -136,12 +138,42 @@ class Creations_API extends Creations {
 		return $response;
 	}
 
+	/**
+	 * Get unique authors from all creations.
+	 *
+	 * @param \WP_REST_Request  $request
+	 * @param \WP_REST_Response $response
+	 * @return \WP_REST_Response
+	 */
+	public function get_authors( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mv_creations';
+
+		// SECURITY CHECKED: No user input in this query
+		$results = $wpdb->get_results(
+			"SELECT author, COUNT(*) as count FROM {$table_name} WHERE author IS NOT NULL AND author != '' GROUP BY author ORDER BY author ASC"
+		);
+
+		$authors = [];
+		if ( ! empty( $results ) ) {
+			foreach ( $results as $row ) {
+				$authors[] = [
+					'name'  => $row->author,
+					'count' => (int) $row->count,
+				];
+			}
+		}
+
+		return API_Services::set_response_data( $authors, $response );
+	}
+
 	public function find( \WP_REST_Request $request, \WP_REST_Response $response ) {
 		$allowed_params = [
 			'author',
 			'category',
 			'cuisine',
 			'type',
+			'missing_fields',
 		];
 
 		$params = $request->get_params();
@@ -164,13 +196,22 @@ class Creations_API extends Creations {
 			$query_args['order_by'] = 'CASE WHEN rating IS NULL OR rating_count IS NULL OR rating_count = 0 THEN 0 ELSE ((rating_count / (rating_count + 5)) * rating + (5 / (rating_count + 5)) * 4.0) END';
 		}
 
-		if ( isset( $params['search'] ) ) {
+		if ( ! empty( $params['search'] ) ) {
 			$query_args['where']['published'] = $params['search'];
 		}
 
 		if ( ! empty( $params ) ) {
 			foreach ( $params as $param => $value ) {
 				if ( in_array( $param, $allowed_params, true ) ) {
+					// Skip missing_fields as it requires special handling
+					if ( 'missing_fields' === $param ) {
+						continue;
+					}
+					// Support comma-separated type values (e.g. "recipe,diy")
+					if ( 'type' === $param && false !== strpos( $value, ',' ) ) {
+						$query_args['type_in'] = array_map( 'trim', explode( ',', $value ) );
+						continue;
+					}
 					$query_args['where'][ $param ] = $value;
 				}
 			}
@@ -179,6 +220,108 @@ class Creations_API extends Creations {
 		if ( ! empty( $params['show_trash'] ) ) {
 			$show_trash               = (bool) $params['show_trash'];
 			$query_args['show_trash'] = $show_trash;
+		}
+
+		// Check if we need to use custom SQL for advanced filters
+		$has_linked_posts_filter = ! empty( $params['linked_posts'] ) && in_array( $params['linked_posts'], [ 'has', 'none' ], true );
+		$has_created_after       = ! empty( $params['created_after'] );
+		$has_created_before      = ! empty( $params['created_before'] );
+		$has_missing_fields      = ! empty( $params['missing_fields'] ) && filter_var( $params['missing_fields'], FILTER_VALIDATE_BOOLEAN );
+		$has_post_id             = ! empty( $params['post_id'] ) && is_numeric( $params['post_id'] );
+		$has_type_in             = ! empty( $query_args['type_in'] );
+
+		// If any advanced filter is set, use custom SQL
+		if ( $has_linked_posts_filter || $has_created_after || $has_created_before || $has_missing_fields || $has_post_id || $has_type_in ) {
+			global $wpdb;
+			$table_name = $wpdb->prefix . 'mv_creations';
+
+			// Build base query with existing where conditions
+			$where_conditions = [];
+			$prepare_params   = [];
+
+			// Columns that use LIKE instead of exact match (mirrors MV_DBI::find logic)
+			$like_columns = [ 'published', 'title', 'post_title', 'associated_posts' ];
+
+			if ( ! empty( $query_args['where'] ) ) {
+				foreach ( $query_args['where'] as $col => $val ) {
+					if ( in_array( $col, $like_columns, true ) ) {
+						$where_conditions[] = "$col LIKE %s";
+						$prepare_params[]   = '%' . $wpdb->esc_like( $val ) . '%';
+					} else {
+						$where_conditions[] = "$col = %s";
+						$prepare_params[]   = $val;
+					}
+				}
+			}
+
+			// Handle linked_posts filter
+			// Note: We use %s placeholders for string literals because wpdb->prepare()
+			// converts the bare string 'null' to SQL NULL, breaking the comparison.
+			if ( $has_linked_posts_filter ) {
+				if ( 'has' === $params['linked_posts'] ) {
+					$where_conditions[] = "(associated_posts IS NOT NULL AND associated_posts != %s AND associated_posts != %s)";
+					$prepare_params[]   = '';
+					$prepare_params[]   = '[]';
+				} else {
+					$where_conditions[] = "(associated_posts IS NULL OR associated_posts = %s OR associated_posts = %s)";
+					$prepare_params[]   = '';
+					$prepare_params[]   = '[]';
+				}
+			}
+
+			// Handle date filters
+			if ( $has_created_after ) {
+				$date               = sanitize_text_field( $params['created_after'] );
+				$where_conditions[] = "created >= %s";
+				$prepare_params[]   = $date;
+			}
+
+			if ( $has_created_before ) {
+				$date               = sanitize_text_field( $params['created_before'] );
+				$where_conditions[] = "created <= %s";
+				$prepare_params[]   = $date . ' 23:59:59';
+			}
+
+			// Handle missing_fields filter
+			if ( $has_missing_fields ) {
+				$where_conditions[] = "(thumbnail_id IS NULL OR thumbnail_id = '' OR description IS NULL OR description = '')";
+			}
+
+			// Handle post_id filter - matches cards linked to this post via canonical_post_id or original_post_id
+			if ( $has_post_id ) {
+				$post_id            = absint( $params['post_id'] );
+				$where_conditions[] = "(canonical_post_id = %d OR original_post_id = %d)";
+				$prepare_params[]   = $post_id;
+				$prepare_params[]   = $post_id;
+			}
+
+			// Handle comma-separated type filter (e.g. "recipe,diy")
+			if ( $has_type_in ) {
+				$type_placeholders = implode( ', ', array_fill( 0, count( $query_args['type_in'] ), '%s' ) );
+				$where_conditions[] = "type IN ($type_placeholders)";
+				foreach ( $query_args['type_in'] as $type_val ) {
+					$prepare_params[] = sanitize_text_field( $type_val );
+				}
+			}
+
+			$where_clause = ! empty( $where_conditions ) ? implode( ' AND ', $where_conditions ) : '1=1';
+
+			// Build complete SQL query
+			$order_by = ! empty( $query_args['order_by'] ) ? $query_args['order_by'] : 'created';
+			$order    = ! empty( $params['order'] ) ? strtoupper( $params['order'] ) : 'DESC';
+			$limit    = ! empty( $params['limit'] ) ? intval( $params['limit'] ) : 50;
+			$offset   = ! empty( $params['offset'] ) ? intval( $params['offset'] ) : 0;
+
+			// SECURITY CHECKED: This query uses properly prepared statements
+			$sql              = "SELECT * FROM $table_name WHERE $where_clause ORDER BY $order_by $order LIMIT %d, %d";
+			$prepare_params[] = $offset;
+			$prepare_params[] = $limit;
+
+			$query_args['sql']    = $sql;
+			$query_args['params'] = $prepare_params;
+
+			// Clear the where array since we're using custom SQL
+			unset( $query_args['where'] );
 		}
 
 		$creations = self::$models_v2->mv_creations->find( $query_args );
@@ -371,8 +514,22 @@ class Creations_API extends Creations {
 			$creation->custom_fields = json_decode($creation->custom_fields ?: '{}');
 		}
 
+		// Set is_published flag before unsetting the published data
+		$creation->is_published = ! empty( $creation->published );
 		unset( $creation->published );
 		unset( $creation->json_ld );
+
+		// Add unit conversion data if feature is enabled
+		if (
+			'recipe' === $creation->type &&
+			GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION ) &&
+			Settings::get_setting( 'mv_create_enable_unit_conversion', false )
+		) {
+			$conversion_data = Creations_Views::get_unit_conversion_data( intval( $creation->id ) );
+			if ( ! empty( $conversion_data ) ) {
+				$creation->unit_conversions = $conversion_data;
+			}
+		}
 
 		// Ensure that creation is an integer. We can't use prepare_item_for_response because it coerces
 		// empty arrays into empty strings, which breaks the UI.

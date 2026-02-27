@@ -1,6 +1,55 @@
 <?php
 if ( $args['creation'] ) {
 	$custom_class = \Mediavine\Create\Creations_Views::get_custom_field( $args['creation'], 'class' );
+
+	// Build consolidated config for Create Studio widgets
+	$cs_config = [];
+
+	// Servings adjustment config
+	if (
+		'recipe' === $args['creation']['type'] &&
+		\Mediavine\Settings::get_setting( 'mv_create_enable_servings_adjustment', false ) &&
+		\Mediavine\Create\GateKeeper::can_access( \Mediavine\Create\GateKeeper::FEATURE_SERVINGS_ADJUSTMENT )
+	) {
+		$servings_label           = \Mediavine\Settings::get_setting( 'mv_create_servings_adjustment_label', 'Adjust Servings' );
+		$cs_config['servingsAdjustment'] = [
+			'enabled'           => true,
+			'label'             => $servings_label,
+			'defaultMultiplier' => 1,
+		];
+	}
+
+	// Unit conversion config
+	if (
+		'recipe' === $args['creation']['type'] &&
+		\Mediavine\Settings::get_setting( 'mv_create_enable_unit_conversion', false ) &&
+		\Mediavine\Create\GateKeeper::can_access( \Mediavine\Create\GateKeeper::FEATURE_UNIT_CONVERSION )
+	) {
+		$uc_label = \Mediavine\Settings::get_setting( 'mv_create_unit_conversion_label', 'Unit Conversion' );
+		$uc_default_system = \Mediavine\Settings::get_setting( 'mv_create_unit_conversion_default_system', 'auto' );
+		$cs_config['unitConversion'] = [
+			'enabled'        => true,
+			'label'          => $uc_label,
+			'default_system' => $uc_default_system,
+			'source_system'  => 'us_customary',
+			'conversions'    => new \stdClass(),
+		];
+		// Merge in pre-computed conversion data if available
+		if ( ! empty( $args['creation']['unit_conversions'] ) ) {
+			$cs_config['unitConversion'] = array_merge(
+				$cs_config['unitConversion'],
+				$args['creation']['unit_conversions']
+			);
+		}
+	}
+
+	$cs_config_attr = '';
+	if ( ! empty( $cs_config ) ) {
+		$cs_config['widgetLayout'] = \Mediavine\Settings::get_setting( 'mv_create_widget_toolbar_layout', 'toolbar' );
+		$cs_config['showLabels']   = (bool) \Mediavine\Settings::get_setting( 'mv_create_show_widget_labels', false );
+		$cs_config_attr = ' data-cs-config="' . esc_attr( wp_json_encode( $cs_config ) ) . '"';
+	}
+
 	/**
 	 * mv_create_card_before hook.
 	 *
@@ -8,7 +57,7 @@ if ( $args['creation'] ) {
 	 */
 	do_action( 'mv_create_card_before', $args );
 	?>
-	<section id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>" class="<?php echo esc_attr( $args['creation']['classes'] ); ?> <?php echo esc_attr( $custom_class ); ?>" style="position: relative;">
+	<section id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>" class="<?php echo esc_attr( $args['creation']['classes'] ); ?> <?php echo esc_attr( $custom_class ); ?>"<?php echo $cs_config_attr; ?> style="position: relative;">
 		<?php
 		/**
 		 * mv_create_card_before_wrapper hook.
@@ -75,6 +124,10 @@ if ( $args['creation'] ) {
 		 */
 		do_action( 'mv_create_card_after_footer', $args );
 		?>
+
+		<?php if ( empty( $args['print'] ) ) : ?>
+		<div class="mv-create-checklists" data-creation-id="<?php echo esc_attr( $args['creation']['id'] ); ?>"></div>
+		<?php endif; ?>
 
 	</section>
 

@@ -6,53 +6,32 @@ class Creations_WP_Content extends Creations {
 
 	public static function register_content_types() {
 		$permission_level = \Mediavine\Permissions::access_level();
-		$post_type_name   = __( 'Create Card', 'mediavine' );
-		$post_type_plural = __( 'Create Cards', 'mediavine' );
+		$post_type_name   = 'Create Card';
+		$post_type_plural = 'Create Cards';
 
 		$post_type_labels = [
-			'name'                  => '%2$s',
-			'singular_name'         => '%1$s',
-			/* translators: %1$s: post type name */
-			'add_new'               => __( 'Add New %1$s', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'add_new_item'          => __( 'Add New %1$s', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'edit_item'             => __( 'Edit %1$s', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'new_item'              => __( 'Add New %1$s', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'view_item'             => __( 'View %1$s', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'view_items'            => __( 'View %2$s', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'search_items'          => __( 'Search %2$s', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'not_found'             => __( 'No %2$s found', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'not_found_in_trash'    => __( 'No %2$s found in trash', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'parent_item_colon'     => __( 'Parent %2$s:', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'all_items'             => __( 'All %2$s', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'archives'              => __( '%1$s Archives', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'attributes'            => __( '%1$s Attributes', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'insert_into_item'      => __( 'Insert into %1$s', 'mediavine' ),
-			/* translators: %1$s: post type name */
-			'uploaded_to_this_item' => __( 'Uploaded to this %1$s', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'filter_items_list'     => __( 'Filter %2$s list', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'items_list_navigation' => __( '%2$s list navigation', 'mediavine' ),
-			/* translators: %2$s: post type name */
-			'items_list'            => __( '%2$s list', 'mediavine' ),
+			'menu_name'             => 'Create',
+			'name'                  => $post_type_plural,
+			'singular_name'         => $post_type_name,
+			'add_new'               => 'Add New ' . $post_type_name,
+			'add_new_item'          => 'Add New ' . $post_type_name,
+			'edit_item'             => 'Edit ' . $post_type_name,
+			'new_item'              => 'Add New ' . $post_type_name,
+			'view_item'             => 'View ' . $post_type_name,
+			'view_items'            => 'View ' . $post_type_plural,
+			'search_items'          => 'Search ' . $post_type_plural,
+			'not_found'             => 'No ' . $post_type_plural . ' found',
+			'not_found_in_trash'    => 'No ' . $post_type_plural . ' found in trash',
+			'parent_item_colon'     => 'Parent ' . $post_type_plural . ':',
+			'all_items'             => 'All ' . $post_type_plural,
+			'archives'              => $post_type_name . ' Archives',
+			'attributes'            => $post_type_name . ' Attributes',
+			'insert_into_item'      => 'Insert into ' . $post_type_name,
+			'uploaded_to_this_item' => 'Uploaded to this ' . $post_type_name,
+			'filter_items_list'     => 'Filter ' . $post_type_plural . ' list',
+			'items_list_navigation' => $post_type_plural . ' list navigation',
+			'items_list'            => $post_type_plural . ' list',
 		];
-
-		foreach ( $post_type_labels as $key => $value ) {
-			$post_type_labels[ $key ] = sprintf( $value, $post_type_name, $post_type_plural );
-		}
 
 		$post_type_args = [
 			'labels'              => $post_type_labels,
@@ -93,43 +72,24 @@ class Creations_WP_Content extends Creations {
 			$taxonomy_plural = $term;
 
 			$taxonomy_labels = [
-				'name'                       => '%2$s',
-				'singular_name'              => '%1$s',
-				/* translators: %2$s: post type name */
-				'search_items'               => __( 'Search %2$s', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'popular_items'              => __( 'Popular %2$s', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'all_items'                  => __( 'All %2$s', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'parent_item'                => __( 'Parent %2$s', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'parent_item_colon'          => __( 'Parent %2$s:', 'mediavine' ),
-				/* translators: %1$s: post type name */
-				'edit_item'                  => __( 'Edit %1$s', 'mediavine' ),
-				/* translators: %1$s: post type name */
-				'view_item'                  => __( 'View %1$s', 'mediavine' ),
-				/* translators: %1$s: post type name */
-				'update_item'                => __( 'Update %1$s', 'mediavine' ),
-				/* translators: %1$s: post type name */
-				'add_new_item'               => __( 'Add New %1$s', 'mediavine' ),
-				/* translators: %1$s: post type name */
-				'new_item_name'              => __( 'New %1$s Name', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'separate_items_with_commas' => __( 'Separate %2$s with commas', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'add_or_remove_items'        => __( 'Add or remove %2$s', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'choose_from_most_used'      => __( 'Choose from the most used %2$s', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'not_found'                  => __( 'No %2$s found', 'mediavine' ),
-				/* translators: %2$s: post type name */
-				'no_terms'                   => __( 'No %2$s', 'mediavine' ),
+				'name'                       => $taxonomy_plural,
+				'singular_name'              => $taxonomy_name,
+				'search_items'               => 'Search ' . $taxonomy_plural,
+				'popular_items'              => 'Popular ' . $taxonomy_plural,
+				'all_items'                  => 'All ' . $taxonomy_plural,
+				'parent_item'                => 'Parent ' . $taxonomy_plural,
+				'parent_item_colon'          => 'Parent ' . $taxonomy_plural . ':',
+				'edit_item'                  => 'Edit ' . $taxonomy_name,
+				'view_item'                  => 'View ' . $taxonomy_name,
+				'update_item'                => 'Update ' . $taxonomy_name,
+				'add_new_item'               => 'Add New ' . $taxonomy_name,
+				'new_item_name'              => 'New ' . $taxonomy_name . ' Name',
+				'separate_items_with_commas' => 'Separate ' . $taxonomy_plural . ' with commas',
+				'add_or_remove_items'        => 'Add or remove ' . $taxonomy_plural,
+				'choose_from_most_used'      => 'Choose from the most used ' . $taxonomy_plural,
+				'not_found'                  => 'No ' . $taxonomy_plural . ' found',
+				'no_terms'                   => 'No ' . $taxonomy_plural,
 			];
-
-			foreach ( $taxonomy_labels as $key => $value ) {
-				$taxonomy_labels[ $key ] = sprintf( $value, $taxonomy_name, $taxonomy_plural );
-			}
 
 			$taxonomy_args = [
 				'labels'             => $taxonomy_labels,

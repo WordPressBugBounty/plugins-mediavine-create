@@ -5,19 +5,22 @@ use Mediavine\MV_DBI;
 use Mediavine\Create\Settings\Advanced;
 use Mediavine\Create\Settings\Affiliates;
 use Mediavine\Create\Settings\Control_Panel;
-use Mediavine\Create\Settings\Display;
+use Mediavine\Create\Settings\Dev;
+use Mediavine\Create\Settings\Appearance;
+use Mediavine\Create\Settings\List_Ads;
 use Mediavine\Create\Settings\Lists;
+use Mediavine\Create\Settings\Reader_Experience;
 use Mediavine\Create\Settings\Recipes;
-use Mediavine\Create\Settings\Pro;
 use Mediavine\Settings;
+use Mediavine\Create\Importers\Importers;
 
 /**
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '1.10.5';
+	const VERSION = '2.0.12';
 
-	const DB_VERSION = '1.10.5';
+	const DB_VERSION = '2.0.12';
 
 	const TEXT_DOMAIN = 'mediavine';
 
@@ -35,7 +38,10 @@ class Plugin {
 
 	public $api_version = 'v1';
 
-	public static $services_api_url = 'https://create.studio/api/v1';
+	public static $services_api_url = 'https://create.studio/api/v2';
+	
+	// Important: keep the trailing slash
+	public static $js_services_api_url = 'https://create.studio/api/v2/';
 
 	public static $create_studio_base_url = 'https://create.studio';
 
@@ -214,6 +220,7 @@ class Plugin {
 		 *              install, the last plugin version will be the current version.
 		 */
 		do_action( self::PLUGIN_DOMAIN . '_plugin_updated', $last_plugin_version );
+
 		update_option( 'mv_create_version', self::VERSION );
 		flush_rewrite_rules();
 	}
@@ -256,6 +263,23 @@ class Plugin {
 		// initialize Admin_Notices
 		\Mediavine\Create\Admin_Notices::get_instance();
 
+		// Initialize Welcome Notice (handles 2.0 upgrade welcome screen)
+		\Mediavine\Create\Welcome_Notice::get_instance();
+
+		// Initialize Broadcast Notice (shows Studio broadcast banners in WP admin)
+		\Mediavine\Create\Broadcast_Notice::get_instance();
+
+		// Initialize Admin Bar (adds quick edit links for Create cards)
+		\Mediavine\Create\Admin_Bar::get_instance();
+
+		$dev_mode = json_decode( get_option( 'mediavine_devmode', '[]' ), true );
+		if ( isset( $dev_mode['create'] ) && $dev_mode['create'] === 'on' ) {
+			self::$services_api_url = 'https://cs.test/api/v2';
+			// Important: keep the trailing slash
+			self::$js_services_api_url = 'https://cs.test/api/v2/';
+			self::$create_studio_base_url = 'https://cs.test';
+		}
+
 		self::$views        = \Mediavine\View_Loader::get_instance( MV_CREATE_DIR );
 		self::$api_services = \Mediavine\Create\API_Services::get_instance();
 		self::$models_v2    = \Mediavine\MV_DBI::get_models(
@@ -265,6 +289,7 @@ class Plugin {
 				'mv_products',
 				'mv_products_map',
 				'mv_reviews',
+				'mv_reviews_responses',
 				'mv_creations',
 				'mv_supplies',
 				'mv_relations',
@@ -296,12 +321,12 @@ class Plugin {
 			}
 		);
 
-		self::$custom_content = Custom_Content::make( 'mv-create', __( 'Create', 'mediavine' ) );
-		self::$settings       = $this->get_settings();
-		self::$shapes         = $this->get_shapes_data();
+		self::$custom_content = Custom_Content::make( 'mv-create', 'Create' );
+
+		// Connect GateKeeper subscription tier to mv_create_is_pro filter
+		add_filter( 'mv_create_is_pro', [ 'Mediavine\Create\GateKeeper', 'is_pro_or_higher' ] );
 
 		register_activation_hook( self::get_activation_path(), [ $this, 'plugin_activation' ] );
-		add_action( 'setup_theme', [ $this, 'plugin_update_check' ], 10, 2 );
 		register_deactivation_hook( self::get_activation_path(), [ $this, 'plugin_deactivation' ] );
 
 		add_filter(
@@ -317,12 +342,19 @@ class Plugin {
 			}
 		);
 
-		// Load translations.
+		// Load translations and run upgrade check at init. The upgrade hooks
+		// (create_settings, etc.) use __() so textdomain must load first.
 		add_action( 'init', 'mv_create_load_plugin_textdomain', 0 );
+		add_action( 'init', [ $this, 'plugin_update_check' ], 1 );
+		add_action( 'init', [ $this, 'init_translatable_data' ], 2 );
 
 		// Activations hooks, forcing order
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'generate_tables' ], 20 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'delete_old_settings' ], 21 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_reader_experience_settings' ], 25 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_interactive_mode_settings' ], 26 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_card_style_preview_images' ], 27 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_hands_free_to_reader_experience' ], 28 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_settings' ], 30 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_shapes' ], 35 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'republish_queue' ], 40 );
@@ -351,7 +383,6 @@ class Plugin {
 		add_filter( 'mv_create_paapi_secret_key_settings_value', 'trim', 10 );
 		add_filter( 'mv_create_paapi_tag_settings_value', 'trim', 10 );
 		add_filter( 'mv_create_localized_admin_settings', [ $this, 'set_custom_post_type_option_value' ], 10 );
-
 		$Images = new Images();
 		$Images->init();
 
@@ -379,6 +410,15 @@ class Plugin {
 		$Reviews = new Reviews();
 		$Reviews->init();
 
+		$Featured_Review = new Featured_Review();
+		$Featured_Review->init();
+
+		$Featured_Review_API = Featured_Review_API::get_instance();
+		$Featured_Review_API->init();
+
+		$Featured_Review_Block = new Featured_Review_Block();
+		$Featured_Review_Block->init();
+
 		Shapes::get_instance();
 		Creations::get_instance();
 		Supplies::get_instance();
@@ -391,8 +431,34 @@ class Plugin {
 
 		\Mediavine\API_Services::get_instance();
 
+		$Dashboard_API = new Dashboard_API();
+		$Dashboard_API->init();
+
 		$Admin_Init = new Admin_Init();
 		$Admin_Init->init();
+
+		$Site_Verification = new Site_Verification();
+		$Site_Verification->init();
+
+		$User_Verification = new User_Verification();
+		$User_Verification->init();
+
+		// Initialize GateKeeper for subscription-based feature gating
+		GateKeeper::init();
+
+		// Initialize webhook handler for Create Studio → plugin communication.
+		Webhook_Handler::init();
+
+		// Initialize Feedback API for error reporting to Create Studio.
+		Feedback_API::init();
+
+		// Initialize Bulk Scrape API for list bulk import feature
+		$Bulk_Scrape_API = new Bulk_Scrape_API();
+		$Bulk_Scrape_API->init();
+
+		// Initialize Recipe Importers feature
+		$Importers = Importers::get_instance();
+		$Importers->init();
 
 		Plugin_Checker::get_instance();
 		Theme_Checker::get_instance();
@@ -415,10 +481,37 @@ class Plugin {
 	}
 
 	/**
+	 * Check if Create dev mode is enabled.
+	 *
+	 * Dev mode is enabled when:
+	 * 1. The mediavine_devmode option has create set to 'on', OR
+	 * 2. The mv_create_dev_mode filter returns true
+	 *
+	 * @return bool True if dev mode is enabled.
+	 */
+	public static function is_dev_mode(): bool {
+		// Check the mediavine_devmode option
+		$dev_mode = json_decode( get_option( 'mediavine_devmode', '[]' ), true );
+		if ( isset( $dev_mode['create'] ) && 'on' === $dev_mode['create'] ) {
+			return true;
+		}
+
+		// Check the filter (used by class-admin-init.php for localhost dev server)
+		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Register Pro-only features.
 	 */
 	public function register_pro_features() {
 		add_filter( 'mv_create_is_pro', '__return_true' );
+
+		$unit_conversion = Unit_Conversion::get_instance();
+		$unit_conversion->init();
 	}
 
 	/**
@@ -429,38 +522,21 @@ class Plugin {
 	}
 
 	/**
+	 * Initialize data that requires translated strings.
+	 * Hooked to 'init' so the textdomain is loaded first.
+	 */
+	public function init_translatable_data() {
+		self::$settings = self::get_settings();
+		self::$shapes   = self::get_shapes_data();
+	}
+
+	/**
 	 * Handle registration of all settings classes and pass complete array
 	 * @return array
 	 */
 	public static function get_settings() {
 		// Settings classes divided by groups
 		$settings = [
-			[
-				'slug'  => self::$settings_group . '_measurement_system',
-				'value' => null,
-				'group' => self::$settings_group,
-				'order' => 20,
-				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Measurement System', 'mediavine' ),
-					'instructions' => __( 'Force a default measurement system (or choose "Any" to allow either).', 'mediavine' ),
-					'default'      => null,
-					'options'      => [
-						[
-							'label' => __( 'Metric', 'mediavine' ),
-							'value' => 'metric',
-						],
-						[
-							'label' => __( 'Imperial', 'mediavine' ),
-							'value' => 'imperial',
-						],
-						[
-							'label' => __( 'Any', 'mediavine' ),
-							'value' => 'any',
-						],
-					],
-				],
-			],
 			[
 				'slug'  => self::$settings_group . '_secondary_color',
 				'value' => null,
@@ -480,39 +556,22 @@ class Plugin {
 				],
 			],
 			[
-				'slug'  => self::$settings_group . '_api_email_confirmed',
-				'value' => false,
-				'group' => 'hidden',
-				'order' => 105,
-				'data'  => [],
-			],
-			[
 				'slug'  => self::$settings_group . '_api_user_id',
 				'value' => false,
 				'group' => 'hidden',
 				'order' => 105,
 				'data'  => [],
 			],
-			[
-				'slug'  => self::$settings_group . '_enable_debugging',
-				'value' => false,
-				'group' => 'mv_secret_do_not_share_or_you_will_be_fired',
-				'order' => 10,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enabled Debugging', 'mediavine' ),
-					'instructions' => __( 'Enable this setting to send all error log data to Sentry for the Publisher Engineering team to debug. This reduces the need for FTP and should be used in lieu of debug log/error log files.', 'mediavine' ),
-					'default'      => 'Disabled',
-				],
-			],
 		];
 
 		$settings = array_merge(
 			Advanced::settings(),
-			Display::settings(),
-			Lists::settings(),
+			Dev::settings(),
+			Appearance::settings(),
 			Recipes::settings(),
-			Pro::settings(),
+			Lists::settings(),
+			List_Ads::settings(),
+			Reader_Experience::settings(),
 			Affiliates::settings(),
 			Control_Panel::settings(),
 			$settings
@@ -526,53 +585,38 @@ class Plugin {
 	 *
 	 * @return void
 	 */
-	function update_services_api() {
+	/**
+	 * Send version info to Create Studio API after a plugin update.
+	 *
+	 * Called via the mv_create_plugin_updated action hook.
+	 * Sends current PHP, WP, and Create versions to the Studio API,
+	 * and logs the version transition if the plugin was actually updated.
+	 *
+	 * @param string $last_plugin_version The previous plugin version before the update.
+	 */
+	function update_services_api( $last_plugin_version = '' ) {
 		global $wp_version;
-		$php_version       = PHP_VERSION;
-		$create_version    = self::VERSION;
-		$api_token_setting = \Mediavine\Settings::get_settings( 'mv_create_api_token' );
 
-		if ( ! $api_token_setting ) {
+		$site_id = Create_Studio_Client::get_site_id();
+
+		if ( empty( $site_id ) ) {
 			return;
 		}
 
-		$token_values = explode( '.', $api_token_setting->value );
+		// Send current version info
+		Create_Studio_Client::request( 'POST', '/sites/' . $site_id, [
+			'php_version'    => PHP_VERSION,
+			'wp_version'     => $wp_version,
+			'create_version' => self::VERSION,
+		] );
 
-		if ( empty( $token_values[1] ) ) {
-			return;
+		// Log the version transition if this is an actual update (not a fresh install)
+		if ( ! empty( $last_plugin_version ) && $last_plugin_version !== self::VERSION ) {
+			Create_Studio_Client::request( 'POST', '/sites/' . $site_id . '/version-log', [
+				'from' => $last_plugin_version,
+				'to'   => self::VERSION,
+			] );
 		}
-
-		$token_data = json_decode(base64_decode($token_values[1]) ?: '{}');
-
-		if ( ! isset( $token_data->site_id ) ) {
-			return;
-		}
-
-		$data = [];
-
-		if ( isset( $php_version ) ) {
-			$data['php_version'] = PHP_VERSION;
-		}
-
-		if ( isset( $wp_version ) ) {
-			$data['wp_version'] = $wp_version;
-		}
-
-		if ( isset( $create_version ) ) {
-			$data['create_version'] = $create_version;
-		}
-
-		$result = wp_remote_post(
-			'https://create.studio/api/v1/sites/' . $token_data->site_id, [
-				'headers' => [
-					'Content-Type'  => 'application/json; charset=utf-8',
-					'Authorization' => 'bearer ' . $api_token_setting->value,
-				],
-				'body'    => wp_json_encode( $data ),
-				'method'  => 'POST',
-			]
-		);
-		return;
 	}
 
 	public function mv_schema_meta_shortcode( $atts ) {
@@ -630,11 +674,17 @@ class Plugin {
 	}
 
 	public function create_settings() {
+		if ( null === self::$settings ) {
+			self::$settings = self::get_settings();
+		}
 		$settings = $this->update_settings( self::$settings );
 		\Mediavine\Settings::create_settings_filter( $settings );
 	}
 
 	public function create_shapes() {
+		if ( null === self::$shapes ) {
+			self::$shapes = self::get_shapes_data();
+		}
 		$shape_dbi = new \Mediavine\MV_DBI( 'mv_shapes' );
 
 		foreach ( self::$shapes as $shape ) {
@@ -828,26 +878,28 @@ class Plugin {
 	}
 
 	/**
-	 * Display importer download admin notice
+	 * Display importer admin notice
 	 *
 	 * @return void
 	 */
 	public function importer_admin_notice_display() {
+		$settings_url = admin_url( 'options-general.php?page=mv_settings&setting=mv_create_enable_importers' );
 		printf(
 			'<div class="notice notice-info"><p><strong>%1$s</strong></p><p>%2$s</p></div>',
 			wp_kses_post( __( 'Thanks for installing Create!', 'mediavine' ) ),
 			wp_kses_post(
 				sprintf(
-					/* translators: %1$s: linked importer plugin */
-					__( 'If you\'re moving from another recipe plugin, you can also download and install our %1$s.', 'mediavine' ),
-					'<a href="https://create.studio/downloads/create-recipe-importers.zip" target="_blank">' . __( 'importer plugin', 'mediavine' ) . '</a>'
+					/* translators: %1$s: link to importer setting, %2$s: closing anchor tag */
+					__( 'If you\'re moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes.', 'mediavine' ),
+					'<a href="' . esc_url( $settings_url ) . '">',
+					'</a>'
 				)
 			)
 		);
 	}
 
 	/**
-	 * Display importer download admin notice if plugin not active
+	 * Display importer admin notice if importers not enabled
 	 *
 	 * @return void
 	 */
@@ -1033,6 +1085,170 @@ class Plugin {
 	public function delete_old_settings() {
 		\Mediavine\Settings::delete_setting( self::$settings_group . '_enable_link_scraping' );
 		\Mediavine\Settings::delete_setting( self::$settings_group . '_ad_density' );
+		\Mediavine\Settings::delete_setting( self::$settings_group . '_measurement_system' );
+	}
+
+	/**
+	 * Migrates settings to the new Reader Experience group.
+	 *
+	 * Moves settings from Pro and Advanced groups to the new reader_experience group
+	 * as part of the Settings UI Redesign.
+	 *
+	 * Settings moved:
+	 * - From Pro: Jump to Recipe, Social Footer settings
+	 * - From Advanced: Checklists, Reviews, Ratings settings
+	 *
+	 * @since 2.1.0
+	 * @param string $last_plugin_version The previous plugin version.
+	 * @return void
+	 */
+	public function migrate_reader_experience_settings( $last_plugin_version ) {
+		// Only run migration for versions before the settings redesign.
+		if ( ! version_compare( $last_plugin_version, '2.1.0', '<' ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'mv_settings';
+
+		// Move Jump to Recipe settings from Pro to reader_experience.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s OR slug LIKE %s",
+				self::$settings_group . '_reader_experience',
+				'%jump_to_recipe%',
+				'%jump_to_how_to%'
+			)
+		);
+
+		// Move Social Footer settings from Pro to reader_experience.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s OR slug LIKE %s OR slug LIKE %s OR slug LIKE %s OR slug LIKE %s",
+				self::$settings_group . '_reader_experience',
+				'%social_footer%',
+				'%social_service%',
+				'%facebook_username%',
+				'%instagram_username%',
+				'%pinterest_username%'
+			)
+		);
+
+		// Move Checklists, Reviews, and Ratings settings from Advanced to reader_experience.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s OR slug LIKE %s OR slug LIKE %s",
+				self::$settings_group . '_reader_experience',
+				'%checklist%',
+				'%review%',
+				'%rating%'
+			)
+		);
+
+		// Move Display settings to Appearance group.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET `group` = %s WHERE `group` = %s",
+				self::$settings_group . '_appearance',
+				self::$settings_group . '_display'
+			)
+		);
+	}
+
+	/**
+	 * Migrates Interactive Mode settings to their own group.
+	 *
+	 * Moves Interactive Mode settings from reader_experience to interactive_mode
+	 * group so they appear in their own settings section.
+	 *
+	 * @since 2.0.9
+	 * @param string $last_plugin_version The previous plugin version.
+	 * @return void
+	 */
+	public function migrate_interactive_mode_settings( $last_plugin_version ) {
+		if ( ! version_compare( $last_plugin_version, '2.0.9', '<' ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'mv_settings';
+
+		// Move Interactive Mode settings from reader_experience to interactive_mode.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s",
+				self::$settings_group . '_interactive_mode',
+				'%interactive_mode%'
+			)
+		);
+
+		// Remove legacy debugging setting.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete( $table, [ 'slug' => self::$settings_group . '_enable_debugging' ] );
+	}
+
+	/**
+	 * Migrates card style preview image URLs from PNG to WebP format.
+	 *
+	 * In 2.0.10, card style preview images were converted from PNG to WebP.
+	 * The image URLs are stored as JSON in the settings data column and need
+	 * to be updated so the theme selector doesn't show 404 images on upgrade.
+	 *
+	 * @since 2.0.10
+	 *
+	 * @param string $last_plugin_version The version being upgraded from.
+	 */
+	public function migrate_card_style_preview_images( $last_plugin_version ) {
+		if ( ! version_compare( $last_plugin_version, '2.0.10', '<' ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'mv_settings';
+
+		// Replace .png with .webp in the data JSON for card style settings.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			"UPDATE {$table} SET data = REPLACE(data, 'card-style-editorial.png', 'card-style-editorial.webp'),
+				data = REPLACE(data, 'card-style-modern.png', 'card-style-modern.webp'),
+				data = REPLACE(data, 'card-style-big-image.png', 'card-style-big-image.webp'),
+				data = REPLACE(data, 'card-style-default.png', 'card-style-default.webp'),
+				data = REPLACE(data, 'card-style-dark.png', 'card-style-dark.webp'),
+				data = REPLACE(data, 'card-style-centered.png', 'card-style-centered.webp'),
+				data = REPLACE(data, 'card-style-centered-dark.png', 'card-style-centered-dark.webp')
+			WHERE slug LIKE '%_card_style' AND data LIKE '%card-style-%.png%'"
+		);
+	}
+
+	/**
+	 * Migrates Hands-free Mode setting from Advanced to Reader Experience.
+	 *
+	 * @since 2.0.12
+	 * @param string $last_plugin_version The previous plugin version.
+	 * @return void
+	 */
+	public function migrate_hands_free_to_reader_experience( $last_plugin_version ) {
+		if ( ! version_compare( $last_plugin_version, '2.0.12', '<' ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'mv_settings';
+
+		// Move Hands-free Mode from advanced to reader_experience.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET `group` = %s WHERE slug = %s",
+				self::$settings_group . '_reader_experience',
+				self::$settings_group . '_enable_hands_free_mode'
+			)
+		);
 	}
 
 	/**

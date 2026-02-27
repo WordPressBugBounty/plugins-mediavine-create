@@ -69,6 +69,16 @@ class Translation extends Plugin {
 			'SUGAR'                => __( 'Sugar', 'mediavine' ),
 			'SUGAR_ALCOHOLS'       => __( 'Sugar Alcohols', 'mediavine' ),
 			'PROTEIN'              => __( 'Protein', 'mediavine' ),
+			'RESPONSES'            => __( 'Responses', 'mediavine' ),
+			'REPLY'                => __( 'Reply', 'mediavine' ),
+			'CANCEL_RESPONSE'      => __( 'Cancel Reply', 'mediavine' ),
+			'YOUR_RESPONSE'        => __( 'Your Response', 'mediavine' ),
+			'WRITE_YOUR_RESPONSE'  => __( 'Write your response...', 'mediavine' ),
+			'SUBMIT_RESPONSE'      => __( 'Submit Response', 'mediavine' ),
+			'CANCEL'               => __( 'Cancel', 'mediavine' ),
+			'NAME_REQUIRED'        => __( 'Name is required', 'mediavine' ),
+			'RESPONSE_REQUIRED'    => __( 'Response is required', 'mediavine' ),
+			'ADMIN'                => __( 'Admin', 'mediavine' ),
 		];
 	}
 

@@ -64,13 +64,22 @@ class Schema_Id_Injector {
 			$load = $dom->loadHTML( '<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NODEFDTD );
 
 			if ( ! $load ) {
-				self::log_dom_failure( 'dom_load_failed', $creation_id, 'Failed to load HTML into DOM' );
 				return false;
 			}
 			
 			// Find and process list items
 			$lis = $dom->getElementsByTagName( 'li' );
 			$li_count = $lis->length;
+			
+			if ( $li_count === 0 ) {
+				self::log_dom_failure( 'no_list_items', $creation_id, 'DOM loaded successfully but found 0 list items' );
+				return false;
+			}
+			
+			if ( $li_count === 0 ) {
+				self::log_dom_failure( 'no_list_items', $creation_id, 'DOM loaded successfully but found 0 list items' );
+				return false;
+			}
 			
 			if ( $li_count === 0 ) {
 				self::log_dom_failure( 'no_list_items', $creation_id, 'DOM loaded successfully but found 0 list items' );
@@ -205,7 +214,7 @@ class Schema_Id_Injector {
 	 */
 	public static function needs_schema_ids( $html ) {
 		// Check if there are list items without schema IDs
-		return preg_match( '/<li(?![^>]*id="mv_create_\d+_\d+")[^>]*>/', $html );
+		return (bool) preg_match( '/<li(?![^>]*id="mv_create_\d+_\d+")[^>]*>/', $html );
 	}
 
 	/**
@@ -461,9 +470,9 @@ class Schema_Id_Injector {
 			$details
 		);
 
+		// Log to WordPress error log
 		error_log( $message );
 	}
-
 
 	/**
 	 * Extract content from DOM body element

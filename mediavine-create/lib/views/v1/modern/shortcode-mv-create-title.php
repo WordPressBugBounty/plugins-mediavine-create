@@ -1,0 +1,5 @@
+<h2 class="mv-create-title mv-create-title-primary">
+    <span id="<?php echo esc_attr(sanitize_title($args['creation']['title'])); ?>">
+        <?php echo esc_html($args['creation']['title']); ?>
+    </span>
+</h2>

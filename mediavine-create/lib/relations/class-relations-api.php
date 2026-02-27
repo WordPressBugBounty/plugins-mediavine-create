@@ -43,6 +43,24 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 
 			global $wpdb;
 
+			// Parse types filter - separate card types from post types and product
+			$requested_types = isset( $params['types'] ) && is_array( $params['types'] ) ? $params['types'] : [];
+			$card_types      = [ 'recipe', 'diy', 'list' ];
+			$post_types_list = [ 'post', 'page' ];
+
+			// Determine which card types to include
+			$filtered_card_types = empty( $requested_types )
+				? $card_types
+				: array_intersect( $requested_types, $card_types );
+
+			// Determine which post types to include
+			$filtered_post_types = empty( $requested_types )
+				? $post_types_list
+				: array_intersect( $requested_types, $post_types_list );
+
+			// Determine if products should be included
+			$include_products = empty( $requested_types ) || in_array( 'product', $requested_types, true );
+
 			$query_args = [
 				'where' => [],
 				'limit' => 1000,
@@ -52,51 +70,104 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 
 			$search_term = $params['search'];
 
-			if ( isset( $params['search'] ) ) {
-				$creation_search['published'] = $params['search'];
-				$query_args['select']         = [ 'id as relation_id', 'canonical_post_id', 'description', 'title', "'card' AS content_type", 'type AS secondary_type', 'thumbnail_id' ];
+			// Only search creations if card types are requested
+			$creations = [];
+			if ( ! empty( $filtered_card_types ) ) {
+				if ( isset( $params['search'] ) ) {
+					$creation_search['published'] = $params['search'];
+					$query_args['select']         = [ 'id as relation_id', 'canonical_post_id', 'description', 'title', "'card' AS content_type", 'type AS secondary_type', 'thumbnail_id' ];
+				}
+
+				// Add type filter to query using IN clause
+				$query_args['where']['type'] = [ 'in' => $filtered_card_types ];
+
+				$creations = self::$models_v2->mv_creations->find( $query_args, $creation_search );
+
+				foreach ( $creations as &$creation ) {
+					$creation->thumbnail_uri = wp_get_attachment_url( $creation->thumbnail_id );
+					Relations::prepare_card_item( $creation );
+				}
 			}
 
-			$allowed_post_types = json_decode(Settings::get_setting('mv_create_allowed_cpt_types') ?: '[]', true);
-			if ( empty( $allowed_post_types ) ) {
-				$allowed_post_types = array_map( 'esc_attr', [ 'post', 'page' ] );
-			} else {
-				$allowed_post_types = array_map( 'esc_attr', array_merge( [ 'post', 'page' ], $allowed_post_types ) );
+			// Only search posts if post types are requested
+			$results = [];
+			if ( ! empty( $filtered_post_types ) ) {
+				$allowed_post_types = json_decode(Settings::get_setting('mv_create_allowed_cpt_types') ?: '[]', true);
+				if ( empty( $allowed_post_types ) ) {
+					$allowed_post_types = [ 'post', 'page' ];
+				} else {
+					$allowed_post_types = array_merge( [ 'post', 'page' ], $allowed_post_types );
+				}
+
+				// Filter allowed_post_types to only include requested types
+				$allowed_post_types        = array_map( 'esc_attr', array_intersect( $allowed_post_types, $filtered_post_types ) );
+				$allowed_post_types_string = implode( ', ', array_fill( 0, count( $allowed_post_types ), '%s' ) );
+
+				if ( ! empty( $allowed_post_types ) ) {
+					$statement = "SELECT id, id as canonical_post_id, id as relation_id, post_title as title, 'post' as content_type, post_type as secondary_type FROM $wpdb->posts WHERE post_title LIKE '%%%s%%' AND post_status = 'publish' AND post_type IN (" . $allowed_post_types_string . ')';
+
+					if ( isset( $params['all'] ) ) {
+						$search_term_array = [
+							$search_term,
+							$search_term,
+						];
+
+						$statement = "SELECT id, id as canonical_post_id, id as relation_id, post_title as title, 'post' as content_type, post_type as secondary_type FROM $wpdb->posts WHERE (post_title LIKE '%%%s%%' OR post_content LIKE '%%%s%%') AND post_status = 'publish' AND post_type IN (" . $allowed_post_types_string . ')';
+
+						$query_params = array_merge( $search_term_array, $allowed_post_types );
+					} else {
+						$query_params = array_merge( [ $search_term ], $allowed_post_types );
+					}
+
+					// SECURITY CHECKED: This query is properly prepared.
+					$prepared = $wpdb->prepare( $statement, $query_params );
+					$results  = $wpdb->get_results( $prepared );
+
+					foreach ( $results as &$post ) {
+						$post->thumbnail_id  = get_post_thumbnail_id( $post->id );
+						$post->thumbnail_uri = wp_get_attachment_url( $post->thumbnail_id );
+						unset( $post->id ); // $post->id has to be unset, otherwise this causes problems with adding cards that are on other lists
+					}
+				}
 			}
 
-			$allowed_post_types_string = implode( ', ', array_fill( 0, count( $allowed_post_types ), '%s' ) );
+			// Search products if requested (Pro only)
+			$products = [];
+			if ( $include_products && \Mediavine\Create\Plugin::is_pro() ) {
+				$products_table = self::$models_v2->mv_products->table_name;
 
-			$statement = "SELECT id, id as canonical_post_id, id as relation_id, post_title as title, 'post' as content_type, post_type as secondary_type FROM $wpdb->posts WHERE post_title LIKE '%%%s%%' AND post_status = 'publish' AND post_type IN (" . $allowed_post_types_string . ')';
+				// SECURITY CHECKED: This query is properly prepared.
+				$statement = "SELECT
+					id,
+					id as relation_id,
+					title,
+					link as url,
+					'product' as content_type,
+					NULL as secondary_type,
+					thumbnail_id,
+					external_thumbnail_url
+				FROM $products_table
+				WHERE title LIKE '%%%s%%'
+				ORDER BY title ASC
+				LIMIT 50";
 
-			if ( isset( $params['all'] ) ) {
-				$search_term = [
-					$search_term,
-					$search_term,
-				];
+				$prepared = $wpdb->prepare( $statement, $search_term );
+				$products = $wpdb->get_results( $prepared );
 
-				$statement = "SELECT id, id as canonical_post_id, id as relation_id, post_title as title, 'post' as content_type, post_type as secondary_type FROM $wpdb->posts WHERE (post_title LIKE '%%%s%%' OR post_content LIKE '%%%s%%') AND post_status = 'publish' AND post_type IN (" . $allowed_post_types_string . ')';
-			}
+				// Format product results
+				foreach ( $products as &$product ) {
+					// Set thumbnail_uri from external URL or local thumbnail
+					if ( ! empty( $product->external_thumbnail_url ) ) {
+						$product->thumbnail_uri = $product->external_thumbnail_url;
+					} elseif ( ! empty( $product->thumbnail_id ) ) {
+						$product->thumbnail_uri = wp_get_attachment_url( $product->thumbnail_id );
+					} else {
+						$product->thumbnail_uri = '';
+					}
 
-			if ( ! is_array( $search_term ) ) {
-				$search_term = [ $search_term ];
-			}
-			$params = array_merge( $search_term, $allowed_post_types );
-
-			// SECURITY CHECKED: This query is properly prepared.
-			$prepared = $wpdb->prepare( $statement, $params );
-			$results  = $wpdb->get_results( $prepared );
-
-			foreach ( $results as &$post ) {
-				$post->thumbnail_id  = get_post_thumbnail_id( $post->id );
-				$post->thumbnail_uri = wp_get_attachment_url( $post->thumbnail_id );
-				unset( $post->id ); // $post->id has to be unset, otherwise this causes problems with adding cards that are on other lists
-			}
-
-			$creations = self::$models_v2->mv_creations->find( $query_args, $creation_search );
-
-			foreach ( $creations as &$creation ) {
-				$creation->thumbnail_uri = wp_get_attachment_url( $creation->thumbnail_id );
-				Relations::prepare_card_item( $creation );
+					// Clean up temporary fields
+					unset( $product->id, $product->external_thumbnail_url );
+				}
 			}
 
 			// set up and return response data
@@ -104,6 +175,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				[
 					'creations' => $creations,
 					'posts'     => $results,
+					'products'  => $products,
 				], $response
 			);
 
@@ -199,6 +271,18 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 					'position'    => '',
 				];
 				$relation = array_merge( $default, $relation );
+
+				// Handle product content type
+				if ( isset( $relation['content_type'] ) && 'product' === $relation['content_type'] ) {
+					$product_result = $this->normalize_product_relation( $relation, $errors );
+					if ( is_wp_error( $product_result ) ) {
+						$errors[] = $product_result;
+						continue;
+					}
+					$relation = $product_result;
+					$relations[] = $relation;
+					continue;
+				}
 
 				// Check if the link is an Amazon link and scrape appropriately.
 				// Method will return false if the link is not an Amazon link, which
@@ -461,6 +545,85 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			}
 
 			return json_decode($original_relations[ $key ]->meta ?: '{}', true);
+		}
+
+		/**
+		 * Normalize product relation data
+		 *
+		 * Handles product list items by validating the product exists, merging product defaults
+		 * with list-specific overrides, and enforcing Pro gating.
+		 *
+		 * @param array $relation Relation data
+		 * @param array $errors   Errors array (passed by reference)
+		 * @return array|\WP_Error Normalized relation data or WP_Error
+		 */
+		public function normalize_product_relation( $relation, &$errors ) {
+			// Pro feature gating
+			if ( ! \Mediavine\Create\Plugin::is_pro() ) {
+				return new \WP_Error(
+					'pro_required',
+					__( 'Product list items require Mediavine Create Pro', 'mediavine' ),
+					[ 'status' => 403 ]
+				);
+			}
+
+			// Validate product exists
+			if ( empty( $relation['relation_id'] ) || '0' === $relation['relation_id'] ) {
+				return new \WP_Error(
+					'invalid_product',
+					__( 'Product ID is required for product list items', 'mediavine' ),
+					[ 'status' => 400 ]
+				);
+			}
+
+			$product_id = intval( $relation['relation_id'] );
+			$product    = self::$models_v2->mv_products->select_one_by_id( $product_id );
+
+			if ( empty( $product ) || is_wp_error( $product ) ) {
+				return new \WP_Error(
+					'product_not_found',
+					sprintf(
+						__( 'Product with ID %d not found', 'mediavine' ),
+						$product_id
+					),
+					[ 'status' => 404 ]
+				);
+			}
+
+			// Store product defaults for fields not overridden by the list
+			// These will be merged in Relations::prepare_product_item()
+
+			// Preserve list-specific overrides if they exist
+			// Otherwise, denormalize product data into relation for backwards compatibility
+			if ( empty( $relation['title'] ) ) {
+				// Clean up title - remove newlines and excessive whitespace from scraped content
+				$relation['title'] = preg_replace( '/\s+/', ' ', trim( $product->title ) );
+			}
+
+			if ( empty( $relation['url'] ) ) {
+				$relation['url'] = $product->link;
+			}
+
+			// Handle thumbnail
+			if ( ! empty( $relation['thumbnail_id'] ) ) {
+				// List has custom thumbnail - get URI
+				$relation['thumbnail_uri'] = wp_get_attachment_url( $relation['thumbnail_id'] );
+			} elseif ( ! empty( $product->external_thumbnail_url ) ) {
+				// Use product's external thumbnail (e.g., Amazon)
+				$relation['thumbnail_uri'] = $product->external_thumbnail_url;
+			} elseif ( ! empty( $product->thumbnail_id ) ) {
+				// Use product's local thumbnail
+				$relation['thumbnail_id']  = $product->thumbnail_id;
+				$relation['thumbnail_uri'] = wp_get_attachment_url( $product->thumbnail_id );
+			}
+
+			// Set nofollow for Amazon products
+			if ( ! empty( $product->asin ) ) {
+				$relation['nofollow'] = true;
+				$relation['asin']     = $product->asin;
+			}
+
+			return $relation;
 		}
 	}
 }

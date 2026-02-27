@@ -169,7 +169,11 @@ class Settings {
 
 				if ( isset( $setting['value'] ) && isset( $setting['slug'] ) ) {
 					$setting['value'] = apply_filters( $setting['slug'] . '_settings_value', $setting['value'] );
-					$setting['value'] = sanitize_text_field( $setting['value'] );
+					if ( 'mv_create_custom_css' === $setting['slug'] ) {
+						$setting['value'] = wp_strip_all_tags( $setting['value'] );
+					} else {
+						$setting['value'] = sanitize_text_field( $setting['value'] );
+					}
 				}
 
 				if ( isset( $setting['data'] ) ) {
@@ -549,6 +553,45 @@ class Settings {
 			$route_namespace, '/reset-settings', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'reset_db_settings' ],
+				'permission_callback' => function ( \WP_REST_Request $request ) {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
+
+		register_rest_route(
+			$route_namespace, '/request-password-reset', [
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => [ $this->settings_api, 'request_password_reset' ],
+				'permission_callback' => function ( \WP_REST_Request $request ) {
+					return current_user_can( 'manage_options' );
+				},
+				'args'                => [
+					'email' => [
+						'type'     => 'string',
+						'required' => true,
+						'validate_callback' => function( $email ) {
+							return is_email( $email );
+						},
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$route_namespace, '/reset-db-versions', [
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => [ $this->settings_api, 'reset_db_versions' ],
+				'permission_callback' => function ( \WP_REST_Request $request ) {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
+
+		register_rest_route(
+			$route_namespace, '/reset-subscription-tier', [
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => [ $this->settings_api, 'reset_subscription_tier' ],
 				'permission_callback' => function ( \WP_REST_Request $request ) {
 					return current_user_can( 'manage_options' );
 				},

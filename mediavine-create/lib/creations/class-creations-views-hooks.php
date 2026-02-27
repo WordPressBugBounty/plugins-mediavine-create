@@ -98,6 +98,50 @@ class Creations_Views_Hooks extends Creations_Views {
 		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
 	}
 
+	public static function card_style_editorial_hooks() {
+		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 40 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 20 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 30 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 40 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], 50 );
+		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], 60 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 70 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 80 );
+		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
+		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
+	}
+
+	public static function card_style_modern_hooks() {
+		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 40 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60 );
+		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 20 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 30 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 40 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], 50 );
+		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], 60 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 70 );
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 80 );
+		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
+		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
+	}
+
 	public static function list_style_square_hooks() {
 		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
 		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 10 );
@@ -343,27 +387,24 @@ class Creations_Views_Hooks extends Creations_Views {
 	 * @return void
 	 */
 	public static function mv_create_list_ads_grid( $args, $row, $count ) {
+		$ads_enabled = apply_filters(
+			'mv_create_list_ads_enabled',
+			Plugin_Checker::has_mv_ads() || (bool) \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ads_enabled', '0' )
+		);
+
 		if (
-			// make sure there should be ads at all
-			(
-				Plugin_Checker::has_mv_ads()
-			) &&
-			// make sure there are items in the list
+			$ads_enabled &&
 			! empty( $args['creation']['list_items_between_ads'] ) &&
-			// make sure we're not on the print page
 			! $args['print'] &&
-			// easy return by making sure this isn't the first row
 			( 1 !== $row ) &&
-			// if there is a remainder when dividing the row count by the list items between ads seting,
-			// we know it is not the correct row to insert an ad
 			( 0 === $row % $args['creation']['list_items_between_ads'] ) &&
-			// multiply the row by 2 to determine the index of the last item.
-			// if it's less than the total number of items, we can insert an ad because
-			// the ad will not be the last item in the list. If the index is greater than or equal
-			// to the total count of items, we don't want to place an ad.
 			( $row * 2 ) < $count
 		) {
-			echo '<div class="mv-list-adwrap"><div class="mv_slot_target" data-slot="content"></div></div>';
+			$should_insert = apply_filters( 'mv_create_should_insert_list_ad', true, $args, $row, $count );
+
+			if ( $should_insert ) {
+				echo self::get_list_ad_html( $args, $row, $count );
+			}
 		}
 	}
 
@@ -376,27 +417,281 @@ class Creations_Views_Hooks extends Creations_Views {
 	 * @return void
 	 */
 	public static function mv_create_list_ads( $args, $i, $count ) {
+		$ads_enabled = apply_filters(
+			'mv_create_list_ads_enabled',
+			Plugin_Checker::has_mv_ads() || (bool) \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ads_enabled', '0' )
+		);
+
 		if (
-			// make sure there should be ads at all
-			(
-				Plugin_Checker::has_mv_ads()
-			) &&
-			// make sure there are items in the list
+			$ads_enabled &&
 			! empty( $args['creation']['list_items_between_ads'] ) &&
-			// make sure we're not on the print page
 			! $args['print'] &&
-			// if there is no remainder when dividing the index plus one (to account for 0-indexing)
-			// by the number of items between ads setting, we know it is the correct item to insert an ad
 			( 0 === ( $i + 1 ) % $args['creation']['list_items_between_ads'] ) &&
-			// if there are remaining items, we can insert an ad. if this is the last item, we
-			// don't want any ads
 			( $i + 1 ) !== $count
 		) {
-			echo '<div class="mv-list-adwrap"><div class="mv_slot_target" data-slot="content"></div></div>';
+			$should_insert = apply_filters( 'mv_create_should_insert_list_ad', true, $args, $i, $count );
+
+			if ( $should_insert ) {
+				echo self::get_list_ad_html( $args, $i, $count );
+			}
+		}
+	}
+
+	/**
+	 * Get the HTML for a list ad slot.
+	 *
+	 * Uses the custom ad HTML setting for non-Mediavine publishers,
+	 * or the default Mediavine slot markup. Filterable via `mv_create_list_ad_html`.
+	 *
+	 * @param array $args  Card arguments.
+	 * @param int   $index Item index or row number.
+	 * @param int   $count Total item count.
+	 * @return string Ad slot HTML.
+	 */
+	private static function get_list_ad_html( $args, $index, $count ) {
+		$default_html = '<div class="mv-list-adwrap"><div class="mv_slot_target" data-slot="content"></div></div>';
+
+		// For non-MV publishers, use their custom ad HTML
+		if ( ! Plugin_Checker::has_mv_ads() ) {
+			$custom_html = trim( \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ad_custom_html', '' ) );
+			if ( ! empty( $custom_html ) ) {
+				$default_html = self::sanitize_custom_list_ad_html( $custom_html );
+			}
+		}
+
+		/**
+		 * Filter the ad slot HTML inserted between list items.
+		 *
+		 * @param string $html  The ad slot HTML.
+		 * @param array  $args  Card template arguments.
+		 * @param int    $index The current item index (or row number for grid layouts).
+		 * @param int    $count The total number of list items.
+		 */
+		return apply_filters( 'mv_create_list_ad_html', $default_html, $args, $index, $count );
+	}
+
+	/**
+	 * Sanitize custom ad slot HTML.
+	 *
+	 * Allows only div and span elements with class, id, and data-* attributes.
+	 * All other tags are unwrapped (children preserved) and all other attributes
+	 * are stripped. Script tags and event handlers are removed entirely.
+	 *
+	 * @param string $html Raw HTML input.
+	 * @return string Sanitized HTML safe for output.
+	 */
+	private static function sanitize_custom_list_ad_html( string $html ): string {
+		$html = trim( $html );
+		if ( '' === $html ) {
+			return '';
+		}
+
+		$dom = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			return '';
+		}
+
+		self::sanitize_dom_node( $dom, $body );
+
+		$result = '';
+		foreach ( $body->childNodes as $child ) {
+			$result .= $dom->saveHTML( $child );
+		}
+
+		return trim( $result );
+	}
+
+	/**
+	 * Recursively sanitize DOM node children in-place.
+	 *
+	 * @param \DOMDocument $dom    The owner document.
+	 * @param \DOMNode     $parent Parent node whose children will be sanitized.
+	 */
+	private static function sanitize_dom_node( \DOMDocument $dom, \DOMNode $parent ): void {
+		$allowed_tags = [ 'div', 'span' ];
+
+		// Snapshot children since we modify the list while iterating
+		$children = iterator_to_array( $parent->childNodes );
+
+		foreach ( $children as $child ) {
+			if ( ! ( $child instanceof \DOMElement ) ) {
+				// Remove comments, processing instructions, etc.; keep text nodes
+				if ( ! ( $child instanceof \DOMText ) ) {
+					$parent->removeChild( $child );
+				}
+				continue;
+			}
+
+			// Executable tags: strip entirely including all children
+			$strip_entirely = [ 'script', 'style', 'iframe', 'form', 'object', 'embed' ];
+			if ( in_array( strtolower( $child->tagName ), $strip_entirely, true ) ) {
+				$parent->removeChild( $child );
+				continue;
+			}
+
+			if ( ! in_array( strtolower( $child->tagName ), $allowed_tags, true ) ) {
+				// Unwrap: sanitize children first, then move them up
+				self::sanitize_dom_node( $dom, $child );
+				$grandchildren = iterator_to_array( $child->childNodes );
+				foreach ( $grandchildren as $gc ) {
+					$parent->insertBefore( $gc, $child );
+				}
+				$parent->removeChild( $child );
+				continue;
+			}
+
+			// Strip disallowed attributes
+			$remove_attrs = [];
+			foreach ( $child->attributes as $attr ) {
+				$name    = strtolower( $attr->nodeName );
+				$allowed = ( 'class' === $name )
+					|| ( 'id' === $name )
+					|| ( 1 === preg_match( '/^data-[a-z0-9-]+$/', $name ) );
+				if ( ! $allowed ) {
+					$remove_attrs[] = $attr->nodeName;
+				}
+			}
+			foreach ( $remove_attrs as $attr_name ) {
+				$child->removeAttribute( $attr_name );
+			}
+
+			// Sanitize class values
+			if ( $child->hasAttribute( 'class' ) ) {
+				$classes = preg_split( '/\s+/', trim( $child->getAttribute( 'class' ) ) );
+				$classes = array_values( array_filter( array_map( 'sanitize_html_class', $classes ) ) );
+				if ( $classes ) {
+					$child->setAttribute( 'class', implode( ' ', $classes ) );
+				} else {
+					$child->removeAttribute( 'class' );
+				}
+			}
+
+			// Sanitize id value
+			if ( $child->hasAttribute( 'id' ) ) {
+				$sanitized_id = sanitize_html_class( $child->getAttribute( 'id' ) );
+				if ( $sanitized_id ) {
+					$child->setAttribute( 'id', $sanitized_id );
+				} else {
+					$child->removeAttribute( 'id' );
+				}
+			}
+
+			// Escape data-* attribute values
+			$data_attrs = [];
+			foreach ( $child->attributes as $attr ) {
+				if ( 0 === strpos( $attr->nodeName, 'data-' ) ) {
+					$data_attrs[ $attr->nodeName ] = $attr->nodeValue;
+				}
+			}
+			foreach ( $data_attrs as $attr_name => $attr_value ) {
+				$child->setAttribute( $attr_name, esc_attr( $attr_value ) );
+			}
+
+			self::sanitize_dom_node( $dom, $child );
 		}
 	}
 
 	public static function mv_create_footer( $args ) {
 		self::$views->the_view( 'shortcode-mv-create-footer', $args );
+	}
+
+	/**
+	 * Get the hook priority for products based on position setting and theme style.
+	 *
+	 * @param string $position Position setting value.
+	 * @param string $style Card theme style.
+	 * @return int Hook priority.
+	 */
+	public static function get_products_priority( $position, $style ) {
+		// Define base priorities for each theme's sections
+		$theme_priorities = [
+			'square'       => [
+				'supplies'     => 30,
+				'instructions' => 40,
+				'notes'        => 50,
+				'video'        => 60,
+			],
+			'centered'     => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+				'video'        => 50,
+			],
+			'centered-dark' => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+				'video'        => 50,
+			],
+			'big-image'    => [
+				'supplies'     => 50,
+				'instructions' => 60,
+				'notes'        => 70,
+				'video'        => 80,
+			],
+			'editorial'    => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+				'video'        => 50,
+			],
+			'modern'       => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+				'video'        => 50,
+			],
+		];
+
+		// Default to square theme priorities if style not found
+		$priorities = $theme_priorities[ $style ] ?? $theme_priorities['square'];
+
+		// Calculate products priority based on position
+		switch ( $position ) {
+			case 'above_supplies':
+				return $priorities['supplies'] - 5;
+			case 'above_instructions':
+				return $priorities['instructions'] - 5;
+			case 'below_notes':
+				return $priorities['notes'] + 5;
+			case 'after_video':
+			default:
+				return $priorities['video'] + 10;
+		}
+	}
+
+	/**
+	 * Adjust products hook priority based on card and global settings.
+	 *
+	 * @param array $args Card rendering arguments.
+	 */
+	public static function adjust_products_priority( $args ) {
+		// Get position from card override or global setting
+		$position = null;
+		if ( ! empty( $args['creation']['products_position'] ) ) {
+			$position = $args['creation']['products_position'];
+		} else {
+			$position = \Mediavine\Settings::get_setting( 'mv_create_products_position', 'after_video' );
+		}
+
+		// Get the card style
+		$style = $args['style'] ?? 'square';
+
+		// Get the correct priority for this position and style
+		$priority = self::get_products_priority( $position, $style );
+
+		// Remove products hook from all possible priorities
+		$possible_priorities = [ 15, 25, 35, 45, 55, 60, 65, 70, 75, 85, 90 ];
+		foreach ( $possible_priorities as $p ) {
+			remove_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], $p );
+		}
+
+		// Re-add at the correct priority
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], $priority );
 	}
 }

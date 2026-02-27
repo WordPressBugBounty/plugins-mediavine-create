@@ -108,6 +108,9 @@ class Creations extends Plugin {
 			'type'    => 'tinyint(1)',
 			'default' => 0,
 		],
+		'products_display_mode'   => 'varchar(50)',
+		'products_section_title'  => 'varchar(255)',
+		'products_position'       => 'varchar(50)',
 	];
 
 	// Key only used for secondary terms
@@ -160,8 +163,8 @@ class Creations extends Plugin {
 		add_filter('mv_dbi_before_update_' . $this->table_name, [ $this, 'before_update' ]);
 		add_filter('mv_dbi_after_update_' . $this->table_name, [ $this, 'after_update' ]);
 		add_filter('mv_dbi_after_delete_' . $this->table_name, [ $this, 'after_delete' ]);
-		add_action('setup_theme', '\Mediavine\Create\Creations_WP_Content::register_content_types', 1);
-		add_action('setup_theme', '\Mediavine\Create\Creations_WP_Content::register_taxonomies', 1);
+		add_action('init', '\Mediavine\Create\Creations_WP_Content::register_content_types', 0);
+		add_action('init', '\Mediavine\Create\Creations_WP_Content::register_taxonomies', 0);
 		add_action('rest_api_init', [ $this, 'routes' ]);
 
 		// Update creation when rating added/updated
@@ -194,91 +197,91 @@ class Creations extends Plugin {
 	public static function get_image_sizes() {
 	  self::$img_sizes = [
 		  'mv_create_1x1'                 => [
-			  'name'   => __('Create Card Square (Small)', 'mediavine'),
+			  'name'   => 'Create Card Square (Small)',
 			  'width'  => 200,
 			  'height' => 200,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_1x1_medium_res'      => [
-			  'name'   => __('Create Card Square', 'mediavine'),
+			  'name'   => 'Create Card Square',
 			  'width'  => 320,
 			  'height' => 320,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_1x1_medium_high_res' => [
-			  'name'   => __('Create Card Square (Medium High)', 'mediavine'),
+			  'name'   => 'Create Card Square (Medium High)',
 			  'width'  => 480,
 			  'height' => 480,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_1x1_high_res'        => [
-			  'name'   => __('Create Card Square (High Res)', 'mediavine'),
+			  'name'   => 'Create Card Square (High Res)',
 			  'width'  => 720,
 			  'height' => 720,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_4x3'                 => [
-			  'name'   => __('Create Card 4:3 (Small)', 'mediavine'),
+			  'name'   => 'Create Card 4:3 (Small)',
 			  'width'  => 320,
 			  'height' => 240,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_4x3_medium_res'      => [
-			  'name'   => __('Create Card 4:3', 'mediavine'),
+			  'name'   => 'Create Card 4:3',
 			  'width'  => 480,
 			  'height' => 360,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_4x3_high_res'        => [
-			  'name'   => __('Create Card 4:3 (High Res)', 'mediavine'),
+			  'name'   => 'Create Card 4:3 (High Res)',
 			  'width'  => 720,
 			  'height' => 540,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_3x4'                 => [
-			  'name'   => __('Create Card 3:4 (Small)', 'mediavine'),
+			  'name'   => 'Create Card 3:4 (Small)',
 			  'height' => 320,
 			  'width'  => 240,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_3x4_medium_res'      => [
-			  'name'   => __('Create Card 3:4', 'mediavine'),
+			  'name'   => 'Create Card 3:4',
 			  'height' => 480,
 			  'width'  => 360,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_3x4_high_res'        => [
-			  'name'   => __('Create Card 3:4 (High Res)', 'mediavine'),
+			  'name'   => 'Create Card 3:4 (High Res)',
 			  'height' => 720,
 			  'width'  => 540,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_16x9'                => [
-			  'name'   => __('Create Card 16:9 (Small)', 'mediavine'),
+			  'name'   => 'Create Card 16:9 (Small)',
 			  'width'  => 320,
 			  'height' => 180,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_16x9_medium_res'     => [
-			  'name'   => __('Create Card 16:9', 'mediavine'),
+			  'name'   => 'Create Card 16:9',
 			  'width'  => 480,
 			  'height' => 270,
 			  'crop'   => true,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_16x9_high_res'       => [
-			  'name'   => __('Create Card 16:9 (High Res)', 'mediavine'),
+			  'name'   => 'Create Card 16:9 (High Res)',
 			  'width'  => 720,
 			  'height' => 405,
 			  'crop'   => true,
@@ -286,14 +289,14 @@ class Creations extends Plugin {
 		  ],
 		  // Same as mv_create_vert. No additional images will be created
 		  'mv_create_no_ratio'            => [
-			  'name'   => __('Create Card No Ratio', 'mediavine'),
+			  'name'   => 'Create Card No Ratio',
 			  'width'  => 735,
 			  'height' => 9999,
 			  'crop'   => false,
 			  'class'  => 'mv-create-image no_pin ggnoads',
 		  ],
 		  'mv_create_vert'                => [
-			  'name'   => __('Create Card Vertical Pin', 'mediavine'),
+			  'name'   => 'Create Card Vertical Pin',
 			  'width'  => 735,
 			  'height' => 9999,
 			  'crop'   => false,
@@ -969,6 +972,7 @@ class Creations extends Plugin {
 	 * @param \WP_REST_Request $request  API Request
 	 */
 	function render_view( \WP_REST_Request $request ) {
+		Creations_Views::$has_card = true;
 		header('Content-Type: text/html; charset=' . get_option('blog_charset'));
 ?>
 		<html>
@@ -985,6 +989,12 @@ class Creations extends Plugin {
 			?>
 			<link rel="stylesheet"
 				href="<?php echo esc_attr(self::get_bundle_css_url()); ?>">
+			<style>
+				div#preview { padding-top: 60px; }
+				div#preview .mv-create-wrapper { margin-top: 0; }
+				div#preview .mv-create-card-style-centered img.mv-create-image { top: -87px; }
+				.adthrive-comscore.adthrive-footer-message { display: none; }
+			</style>
 			<?php
 			// phpcs:enable
 			?>
@@ -1367,6 +1377,25 @@ class Creations extends Plugin {
 							[
 								[ self::$api_services, 'process_pagination' ],
 								[ $this->api, 'find' ],
+							],
+							$request
+						);
+					},
+					'permission_callback' => [ self::$api_services, 'permitted' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			$namespace,
+			'/creations/authors',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => function ( \WP_REST_Request $request ) {
+						return API_Services::middleware(
+							[
+								[ $this->api, 'get_authors' ],
 							],
 							$request
 						);

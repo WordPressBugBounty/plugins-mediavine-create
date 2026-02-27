@@ -154,7 +154,7 @@ class Arr {
 	 * @param  mixed         $default
 	 * @return mixed
 	 */
-	public static function first( $array, callable $callback = null, $default = null ): mixed {
+	public static function first( $array, callable $callback = null, $default = null ) {
 		if ( is_null( $callback ) ) {
 			if ( empty( $array ) ) {
 				return mv_get_value( $default );
@@ -182,7 +182,7 @@ class Arr {
 	 * @param  mixed         $default
 	 * @return mixed
 	 */
-	public static function last( $array, callable $callback = null, $default = null ): mixed {
+	public static function last( $array, callable $callback = null, $default = null ) {
 		if ( is_null( $callback ) ) {
 			return empty( $array ) ? mv_get_value( $default ) : end( $array );
 		}
@@ -266,7 +266,7 @@ class Arr {
 	 * @param  mixed              $default
 	 * @return mixed
 	 */
-	public static function get( $array, $key, $default = null ): mixed {
+	public static function get( $array, $key, $default = null ) {
 		if ( ! static::accessible( $array ) ) {
 			return mv_get_value( $default );
 		}
@@ -453,7 +453,7 @@ class Arr {
 	 * @param  mixed  $default
 	 * @return mixed
 	 */
-	public static function pull( &$array, $key, $default = null ): mixed {
+	public static function pull( &$array, $key, $default = null ) {
 		$value = static::get( $array, $key, $default );
 
 		static::forget( $array, $key );
@@ -470,7 +470,7 @@ class Arr {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public static function random( $array, $number = null ): mixed {
+	public static function random( $array, $number = null ) {
 		$requested = is_null( $number ) ? 1 : $number;
 
 		$count = count( $array );

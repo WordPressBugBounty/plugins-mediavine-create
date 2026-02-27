@@ -197,13 +197,27 @@ class Relations extends Plugin {
 	public static function get_creation_relations( $creation_id ) {
 		global $wpdb;
 		$table = self::$models_v2->mv_relations->table_name;
+		$products_table = self::$models_v2->mv_products->table_name;
 		if ( $creation_id instanceof Model ) {
 			$model       = $creation_id;
 			$creation_id = $model->key();
 		}
 		$creation_id = intval( $creation_id );
 		// SECURITY CHECKED: This query is properly prepared.
-		$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d ORDER BY type, position ASC", [ $creation_id ] );
+		$prepared_statement = $wpdb->prepare(
+			"SELECT {$table}.*,
+				{$products_table}.title as product_title,
+				{$products_table}.description as product_description,
+				{$products_table}.link as product_link,
+				{$products_table}.thumbnail_id as product_thumbnail_id,
+				{$products_table}.external_thumbnail_url as product_external_thumbnail_url,
+				{$products_table}.asin as product_asin
+			FROM {$table}
+			LEFT JOIN {$products_table} ON {$table}.relation_id = {$products_table}.id AND {$table}.content_type = 'product'
+			WHERE {$table}.creation = %d
+			ORDER BY {$table}.type, {$table}.position ASC",
+			[ $creation_id ]
+		);
 
 		$relations = $wpdb->get_results( $prepared_statement );
 		if ( empty( $relations ) ) {
@@ -232,6 +246,9 @@ class Relations extends Plugin {
 					break;
 				case 'revision':
 					$relation = static::fix_revision_item( $relation );
+					break;
+				case 'product':
+					$relation = static::prepare_product_item( $relation );
 					break;
 				default:
 					break;
@@ -328,6 +345,81 @@ class Relations extends Plugin {
 				$relation->posts = $associated_posts;
 			}
 		}
+		return $relation;
+	}
+
+	/**
+	 * Prepare list items that are products.
+	 *
+	 * Merges product data from wp_mv_products with list-specific overrides from wp_mv_relations.
+	 * List overrides (title, url, thumbnail_id) take precedence over product defaults.
+	 *
+	 * @param \stdClass $relation
+	 * @return \stdClass $relation
+	 */
+	public static function prepare_product_item( $relation ) {
+		// If product was deleted, return relation as-is (will be filtered out in shortcode)
+		if ( empty( $relation->product_title ) && empty( $relation->product_link ) ) {
+			return $relation;
+		}
+
+		// Merge product data with list overrides
+		// List-specific values take precedence over product defaults
+		if ( empty( $relation->title ) && ! empty( $relation->product_title ) ) {
+			// Clean up title - remove newlines and excessive whitespace from scraped content
+			$relation->title = preg_replace( '/\s+/', ' ', trim( $relation->product_title ) );
+		} elseif ( ! empty( $relation->title ) ) {
+			// Also clean existing title if it has newlines
+			$relation->title = preg_replace( '/\s+/', ' ', trim( $relation->title ) );
+		}
+
+		if ( empty( $relation->description ) && ! empty( $relation->product_description ) ) {
+			$relation->description = $relation->product_description;
+		}
+
+		if ( empty( $relation->url ) && ! empty( $relation->product_link ) ) {
+			$relation->url = $relation->product_link;
+		}
+
+		// Handle thumbnail: prioritize list override, then product external URL, then product thumbnail_id
+		if ( empty( $relation->thumbnail_id ) && ! empty( $relation->product_thumbnail_id ) ) {
+			$relation->thumbnail_id = $relation->product_thumbnail_id;
+		}
+
+		if ( empty( $relation->thumbnail_uri ) ) {
+			if ( ! empty( $relation->product_external_thumbnail_url ) ) {
+				$relation->thumbnail_uri = $relation->product_external_thumbnail_url;
+			} elseif ( ! empty( $relation->product_thumbnail_id ) ) {
+				$relation->thumbnail_uri = wp_get_attachment_url( $relation->product_thumbnail_id );
+			}
+		}
+
+		// Set nofollow and ASIN for Amazon products
+		// Also set meta field with external thumbnail URL so img() method can find it
+		if ( ! empty( $relation->product_asin ) ) {
+			$relation->nofollow = true;
+			$relation->asin     = $relation->product_asin;
+
+			// Set meta field with external thumbnail URL for Amazon products
+			// This allows the img() method in Creations_Views to properly render Amazon images
+			if ( ! empty( $relation->product_external_thumbnail_url ) ) {
+				$meta = [
+					'external_thumbnail_url' => $relation->product_external_thumbnail_url,
+				];
+				$relation->meta = wp_json_encode( $meta );
+			}
+		}
+
+		// Clean up temporary product fields
+		unset(
+			$relation->product_title,
+			$relation->product_description,
+			$relation->product_link,
+			$relation->product_thumbnail_id,
+			$relation->product_external_thumbnail_url,
+			$relation->product_asin
+		);
+
 		return $relation;
 	}
 

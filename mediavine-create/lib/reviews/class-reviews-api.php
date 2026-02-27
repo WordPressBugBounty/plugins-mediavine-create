@@ -345,6 +345,20 @@ class Reviews_API extends Reviews {
 			);
 		}
 
+		// Check if admin editing is gated (admins editing on behalf of users)
+		if ( \Mediavine\Permissions::is_user_authorized() && ! empty( $params['edited_by_admin'] ) ) {
+			if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_EDIT ) ) {
+				return new \WP_Error(
+					'feature_gated',
+					__( 'Editing reviews requires a Pro subscription', 'mediavine' ),
+					[
+						'status'      => 403,
+						'upgrade_url' => GateKeeper::get_upgrade_url(),
+					]
+				);
+			}
+		}
+
 		// This accounts for old versions of create where we used recipe_id
 		if ( empty( $params['creation'] ) && ! empty( $params['recipe_id'] ) ) {
 			$params['creation'] = $params['recipe_id'];
@@ -354,6 +368,12 @@ class Reviews_API extends Reviews {
 
 		if ( ! $rating_status['ok'] ) {
 			return new \WP_REST_Response( $rating_status['response'], $rating_status['status'] );
+		}
+
+		// Admin bypass: authorized admins can change ratings without requiring content fields
+		// This allows admins to change rating-only reviews to any star value
+		if ( \Mediavine\Permissions::is_user_authorized() && ! empty( $params['edited_by_admin'] ) ) {
+			$rating_status['more_required'] = false;
 		}
 
 		$result = $this->validate_review( $params, $rating_status );
@@ -368,6 +388,9 @@ class Reviews_API extends Reviews {
 			if ( $updated ) {
 				$updated->updated = true;
 				$this->Reviews->update_creation_rating( $updated );
+				if ( \Mediavine\Permissions::is_user_authorized() && ! empty( $params['edited_by_admin'] ) ) {
+					$this->maybe_unlock_moderator_achievement();
+				}
 				$response    = [];
 				$response    = $this::$api_services->prepare_item_for_response( $updated, $request );
 				$status_code = 200;
@@ -460,6 +483,30 @@ class Reviews_API extends Reviews {
 			}
 		}
 
+		// Filter by has_responses (boolean: true = has responses, false = no responses)
+		if ( isset( $params['has_responses'] ) ) {
+			$has_responses = filter_var( $params['has_responses'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+			if ( null !== $has_responses ) {
+				$query_args['where']['has_responses'] = $has_responses ? 1 : 0;
+			}
+		}
+
+		// Filter by has_content (boolean: true = has title or content, false = rating only)
+		$has_content_filter = null;
+		if ( isset( $params['has_content'] ) ) {
+			$has_content_filter = filter_var( $params['has_content'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+		}
+
+		// Min rating filter will be applied post-query (for >= comparison)
+		$min_rating = isset( $params['min_rating'] ) && is_numeric( $params['min_rating'] )
+			? floatval( $params['min_rating'] )
+			: null;
+
+		// Max rating filter will be applied post-query
+		$max_rating = isset( $params['max_rating'] ) && is_numeric( $params['max_rating'] )
+			? floatval( $params['max_rating'] )
+			: null;
+
 		if ( ! empty( $params['limit'] ) ) {
 			$limit               = sanitize_text_field( $params['limit'] );
 			$query_args['limit'] = $limit;
@@ -481,10 +528,101 @@ class Reviews_API extends Reviews {
 			$query_args['offset'] = $offset;
 		}
 
-		$query_args['order_by'] = 'modified';
-		$query_args['order']    = 'DESC';
+		// Allow custom sorting
+		$allowed_order_by = [ 'modified', 'created', 'rating' ];
+		$order_by = isset( $params['order_by'] ) && in_array( $params['order_by'], $allowed_order_by, true )
+			? $params['order_by']
+			: 'modified';
+		$query_args['order_by'] = $order_by;
+
+		$allowed_order = [ 'ASC', 'DESC' ];
+		$order = isset( $params['order'] ) && in_array( strtoupper( $params['order'] ), $allowed_order, true )
+			? strtoupper( $params['order'] )
+			: 'DESC';
+		$query_args['order'] = $order;
 
 		$reviews = $this->Reviews->find( $query_args, $search );
+
+		// Apply min_rating filter post-query (for >= comparison not supported by DBI)
+		if ( is_array( $reviews ) && null !== $min_rating ) {
+			$reviews = array_filter( $reviews, function( $review ) use ( $min_rating ) {
+				$rating = isset( $review->rating ) ? floatval( $review->rating ) : 0;
+				return $rating >= $min_rating;
+			} );
+			$reviews = array_values( $reviews ); // Re-index array
+		}
+
+		// Apply max_rating filter post-query (for <= comparison not supported by DBI)
+		if ( is_array( $reviews ) && null !== $max_rating ) {
+			$reviews = array_filter( $reviews, function( $review ) use ( $max_rating ) {
+				$rating = isset( $review->rating ) ? floatval( $review->rating ) : 0;
+				return $rating <= $max_rating;
+			} );
+			$reviews = array_values( $reviews ); // Re-index array
+		}
+
+		// Apply has_content filter post-query
+		if ( is_array( $reviews ) && null !== $has_content_filter ) {
+			$reviews = array_filter( $reviews, function( $review ) use ( $has_content_filter ) {
+				$title   = isset( $review->review_title ) ? $review->review_title : '';
+				$content = isset( $review->review_content ) ? $review->review_content : '';
+				$has_content = ! empty( $title ) || ! empty( $content );
+				return $has_content_filter ? $has_content : ! $has_content;
+			} );
+			$reviews = array_values( $reviews ); // Re-index array
+		}
+
+		// Content length filters (for review_content specifically)
+		$min_content_length = isset( $params['min_content_length'] ) && is_numeric( $params['min_content_length'] )
+			? intval( $params['min_content_length'] )
+			: null;
+		$max_content_length = isset( $params['max_content_length'] ) && is_numeric( $params['max_content_length'] )
+			? intval( $params['max_content_length'] )
+			: null;
+
+		if ( is_array( $reviews ) && ( null !== $min_content_length || null !== $max_content_length ) ) {
+			$reviews = array_filter( $reviews, function( $review ) use ( $min_content_length, $max_content_length ) {
+				$content_length = isset( $review->review_content ) ? mb_strlen( $review->review_content ) : 0;
+				if ( null !== $min_content_length && $content_length < $min_content_length ) {
+					return false;
+				}
+				if ( null !== $max_content_length && $content_length > $max_content_length ) {
+					return false;
+				}
+				return true;
+			} );
+			$reviews = array_values( $reviews );
+		}
+
+		// Suggested featured filter: optimal reviews for featuring (140-300 chars, highest rated, with content)
+		// Falls back to any review with content if no optimal matches
+		$suggested_featured = isset( $params['suggested_featured'] )
+			? filter_var( $params['suggested_featured'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE )
+			: null;
+
+		if ( is_array( $reviews ) && true === $suggested_featured ) {
+			// First, filter to only reviews with content
+			$reviews_with_content = array_filter( $reviews, function( $review ) {
+				$content = isset( $review->review_content ) ? $review->review_content : '';
+				return ! empty( $content );
+			} );
+
+			// Try to find optimal length reviews (140-300 chars)
+			$optimal_reviews = array_filter( $reviews_with_content, function( $review ) {
+				$content_length = isset( $review->review_content ) ? mb_strlen( $review->review_content ) : 0;
+				return $content_length >= 140 && $content_length <= 300;
+			} );
+
+			// Use optimal if available, otherwise fall back to all with content
+			$reviews = ! empty( $optimal_reviews ) ? array_values( $optimal_reviews ) : array_values( $reviews_with_content );
+
+			// Sort by rating descending (highest first)
+			usort( $reviews, function( $a, $b ) {
+				$rating_a = isset( $a->rating ) ? floatval( $a->rating ) : 0;
+				$rating_b = isset( $b->rating ) ? floatval( $b->rating ) : 0;
+				return $rating_b <=> $rating_a;
+			} );
+		}
 
 		if ( is_array( $reviews ) ) {
 
@@ -492,21 +630,37 @@ class Reviews_API extends Reviews {
 
 			$response['links'] = $this::$api_services->prepare_collection_links( $request );
 
+			$is_authenticated  = \Mediavine\Permissions::is_user_authorized();
+			$creation_cache    = [];
+
 			$response = [];
 			foreach ( $reviews as $review ) {
 				$relationships = [];
-				if ( isset( $review->creation ) ) {
-					$relationships[] = self::$models_v2->mv_creations->select_one( $review->creation );
+				if ( $is_authenticated && isset( $review->creation ) ) {
+					$creation_id = $review->creation;
+					if ( ! isset( $creation_cache[ $creation_id ] ) ) {
+						$full_creation = self::$models_v2->mv_creations->select_one( $creation_id );
+						if ( $full_creation ) {
+							$creation_cache[ $creation_id ] = (object) [
+								'id'    => $full_creation->id,
+								'title' => $full_creation->title,
+								'type'  => $full_creation->type,
+							];
+						}
+					}
+					if ( isset( $creation_cache[ $creation_id ] ) ) {
+						$relationships[] = $creation_cache[ $creation_id ];
+					}
 				}
 
-				$review->review_title   = wp_kses( $review->review_title, [] );
-				$review->review_content = wp_kses( $review->review_content, [] );
-				$review->author_email   = wp_kses( $review->author_email, [] );
-				$review->author_name    = wp_kses( $review->author_name, [] );
-				$review->type           = wp_kses( $review->type, [] );
+				$review->review_title   = wp_strip_all_tags( $review->review_title );
+				$review->review_content = wp_strip_all_tags( $review->review_content );
+				$review->author_email   = wp_strip_all_tags( $review->author_email );
+				$review->author_name    = wp_strip_all_tags( $review->author_name );
+				$review->type           = wp_strip_all_tags( $review->type );
 
 				// The email should never be publicly available
-				if ( ! \Mediavine\Permissions::is_user_authorized() ) {
+				if ( ! $is_authenticated ) {
 					unset( $review->author_email );
 				}
 
@@ -540,11 +694,11 @@ class Reviews_API extends Reviews {
 
 		$review = self::$models->reviews->select_one_by_id( $params['id'] );
 
-		$review->review_title   = wp_kses( $review->review_title, [] );
-		$review->review_content = wp_kses( $review->review_content, [] );
-		$review->author_email   = wp_kses( $review->author_email, [] );
-		$review->author_name    = wp_kses( $review->author_name, [] );
-		$review->type           = wp_kses( $review->type, [] );
+		$review->review_title   = wp_strip_all_tags( $review->review_title );
+		$review->review_content = wp_strip_all_tags( $review->review_content );
+		$review->author_email   = wp_strip_all_tags( $review->author_email );
+		$review->author_name    = wp_strip_all_tags( $review->author_name );
+		$review->type           = wp_strip_all_tags( $review->type );
 
 		// The email should never be publicly available
 		if ( ! \Mediavine\Permissions::is_user_authorized() ) {
@@ -576,11 +730,18 @@ class Reviews_API extends Reviews {
 
 		$params    = $request->get_params();
 		$review_id = intval( $params['id'] );
-		$review    = self::$models->reviews->select_one_by_id( $review_id );
-		$deleted   = self::$models->reviews->delete_by_id( $review_id );
+		$review    = self::$models_v2->mv_reviews->select_one_by_id( $review_id );
+
+		if ( ! $review ) {
+			return new \WP_Error( 404, __( 'Review Not Found', 'mediavine' ), [ 'status' => 404 ] );
+		}
+
+		global $wpdb;
+		$deleted = $wpdb->delete( self::$models_v2->mv_reviews->table_name, [ 'id' => $review_id ] );
 
 		if ( $deleted ) {
 			$this->Reviews->update_creation_rating( $review );
+			$this->maybe_unlock_moderator_achievement();
 			$response    = [];
 			$status_code = 204;
 		}
@@ -590,6 +751,29 @@ class Reviews_API extends Reviews {
 		}
 
 		return new \WP_REST_Response( $response, $status_code );
+	}
+
+	/**
+	 * Unlock the moderator achievement when an admin edits or deletes a review.
+	 */
+	private function maybe_unlock_moderator_achievement() {
+		$achievements = get_option( 'mv_create_achievements', [] );
+		if ( ! is_array( $achievements ) ) {
+			$achievements = json_decode( $achievements, true );
+			if ( ! is_array( $achievements ) ) {
+				$achievements = [];
+			}
+		}
+
+		if ( ! empty( $achievements['moderator']['unlocked'] ) ) {
+			return;
+		}
+
+		$achievements['moderator'] = [
+			'unlocked'    => true,
+			'unlocked_at' => gmdate( 'c' ),
+		];
+		update_option( 'mv_create_achievements', wp_json_encode( $achievements ) );
 	}
 
 	function init() {

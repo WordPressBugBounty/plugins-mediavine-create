@@ -66,8 +66,8 @@ class API_Services {
 			'id'     => 'mv-error-42',
 			'status' => 400,
 			'type'   => 'error',
-			'title'  => __( 'Bad Request', 'mediavine' ),
-			'detail' => __( 'Missing required input', 'mediavine' ),
+			'title'  => 'Bad Request',
+			'detail' => 'Missing required input',
 		];
 		return $this;
 	}
@@ -81,8 +81,8 @@ class API_Services {
 			'id'      => $error_id,
 			'status'  => $status,
 			'type'    => $type,
-			'title'   => __( 'Bad Request', 'mediavine' ),
-			'details' => __( 'We\'re missing important information', 'mediavine' ),
+			'title'   => 'Bad Request',
+			'details' => 'We\'re missing important information',
 		];
 
 		if ( ! empty( $error_msg['title'] ) ) {

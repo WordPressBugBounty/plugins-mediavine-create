@@ -6,14 +6,10 @@
 			method="get"
 			target="_blank"
 			action="<?php echo esc_html( get_rest_url( null, '/mv-create/v1/creations/' . $args['creation']['id'] . '/print' ) ); ?>"
-		>
-			<button
+		><button
 				class="mv-create-button mv-create-print-button mv-create-uppercase"
 				data-mv-print="<?php echo esc_html( get_rest_url( null, '/mv-create/v1/creations/' . $args['creation']['id'] . '/print' ) ); ?>?ajax=true"
-			>
-				<?php esc_html_e( 'Print', 'mediavine' ); ?>
-			</button>
-		</form>
+			><?php esc_html_e( 'Print', 'mediavine' ); ?></button></form>
 
 		<?php if ( ! $args['print'] && $args['allow_reviews'] ) { ?>
 			<div class="mv-create-reviews-flex">

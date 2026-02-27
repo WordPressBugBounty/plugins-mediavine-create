@@ -130,7 +130,7 @@ final class Custom_Content {
 					],
 					[
 						'slug'  => $this->namespace . '-meta',
-						'title' => $this->label . __( 'Meta Boxes', 'mediavine' ),
+						'title' => $this->label . ' ' . __( 'Meta Boxes', 'mediavine' ),
 					],
 				]
 			);

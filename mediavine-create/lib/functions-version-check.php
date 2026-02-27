@@ -232,10 +232,11 @@ function mv_create_add_action_links( $links ) {
 
 function mv_create_plugin_info_links( $links, $file ) {
 	if ( strpos( $file, 'mediavine-create.php' ) !== false ) {
-		$new_links = [
-			'importers' => '<a href="https://create.studio/downloads/create-recipe-importers.zip" target="_blank">Download Mediavine Recipe Importers Plugin</a>',
+		$settings_url = admin_url( 'options-general.php?page=mv_settings&setting=mv_create_enable_importers' );
+		$new_links    = [
+			'importers' => '<a href="' . esc_url( $settings_url ) . '">Enable Recipe Importer</a>',
 		];
-		$links     = array_merge( $links, $new_links );
+		$links = array_merge( $links, $new_links );
 	}
 
 	return $links;

@@ -1,9 +1,9 @@
 === Create ===
 Contributors: mischiefmarmot
 Donate link: https://create.studio
-Tags: recipe, recipe card, how to, schema, seo
+Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
-Tested up to: 6.8.3
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: trunk
 License: GPLv2 or later
@@ -13,86 +13,87 @@ Complete tool for creating and publishing recipes and other schema types on your
 
 == Description ==
 
-= A Plugin for Bakers. Makers. Adventure-takers. =
-Top in tech, speed, and SEO so you can focus on what you do best and CREATE.
+= Recipes, guides, and lists — for creators who care about their craft. =
 
-Now you can craft multiple Google Schema.org types using just one plugin.
+Create gives you everything you need to publish recipes, how-to guides, and lists — with correct Schema.org markup, fast page loads, and an editor that stays out of your way. Whether you're sharing recipes, DIY tutorials, travel guides, crochet patterns, game walkthroughs, or curated round-ups, Create handles the structured content so you can focus on creating.
 
-* Recipes
-* How-to guides and craft instructions
-* Lists and round-ups
-* More to come!
+**One plugin. Three card types. Full schema support.**
 
-Now: Automatically calculate nutritional data for your recipes for free.
+* **Recipes** — Granular ingredient editing, free nutrition calculator, video embeds, and built-in importers for 10+ recipe plugins
+* **How-to guides** — Step-by-step instructions with materials lists, photos, and video for any kind of tutorial or guide
+* **Lists and round-ups** — Showcase links, images, and products with bulk import and drag-and-drop ordering
 
-= Create is for... =
+= New Independent Ownership =
+In mid-2025, Create was [purchased](https://create.studio/hello) from Mediavine by John-Michael, one of the plugin's founding developers. Create is now fully independent and continues to be actively developed at [Create Studio](https://create.studio).
 
-**Recipes** — Easily import content from other plugins. Includes free nutrition calculator and video embeds.
-**Lists and round-ups** — Showcase images, links and more in a user-friendly manner.
-**How-to guides** — Display beautiful printable materials lists, instructions and videos for DIYs, crafts and more.
+= Why Create? =
 
-= Create was built with the following in mind: =
-**1. Speed**
-Lightweight, with our strong focus on site speed
+**Fast by default** — Lightweight JavaScript and optimized bundling so your cards don't slow down your pages
 
-**2. Optimized for SEO**
-Full Google Rich Snippet support and one-button schema validation so content is marked up for mobile search carousels
+**SEO built in** — Recipe, HowTo, and ItemList JSON-LD generated automatically with one-click schema validation
 
-**3. Easy to Use**
-Built for optimal user experience, for you and your readers
+**Looks like your site** — Seven card themes that inherit your fonts and colors, including Editorial and Modern Elegant
 
-**4. Top-notch Importers**
-Easily transfer your content from other recipe plugins
+**Ad-ready themes** — Optimized card layouts with configurable ad slot placements
 
-**5. Multiple Themes**
-Five gorgeous themes by Purr Design with more on the way
+**Gutenberg and Classic Editor** — Full block editor support with live preview, plus shortcode fallback
 
-**6. Ad-Ready**
-Fully monetize your content using the most-ad-optimized themes
+**Built-in importers** — Switch from WP Recipe Maker, Tasty, EasyRecipe, and 8 other plugins without a separate download
 
-**7. Matches your site**
-All themes mimic your site's unique design so no two look the same
+**Free nutrition calculator** — Automatic nutrition data powered by [API Ninjas](https://api-ninjas.com/api/nutrition)
 
-**8. Live Preview**
-See your content how it will appear on your site, in real time, with full Gutenberg support
+**Modern editor experience** — Keyboard shortcuts throughout the app, simple workflows, and unobtrusive customization options designed for how *you* actually work
 
-**9. Mobile First**
-Responsively designed to engage the majority of your audience
+= Premium Features =
+Upgrade through [Create Studio](https://create.studio) to unlock:
+
+* **Interactive Mode** — Turns your cards into a hands-free cooking companion with interactive checklists so readers can check off ingredients and steps as they go
+* **Adjustable Servings and Unit Conversion** — Readers scale ingredient quantities and convert between metric and imperial
+* **Premium themes** — Editorial and Modern Elegant card designs
+* **Review management** — Reader reviews with featured review blocks and response tools
+* **Bulk list tools** — Paste URLs to bulk-import list items, plus inline bulk editing
+* **Products in Lists** — Add product items for affiliate placements
 
 == Installation ==
 
 = Minimum Requirements =
 
 * PHP version 7.4 or greater
-* MySQL version 6.5 or greater
+* MySQL version 8.0 or greater
+* WordPress version 6.5 or greater
 
 = Automatic Installation =
 
 1. Go to Plugins > Add New
 1. Type "Create" in the search field and click "Search Plugins"
 1. Click "Install Now" to install and then click "Activate"
-1. Go to Settings > Create and choose your card style
-1. [Register your Create plugin](https://help.create.studio/en/articles/8916417)
-1. If using another recipe card plugin and you'd like to import your recipes from that plugin, [download and install the Recipe Importers utility](https://create.studio/downloads/create-recipe-importers.zip)
 
 = Manual Installation =
 
-1. [Download a copy of the "Create" plugin](https://downloads.wordpress.org/plugin/mediavine-create.latest-stable.zip)
-1. Upload `mediavine-create` to the `/wp-content/plugins/` directory
+1. [Download a copy of the "Create" plugin](https://create.studio/plugin)
+1. Upload `mediavine-create.zip` to the `/wp-content/plugins/` directory (using the "Upload Plugin" button or server filesystem access)
 1. Activate the plugin through the "Plugins" menu in WordPress
-1. Go to Settings > Create and choose your card style
-1. [Register your Create plugin](https://help.create.studio/en/articles/8916417)
-1. If using another recipe card plugin and you'd like to import your recipes from that plugin, [download and install the Recipe Importers utility](https://create.studio/downloads/create-recipe-importers.zip)
 
-For more, please see our [help center](https://help.create.studio).
+= After Installation =
+1. Explore the plugin settings and choose your card style
+1. [Connect your site to Create Studio](https://create.studio/admin) to unlock features like nutrition calculation and link scraping – [Learn more](https://help.create.studio/en/articles/8916417)
+1. If you previously used another recipe card plugin, enable the built-in Recipe Importers under Create > Settings > Advanced to begin importing
+
+For more information, please see our [help center](https://help.create.studio).
 
 == Frequently Asked Questions ==
 
+= How much does it cost? =
+
+Create is free for everyone. All core features of the plugin will remain free and supported — including plugin updates, automatic nutriton calculation, user reviews, and more.
+
+Premium features like premium themes, Interactive Mode, and review management are available through a [Create Studio](https://create.studio/#interactive-mode) subscription.
+
 = How do I import my existing recipes? =
 
-[Download and install the Recipe Importers utility](https://create.studio/downloads/create-recipe-importers.zip)
+Recipe Importers are built into Create. Enable them under Create > Settings > Advanced, then go to Create > Import Recipes to start importing.
 
-= Which recipe card plugins does the importer support?
+= Which recipe card plugins does the importer support? =
 
 * Cookbook
 * EasyRecipe
@@ -107,9 +108,9 @@ For more, please see our [help center](https://help.create.studio).
 * ZipList Recipe Plugin
 
 = How will the cards display? =
-Our cards are displayed using a WordPress shortcode.
+Our cards are displayed using WordPress blocks or shortcodes.
 
-This means that if the plugin is disabled, the recipes themselves will not display on the front end of a blog post. This is typical behavior for most WordPress plugins.
+This means that if the plugin is disabled, the cards will not display on the front end of your posts. This is typical behavior for most WordPress plugins.
 
 If the plugin is deactivated, no data will be deleted and reactivating the plugin will restore the original card display.
 
@@ -117,39 +118,76 @@ If the plugin is deactivated, no data will be deleted and reactivating the plugi
 
 Yes! Nutritional data is an important part of Schema, which search engines love to have for optimal results.
 
-Nutrition facts can be manually entered for a recipe. They will also transfer over if the recipe already contains it.
+Nutrition facts can be manually entered for a recipe. They will also transfer over through the importer if the recipe already contains it.
 
-We also provide automatic nutrition calculation with [API Ninjas Nutrition](https://api-ninjas.com/api/nutrition). [Learn more about this feature](https://help.create.studio/en/articles/8914561).
-
-= How much does it cost? =
-
-Create is free to the blogging community at large. You do not need to be a Mediavine publisher to use it. All core functions of the plugin will always remain free.
-
-There may be features in the future that would need a license for a fee, but the core functionalities will always remain free and supported for everyone — including plugin updates to keep Create in compliance with WordPress releases.
+Create provides **free** automatic nutrition calculation with [API Ninjas Nutrition](https://api-ninjas.com/api/nutrition). [Learn more about this feature](https://help.create.studio/en/articles/8914561).
 
 = Where do I report security bugs found in this plugin? =
 Please report security bugs found in the source code of the Create plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/mediavine-create). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Screenshots ==
 
-1. Choose between Recipe, How-To and List cards. (More types coming soon.)
-2. Refreshed interface design provides a better user experience.
-3. View all of your cards at a glance in the Create card gallery.
-4. Search and sort all of your cards for easy editing.
-5. Create SEO-ready Recipe cards in minutes.
-6. A published Recipe card using the Hero Image card style.
-7. A published Recipe card using the Simple Square card style.
-8. Our automatic nutrition calculator saves you time and headaches.
-9. Publish beautiful lists and round-ups with the List card type.
-10. A published List card using the Big Image layout.
-11. A published List card using the Circles layout.
-12. How-to cards can be used for any kind of instructional guide.
-13. A published How-To card on the Dark Classy Circle card style.
-14. A published How-To card on the Hero Image card style.
-15. Add recommended products to your Recipe and How-To cards.
-16. All card styles adapt to your site's existing design.
+1. Create beautiful recipe cards, how-to guides, and lists — all with full schema support.
+2. New! Filters and sorting options to find your cards quickly.
+3. New! redesigned recipe editor with granular ingredient editing.
+4. New! Drag-and-drop all over the place to rearrange list items, products, and ingredients.
+5. Bring your recipes home with (newly) built-in importers for 10+ plugins.
+6. New! Searchable settings with intuitive previews for layout and theming options.
+7. New! Position and layout options for Recommended Products.
+8. New! Bulk import links into list items in seconds.
+9. Redesigned reviews section with bulk actions makes spam management a beeze.
+10. New! Dashboard, Achievements, and app-wide Keyboard Shortcuts (try confetti!).
+11. A published Recipe card in the New Modern Elegant style.
+12. A published Recipe card in the New Editorial style.
+13. A published List card in the Hero Image style.
 
 == Changelog ==
+
+= 2.0.0 =
+
+* FEATURE: New Dashboard page with stats, tips & announcements, setup checklist, and achievements
+* FEATURE: Granular Ingredient Editing (quantity, unit, item, note, and links)
+* FEATURE: Redesigned Settings with search, logical grouping, collapsible sections, and new theme selector
+* FEATURE: Welcome page showcasing all new 2.0 features with interactive demos
+* FEATURE: Ad slot settings for list card ad placements
+* FEATURE: Create Studio connection for site registration, Premium features, and multi-user verification
+* FEATURE: [Interactive Mode](https://create.studio/#interactive-mode) (Premium)
+* FEATURE: Review Responses (Premium)
+* FEATURE: Adjustable Servings (Premium – Enable in settings)
+* FEATURE: Unit Conversion (Premium – Enable in settings)
+* FEATURE: New Featured Review block (Premium)
+* FEATURE: New **Editorial** card theme option (Premium)
+* FEATURE: New **Modern Elegant** card theme option (Premium)
+* FEATURE: Interactive Checklists — readers can check off ingredients and steps as they cook (Premium)
+* FEATURE: Products in Lists — add products as list items for affiliate placements (Premium)
+* FEATURE: Bulk List Item Import — paste URLs to import them all as list items (Premium)
+* SETTING: Custom ad slots for list cards
+* SETTING: Preview themes live before choosing one using the new Theme Selector
+* SETTING: Preview Interactive Mode in the settings using one of your own cards
+* SETTING: Recommended Products title, format, and position (Premium)
+* SETTING: Custom CSS for Create cards (Premium)
+* ENHANCEMENT: Improve text contrast in all card themes to meet WCAG standards
+* ENHANCEMENT: Rebrand Pro features to Premium with three-tier subscription model
+* ENHANCEMENT: Bring the Importers into Create — no need to download a separate plugin; completely redesigned and integrated; enable in Advanced Settings
+* ENHANCEMENT: Major rewrite of the editor to improve performance, usability, and stability
+* ENHANCEMENT: Rename top-level admin menu from "Create Cards" to "Create"
+* ENHANCEMENT: Add sticky editor toolbar with scroll-based compaction for always-visible save button
+* ENHANCEMENT: Add collapsible sections with split-pane layout and auto-collapse on narrow screens
+* ENHANCEMENT: Improve drag-and-drop with better drop indicator and arrow button fallback for touch devices
+* ENHANCEMENT: Add mobile-responsive layouts for editor toolbar, Products collection, and form sections
+* ENHANCEMENT: Revamp card creation flow with smart type detection and allowed type validation
+* ENHANCEMENT: Enhance card collection views with advanced filtering options including missing fields filter
+* ENHANCEMENT: Improve Recommended Products management with bulk selection, shift+click range select, keyboard shortcuts, and Amazon/Other filtering
+* ENHANCEMENT: Redesign Reviews moderation UI with expandable rows, inline editing, advanced filters (rating, content type, sort order), and URL-persisted filter state
+* ENHANCEMENT: Revamp In-Editor Post Links for quick navigation from card editor to embedded posts
+* ENHANCEMENT: Improve List editor with unified item types, better search, and smoother drag-and-drop
+* ENHANCEMENT: Add keyboard shortcuts throughout the app (Shift+? to view all)
+* ENHANCEMENT: Optimize JavaScript bundling for faster card and page loading
+* ENHANCEMENT: Redesign reader-facing review modal for a smoother experience
+* ENHANCEMENT: Robust error reporting system with Create Studio integration
+* ENHANCEMENT: Add bulk editing for list items (Premium)
+* FIX: Apply Photo Ratio setting to list layouts
+* FIX: Resolve WP 6.7 _load_textdomain_just_in_time notice
 
 = 1.10.5 =
 * FIX: Resolve PHP 8.x fatal error when saving list relations with empty or array-type meta fields
@@ -177,19 +215,7 @@ Please report security bugs found in the source code of the Create plugin throug
 * FIX: Adds checks in color mixing functions to prevent PHP 8+ fatal errors (thanks Peter/Deep Roots Hosting!)
 * FIX: Resolve "spastic" editing and unusability in detail ingredient editor
 
-
 = 1.9.16 =
 * FEATURE: Change to new ownership!
 * ENHANCEMENT: Upgrade to PHP 7.4, Node 18 & 22 for modern features
 * ENHANCEMENT: Upgrade to WordPress 6.5 for modern features
-
-= 1.9.15 =
-* FIX: Improved instructions processing with robust DOM handling
-* FIX: Fixed Mediavine video aspect ratio
-
-= 1.9.14 =
-* FIX: Greek characters properly render in instructions
-
-= 1.9.12 =
-* FIX: Recipe card ratings display in structured data
-* FIX: Mediavine video selection works with new Mediavine videos endpoint, and video thumbnails display correctly

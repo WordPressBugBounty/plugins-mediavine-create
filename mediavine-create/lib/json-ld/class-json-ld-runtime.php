@@ -162,9 +162,10 @@ class JSON_LD_Runtime extends Plugin {
 	 * The name property of the schema will be pulled from the first list.
 	 *
 	 * @param array $list_data List of creation data for lists
+	 * @param int   $post_id   ID of the current post (used for text item fragment URLs)
 	 * @return string Encoded JSON-LD string
 	 */
-	public function build_list_json_ld_schema( $list_data ) {
+	public function build_list_json_ld_schema( $list_data, $post_id = null ) {
 		$combined_list_items = [];
 		foreach ( $list_data as $list ) {
 			// If there's no JSON-LD, for any reason, we want to skip this list
@@ -190,8 +191,14 @@ class JSON_LD_Runtime extends Plugin {
 
 		$json_ld_array = json_decode( $json_ld, true );
 
+		// Build creation context for text item fragment URLs
+		$creation_context = [];
+		if ( ! empty( $post_id ) ) {
+			$creation_context['canonical_post_id'] = $post_id;
+		}
+
 		// Replace original list items with updated combined list
-		$combined_json_ld = $this->json_ld_types->add_json_ld_item_list( $json_ld_array, $combined_list_items, 'itemListElement' );
+		$combined_json_ld = $this->json_ld_types->add_json_ld_item_list( $json_ld_array, $combined_list_items, 'itemListElement', $creation_context );
 
 		return wp_json_encode( $combined_json_ld );
 	}
@@ -290,7 +297,7 @@ class JSON_LD_Runtime extends Plugin {
 
 		// Build list schema if we need to
 		if ( ! empty( $list_data ) ) {
-			$json_ld_strings['list'] = $this->build_list_json_ld_schema( $list_data );
+			$json_ld_strings['list'] = $this->build_list_json_ld_schema( $list_data, $post_id );
 		}
 
 		// Build schema into string

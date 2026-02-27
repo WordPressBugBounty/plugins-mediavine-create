@@ -311,6 +311,18 @@ class Images {
 		// Always display alt attribute, even if empty for HTML validation
 		$attributes .= 'alt="' . $image_alt_text . '" ';
 
+		// Add width and height attributes to prevent CLS
+		if ( ! empty( $image_meta['width'] ) && ! empty( $image_meta['height'] ) ) {
+			$attributes .= 'width="' . intval( $image_meta['width'] ) . '" ';
+			$attributes .= 'height="' . intval( $image_meta['height'] ) . '" ';
+		}
+
+		// Add fetchpriority for the first card image (LCP optimization)
+		if ( ! Creations_Views::$lcp_image_rendered ) {
+			$attributes .= 'fetchpriority="high" ';
+			Creations_Views::$lcp_image_rendered = true;
+		}
+
 		// Full resolution image for pinterest
 		if ( ! empty( $image['image_url_full_size'] ) && $image['image_url_full_size'] !== $img_url ) {
 			$pinterest = ' data-pin-media="' . $image['image_url_full_size'] . '"';
@@ -512,6 +524,10 @@ class Images {
 	 * @return false|int|\WP_Error|null
 	 */
 	public static function download_image_from_url( $img_src ) {
+		// Validate URL before attempting to download
+		if ( empty( $img_src ) || ! is_string( $img_src ) || ! wp_http_validate_url( $img_src ) ) {
+			return false;
+		}
 
 		self::load_missing_wp_functions();
 
@@ -573,10 +589,16 @@ class Images {
 
 		update_post_meta( $attach_id, 'origin_uri', $origin );
 
-		// Define attachment metadata
-		$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+		// Skip synchronous image processing during REST API requests to prevent timeouts
+		if ( ! defined('REST_REQUEST') || ! REST_REQUEST ) {
+			// Define attachment metadata
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
 
-		wp_update_attachment_metadata( $attach_id, $attach_data );
+			wp_update_attachment_metadata( $attach_id, $attach_data );
+		} else {
+			// Defer image processing to background task during REST requests
+			self::generate_intermediate_sizes_deferred( $attach_id, [] );
+		}
 
 		return $attach_id;
 	}
@@ -595,7 +617,8 @@ class Images {
 	public static function get_attachment_id_from_url( $url ) {
 		$attachment_id = null;
 
-		if ( ! $url ) {
+		// Validate URL format before processing
+		if ( empty( $url ) || ! is_string( $url ) || ! wp_http_validate_url( $url ) ) {
 			return $attachment_id;
 		}
 

@@ -309,19 +309,6 @@
             "install-path": "../guzzlehttp/psr7"
         },
         {
-            "name": "mediavine/paapi5-php-sdk",
-            "version": "1.0.5",
-            "version_normalized": "1.0.5.0",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:mediavine/paapi5-php-sdk.git",
-                "reference": "origin/master"
-            },
-            "type": "library",
-            "installation-source": "source",
-            "install-path": "../mediavine/paapi5-php-sdk"
-        },
-        {
             "name": "psr/http-message",
             "version": "1.1",
             "version_normalized": "1.1.0.0",
@@ -426,8 +413,8 @@
         },
         {
             "name": "symfony/polyfill-intl-idn",
-            "version": "v1.32.0",
-            "version_normalized": "1.32.0.0",
+            "version": "v1.33.0",
+            "version_normalized": "1.33.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-idn.git",
@@ -492,7 +479,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-idn/tree/v1.32.0"
+                "source": "https://github.com/symfony/polyfill-intl-idn/tree/v1.33.0"
             },
             "funding": [
                 {
@@ -504,6 +491,10 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
@@ -512,8 +503,8 @@
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
-            "version": "v1.32.0",
-            "version_normalized": "1.32.0.0",
+            "version": "v1.33.0",
+            "version_normalized": "1.33.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
@@ -576,7 +567,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.32.0"
+                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.33.0"
             },
             "funding": [
                 {
@@ -588,11 +579,71 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
             "install-path": "../symfony/polyfill-intl-normalizer"
+        },
+        {
+            "name": "traydigita/paapi5-php-sdk",
+            "version": "1.0.5",
+            "version_normalized": "1.0.5.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/paapi5-php-sdk",
+                "reference": "b85f09931e44628fa766abb73b9ddf10b7cb0ebb"
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^6.2||^7",
+                "php": ">=5.5"
+            },
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Amazon\\ProductAdvertisingAPI\\v1\\": "src/"
+                },
+                "psr-0": {
+                    "Amazon\\ProductAdvertisingAPI\\v1\\": "src/"
+                }
+            },
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Product Advertising API Team",
+                    "homepage": "https://webservices.amazon.com/paapi5/documentation/index.html"
+                }
+            ],
+            "description": "(Official -> amzn/paapi5-php-sdk) ProductAdvertisingAPI 5.0 PHP SDK",
+            "homepage": "https://webservices.amazon.com/paapi5/documentation/index.html",
+            "keywords": [
+                "ProductAdvertisingAPI",
+                "amazon",
+                "getbrowsenodes",
+                "getitems",
+                "getvariations",
+                "pa-api",
+                "paapi",
+                "paapi5",
+                "paapi5-php-sdk",
+                "paapi5.0",
+                "searchitems"
+            ],
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            },
+            "install-path": "../traydigita/paapi5-php-sdk"
         }
     ],
     "dev": false,

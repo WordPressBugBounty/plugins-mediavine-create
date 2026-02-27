@@ -84,6 +84,82 @@ class Creations_Views_Colors extends Creations_Views {
 	}
 
 	/**
+	 * Linearise a single sRGB channel value for luminance calculation.
+	 *
+	 * @param float $c Channel value 0–1.
+	 *
+	 * @return float Linear-light value.
+	 */
+	private static function linearise( $c ) {
+		return $c <= 0.04045
+			? $c / 12.92
+			: pow( ( $c + 0.055 ) / 1.055, 2.4 );
+	}
+
+	/**
+	 * WCAG 2.x relative luminance of a color (0 = black, 1 = white).
+	 *
+	 * @param string $color Hex color code.
+	 *
+	 * @return float Luminance between 0 and 1.
+	 */
+	public static function luminance( $color ) {
+		$color = self::validate( $color );
+		list( $r, $g, $b ) = self::to_rgb( $color );
+
+		$r = self::linearise( $r / 255 );
+		$g = self::linearise( $g / 255 );
+		$b = self::linearise( $b / 255 );
+
+		return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+	}
+
+	/**
+	 * WCAG 2.x contrast ratio between two colors (1–21).
+	 *
+	 * @param string $fg Foreground hex color.
+	 * @param string $bg Background hex color.
+	 *
+	 * @return float Contrast ratio.
+	 */
+	public static function contrast_ratio( $fg, $bg ) {
+		$l1 = self::luminance( $fg );
+		$l2 = self::luminance( $bg );
+
+		if ( $l1 > $l2 ) {
+			return ( $l1 + 0.05 ) / ( $l2 + 0.05 );
+		}
+		return ( $l2 + 0.05 ) / ( $l1 + 0.05 );
+	}
+
+	/**
+	 * Return a contrasting text color for a given background using WCAG 2.x luminance.
+	 *
+	 * Targets a minimum contrast ratio of 5.0:1 (exceeds WCAG AA 4.5:1).
+	 * Falls back to whichever of $light/$dark achieves the higher ratio.
+	 *
+	 * @param string $color     Hex color code of the background.
+	 * @param string $light     Light text option. Default '#ffffff'.
+	 * @param string $dark      Dark text option. Default '#000000'.
+	 * @param float  $min_ratio Minimum acceptable contrast ratio. Default 5.0.
+	 *
+	 * @return string Hex color that contrasts with the background.
+	 */
+	public static function contrast_text( $color, $light = '#ffffff', $dark = '#000000', $min_ratio = 5.0 ) {
+		$light_ratio = self::contrast_ratio( $light, $color );
+		$dark_ratio  = self::contrast_ratio( $dark, $color );
+
+		if ( $light_ratio >= $min_ratio ) {
+			return $light;
+		}
+		if ( $dark_ratio >= $min_ratio ) {
+			return $dark;
+		}
+		// Neither hits target — return whichever is higher.
+		return $light_ratio > $dark_ratio ? $light : $dark;
+	}
+
+	/**
 	 * Return rgba(r, g, b, a) CSS color format
 	 *
 	 * @param string $color Hex color code

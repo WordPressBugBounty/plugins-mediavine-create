@@ -54,13 +54,26 @@ class Advanced implements Settings_Group {
 			[
 				'slug'  => Plugin::$settings_group . '_enable_hands_free_mode',
 				'value' => false,
-				'group' => Plugin::$settings_group . '_advanced',
+				'group' => Plugin::$settings_group . '_reader_experience',
 				'order' => 10,
 				'data'  => [
 					'type'         => 'checkbox',
 					'label'        => __( 'Enable Hands-free Mode', 'mediavine' ),
 					'instructions' => __( 'Adds a toggle to Create cards to allow readers to keep their screen awake while reading on supported devices.', 'mediavine' ),
 					'default'      => 'Disabled',
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_enable_checklists',
+				'value' => false,
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 11,
+				'data'  => [
+					'type'         => 'checkbox',
+					'label'        => __( 'Enable Checklists', 'mediavine' ),
+					'instructions' => __( 'Add interactive checkboxes to ingredients and instructions for tracking cooking progress.', 'mediavine' ),
+					'default'      => __( 'Disabled', 'mediavine' ),
+					'gated'        => 'checklists',
 				],
 			],
 			[
@@ -189,18 +202,6 @@ class Advanced implements Settings_Group {
 				],
 			],
 			[
-				'slug'  => Plugin::$settings_group . '_enable_logging',
-				'value' => false,
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 105,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Error Reporting', 'mediavine' ),
-					'instructions' => __( 'Checking this box allows the plugin to automatically send useful error reports to the development team. (You may still be prompted to manually send error reports, even if this box is unchecked.)', 'mediavine' ),
-					'default'      => __( 'Disabled', 'mediavine' ),
-				],
-			],
-			[
 				'slug'  => Plugin::$settings_group . '_affiliate_message',
 				'value' => 'As an Amazon Associate and member of other affiliate programs, I earn from qualifying purchases.',
 				'group' => Plugin::$settings_group . '_advanced',
@@ -221,8 +222,30 @@ class Advanced implements Settings_Group {
 				'data'  => [
 					'type'         => 'allowed_types',
 					'label'        => __( 'Allowed Types', 'mediavine' ),
-					'instructions' => null,
+					'instructions' => __( 'If any types are selected, only they will be available for adding new cards. Existing cards of disallowed types will still function properly.', 'mediavine' ),
 					'default'      => '[]',
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_default_card_view',
+				'value' => 'browse',
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 1,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Default Card View', 'mediavine' ),
+					'instructions' => __( 'When adding a card to a post, choose whether to show the card browser or the create new card form by default.', 'mediavine' ),
+					'default'      => __( 'Browse Existing Cards', 'mediavine' ),
+					'options'      => [
+						[
+							'label' => __( 'Browse Existing Cards', 'mediavine' ),
+							'value' => 'browse',
+						],
+						[
+							'label' => __( 'Create New Card', 'mediavine' ),
+							'value' => 'create',
+						],
+					],
 				],
 			],
 			[
@@ -286,6 +309,60 @@ class Advanced implements Settings_Group {
 					'instructions' => __( 'If enabled, will disable specific image sizes created by Create', 'mediavine' ),
 					'default'      => 'Disabled',
 					'options'      => Plugin::get_image_size_values(),
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_products_position',
+				'value' => 'after_video',
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 131,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Products Position', 'mediavine' ),
+					'instructions' => __( 'Choose where the products section appears within your recipe and how-to cards.', 'mediavine' ),
+					'default'      => __( 'After Video', 'mediavine' ),
+					'options'      => [
+						[
+							'label' => __( 'Above Supplies/Ingredients', 'mediavine' ),
+							'value' => 'above_supplies',
+						],
+						[
+							'label' => __( 'Above Instructions', 'mediavine' ),
+							'value' => 'above_instructions',
+						],
+						[
+							'label' => __( 'Below Notes', 'mediavine' ),
+							'value' => 'below_notes',
+						],
+						[
+							'label' => __( 'After Video', 'mediavine' ),
+							'value' => 'after_video',
+						],
+					],
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_enable_confetti_shortcut',
+				'value' => true,
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 199,
+				'data'  => [
+					'type'         => 'checkbox',
+					'label'        => __( 'Enable Confetti Shortcut', 'mediavine' ),
+					'instructions' => __( 'Press Shift+C anywhere in Create to launch celebratory confetti. Disable to remove this keyboard shortcut.', 'mediavine' ),
+					'default'      => __( 'Enabled', 'mediavine' ),
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_enable_importers',
+				'value' => false,
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 200,
+				'data'  => [
+					'type'         => 'checkbox',
+					'label'        => __( 'Enable Recipe Importers', 'mediavine' ),
+					'instructions' => __( 'Import recipes from other recipe plugins like WP Recipe Maker, Tasty Recipes, and more.', 'mediavine' ),
+					'default'      => __( 'Disabled', 'mediavine' ),
 				],
 			],
 		];

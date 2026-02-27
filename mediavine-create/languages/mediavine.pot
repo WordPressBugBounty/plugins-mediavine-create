@@ -1,23 +1,23 @@
-# Copyright (C) 2025 Mischief Marmot
+# Copyright (C) 2026 Mischief Marmot
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 1.10.5\n"
+"Project-Id-Version: Create 2.0.12\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-12-16T20:46:49+00:00\n"
+"POT-Creation-Date: 2026-02-27T03:28:13+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
 
 #. Plugin Name of the plugin
 #: mediavine-create.php
-#: admin/class-admin-init.php:364
-#: class-plugin.php:299
+#: admin/class-admin-init.php:409
+#: admin/class-admin-init.php:552
 msgid "Create"
 msgstr ""
 
@@ -41,158 +41,158 @@ msgstr ""
 msgid "https://create.studio/"
 msgstr ""
 
-#: admin/class-admin-init.php:312
-#: class-plugin.php:1177
+#: admin/class-admin-init.php:349
+#: admin/class-admin-init.php:350
+msgid "Dashboard"
+msgstr ""
+
+#: admin/class-admin-init.php:357
+#: class-plugin.php:1393
 msgid "Recipes"
 msgstr ""
 
-#: admin/class-admin-init.php:313
-#: class-plugin.php:1184
+#: admin/class-admin-init.php:358
+#: class-plugin.php:1400
 msgid "How-Tos"
 msgstr ""
 
-#: admin/class-admin-init.php:339
+#: admin/class-admin-init.php:384
 #: lib/i18n/class-translation.php:52
-#: lib/views/v1/shortcode-mv-create-products.php:66
+#: lib/settings-group/class-reader-experience.php:491
+#: lib/settings-group/class-reader-experience.php:498
+#: lib/views/v1/shortcode-mv-create-products-list.php:10
+#: lib/views/v1/shortcode-mv-create-products.php:23
 msgid "Recommended Products"
 msgstr ""
 
-#: admin/class-admin-init.php:340
+#: admin/class-admin-init.php:385
 msgid "User Reviews"
 msgstr ""
 
-#: admin/class-admin-init.php:355
-#: admin/class-admin-init.php:363
+#: admin/class-admin-init.php:400
+#: admin/class-admin-init.php:408
 msgid "Create Plugin Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:356
+#: admin/class-admin-init.php:401
 msgid "Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:433
-msgid "Create by Mediavine"
+#: admin/class-admin-init.php:420
+#: lib/class-admin-bar.php:97
+msgid "Edit Create Card"
 msgstr ""
 
-#: class-plugin.php:445
-msgid "Measurement System"
+#: admin/class-admin-init.php:421
+msgid "Edit Card"
 msgstr ""
 
-#: class-plugin.php:446
-msgid "Force a default measurement system (or choose \"Any\" to allow either)."
+#: admin/class-admin-init.php:430
+msgid "Welcome to Create 2.0"
 msgstr ""
 
-#: class-plugin.php:450
-msgid "Metric"
+#: admin/class-admin-init.php:431
+msgid "Welcome"
 msgstr ""
 
-#: class-plugin.php:454
-msgid "Imperial"
+#: admin/class-admin-init.php:441
+#: admin/class-admin-init.php:442
+msgid "Theme Elements"
 msgstr ""
 
-#: class-plugin.php:458
-msgid "Any"
-msgstr ""
-
-#: class-plugin.php:478
+#: class-plugin.php:554
+#: lib/settings/class-site-verification.php:436
 msgid "Product Registration"
 msgstr ""
 
-#: class-plugin.php:479
+#: class-plugin.php:555
+#: lib/settings/class-site-verification.php:437
 msgid "In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs."
 msgstr ""
 
-#: class-plugin.php:503
-msgid "Enabled Debugging"
-msgstr ""
-
-#: class-plugin.php:504
-msgid "Enable this setting to send all error log data to Sentry for the Publisher Engineering team to debug. This reduces the need for FTP and should be used in lieu of debug log/error log files."
-msgstr ""
-
-#: class-plugin.php:838
+#: class-plugin.php:889
 msgid "Thanks for installing Create!"
 msgstr ""
 
-#. translators: %1$s: linked importer plugin
-#: class-plugin.php:842
+#. translators: %1$s: link to importer setting, %2$s: closing anchor tag
+#: class-plugin.php:893
 #, php-format
-msgid "If you're moving from another recipe plugin, you can also download and install our %1$s."
+msgid "If you're moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes."
 msgstr ""
 
-#: class-plugin.php:843
-msgid "importer plugin"
-msgstr ""
-
-#: class-plugin.php:1107
+#: class-plugin.php:1323
 msgid "CSS Class"
 msgstr ""
 
-#: class-plugin.php:1108
+#: class-plugin.php:1324
 msgid "Add an additional CSS class to this card."
 msgstr ""
 
-#: class-plugin.php:1113
+#: class-plugin.php:1329
 msgid "Custom Nutrition Disclaimer"
 msgstr ""
 
-#: class-plugin.php:1114
+#: class-plugin.php:1330
 msgid "Example: Nutrition information isn't always accurate."
 msgstr ""
 
-#: class-plugin.php:1120
+#: class-plugin.php:1336
 msgid "Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1121
+#: class-plugin.php:1337
 msgid "Override the default affiliate message for this card."
 msgstr ""
 
-#: class-plugin.php:1127
+#: class-plugin.php:1343
 msgid "Show Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1128
+#: class-plugin.php:1344
 msgid "Check this box to display an affiliate message on this List."
 msgstr ""
 
-#: class-plugin.php:1137
+#: class-plugin.php:1353
 msgid "Social Footer Icon"
 msgstr ""
 
-#: class-plugin.php:1138
+#: class-plugin.php:1354
 msgid "Override the default social footer icon for this card."
 msgstr ""
 
-#: class-plugin.php:1151
+#: class-plugin.php:1367
 msgid "Social Footer Heading"
 msgstr ""
 
-#: class-plugin.php:1152
+#: class-plugin.php:1368
 msgid "Override the default social footer heading for this card."
 msgstr ""
 
-#: class-plugin.php:1158
+#: class-plugin.php:1374
 msgid "Social Footer Content"
 msgstr ""
 
-#: class-plugin.php:1159
+#: class-plugin.php:1375
 msgid "Override the default social footer content for this card."
 msgstr ""
 
-#: class-plugin.php:1176
+#: class-plugin.php:1392
+#: lib/class-admin-bar.php:141
 msgid "Recipe"
 msgstr ""
 
-#: class-plugin.php:1183
+#: class-plugin.php:1399
+#: lib/class-admin-bar.php:142
 msgid "How-To"
 msgstr ""
 
-#: class-plugin.php:1190
+#: class-plugin.php:1406
+#: lib/class-admin-bar.php:143
+#: lib/settings-group/class-reader-experience.php:483
 msgid "List"
 msgstr ""
 
-#: class-plugin.php:1191
+#: class-plugin.php:1407
 msgid "Lists"
 msgstr ""
 
@@ -252,17 +252,123 @@ msgstr ""
 msgid "Fully qualified URL of post."
 msgstr ""
 
-#: lib/class-api-services.php:69
-#: lib/class-api-services.php:84
-msgid "Bad Request"
+#: lib/blocks/class-featured-review-block.php:97
+#, php-format
+msgid "%s out of 5 stars"
 msgstr ""
 
-#: lib/class-api-services.php:70
-msgid "Missing required input"
+#: lib/blocks/class-featured-review-block.php:153
+msgid "Please select a Create card."
 msgstr ""
 
-#: lib/class-api-services.php:85
-msgid "We're missing important information"
+#: lib/blocks/class-featured-review-block.php:157
+msgid "Card no longer exists."
+msgstr ""
+
+#: lib/blocks/class-featured-review-block.php:162
+msgid "No featured review selected for this card."
+msgstr ""
+
+#: lib/class-admin-bar.php:71
+#, php-format
+msgid "Untitled %s"
+msgstr ""
+
+#: lib/class-admin-bar.php:106
+msgid "Edit Create Cards"
+msgstr ""
+
+#: lib/class-admin-notices.php:176
+#: lib/class-admin-notices.php:333
+msgid "Didn't get an email? Resend"
+msgstr ""
+
+#: lib/class-admin-notices.php:180
+msgid "Password Reset Email Sent"
+msgstr ""
+
+#: lib/class-admin-notices.php:181
+msgid "We've sent you an email with instructions to set your password for Create Studio. Once you've set your password, click below to continue."
+msgstr ""
+
+#: lib/class-admin-notices.php:182
+msgid "📧 Check your spam folder if you don't see it in your inbox."
+msgstr ""
+
+#: lib/class-admin-notices.php:183
+msgid "I've set my password, check again"
+msgstr ""
+
+#: lib/class-admin-notices.php:192
+#: lib/class-broadcast-notice.php:146
+#: lib/class-welcome-notice.php:250
+#: lib/importers/class-importers.php:143
+msgid "Dismiss"
+msgstr ""
+
+#: lib/class-admin-notices.php:196
+msgid "Action Required: Set a Password for Create Studio"
+msgstr ""
+
+#: lib/class-admin-notices.php:197
+msgid "To continue using Create's external services like Nutrition Calculation and Web Scraping, you need to create a password. Click below to receive an email with instructions."
+msgstr ""
+
+#: lib/class-admin-notices.php:199
+#: lib/class-admin-notices.php:256
+msgid "Send Password Reset Email"
+msgstr ""
+
+#: lib/class-admin-notices.php:222
+#: lib/class-admin-notices.php:300
+msgid "Sending..."
+msgstr ""
+
+#: lib/class-admin-notices.php:238
+#: lib/class-admin-notices.php:245
+#: lib/class-admin-notices.php:278
+#: lib/class-admin-notices.php:316
+#: lib/class-admin-notices.php:322
+msgid "Success!"
+msgstr ""
+
+#: lib/class-admin-notices.php:238
+#: lib/class-admin-notices.php:245
+msgid "Check your email for instructions. Reloading..."
+msgstr ""
+
+#: lib/class-admin-notices.php:254
+#: lib/class-admin-notices.php:331
+msgid "Failed to send email. Please try again."
+msgstr ""
+
+#: lib/class-admin-notices.php:267
+msgid "Checking..."
+msgstr ""
+
+#: lib/class-admin-notices.php:278
+msgid "Your password is set. Reloading..."
+msgstr ""
+
+#: lib/class-admin-notices.php:285
+msgid "Password not yet set. Please check your email and follow the instructions."
+msgstr ""
+
+#: lib/class-admin-notices.php:287
+msgid "Unable to verify password status. Please try again."
+msgstr ""
+
+#: lib/class-admin-notices.php:316
+#: lib/class-admin-notices.php:322
+msgid "Email resent! Check your inbox. Reloading..."
+msgstr ""
+
+#: lib/class-admin-notices.php:354
+msgid "Resend available in:"
+msgstr ""
+
+#: lib/class-broadcast-notice.php:104
+msgid "Update now"
 msgstr ""
 
 #: lib/class-custom-content.php:129
@@ -278,15 +384,27 @@ msgstr ""
 #: lib/nutrition/class-nutrition-api.php:61
 #: lib/nutrition/class-nutrition-api.php:95
 #: lib/product-maps/class-products-map-api.php:151
-#: lib/products/class-products-api.php:132
-#: lib/products/class-products-api.php:225
-#: lib/supplies/class-supplies-api.php:81
+#: lib/products/class-products-api.php:138
+#: lib/products/class-products-api.php:294
+#: lib/supplies/class-supplies-api.php:87
 msgid "Entry Not Found"
 msgstr ""
 
 #: lib/class-publish.php:16
 #: lib/class-publish.php:580
 msgid "The Creation could not be found"
+msgstr ""
+
+#: lib/class-welcome-notice.php:245
+msgid "Create 2.0 is here!"
+msgstr ""
+
+#: lib/class-welcome-notice.php:246
+msgid "Discover new themes, interactive mode, and more."
+msgstr ""
+
+#: lib/class-welcome-notice.php:248
+msgid "See What's New"
 msgstr ""
 
 #: lib/creations/class-creations-api.php:23
@@ -314,36 +432,41 @@ msgstr ""
 msgid "A conflict occurred and the Creation could not be updated"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:329
+#: lib/creations/class-creations-api.php:472
 msgid "The Create Card could not be found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:361
-#: lib/creations/class-creations-api.php:422
+#: lib/creations/class-creations-api.php:504
+#: lib/creations/class-creations-api.php:579
+#: lib/unit-conversion/class-unit-conversion.php:178
 msgid "Creation not found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:391
+#: lib/creations/class-creations-api.php:548
 #: lib/product-maps/class-products-map-api.php:285
-#: lib/products/class-products-api.php:563
-#: lib/reviews/class-reviews-api.php:589
-#: lib/supplies/class-supplies-api.php:104
+#: lib/products/class-products-api.php:863
+#: lib/reviews/class-reviews-api.php:750
+#: lib/supplies/class-supplies-api.php:110
 msgid "Entry Could Not Be Deleted"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:391
+#: lib/creations/class-creations-api.php:548
 msgid "A conflict occurred and the Creation could not be deleted"
 msgstr ""
 
 #: lib/creations/class-creations-jump-to-recipe.php:368
 #: lib/settings-group/class-pro.php:39
 #: lib/settings-group/class-pro.php:46
+#: lib/settings-group/class-reader-experience.php:78
+#: lib/settings-group/class-reader-experience.php:85
 msgid "Jump to Recipe"
 msgstr ""
 
 #: lib/creations/class-creations-jump-to-recipe.php:370
 #: lib/settings-group/class-pro.php:52
 #: lib/settings-group/class-pro.php:59
+#: lib/settings-group/class-reader-experience.php:91
+#: lib/settings-group/class-reader-experience.php:98
 msgid "Jump to How-To"
 msgstr ""
 
@@ -351,65 +474,72 @@ msgstr ""
 msgid "Disable Jump-to-Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:71
+#: lib/creations/class-creations-views.php:133
 msgid "Facebook Page:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:75
+#: lib/creations/class-creations-views.php:137
 msgid "Instagram:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:79
+#: lib/creations/class-creations-views.php:141
 msgid "Pinterest Profile:"
 msgstr ""
 
 #. Translators: Type of card. Will output either 'recipe' or 'project'
-#: lib/creations/class-creations-views.php:546
+#: lib/creations/class-creations-views.php:645
 #, php-format
 msgid "Did you make this %s?"
 msgstr ""
 
 #. Translators: Social Service name with link
-#: lib/creations/class-creations-views.php:565
+#: lib/creations/class-creations-views.php:664
 #, php-format
 msgid "Please leave a comment on the blog or share a photo on %s"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:737
+#: lib/creations/class-creations-views.php:847
+msgid "View Product"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:849
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:739
+#: lib/creations/class-creations-views.php:851
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:741
+#: lib/creations/class-creations-views.php:853
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:762
-#: lib/creations/class-creations-views.php:1311
-#: lib/creations/class-creations.php:763
+#: lib/creations/class-creations-views.php:874
+#: lib/creations/class-creations-views.php:1497
+#: lib/creations/class-creations.php:766
+#: lib/importers/sources/class-import-purr.php:107
 msgid "Prep Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:768
-#: lib/creations/class-creations.php:764
+#: lib/creations/class-creations-views.php:880
+#: lib/creations/class-creations.php:767
 msgid "Active Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:774
-#: lib/creations/class-creations-views.php:1313
-#: lib/creations/class-creations.php:765
+#: lib/creations/class-creations-views.php:886
+#: lib/creations/class-creations-views.php:1499
+#: lib/creations/class-creations.php:768
+#: lib/importers/class-mv-recipe-importer.php:910
+#: lib/importers/sources/class-import-purr.php:108
 msgid "Additional Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:780
-#: lib/creations/class-creations-views.php:1333
+#: lib/creations/class-creations-views.php:892
+#: lib/creations/class-creations-views.php:1519
 msgid "Total Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:784
+#: lib/creations/class-creations-views.php:896
 #: lib/i18n/class-translation.php:45
 #: lib/views/v1/big-image/shortcode-mv-create-title.php:12
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:19
@@ -417,411 +547,246 @@ msgstr ""
 #: lib/views/v1/centered/shortcode-mv-create-nutrition.php:19
 #: lib/views/v1/centered/shortcode-mv-create-times.php:11
 #: lib/views/v1/dark/shortcode-mv-create-nutrition.php:17
+#: lib/views/v1/editorial/shortcode-mv-create-nutrition.php:19
+#: lib/views/v1/editorial/shortcode-mv-create-times.php:11
+#: lib/views/v1/modern/shortcode-mv-create-times.php:11
 #: lib/views/v1/shortcode-mv-create-nutrition.php:17
 #: lib/views/v1/shortcode-mv-create-title.php:4
 msgid "Yield"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:788
+#: lib/creations/class-creations-views.php:900
 #: lib/i18n/class-translation.php:51
 #: lib/views/v1/shortcode-mv-create-footer.php:56
 msgid "Category"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:792
-#: lib/creations/class-creations-views.php:964
+#: lib/creations/class-creations-views.php:904
+#: lib/creations/class-creations-views.php:1088
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:796
-#: lib/creations/class-creations-views.php:1195
+#: lib/creations/class-creations-views.php:908
+#: lib/creations/class-creations-views.php:1382
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:801
-#: lib/creations/class-creations-views.php:1198
+#: lib/creations/class-creations-views.php:913
+#: lib/creations/class-creations-views.php:1385
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:804
+#: lib/creations/class-creations-views.php:916
 msgid "Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:807
-#: lib/creations/class-creations-views.php:1341
+#: lib/creations/class-creations-views.php:919
+#: lib/creations/class-creations-views.php:1527
 msgid "Difficulty"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:969
+#: lib/creations/class-creations-views.php:1093
 #: lib/i18n/class-translation.php:60
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:974
+#: lib/creations/class-creations-views.php:1098
 #: lib/i18n/class-translation.php:61
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:979
+#: lib/creations/class-creations-views.php:1103
 #: lib/i18n/class-translation.php:62
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:984
+#: lib/creations/class-creations-views.php:1108
 #: lib/i18n/class-translation.php:63
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:989
+#: lib/creations/class-creations-views.php:1113
 #: lib/i18n/class-translation.php:64
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:994
+#: lib/creations/class-creations-views.php:1118
 #: lib/i18n/class-translation.php:65
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:999
+#: lib/creations/class-creations-views.php:1123
 #: lib/i18n/class-translation.php:66
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1004
+#: lib/creations/class-creations-views.php:1128
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1009
+#: lib/creations/class-creations-views.php:1133
 #: lib/i18n/class-translation.php:68
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1014
+#: lib/creations/class-creations-views.php:1138
 #: lib/i18n/class-translation.php:69
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1019
+#: lib/creations/class-creations-views.php:1143
 #: lib/i18n/class-translation.php:70
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1024
+#: lib/creations/class-creations-views.php:1148
 #: lib/i18n/class-translation.php:71
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1193
+#: lib/creations/class-creations-views.php:1380
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1312
-#: lib/creations/class-creations.php:770
+#: lib/creations/class-creations-views.php:1498
+#: lib/creations/class-creations.php:773
+#: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:695
+#: lib/importers/sources/class-import-cookbook.php:132
+#: lib/importers/sources/class-import-meal-planner.php:204
+#: lib/importers/sources/class-import-purr.php:106
+#: lib/importers/sources/class-import-recipe-maker.php:117
+#: lib/importers/sources/class-import-simple-recipes-pro-latest.php:170
+#: lib/importers/sources/class-import-simple-recipes-pro-legacy.php:155
+#: lib/importers/sources/class-import-simple-recipes-pro.php:117
+#: lib/importers/sources/class-import-tasty-recipes.php:102
+#: lib/importers/sources/class-import-wp-ultimate-recipe.php:82
+#: lib/importers/sources/class-import-yummly.php:123
+#: lib/importers/sources/class-import-zip-recipes.php:156
+#: lib/importers/sources/class-import-ziplist.php:139
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1345
+#: lib/creations/class-creations-views.php:1531
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1392
+#: lib/creations/class-creations-views.php:1578
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1393
+#: lib/creations/class-creations-views.php:1579
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1396
+#: lib/creations/class-creations-views.php:1582
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1397
+#: lib/creations/class-creations-views.php:1583
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1400
+#: lib/creations/class-creations-views.php:1586
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1401
+#: lib/creations/class-creations-views.php:1587
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1404
-#: lib/products/class-amazon.php:560
+#: lib/creations/class-creations-views.php:1590
+#: lib/products/class-amazon.php:610
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1405
-#: lib/products/class-amazon.php:561
+#: lib/creations/class-creations-views.php:1591
+#: lib/products/class-amazon.php:611
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1408
-#: lib/products/class-amazon.php:565
+#: lib/creations/class-creations-views.php:1594
+#: lib/products/class-amazon.php:615
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1409
-#: lib/products/class-amazon.php:566
+#: lib/creations/class-creations-views.php:1595
+#: lib/products/class-amazon.php:616
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1412
-#: lib/products/class-amazon.php:577
+#: lib/creations/class-creations-views.php:1598
+#: lib/products/class-amazon.php:627
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1413
-#: lib/products/class-amazon.php:578
+#: lib/creations/class-creations-views.php:1599
+#: lib/products/class-amazon.php:628
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1607
+#: lib/creations/class-creations-views.php:1793
 msgid "No Card with ID found"
 msgstr ""
 
-#: lib/creations/class-creations-wp-content.php:9
-msgid "Create Card"
-msgstr ""
-
-#: lib/creations/class-creations-wp-content.php:10
-msgid "Create Cards"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:16
-#: lib/creations/class-creations-wp-content.php:18
-#: lib/creations/class-creations-wp-content.php:22
-#: lib/creations/class-creations-wp-content.php:115
-#, php-format
-msgid "Add New %1$s"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:20
-#: lib/creations/class-creations-wp-content.php:109
-#, php-format
-msgid "Edit %1$s"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:24
-#: lib/creations/class-creations-wp-content.php:111
-#, php-format
-msgid "View %1$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:26
-#, php-format
-msgid "View %2$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:28
-#: lib/creations/class-creations-wp-content.php:99
-#, php-format
-msgid "Search %2$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:30
-#: lib/creations/class-creations-wp-content.php:125
-#, php-format
-msgid "No %2$s found"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:32
-#, php-format
-msgid "No %2$s found in trash"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:34
-#: lib/creations/class-creations-wp-content.php:107
-#, php-format
-msgid "Parent %2$s:"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:36
-#: lib/creations/class-creations-wp-content.php:103
-#, php-format
-msgid "All %2$s"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:38
-#, php-format
-msgid "%1$s Archives"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:40
-#, php-format
-msgid "%1$s Attributes"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:42
-#, php-format
-msgid "Insert into %1$s"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:44
-#, php-format
-msgid "Uploaded to this %1$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:46
-#, php-format
-msgid "Filter %2$s list"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:48
-#, php-format
-msgid "%2$s list navigation"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:50
-#, php-format
-msgid "%2$s list"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:101
-#, php-format
-msgid "Popular %2$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:105
-#, php-format
-msgid "Parent %2$s"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:113
-#, php-format
-msgid "Update %1$s"
-msgstr ""
-
-#. translators: %1$s: post type name
-#: lib/creations/class-creations-wp-content.php:117
-#, php-format
-msgid "New %1$s Name"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:119
-#, php-format
-msgid "Separate %2$s with commas"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:121
-#, php-format
-msgid "Add or remove %2$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:123
-#, php-format
-msgid "Choose from the most used %2$s"
-msgstr ""
-
-#. translators: %2$s: post type name
-#: lib/creations/class-creations-wp-content.php:127
-#, php-format
-msgid "No %2$s"
-msgstr ""
-
-#: lib/creations/class-creations.php:197
-msgid "Create Card Square (Small)"
-msgstr ""
-
-#: lib/creations/class-creations.php:204
-msgid "Create Card Square"
-msgstr ""
-
-#: lib/creations/class-creations.php:211
-msgid "Create Card Square (Medium High)"
-msgstr ""
-
-#: lib/creations/class-creations.php:218
-msgid "Create Card Square (High Res)"
-msgstr ""
-
-#: lib/creations/class-creations.php:225
-msgid "Create Card 4:3 (Small)"
-msgstr ""
-
-#: lib/creations/class-creations.php:232
-msgid "Create Card 4:3"
-msgstr ""
-
-#: lib/creations/class-creations.php:239
-msgid "Create Card 4:3 (High Res)"
-msgstr ""
-
-#: lib/creations/class-creations.php:246
-msgid "Create Card 3:4 (Small)"
-msgstr ""
-
-#: lib/creations/class-creations.php:253
-msgid "Create Card 3:4"
-msgstr ""
-
-#: lib/creations/class-creations.php:260
-msgid "Create Card 3:4 (High Res)"
-msgstr ""
-
-#: lib/creations/class-creations.php:267
-msgid "Create Card 16:9 (Small)"
-msgstr ""
-
-#: lib/creations/class-creations.php:274
-msgid "Create Card 16:9"
-msgstr ""
-
-#: lib/creations/class-creations.php:281
-msgid "Create Card 16:9 (High Res)"
-msgstr ""
-
-#: lib/creations/class-creations.php:289
-msgid "Create Card No Ratio"
-msgstr ""
-
-#: lib/creations/class-creations.php:296
-msgid "Create Card Vertical Pin"
-msgstr ""
-
-#: lib/creations/class-creations.php:572
+#: lib/creations/class-creations.php:575
 msgid "Post ID was not set in function call"
 msgstr ""
 
-#: lib/creations/class-creations.php:572
+#: lib/creations/class-creations.php:575
 msgid "A Post ID was not included in the request"
 msgstr ""
 
-#: lib/creations/class-creations.php:576
+#: lib/creations/class-creations.php:579
 msgid "Post ID value was not a number"
 msgstr ""
 
-#: lib/creations/class-creations.php:576
+#: lib/creations/class-creations.php:579
 msgid "A Post ID varable was included but was non-numeric"
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:752
+msgid "Add structured data to every post"
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:753
+msgid "Embedding a Create card adds Recipe or HowTo schema automatically, helping your content appear in Google rich results."
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:758
+msgid "Use List cards for roundups"
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:759
+msgid "List cards generate ItemList schema and link to your other content — great for roundup posts."
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:764
+msgid "Customize your card colors"
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:765
+msgid "Match your cards to your brand by setting primary and secondary colors in Settings."
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:771
+msgid "Add reviews to boost engagement"
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:772
+msgid "Enable reviews on your cards to let readers rate your recipes. Higher engagement signals help with SEO."
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:777
+msgid "Connect to Create Studio"
+msgstr ""
+
+#: lib/dashboard/class-dashboard-api.php:778
+msgid "Link your site to Create Studio for analytics, remote settings, and Pro features."
 msgstr ""
 
 #: lib/db-interface/class-mv-dbi.php:69
@@ -1026,8 +991,8 @@ msgid "Thanks for the review!"
 msgstr ""
 
 #: lib/i18n/class-translation.php:44
-#: lib/views/v1/big-image/shortcode-mv-create-print-button.php:14
-#: lib/views/v1/shortcode-mv-create-print-button.php:12
+#: lib/views/v1/big-image/shortcode-mv-create-print-button.php:12
+#: lib/views/v1/shortcode-mv-create-print-button.php:10
 msgid "Print"
 msgstr ""
 
@@ -1035,6 +1000,7 @@ msgstr ""
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:23
 #: lib/views/v1/centered/shortcode-mv-create-nutrition.php:23
 #: lib/views/v1/dark/shortcode-mv-create-nutrition.php:21
+#: lib/views/v1/editorial/shortcode-mv-create-nutrition.php:23
 #: lib/views/v1/shortcode-mv-create-nutrition.php:21
 msgid "Serving Size"
 msgstr ""
@@ -1062,18 +1028,58 @@ msgid "Materials"
 msgstr ""
 
 #: lib/i18n/class-translation.php:56
-#: lib/views/v1/shortcode-mv-create-supplies-recipe.php:4
+#: lib/views/v1/shortcode-mv-create-supplies-recipe.php:6
 msgid "Ingredients"
 msgstr ""
 
 #: lib/i18n/class-translation.php:57
-#: lib/views/v1/shortcode-mv-create-instructions.php:19
+#: lib/views/v1/shortcode-mv-create-instructions.php:34
 msgid "Instructions"
 msgstr ""
 
 #: lib/i18n/class-translation.php:58
 #: lib/views/v1/shortcode-mv-create-notes.php:5
 msgid "Notes"
+msgstr ""
+
+#: lib/i18n/class-translation.php:72
+msgid "Responses"
+msgstr ""
+
+#: lib/i18n/class-translation.php:73
+msgid "Reply"
+msgstr ""
+
+#: lib/i18n/class-translation.php:74
+msgid "Cancel Reply"
+msgstr ""
+
+#: lib/i18n/class-translation.php:75
+msgid "Your Response"
+msgstr ""
+
+#: lib/i18n/class-translation.php:76
+msgid "Write your response..."
+msgstr ""
+
+#: lib/i18n/class-translation.php:77
+msgid "Submit Response"
+msgstr ""
+
+#: lib/i18n/class-translation.php:78
+msgid "Cancel"
+msgstr ""
+
+#: lib/i18n/class-translation.php:79
+msgid "Name is required"
+msgstr ""
+
+#: lib/i18n/class-translation.php:80
+msgid "Response is required"
+msgstr ""
+
+#: lib/i18n/class-translation.php:81
+msgid "Admin"
 msgstr ""
 
 #. translators: %s: field name
@@ -1111,7 +1117,140 @@ msgid "No image with that ID."
 msgstr ""
 
 #: lib/importer-compatibility/class-importer-compatibility.php:23
-msgid "The currently installed version of <strong>Mediavine Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated."
+msgid "The currently installed version of <strong>Create Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated."
+msgstr ""
+
+#: lib/importers/class-importers-admin.php:90
+#: lib/importers/class-importers-admin.php:91
+msgid "Import Recipes"
+msgstr ""
+
+#: lib/importers/class-importers.php:128
+msgid "Create Recipe Importer Migration"
+msgstr ""
+
+#: lib/importers/class-importers.php:135
+#, php-format
+msgid "The standalone Create Recipe Importer plugin has been integrated into Create. The standalone plugin has been deactivated and the integrated importers have been enabled. You can manage this setting in <a href=\"%s\">Settings → Advanced</a>."
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:84
+msgid "Cookbook"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:89
+msgid "EasyRecipe/EasyRecipe Pro"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:94
+msgid "Meal Planner Pro Recipes"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:99
+msgid "Purr Recipe Cards"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:104
+msgid "WP Recipe Maker"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:109
+msgid "Simple Recipes Pro"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:114
+msgid "Simple Recipe Pro (Newer Versions)"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:119
+msgid "Simple Recipe Pro (Older Versions)"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:124
+msgid "WP Tasty"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:129
+msgid "WP Ultimate Recipe"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:134
+msgid "Yummly"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:139
+msgid "ZipList Recipes"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:144
+msgid "Zip Recipes"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:926
+#: lib/importers/class-mv-recipe-importer.php:1007
+msgid "Recipe Not Generated"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:927
+#: lib/importers/class-mv-recipe-importer.php:1008
+msgid "WordPress failed to create new recipe."
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:967
+#: lib/importers/sources/class-import-cookbook.php:133
+msgid "Inactive Time"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:1074
+#: lib/reviews/class-review-responses-api.php:209
+#: lib/reviews/class-reviews-api.php:249
+#: lib/reviews/class-reviews-api.php:329
+#: lib/settings/class-settings-api.php:38
+#: lib/settings/class-settings-api.php:225
+msgid "Unsafe Content Submission"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:1075
+#: lib/reviews/class-reviews-api.php:250
+#: lib/reviews/class-reviews-api.php:330
+#: lib/settings/class-settings-api.php:39
+#: lib/settings/class-settings-api.php:226
+msgid "You're submission includes unsafe characters"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:2353
+msgid "Post not found"
+msgstr ""
+
+#: lib/importers/sources/class-import-cookbook.php:341
+#: lib/importers/sources/class-import-cookbook.php:397
+#: lib/importers/sources/class-import-easy-recipe.php:58
+#: lib/importers/sources/class-import-meal-planner.php:285
+#: lib/importers/sources/class-import-purr.php:197
+#: lib/importers/sources/class-import-recipe-maker.php:549
+#: lib/importers/sources/class-import-simple-recipes-pro-latest.php:190
+#: lib/importers/sources/class-import-simple-recipes-pro-legacy.php:238
+#: lib/importers/sources/class-import-simple-recipes-pro.php:260
+#: lib/importers/sources/class-import-tasty-recipes.php:379
+#: lib/importers/sources/class-import-wp-ultimate-recipe.php:241
+#: lib/importers/sources/class-import-yummly.php:164
+#: lib/importers/sources/class-import-zip-recipes.php:236
+#: lib/importers/sources/class-import-ziplist.php:184
+msgid "Failed to process shortcode replacement"
+msgstr ""
+
+#: lib/importers/sources/class-import-simple-recipes-pro-latest.php:173
+#: lib/importers/sources/class-import-simple-recipes-pro-legacy.php:158
+#: lib/importers/sources/class-import-simple-recipes-pro.php:120
+msgid "Wait Time"
+msgstr ""
+
+#: lib/importers/sources/class-import-tasty-recipes.php:199
+msgid "No reviews to import"
+msgstr ""
+
+#: lib/importers/sources/class-import-wp-ultimate-recipe.php:83
+msgid "Passive Time"
 msgstr ""
 
 #: lib/json-ld/class-json-ld-types.php:532
@@ -1162,14 +1301,34 @@ msgstr ""
 msgid "Anonymous"
 msgstr ""
 
+#: lib/lists/class-bulk-scrape-api.php:93
+msgid "You do not have permission to access this endpoint."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:102
+msgid "Bulk import is a Pro feature. Please upgrade to access this feature."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:338
+msgid "Post not found or not published."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:380
+msgid "Create card not found."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:569
+msgid "Could not scrape URL. No title or image found."
+msgstr ""
+
 #: lib/nutrition/class-nutrition-api.php:61
 #: lib/nutrition/class-nutrition-api.php:95
 msgid "The Nutrition could not be found"
 msgstr ""
 
 #: lib/product-maps/class-products-map-api.php:151
-#: lib/products/class-products-api.php:134
-#: lib/products/class-products-api.php:227
+#: lib/products/class-products-api.php:140
+#: lib/products/class-products-api.php:296
 msgid "The Product could not be found"
 msgstr ""
 
@@ -1177,181 +1336,301 @@ msgstr ""
 msgid "A conflict occurred and the Product Maps could not be deleted"
 msgstr ""
 
-#: lib/products/class-amazon.php:239
+#: lib/products/class-amazon.php:265
 msgid "Unknown API Error"
 msgstr ""
 
-#: lib/products/class-amazon.php:242
+#: lib/products/class-amazon.php:268
 msgid "An error occurred, but no error data was provided by the API."
 msgstr ""
 
-#: lib/products/class-amazon.php:258
-#: lib/products/class-amazon.php:300
-#: lib/products/class-amazon.php:314
-#: lib/products/class-amazon.php:352
-msgid "Invalid Amazon Credentials"
+#: lib/products/class-amazon.php:284
+#: lib/products/class-products-api.php:662
+msgid "Amazon: API Access Not Enabled"
 msgstr ""
 
-#: lib/products/class-amazon.php:261
-msgid "Your Access Key ID does not have Amazon's Product Advertising API access."
-msgstr ""
-
-#: lib/products/class-amazon.php:263
-#: lib/products/class-amazon.php:277
-#: lib/products/class-amazon.php:291
-msgid "Sign up for Amazon's Product Advertising API"
-msgstr ""
-
-#: lib/products/class-amazon.php:272
-#: lib/products/class-amazon.php:286
-msgid "Invalid Partner Tag"
-msgstr ""
-
-#: lib/products/class-amazon.php:275
-msgid "The partner tag is not mapped to a valid associate store with your access key."
+#: lib/products/class-amazon.php:287
+#: lib/products/class-products-api.php:665
+msgid "Amazon reports your Access Key doesn't have Product Advertising API access. If you're using AWS credentials, Amazon requires you to migrate them through Associates Central."
 msgstr ""
 
 #: lib/products/class-amazon.php:289
-msgid "Your access key is not mapped to primary of approved associate store."
+#: lib/products/class-products-api.php:667
+msgid "Manage Credentials in Amazon Associates Central"
 msgstr ""
 
-#: lib/products/class-amazon.php:303
-msgid "Your Amazon Affiliates credentials appear to be incorrect. It is also possible they may still be provisioning, which normally takes around 24-48 hours. Please review your settings or manually add an image and title."
+#: lib/products/class-amazon.php:299
+#: lib/products/class-products-api.php:673
+msgid "Amazon: API Access Paused"
 msgstr ""
 
-#: lib/products/class-amazon.php:305
-#: lib/products/class-amazon.php:357
-msgid "Amazon Affiliates Settings"
+#: lib/products/class-amazon.php:302
+#: lib/products/class-products-api.php:676
+msgid "Amazon requires 10 qualified sales in the trailing 30 days to access their Product Advertising API. Once you meet this threshold, API access restores automatically. You can still add products manually."
+msgstr ""
+
+#: lib/products/class-amazon.php:304
+#: lib/products/class-products-api.php:678
+msgid "View Your Amazon Associates Dashboard"
+msgstr ""
+
+#: lib/products/class-amazon.php:314
+#: lib/products/class-products-api.php:684
+msgid "Amazon: Invalid Store ID"
 msgstr ""
 
 #: lib/products/class-amazon.php:317
-msgid "The request signature did not include all of the required components."
+#: lib/products/class-products-api.php:687
+msgid "Amazon reports your Store ID (Partner Tag) doesn't match your API credentials. Your Store ID looks like \"yoursite-20\" - make sure it's from the same Amazon account as your API keys. Common mistake: using your Access Key ID instead of your Store ID."
 msgstr ""
 
-#: lib/products/class-amazon.php:326
-msgid "Too Many Requests"
+#: lib/products/class-amazon.php:319
+#: lib/products/class-products-api.php:689
+msgid "Check Your Store ID in Settings"
 msgstr ""
 
 #: lib/products/class-amazon.php:329
-msgid "The request was denied due to request throttling. Please take a break and reduce the number of requests made to the Amazon Product Advertising API. For some reason Amazon also gives this error if you haven't had three qualifying purchases through your affiliate account within the past 30 days."
+#: lib/products/class-products-api.php:695
+msgid "Amazon: Account Not Approved"
 msgstr ""
 
-#: lib/products/class-amazon.php:331
-msgid "If this error still persists after at least an hour, and your account has had enough qualifying purchases, please contact Amazon support."
+#: lib/products/class-amazon.php:332
+#: lib/products/class-products-api.php:698
+msgid "Amazon reports your credentials aren't linked to an approved Associates account. This usually means your Associates application is still pending, or you're using credentials from a different Amazon account than your approved store."
 msgstr ""
 
-#: lib/products/class-amazon.php:340
-msgid "request_expired"
+#: lib/products/class-amazon.php:334
+#: lib/products/class-products-api.php:700
+msgid "Check Your Account in Amazon Associates Central"
 msgstr ""
 
-#: lib/products/class-amazon.php:343
-msgid "The request is past expiry date or the request date (either with 15 minute padding), or the request date occurs more than 15 minutes in the future."
+#: lib/products/class-amazon.php:344
+#: lib/products/class-products-api.php:706
+msgid "Amazon: Invalid Credentials"
 msgstr ""
 
-#: lib/products/class-amazon.php:355
-msgid "Your Amazon Affiliates Access Key ID or security token appear to be invalid. Please review your credentials."
+#: lib/products/class-amazon.php:347
+#: lib/products/class-products-api.php:709
+msgid "Amazon couldn't validate your credentials. Check that your Secret Key is correct - it's a 40-character string, not your Store ID. If you just created new credentials, Amazon takes up to 48 hours to activate them."
 msgstr ""
 
-#: lib/products/class-amazon.php:366
-msgid "Invalid Parameter"
+#: lib/products/class-amazon.php:349
+#: lib/products/class-products-api.php:711
+msgid "Review Your Credentials in Settings"
 msgstr ""
 
-#: lib/products/class-amazon.php:369
-msgid "Parameter is either invalid or missing. Please check your input and try again."
+#: lib/products/class-amazon.php:359
+#: lib/products/class-products-api.php:717
+msgid "Amazon: Missing Secret Key"
 msgstr ""
 
-#: lib/products/class-amazon.php:378
-msgid "Operation Unknown"
+#: lib/products/class-amazon.php:362
+#: lib/products/class-products-api.php:720
+msgid "Amazon reports your Secret Key is missing or incomplete. Your Secret Key is a 40-character string that looks like \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\". Make sure you copied the entire key without extra spaces."
 msgstr ""
 
-#: lib/products/class-amazon.php:381
-msgid "The operation requested is invalid. Please verify that the operation name is typed correctly."
+#: lib/products/class-amazon.php:364
+#: lib/products/class-products-api.php:722
+msgid "Re-enter Your Secret Key in Settings"
 msgstr ""
 
-#: lib/products/class-amazon.php:413
-msgid "Register to Access PRO Features"
+#: lib/products/class-amazon.php:374
+#: lib/products/class-products-api.php:728
+msgid "Amazon: Rate Limit Exceeded"
 msgstr ""
 
-#: lib/products/class-amazon.php:416
-msgid "Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title."
+#: lib/products/class-amazon.php:377
+#: lib/products/class-products-api.php:731
+msgid "Amazon is rate-limiting your requests because you've exceeded their API limits. Wait a few minutes before trying again."
+msgstr ""
+
+#: lib/products/class-amazon.php:387
+#: lib/products/class-products-api.php:737
+msgid "Amazon: Request Expired"
+msgstr ""
+
+#: lib/products/class-amazon.php:390
+#: lib/products/class-products-api.php:740
+msgid "Amazon rejected the request because your server's clock is out of sync. Amazon requires requests to be within 15 minutes of the actual time. Contact your hosting provider to sync your server's clock."
+msgstr ""
+
+#: lib/products/class-amazon.php:400
+#: lib/products/class-products-api.php:746
+msgid "Amazon: Unknown Access Key"
+msgstr ""
+
+#: lib/products/class-amazon.php:403
+#: lib/products/class-products-api.php:749
+msgid "Amazon doesn't recognize your Access Key ID. Your Access Key is a 20-character string starting with \"AKIA\". Common mistakes: using your Store ID instead, extra spaces, or using old/deleted credentials. Generate new credentials in Amazon Associates if needed."
+msgstr ""
+
+#: lib/products/class-amazon.php:405
+#: lib/products/class-products-api.php:751
+msgid "Check Your Access Key in Settings"
+msgstr ""
+
+#: lib/products/class-amazon.php:415
+#: lib/products/class-products-api.php:757
+msgid "Amazon: Invalid Request"
 msgstr ""
 
 #: lib/products/class-amazon.php:418
-msgid "Register Create"
+#: lib/products/class-products-api.php:760
+msgid "Amazon reports an invalid or missing parameter in the request. This is usually a temporary issue - please try again."
 msgstr ""
 
-#: lib/products/class-amazon.php:426
-msgid "Amazon Affiliates Not Setup"
-msgstr ""
-
-#: lib/products/class-amazon.php:429
-msgid "Amazon Affiliates is not enabled or fully setup to process Amazon links. Please activate Amazon Affiliates or manually add an image and title."
+#: lib/products/class-amazon.php:428
+#: lib/products/class-products-api.php:766
+msgid "Amazon: Unknown Operation"
 msgstr ""
 
 #: lib/products/class-amazon.php:431
+#: lib/products/class-products-api.php:769
+msgid "Amazon received an unknown API operation. This is likely a plugin issue - please contact support."
+msgstr ""
+
+#: lib/products/class-amazon.php:463
+msgid "Register to Access PRO Features"
+msgstr ""
+
+#: lib/products/class-amazon.php:466
+msgid "Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon.php:468
+#: lib/products/class-products-api.php:790
+msgid "Register Create"
+msgstr ""
+
+#: lib/products/class-amazon.php:476
+msgid "Amazon Affiliates Not Setup"
+msgstr ""
+
+#: lib/products/class-amazon.php:479
+msgid "Amazon Affiliates is not enabled or fully setup to process Amazon links. Please activate Amazon Affiliates or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon.php:481
 msgid "Activate Amazon Affiliates"
 msgstr ""
 
-#: lib/products/class-amazon.php:445
-#: lib/products/class-amazon.php:649
+#: lib/products/class-amazon.php:495
+#: lib/products/class-amazon.php:699
 msgid "Conflict with Another Plugin"
 msgstr ""
 
-#: lib/products/class-amazon.php:448
+#: lib/products/class-amazon.php:498
 msgid "Uh oh! It looks like another plugin is conflicting with Create's Amazon API Integration feature. We're working on a way to avoid these conflicts, but in the meantime, entering the product details manually is the easiest solution!"
 msgstr ""
 
-#: lib/products/class-amazon.php:450
+#: lib/products/class-amazon.php:500
 msgid "Contact support@create.studio for more information."
 msgstr ""
 
-#: lib/products/class-amazon.php:469
+#: lib/products/class-amazon.php:519
 msgid "Waiting for Amazon Affiliates Secret Access Key Provision"
 msgstr ""
 
 #. Translators: Remaining time
-#: lib/products/class-amazon.php:474
+#: lib/products/class-amazon.php:524
 #, php-format
 msgid "Amazon Affiliates may still be provisioning. Expected time remaining: %s. Please manually add an image and title."
 msgstr ""
 
 #. Translators: Remaining time
-#: lib/products/class-amazon.php:614
+#: lib/products/class-amazon.php:664
 #, php-format
 msgid " (Time remaining: %s)"
 msgstr ""
 
-#: lib/products/class-amazon.php:650
+#: lib/products/class-amazon.php:700
 msgid "Uh oh! Another plugin is conflicting with Create's Amazon API Integration feature. Please disable your other Amazon plugins that utilize Amazon's API in order to activate this feature in Create. Contact support@create.studio for more information."
 msgstr ""
 
-#: lib/products/class-products-api.php:106
+#: lib/products/class-products-api.php:112
 msgid "Title Not Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:109
+#: lib/products/class-products-api.php:115
 msgid "The product is missing a title"
 msgstr ""
 
-#: lib/products/class-products-api.php:116
+#: lib/products/class-products-api.php:122
 msgid "URL Not Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:119
+#: lib/products/class-products-api.php:125
 msgid "The product is missing a link"
 msgstr ""
 
-#: lib/products/class-products-api.php:317
-#: lib/products/class-products-api.php:412
+#: lib/products/class-products-api.php:386
+#: lib/products/class-products-api.php:496
 msgid "No Data Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:319
-#: lib/products/class-products-api.php:414
+#: lib/products/class-products-api.php:388
+#: lib/products/class-products-api.php:498
 msgid "The Product link scrape did not turn up any results"
 msgstr ""
 
-#: lib/products/class-products-api.php:565
+#: lib/products/class-products-api.php:651
+msgid "Missing error_code parameter"
+msgstr ""
+
+#: lib/products/class-products-api.php:654
+msgid "Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning"
+msgstr ""
+
+#: lib/products/class-products-api.php:775
+msgid "Plugin Conflict Detected"
+msgstr ""
+
+#: lib/products/class-products-api.php:778
+msgid "Another plugin is conflicting with Create's Amazon integration. This is a known issue with some Amazon affiliate plugins. Try deactivating other Amazon-related plugins, or add products manually."
+msgstr ""
+
+#: lib/products/class-products-api.php:780
+msgid "Contact Create Support"
+msgstr ""
+
+#: lib/products/class-products-api.php:785
+msgid "Create Registration Required"
+msgstr ""
+
+#: lib/products/class-products-api.php:788
+msgid "Amazon product scraping requires Create to be registered. Register your site to enable this feature, or add products manually."
+msgstr ""
+
+#: lib/products/class-products-api.php:795
+msgid "Amazon Integration Not Configured"
+msgstr ""
+
+#: lib/products/class-products-api.php:798
+msgid "Amazon Affiliates needs to be enabled and configured in Create settings before you can scrape Amazon products."
+msgstr ""
+
+#: lib/products/class-products-api.php:800
+msgid "Configure Amazon Affiliates"
+msgstr ""
+
+#: lib/products/class-products-api.php:805
+msgid "Amazon: Credentials Still Activating"
+msgstr ""
+
+#: lib/products/class-products-api.php:808
+msgid "Amazon takes up to 48 hours to activate new API credentials. You can add products manually while waiting, or try again later."
+msgstr ""
+
+#: lib/products/class-products-api.php:817
+msgid "Unknown error code"
+msgstr ""
+
+#: lib/products/class-products-api.php:821
+#, php-format
+msgid "The error code \"%s\" is not recognized. Available codes: %s"
+msgstr ""
+
+#: lib/products/class-products-api.php:865
 msgid "A conflict occurred and the product could not be deleted"
 msgstr ""
 
@@ -1359,13 +1638,197 @@ msgstr ""
 msgid "Unsafe Data"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:132
-#: lib/supplies/class-supplies-api.php:57
+#: lib/relations/class-relations-api.php:204
+#: lib/supplies/class-supplies-api.php:63
 msgid "No Entries Found"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:132
+#: lib/relations/class-relations-api.php:204
 msgid "No relations were found for the given create card"
+msgstr ""
+
+#: lib/relations/class-relations-api.php:565
+msgid "Product list items require Mediavine Create Pro"
+msgstr ""
+
+#: lib/relations/class-relations-api.php:574
+msgid "Product ID is required for product list items"
+msgstr ""
+
+#: lib/relations/class-relations-api.php:586
+#, php-format
+msgid "Product with ID %d not found"
+msgstr ""
+
+#: lib/reviews/class-featured-review-api.php:107
+msgid "Featured reviews require a Pro subscription"
+msgstr ""
+
+#: lib/reviews/class-featured-review-api.php:119
+#: lib/reviews/class-review-responses-api.php:116
+msgid "Review not found."
+msgstr ""
+
+#: lib/reviews/class-featured-review-api.php:147
+msgid "Failed to update featured status."
+msgstr ""
+
+#: lib/reviews/class-featured-review.php:213
+msgid "Featured Reviews: Show Rating"
+msgstr ""
+
+#: lib/reviews/class-featured-review.php:214
+msgid "Display the star rating in featured review blocks."
+msgstr ""
+
+#: lib/reviews/class-featured-review.php:226
+msgid "Featured Reviews: Show Review Text"
+msgstr ""
+
+#: lib/reviews/class-featured-review.php:227
+msgid "Display the review content in featured review blocks."
+msgstr ""
+
+#: lib/reviews/class-featured-review.php:239
+msgid "Featured Reviews: Show Reviewer Name"
+msgstr ""
+
+#: lib/reviews/class-featured-review.php:240
+msgid "Display the reviewer's name in featured review blocks."
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:45
+msgid "Review ID Required"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:46
+msgid "A valid review ID is required"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:55
+msgid "Content Required"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:56
+msgid "Response content is required"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:65
+msgid "Author Required"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:66
+msgid "Author name or user ID is required"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:75
+msgid "Invalid Email"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:76
+#: lib/reviews/class-reviews-api.php:96
+msgid "Email address provided is invalid"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:125
+msgid "This review is not associated with a public post."
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:196
+msgid "Responding to reviews requires a Pro subscription"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:210
+msgid "Your submission includes unsafe characters"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:237
+msgid "Rate Limit Exceeded"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:238
+msgid "You are submitting responses too quickly. Please wait before trying again."
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:253
+msgid "Response Creation Failed"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:254
+msgid "Unable to create response"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:272
+msgid "You are not authorized to edit this response."
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:294
+msgid "Response Update Failed"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:295
+msgid "Unable to update response"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:313
+msgid "You are not authorized to delete this response."
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:326
+msgid "Response Could Not Be Deleted"
+msgstr ""
+
+#: lib/reviews/class-review-responses-api.php:327
+msgid "A conflict occurred and the response could not be deleted"
+msgstr ""
+
+#: lib/reviews/class-review-responses.php:52
+msgid "Reviewer"
+msgstr ""
+
+#: lib/reviews/class-review-responses.php:53
+msgid "Someone"
+msgstr ""
+
+#. translators: %s: Post title
+#: lib/reviews/class-review-responses.php:58
+#, php-format
+msgid "[%1$s] New response to your review on \"%2$s\""
+msgstr ""
+
+#. translators: 1: Reviewer name, 2: Responder name, 3: Post title
+#: lib/reviews/class-review-responses.php:62
+#, php-format
+msgid ""
+"Hi %1$s,\n"
+"\n"
+"%2$s has responded to your review on \"%3$s\".\n"
+"\n"
+"Their response:\n"
+"%4$s\n"
+"\n"
+"View the full conversation:\n"
+"%5$s\n"
+"\n"
+"---\n"
+"You are receiving this email because you left a review and opted to receive notifications.\n"
+""
+msgstr ""
+
+#: lib/reviews/class-review-responses.php:127
+msgid "Review ID was not set in function call"
+msgstr ""
+
+#: lib/reviews/class-review-responses.php:127
+msgid "A Review ID was not included in the request"
+msgstr ""
+
+#: lib/reviews/class-review-responses.php:131
+msgid "Review ID value was not a number"
+msgstr ""
+
+#: lib/reviews/class-review-responses.php:131
+msgid "A Review ID variable was included but was non-numeric"
 msgstr ""
 
 #: lib/reviews/class-reviews-api.php:69
@@ -1378,10 +1841,6 @@ msgstr ""
 
 #: lib/reviews/class-reviews-api.php:95
 msgid "Email is Invalid"
-msgstr ""
-
-#: lib/reviews/class-reviews-api.php:96
-msgid "Email address provided is invalid"
 msgstr ""
 
 #: lib/reviews/class-reviews-api.php:112
@@ -1424,33 +1883,27 @@ msgstr ""
 msgid "Message is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:249
-#: lib/reviews/class-reviews-api.php:329
-#: lib/settings/class-settings-api.php:37
-#: lib/settings/class-settings-api.php:216
-msgid "Unsafe Content Submission"
-msgstr ""
-
-#: lib/reviews/class-reviews-api.php:250
-#: lib/reviews/class-reviews-api.php:330
-#: lib/settings/class-settings-api.php:38
-#: lib/settings/class-settings-api.php:217
-msgid "You're submission includes unsafe characters"
-msgstr ""
-
 #: lib/reviews/class-reviews-api.php:343
 msgid "You are not authorized to edit this review."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:429
+#: lib/reviews/class-reviews-api.php:353
+msgid "Editing reviews requires a Pro subscription"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:452
 msgid "You are not allowed to view all reviews."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:439
+#: lib/reviews/class-reviews-api.php:462
 msgid "This creation is not associated with a public post."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:589
+#: lib/reviews/class-reviews-api.php:736
+msgid "Review Not Found"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:750
 msgid "A conflict occurred and the single review could not be deleted"
 msgstr ""
 
@@ -1460,19 +1913,19 @@ msgstr ""
 msgid "Review from %s"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:29
+#: lib/reviews/class-reviews.php:34
 msgid "Creation ID was not set in function call"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:29
+#: lib/reviews/class-reviews.php:34
 msgid "A Creation ID was not included in the request"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:33
+#: lib/reviews/class-reviews.php:38
 msgid "Creation ID value was not a number"
 msgstr ""
 
-#: lib/reviews/class-reviews.php:33
+#: lib/reviews/class-reviews.php:38
 msgid "A Creation ID variable was included but was non-numeric"
 msgstr ""
 
@@ -1510,158 +1963,253 @@ msgid "Adds a toggle to Create cards to allow readers to keep their screen awake
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:73
-msgid "Enable High Contrast"
+#: lib/settings-group/class-reader-experience.php:238
+msgid "Enable Checklists"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:74
-msgid "By default, high contrast mode is disabled."
+#: lib/settings-group/class-reader-experience.php:239
+msgid "Add interactive checkboxes to ingredients and instructions for tracking cooking progress."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:75
-#: lib/settings-group/class-advanced.php:151
-#: lib/settings-group/class-advanced.php:187
+#: lib/settings-group/class-advanced.php:88
+#: lib/settings-group/class-advanced.php:164
 #: lib/settings-group/class-advanced.php:200
+#: lib/settings-group/class-advanced.php:365
+#: lib/settings-group/class-appearance.php:191
+#: lib/settings-group/class-appearance.php:218
+#: lib/settings-group/class-appearance.php:231
 #: lib/settings-group/class-display.php:120
 #: lib/settings-group/class-display.php:132
 #: lib/settings-group/class-display.php:144
+#: lib/settings-group/class-list-ads.php:34
 #: lib/settings-group/class-lists.php:62
 #: lib/settings-group/class-pro.php:122
-#: lib/settings-group/class-recipes.php:36
-#: lib/settings-group/class-recipes.php:61
+#: lib/settings-group/class-reader-experience.php:240
+#: lib/settings-group/class-reader-experience.php:275
+#: lib/settings-group/class-reader-experience.php:335
+#: lib/settings-group/class-recipes.php:24
+#: lib/settings-group/class-recipes.php:79
+#: lib/settings-group/class-recipes.php:168
+#: lib/settings-group/class-recipes.php:193
 msgid "Disabled"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:85
-msgid "Default Copyright Attribution"
-msgstr ""
-
 #: lib/settings-group/class-advanced.php:86
-msgid "If left blank, the Create Card author will be displayed."
+msgid "Enable High Contrast"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:97
-msgid "Override author"
+#: lib/settings-group/class-advanced.php:87
+msgid "By default, high contrast mode is disabled."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:98
-msgid "Enabling this setting will cause the Default Copyright Attribution to display instead of the author."
+msgid "Default Copyright Attribution"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:99
+msgid "If left blank, the Create Card author will be displayed."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:110
+msgid "Override author"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:111
+msgid "Enabling this setting will cause the Default Copyright Attribution to display instead of the author."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:123
 msgid "Primary Heading Tag"
 msgstr ""
 
 #. translators: Link tags
-#: lib/settings-group/class-advanced.php:113
+#: lib/settings-group/class-advanced.php:126
 #, php-format
 msgid "While having %1$smultiple H1s on a page is approved by Google%2$s, many still recommend maintaining the page to only a single H1. This allows you to choose what tag you want for the primary heading, properly adjusting the heading hierarchy throughout the card."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:117
+#: lib/settings-group/class-advanced.php:130
 msgid "H2"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:137
+#: lib/settings-group/class-advanced.php:150
 msgid "Output JSON-LD Schema in head"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:138
+#: lib/settings-group/class-advanced.php:151
 msgid "If enabled, Create will output the JSON-LD schema in the wp_head hook. If disabled, it will be output just before the card."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:139
-#: lib/settings-group/class-advanced.php:163
-#: lib/settings-group/class-advanced.php:175
+#: lib/settings-group/class-advanced.php:152
+#: lib/settings-group/class-advanced.php:176
+#: lib/settings-group/class-advanced.php:188
+#: lib/settings-group/class-advanced.php:353
+#: lib/settings-group/class-appearance.php:130
+#: lib/settings-group/class-appearance.php:178
+#: lib/settings-group/class-appearance.php:204
 #: lib/settings-group/class-display.php:62
 #: lib/settings-group/class-display.php:108
 #: lib/settings-group/class-display.php:156
+#: lib/settings-group/class-list-ads.php:34
 #: lib/settings-group/class-lists.php:50
-#: lib/settings-group/class-recipes.php:24
+#: lib/settings-group/class-reader-experience.php:171
+#: lib/settings-group/class-reader-experience.php:263
+#: lib/settings-group/class-reader-experience.php:542
+#: lib/settings-group/class-recipes.php:142
+#: lib/settings-group/class-recipes.php:156
 msgid "Enabled"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:149
+#: lib/settings-group/class-advanced.php:162
 msgid "Use Enhanced Search"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:150
+#: lib/settings-group/class-advanced.php:163
 msgid "Create has a search feature that allows users to match posts based on the content of the recipe cards included in the post. If you notice that this feature is causing an issue with other themes or plugins that modify the search query, you can disable this feature."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:161
+#: lib/settings-group/class-advanced.php:174
 msgid "Autosave"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:162
+#: lib/settings-group/class-advanced.php:175
 msgid "By default, we'll save your work as you edit, even if you haven't published your changes. If you disable this setting, we'll only save draft content if you specifically click the 'Save Draft' button."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:173
+#: lib/settings-group/class-advanced.php:186
+#: lib/settings-group/class-reader-experience.php:261
 msgid "Allow Reviews"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:174
+#: lib/settings-group/class-advanced.php:187
+#: lib/settings-group/class-reader-experience.php:262
 msgid "Unchecking this box will prevent users from being able to leave reviews on your recipe cards."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:185
+#: lib/settings-group/class-advanced.php:198
+#: lib/settings-group/class-reader-experience.php:273
 msgid "Display Review CTAs"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:186
+#: lib/settings-group/class-advanced.php:199
+#: lib/settings-group/class-reader-experience.php:274
 msgid "Display prompts encouraging site visitors to leave reviews."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:198
-msgid "Enable Error Reporting"
-msgstr ""
-
-#: lib/settings-group/class-advanced.php:199
-msgid "Checking this box allows the plugin to automatically send useful error reports to the development team. (You may still be prompted to manually send error reports, even if this box is unchecked.)"
-msgstr ""
-
-#: lib/settings-group/class-advanced.php:210
+#: lib/settings-group/class-advanced.php:211
 msgid "Global Affiliate Message"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:211
+#: lib/settings-group/class-advanced.php:212
 msgid "Set the default affiliate disclaimer message with this text. Affiliate messaging can be overridden in individual posts."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:223
+#: lib/settings-group/class-advanced.php:224
 msgid "Allowed Types"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:235
-msgid "Allowed Custom Post Types"
+#: lib/settings-group/class-advanced.php:225
+msgid "If any types are selected, only they will be available for adding new cards. Existing cards of disallowed types will still function properly."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:236
+msgid "Default Card View"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:237
+msgid "When adding a card to a post, choose whether to show the card browser or the create new card form by default."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:238
+#: lib/settings-group/class-advanced.php:241
+msgid "Browse Existing Cards"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:245
+msgid "Create New Card"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:258
+msgid "Allowed Custom Post Types"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:259
 msgid "If enabled, will allow specific custom post types to be added to Lists"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:248
+#: lib/settings-group/class-advanced.php:271
+#: lib/settings-group/class-reader-experience.php:286
 msgid "Allow Anonymous Ratings"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:249
+#: lib/settings-group/class-advanced.php:272
+#: lib/settings-group/class-reader-experience.php:287
 msgid "If enabled, 4 and 5 star reviews will be submitted when the star is clicked. Users leaving a star rating will then see a popup modal prompting them to leave an optional review. Disabling this will not sumbit the rating until after the review has been added. The prompt will still display."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:260
+#: lib/settings-group/class-advanced.php:283
+#: lib/settings-group/class-reader-experience.php:298
 msgid "Enable Public Reviews"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:272
+#: lib/settings-group/class-advanced.php:295
+#: lib/settings-group/class-reader-experience.php:310
 msgid "Comments Section"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:285
+#: lib/settings-group/class-advanced.php:308
 msgid "Prevent Image Size Generation"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:286
+#: lib/settings-group/class-advanced.php:309
 msgid "If enabled, will disable specific image sizes created by Create"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:321
+msgid "Products Position"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:322
+msgid "Choose where the products section appears within your recipe and how-to cards."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:323
+#: lib/settings-group/class-advanced.php:338
+#: lib/settings-group/class-reader-experience.php:511
+#: lib/settings-group/class-reader-experience.php:527
+msgid "After Video"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:326
+msgid "Above Supplies/Ingredients"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:330
+#: lib/settings-group/class-reader-experience.php:519
+msgid "Above Instructions"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:334
+#: lib/settings-group/class-reader-experience.php:523
+msgid "Below Notes"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:351
+msgid "Enable Confetti Shortcut"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:352
+msgid "Press Shift+C anywhere in Create to launch celebratory confetti. Disable to remove this keyboard shortcut."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:363
+msgid "Enable Recipe Importers"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:364
+msgid "Import recipes from other recipe plugins like WP Recipe Maker, Tasty Recipes, and more."
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:22
@@ -1680,199 +2228,290 @@ msgid ""
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:43
-msgid "Amazon Affiliates Access Key"
+msgid "Amazon Marketplace"
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:44
-msgid "The Amazon Affiliates Access Key"
+msgid "Select the Amazon marketplace your affiliate account is registered with."
 msgstr ""
 
-#: lib/settings-group/class-affiliates.php:56
-msgid "Amazon Affiliates Secret Access Key"
+#: lib/settings-group/class-affiliates.php:68
+msgid "Amazon Affiliates Access Key"
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:69
+msgid "The Amazon Affiliates Access Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:81
+msgid "Amazon Affiliates Secret Access Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:94
 msgid "Amazon Associate Tag"
 msgstr ""
 
-#: lib/settings-group/class-affiliates.php:70
-msgid "The Amazon Associate Tag/Store ID for the US Marketplace (other countries will be supported in the future)"
+#: lib/settings-group/class-affiliates.php:95
+msgid "The Amazon Associate Tag/Store ID for the selected marketplace."
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:31
-msgid "List Items Between Ads"
+#: lib/settings-group/class-appearance.php:20
+#: lib/settings-group/class-display.php:166
+msgid "Card Style"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:32
-msgid "Choose the number of list items between each ad in the card."
+#: lib/settings-group/class-appearance.php:21
+#: lib/settings-group/class-display.php:167
+msgid "Simple Square"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:35
-msgid "Disable ads in lists"
+#: lib/settings-group/class-appearance.php:25
+#: lib/settings-group/class-display.php:170
+msgid "Editorial"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:39
-msgid "2"
+#: lib/settings-group/class-appearance.php:28
+#: lib/settings-group/class-display.php:173
+msgid "Editorial<br>by Mischief Marmot"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:43
-msgid "3"
+#: lib/settings-group/class-appearance.php:32
+#: lib/settings-group/class-display.php:177
+msgid "Modern Elegant"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:47
-msgid "4"
+#: lib/settings-group/class-appearance.php:35
+#: lib/settings-group/class-display.php:180
+msgid "Modern Elegant<br>by Mischief Marmot"
 msgstr ""
 
-#: lib/settings-group/class-control-panel.php:51
-msgid "5"
+#: lib/settings-group/class-appearance.php:39
+#: lib/settings-group/class-display.php:184
+msgid "Hero Image by Purr Design"
 msgstr ""
 
+#. translators: credit name and url
+#: lib/settings-group/class-appearance.php:43
+#: lib/settings-group/class-display.php:188
+#, php-format
+msgid "Hero Image<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:46
+#: lib/settings-group/class-display.php:191
+msgid "Simple Square by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-appearance.php:50
+#: lib/settings-group/class-display.php:195
+#, php-format
+msgid "Simple Square<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:53
+#: lib/settings-group/class-display.php:198
+msgid "Dark Simple Square by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-appearance.php:57
+#: lib/settings-group/class-display.php:202
+#, php-format
+msgid "Dark Simple Square<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:60
+#: lib/settings-group/class-display.php:205
+msgid "Classy Circle by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-appearance.php:64
+#: lib/settings-group/class-display.php:209
+#, php-format
+msgid "Classy Circle<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:67
+#: lib/settings-group/class-display.php:212
+msgid "Dark Classy Circle by Purr Design"
+msgstr ""
+
+#. translators: credit name and url
+#: lib/settings-group/class-appearance.php:71
+#: lib/settings-group/class-display.php:216
+#, php-format
+msgid "Dark Classy Circle<br>by %s"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:97
 #: lib/settings-group/class-display.php:30
 msgid "Photo Ratio"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:98
+msgid "Select an aspect ratio for photo display on cards and lists. Circles list layout and Classy Circle card style will ignore this setting."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:99
+#: lib/settings-group/class-appearance.php:103
+#: lib/settings-group/class-display.php:32
+#: lib/settings-group/class-display.php:35
+msgid "No fixed ratio"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:128
+#: lib/settings-group/class-display.php:60
+msgid "Enable Print Thumbnails"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:129
+#: lib/settings-group/class-display.php:61
+msgid "By default, card thumbnails will display in the print view. This can be disabled."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:141
+#: lib/settings-group/class-display.php:72
+msgid "Pinterest Button Location"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:142
+#: lib/settings-group/class-display.php:73
+msgid "Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:143
+#: lib/settings-group/class-appearance.php:163
+#: lib/settings-group/class-display.php:74
+#: lib/settings-group/class-display.php:93
+msgid "Top Right"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:147
+#: lib/settings-group/class-display.php:77
+msgid "Off"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:151
+#: lib/settings-group/class-display.php:81
+msgid "Top Left"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:155
+#: lib/settings-group/class-display.php:85
+msgid "Inside Top Left"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:159
+#: lib/settings-group/class-display.php:89
+msgid "Inside Top Right"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:176
+#: lib/settings-group/class-display.php:106
+msgid "Force Uppercase"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:177
+#: lib/settings-group/class-display.php:107
+msgid "By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:189
+#: lib/settings-group/class-display.php:118
+msgid "Use Theme Body Font Size"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:190
+#: lib/settings-group/class-display.php:119
+msgid "If enabled, the Create card body font size will match that of the theme."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:202
+#: lib/settings-group/class-display.php:154
+msgid "Center Full Width Cards"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:203
+#: lib/settings-group/class-display.php:155
+msgid "When a card reaches its max width of 700px, center the card within the content area."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:216
+#: lib/settings-group/class-display.php:130
+msgid "Aggressive List CSS"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:217
+#: lib/settings-group/class-display.php:131
+msgid "Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:229
+#: lib/settings-group/class-display.php:142
+msgid "Aggressive Buttons CSS"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:230
+#: lib/settings-group/class-display.php:143
+msgid "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style."
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:242
+msgid "Custom CSS"
+msgstr ""
+
+#: lib/settings-group/class-appearance.php:243
+msgid "Add custom CSS to style Create cards. Use .mv-create-card as the root selector. Example: <code>.mv-create-card .mv-create-title-primary { font-size: 24px; }</code>"
 msgstr ""
 
 #: lib/settings-group/class-display.php:31
 msgid "Select an aspect ratio for photo display. Some card styles, such as Classy Circle, will ignore this setting."
 msgstr ""
 
-#: lib/settings-group/class-display.php:32
-#: lib/settings-group/class-display.php:35
-msgid "No fixed ratio"
+#: lib/settings-group/class-list-ads.php:32
+msgid "Enable Ads in Lists"
 msgstr ""
 
-#: lib/settings-group/class-display.php:60
-msgid "Enable Print Thumbnails"
+#: lib/settings-group/class-list-ads.php:33
+msgid "Enable ad slot insertion between list items."
 msgstr ""
 
-#: lib/settings-group/class-display.php:61
-msgid "By default, card thumbnails will display in the print view. This can be disabled."
+#: lib/settings-group/class-list-ads.php:44
+msgid "List Items Between Ads"
 msgstr ""
 
-#: lib/settings-group/class-display.php:72
-msgid "Pinterest Button Location"
+#: lib/settings-group/class-list-ads.php:45
+msgid "Choose the number of list items between each ad in the card."
 msgstr ""
 
-#: lib/settings-group/class-display.php:73
-msgid "Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right."
+#: lib/settings-group/class-list-ads.php:48
+msgid "Disable ads in lists"
 msgstr ""
 
-#: lib/settings-group/class-display.php:74
-#: lib/settings-group/class-display.php:93
-msgid "Top Right"
+#: lib/settings-group/class-list-ads.php:52
+msgid "2"
 msgstr ""
 
-#: lib/settings-group/class-display.php:77
-msgid "Off"
+#: lib/settings-group/class-list-ads.php:56
+msgid "3"
 msgstr ""
 
-#: lib/settings-group/class-display.php:81
-msgid "Top Left"
+#: lib/settings-group/class-list-ads.php:60
+msgid "4"
 msgstr ""
 
-#: lib/settings-group/class-display.php:85
-msgid "Inside Top Left"
+#: lib/settings-group/class-list-ads.php:64
+msgid "5"
 msgstr ""
 
-#: lib/settings-group/class-display.php:89
-msgid "Inside Top Right"
+#: lib/settings-group/class-list-ads.php:81
+msgid "Ad Slot HTML"
 msgstr ""
 
-#: lib/settings-group/class-display.php:106
-msgid "Force Uppercase"
-msgstr ""
-
-#: lib/settings-group/class-display.php:107
-msgid "By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired."
-msgstr ""
-
-#: lib/settings-group/class-display.php:118
-msgid "Use Theme Body Font Size"
-msgstr ""
-
-#: lib/settings-group/class-display.php:119
-msgid "If enabled, the Create card body font size will match that of the theme."
-msgstr ""
-
-#: lib/settings-group/class-display.php:130
-msgid "Aggressive List CSS"
-msgstr ""
-
-#: lib/settings-group/class-display.php:131
-msgid "Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards."
-msgstr ""
-
-#: lib/settings-group/class-display.php:142
-msgid "Aggressive Buttons CSS"
-msgstr ""
-
-#: lib/settings-group/class-display.php:143
-msgid "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style."
-msgstr ""
-
-#: lib/settings-group/class-display.php:154
-msgid "Center Full Width Cards"
-msgstr ""
-
-#: lib/settings-group/class-display.php:155
-msgid "When a card reaches its max width of 700px, center the card within the content area."
-msgstr ""
-
-#: lib/settings-group/class-display.php:166
-msgid "Card Style"
-msgstr ""
-
-#: lib/settings-group/class-display.php:167
-msgid "Simple Square"
-msgstr ""
-
-#: lib/settings-group/class-display.php:170
-msgid "Simple Square by Purr Design"
-msgstr ""
-
-#. translators: credit name and url
-#: lib/settings-group/class-display.php:174
-#, php-format
-msgid "Simple Square<br>by %s"
-msgstr ""
-
-#: lib/settings-group/class-display.php:177
-msgid "Dark Simple Square by Purr Design"
-msgstr ""
-
-#. translators: credit name and url
-#: lib/settings-group/class-display.php:181
-#, php-format
-msgid "Dark Simple Square<br>by %s"
-msgstr ""
-
-#: lib/settings-group/class-display.php:184
-msgid "Classy Circle by Purr Design"
-msgstr ""
-
-#. translators: credit name and url
-#: lib/settings-group/class-display.php:188
-#, php-format
-msgid "Classy Circle<br>by %s"
-msgstr ""
-
-#: lib/settings-group/class-display.php:191
-msgid "Dark Classy Circle by Purr Design"
-msgstr ""
-
-#. translators: credit name and url
-#: lib/settings-group/class-display.php:195
-#, php-format
-msgid "Dark Classy Circle<br>by %s"
-msgstr ""
-
-#: lib/settings-group/class-display.php:198
-msgid "Hero Image by Purr Design"
-msgstr ""
-
-#. translators: credit name and url
-#: lib/settings-group/class-display.php:202
-#, php-format
-msgid "Hero Image<br>by %s"
+#: lib/settings-group/class-list-ads.php:82
+msgid "Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped."
 msgstr ""
 
 #: lib/settings-group/class-lists.php:22
@@ -1917,10 +2556,12 @@ msgid "Button Action Defaults"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:23
+#: lib/settings-group/class-reader-experience.php:62
 msgid "Enable Jump To Recipe Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:24
+#: lib/settings-group/class-reader-experience.php:63
 msgid ""
 "When enabled, use of a Jump Button means that readers will be able to bypass\n"
 "\t\t\t\t\t\tthe content of your blog post, including any in-content ads that would have\n"
@@ -1932,194 +2573,545 @@ msgid ""
 msgstr ""
 
 #: lib/settings-group/class-pro.php:44
+#: lib/settings-group/class-reader-experience.php:83
 msgid "Jump To Recipe Button Text"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:57
+#: lib/settings-group/class-reader-experience.php:96
 msgid "Jump To How-To Button Text"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:70
+#: lib/settings-group/class-reader-experience.php:109
 msgid "Jump to Recipe Color"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:72
 #: lib/settings-group/class-pro.php:76
+#: lib/settings-group/class-reader-experience.php:111
+#: lib/settings-group/class-reader-experience.php:115
 msgid "Gray"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:80
+#: lib/settings-group/class-reader-experience.php:119
 msgid "Custom Colors"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:93
+#: lib/settings-group/class-reader-experience.php:132
 msgid "Jump to Recipe Button Style"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:95
 #: lib/settings-group/class-pro.php:99
+#: lib/settings-group/class-reader-experience.php:134
+#: lib/settings-group/class-reader-experience.php:138
 msgid "Link"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:103
+#: lib/settings-group/class-reader-experience.php:142
 msgid "Hollow Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:107
+#: lib/settings-group/class-reader-experience.php:146
 msgid "Solid Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:120
+#: lib/settings-group/class-reader-experience.php:333
 msgid "Enable Social Footer"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:121
+#: lib/settings-group/class-reader-experience.php:334
 msgid "Adds a call to action to the bottom of each card encouraging social sharing."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:132
+#: lib/settings-group/class-reader-experience.php:345
 msgid "Social Sharing Service"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:133
+#: lib/settings-group/class-reader-experience.php:346
 msgid "Select the social service to encourage."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:134
 #: lib/settings-group/class-pro.php:141
+#: lib/settings-group/class-reader-experience.php:347
+#: lib/settings-group/class-reader-experience.php:354
 msgid "Instagram"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:137
+#: lib/settings-group/class-reader-experience.php:350
 msgid "Facebook"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:145
+#: lib/settings-group/class-reader-experience.php:358
 msgid "Pinterest"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:159
+#: lib/settings-group/class-reader-experience.php:372
 msgid "Facebook Username"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:160
+#: lib/settings-group/class-reader-experience.php:373
 msgid "Enter your Facebook username to link the Facebook icon on Facebook social footer cards."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:172
+#: lib/settings-group/class-reader-experience.php:385
 msgid "Instagram Username"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:173
+#: lib/settings-group/class-reader-experience.php:386
 msgid "Enter your Instagram username to link the Instagram icon on Instagram social footer cards."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:185
+#: lib/settings-group/class-reader-experience.php:398
 msgid "Pinterest Username"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:186
+#: lib/settings-group/class-reader-experience.php:399
 msgid "Enter your Pinterest username to link the Pinterest icon on Pinterest social footer cards."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:193
+#: lib/settings-group/class-reader-experience.php:406
 msgid "Did you make this recipe?"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:198
+#: lib/settings-group/class-reader-experience.php:411
 msgid "Social Footer Heading - Recipe"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:199
+#: lib/settings-group/class-reader-experience.php:412
 msgid "The title for the social footer on recipe cards. If left blank, \"Did you make this recipe?\" will display."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:211
+#: lib/settings-group/class-reader-experience.php:424
 msgid "Social Footer Content - Recipe"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:212
+#: lib/settings-group/class-reader-experience.php:425
 msgid "The content for the social footer on recipe cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:219
+#: lib/settings-group/class-reader-experience.php:432
 msgid "Did you make this project?"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:224
+#: lib/settings-group/class-reader-experience.php:437
 msgid "Social Footer Heading - How-To"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:225
+#: lib/settings-group/class-reader-experience.php:438
 msgid "The title for the social footer on how-to cards. If left blank, \"Did you make this project?\" will display."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:237
+#: lib/settings-group/class-reader-experience.php:450
 msgid "Social Footer Content - How-To"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:238
+#: lib/settings-group/class-reader-experience.php:451
 msgid "The content for the social footer on how-to cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
 msgstr ""
 
+#: lib/settings-group/class-reader-experience.php:84
+msgid "The text of the Jump To Recipe Button"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:97
+msgid "The text of the Jump To How-To Button"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:110
+msgid "Color for Jump to Recipe Button"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:133
+msgid "Style for Jump to Recipe Button"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:169
+msgid "Enable Interactive Mode"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:170
+msgid "Allow readers to experience step-by-step interactive cooking mode on recipe cards."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:182
+msgid "Interactive Mode Button Text"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:183
+msgid "Customize the text displayed on the Interactive Mode button. Leave blank for the default. This setting syncs with Create Studio."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:196
+msgid "CTA Style"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:197
+msgid "Choose how the Interactive Mode call-to-action appears on your recipe cards. This setting syncs with Create Studio."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:210
+msgid "CTA Title"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:211
+msgid "Title text for the CTA element. Leave blank for the default. This setting syncs with Create Studio."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:224
+msgid "CTA Subtitle"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:225
+msgid "Subtitle text for the CTA element. Leave blank for the default. This setting syncs with Create Studio."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:299
+msgid "If enabled, card reviews will be publicly visible, displayed in a tab alongside comments. You must specify a DOM selector for your comments section."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:311
+msgid "Add the DOM selector of your comments section. (In most themes, this will be \"#comments\".)"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:473
+msgid "Products Display Mode"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:474
+msgid "Choose how products are displayed on recipe and how-to cards. Gallery shows products in a scrollable carousel, while List displays them in a clean text format."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:475
+#: lib/settings-group/class-reader-experience.php:479
+msgid "Gallery"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:496
+msgid "Products Section Title"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:497
+msgid "The heading displayed above the products section on cards."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:509
+msgid "Products Section Position"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:510
+msgid "Choose where the products section appears on recipe and how-to cards."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:515
+msgid "Above Supplies"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:540
+msgid "Show Affiliate Disclaimer"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:541
+msgid "Display an affiliate disclaimer below the products section when using the text list display mode. This helps with FTC compliance for affiliate links."
+msgstr ""
+
 #: lib/settings-group/class-recipes.php:22
-msgid "Use Nutrition"
+msgid "Enable Unit Conversion"
 msgstr ""
 
 #: lib/settings-group/class-recipes.php:23
-msgid "Unchecking the box will remove nutrition inputs from the recipe card interface and hide nutrition data for all recipes."
-msgstr ""
-
-#: lib/settings-group/class-recipes.php:34
-msgid "Use Traditional Nutrition Display"
+msgid "Allows readers to toggle between US Customary and Metric units for recipe ingredients."
 msgstr ""
 
 #: lib/settings-group/class-recipes.php:35
+msgid "Default Measurement System"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:36
+msgid "Choose the default measurement system displayed to readers. \"Auto\" detects based on the reader's locale."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:41
+msgid "Auto (detect from locale)"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:45
+msgid "US Customary"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:49
+msgid "Metric"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:63
+msgid "Unit Conversion Label"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:64
+msgid "Customize the label displayed next to the unit conversion toggle."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:77
+msgid "Enable Servings Adjustment"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:78
+msgid "Allows readers to scale recipe ingredient amounts by selecting serving multipliers (1x, 2x, 3x)."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:90
+msgid "Servings Adjustment Label"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:91
+msgid "Customize the label displayed next to the servings adjustment buttons."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:104
+msgid "Widget Toolbar Layout"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:105
+msgid "Choose how the servings adjuster and unit conversion controls are arranged on your recipe cards."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:111
+msgid "Toolbar"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:115
+msgid "Left"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:119
+msgid "Right"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:123
+msgid "Centered"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:127
+msgid "Inline"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:140
+msgid "Show Widget Labels"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:141
+msgid "Display labels above the servings adjuster and unit conversion controls."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:154
+msgid "Use Nutrition"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:155
+msgid "Unchecking the box will remove nutrition inputs from the recipe card interface and hide nutrition data for all recipes."
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:166
+msgid "Use Traditional Nutrition Display"
+msgstr ""
+
+#: lib/settings-group/class-recipes.php:167
 msgid "Checking the box will add a traditional nutrition display."
 msgstr ""
 
-#: lib/settings-group/class-recipes.php:46
+#: lib/settings-group/class-recipes.php:178
 msgid "Calculated Nutrition Disclaimer"
 msgstr ""
 
-#: lib/settings-group/class-recipes.php:47
+#: lib/settings-group/class-recipes.php:179
 msgid "If provided, this disclaimer will be automatically added to each recipe upon nutrition calculation."
 msgstr ""
 
-#: lib/settings-group/class-recipes.php:59
+#: lib/settings-group/class-recipes.php:191
 msgid "Display Zero Values For Net Carbs And Sugar Alcohols"
 msgstr ""
 
-#: lib/settings-group/class-recipes.php:60
+#: lib/settings-group/class-recipes.php:192
 msgid "Checking this box will display the Net Carbohydrate and Sugar Alcohols fields on recipe nutrition when they have a value of \"0\", which are hidden by default. The display of zero values can be overridden for individual recipes."
+msgstr ""
+
+#: lib/settings/class-create-studio-client.php:92
+#: lib/settings/class-feedback-api.php:36
+msgid "Site is not connected to Create Studio"
+msgstr ""
+
+#: lib/settings/class-create-studio-client.php:149
+#: lib/settings/class-create-studio-client.php:173
+#: lib/settings/class-create-studio-client.php:203
+msgid "Could not determine site ID from token"
+msgstr ""
+
+#: lib/settings/class-feedback-api.php:62
+msgid "Error message is required"
+msgstr ""
+
+#: lib/settings/class-feedback-api.php:76
+msgid "Failed to submit feedback to Create Studio"
+msgstr ""
+
+#: lib/settings/class-settings-api.php:396
+msgid "Invalid email address"
+msgstr ""
+
+#: lib/settings/class-settings-api.php:420
+#: lib/settings/class-settings-api.php:443
+msgid "Failed to send password reset email. Please try again."
+msgstr ""
+
+#: lib/settings/class-settings-api.php:436
+msgid "Password reset email sent. Please check your inbox."
+msgstr ""
+
+#: lib/settings/class-settings-api.php:549
+#: lib/settings/class-settings-api.php:611
+msgid "This action is only available when dev mode is enabled."
+msgstr ""
+
+#: lib/settings/class-settings-api.php:589
+msgid "Database version options have been reset. The plugin will re-run migrations on next page load."
+msgstr ""
+
+#: lib/settings/class-settings-api.php:633
+msgid "Subscription tier options have been reset. The plugin will re-fetch subscription status on next check."
+msgstr ""
+
+#: lib/settings/class-user-verification.php:124
+msgid "Administrator access required"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:145
+msgid "Site must be connected to Create Studio before user verification"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:177
+msgid "Failed to create link session"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:213
+#: lib/settings/class-user-verification.php:295
+msgid "Site must be connected to Create Studio"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:306
+msgid "Session ID is required"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:320
+msgid "Failed to complete verification"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:338
+msgid "Verification token missing from response"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:379
+msgid "User was not verified"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:423
+msgid "User is not linked with Create Studio"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:439
+msgid "Failed to resend verification email"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:467
+msgid "User is not verified with Create Studio"
+msgstr ""
+
+#: lib/settings/class-user-verification.php:491
+msgid "Your verification has expired. Please verify again."
+msgstr ""
+
+#: lib/settings/class-user-verification.php:498
+msgid "Failed to generate SSO URL"
 msgstr ""
 
 #: lib/supplies/class-supplies-api.php:31
 msgid "A conflict occurred and the Supply could not be created"
 msgstr ""
 
-#: lib/supplies/class-supplies-api.php:57
+#: lib/supplies/class-supplies-api.php:63
 msgid "No Supplies were found for the given Creation"
 msgstr ""
 
-#: lib/supplies/class-supplies-api.php:81
+#: lib/supplies/class-supplies-api.php:87
 msgid "The Supply could not be found"
 msgstr ""
 
-#: lib/supplies/class-supplies-api.php:104
+#: lib/supplies/class-supplies-api.php:110
 msgid "A conflict occurred and the Supply could not be deleted"
+msgstr ""
+
+#: lib/unit-conversion/class-unit-conversion.php:398
+msgid "Unit conversion API request failed"
 msgstr ""
 
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:16
 #: lib/views/v1/centered/shortcode-mv-create-nutrition.php:16
 #: lib/views/v1/dark/shortcode-mv-create-nutrition.php:14
+#: lib/views/v1/editorial/shortcode-mv-create-nutrition.php:16
 #: lib/views/v1/shortcode-mv-create-nutrition.php:14
 msgid "Nutrition Information"
 msgstr ""
 
-#: lib/views/v1/shortcode-mv-create-list-circles.php:59
-#: lib/views/v1/shortcode-mv-create-list-grid.php:75
-#: lib/views/v1/shortcode-mv-create-list-hero.php:47
-#: lib/views/v1/shortcode-mv-create-list-numbered.php:72
+#: lib/views/v1/editorial/shortcode-mv-create-nutrition.php:26
+msgid "Amounts Per Serving"
+msgstr ""
+
+#: lib/views/v1/shortcode-mv-create-list-circles.php:79
+#: lib/views/v1/shortcode-mv-create-list-grid.php:93
+#: lib/views/v1/shortcode-mv-create-list-hero.php:71
+#: lib/views/v1/shortcode-mv-create-list-numbered.php:105
 msgid "Photo Credit:"
+msgstr ""
+
+#: lib/views/v1/shortcode-mv-create-supplies-recipe.php:20
+msgid "Toggle ingredient group"
+msgstr ""
+
+#: admin/ui/build/app.build.2.0.12.js:6357
+msgid "List Items"
+msgstr ""
+
+#: admin/ui/build/app.build.2.0.12.js:6357
+msgid "Image"
+msgstr ""
+
+#: admin/ui/build/app.build.2.0.12.js:6357
+msgid "Description"
 msgstr ""

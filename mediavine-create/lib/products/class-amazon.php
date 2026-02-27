@@ -27,6 +27,8 @@ class Amazon {
 
 	private $tag = '';
 
+	private $marketplace = 'US';
+
 	/**
 	 * Amazon configuration class
 	 * @var Configuration
@@ -60,7 +62,8 @@ class Amazon {
 			$this->enabled = Settings::get_setting( self::$settings_group . '_enable_amazon', false );
 			$this->key     = Settings::get_setting( self::$settings_group . '_paapi_access_key', '' );
 			$this->secret  = Settings::get_setting( self::$settings_group . '_paapi_secret_key', '' );
-			$this->tag     = Settings::get_setting( self::$settings_group . '_paapi_tag', '' );
+			$this->tag         = Settings::get_setting( self::$settings_group . '_paapi_tag', '' );
+			$this->marketplace = Settings::get_setting( self::$settings_group . '_paapi_marketplace', 'US' );
 		}
 
 		$this->setup_configuration();
@@ -84,6 +87,19 @@ class Amazon {
 	}
 
 
+	private static $marketplace_config = [
+		'US' => [ 'host' => 'webservices.amazon.com',        'region' => 'us-east-1' ],
+		'UK' => [ 'host' => 'webservices.amazon.co.uk',      'region' => 'eu-west-1' ],
+		'CA' => [ 'host' => 'webservices.amazon.ca',         'region' => 'us-east-1' ],
+		'DE' => [ 'host' => 'webservices.amazon.de',         'region' => 'eu-west-1' ],
+		'FR' => [ 'host' => 'webservices.amazon.fr',         'region' => 'eu-west-1' ],
+		'JP' => [ 'host' => 'webservices.amazon.co.jp',      'region' => 'us-west-2' ],
+		'AU' => [ 'host' => 'webservices.amazon.com.au',     'region' => 'us-east-1' ],
+		'IN' => [ 'host' => 'webservices.amazon.in',         'region' => 'eu-west-1' ],
+		'IT' => [ 'host' => 'webservices.amazon.it',         'region' => 'eu-west-1' ],
+		'ES' => [ 'host' => 'webservices.amazon.es',         'region' => 'eu-west-1' ],
+	];
+
 	/**
 	 * Set up configuration object
 	 * @return Configuration
@@ -93,12 +109,9 @@ class Amazon {
 		$config->setAccessKey( $this->key );
 		$config->setSecretKey( $this->secret );
 
-		/*
-		 * PAAPI host and region to which you want to send request
-		 * For more details refer: https://webservices.amazon.com/paapi5/documentation/common-request-parameters.html#host-and-region
-		 */
-		$config->setHost( 'webservices.amazon.com' );
-		$config->setRegion( 'us-east-1' );
+		$mc = self::$marketplace_config[ $this->marketplace ] ?? self::$marketplace_config['US'];
+		$config->setHost( $mc['host'] );
+		$config->setRegion( $mc['region'] );
 		$this->config = $config;
 
 		return $config;
@@ -112,6 +125,20 @@ class Amazon {
 	 * @return string|null
 	 */
 	public function get_asin_from_link( $link ) {
+		// Resolve amzn.to shortlinks to the full URL before parsing ASIN
+		if ( false !== strpos( $link, 'amzn.to' ) ) {
+			$response = wp_remote_get( $link, [ 'redirection' => 5, 'timeout' => 10 ] );
+			if ( ! is_wp_error( $response ) ) {
+				$http_response = $response['http_response'];
+				if ( $http_response instanceof \WP_HTTP_Requests_Response ) {
+					$requests_response = $http_response->get_response_object();
+					if ( ! empty( $requests_response->url ) ) {
+						$link = $requests_response->url;
+					}
+				}
+			}
+		}
+
 		// https://regex101.com/r/PLxDdM/3
 		$re = '/http[s]?:\/\/.+(?<code>\/gp|\/dp).+(?<asin>[a-zA-Z0-9]{10})/U';
 
@@ -119,7 +146,6 @@ class Amazon {
 		if ( ! empty( $matches[0]['asin'] ) ) {
 			return $matches[0]['asin'];
 		}
-		// TODO: Add logic to get ASIN from amzn.to shortened links
 		return null;
 	}
 
@@ -251,134 +277,159 @@ class Amazon {
 		];
 		$error_response['data'] = $error_response;
 
-		// More human readable code for AccessDenied
+		// AccessDenied - API access not enabled or AWS credentials need migration
 		if ( 'AccessDenied' === $error->Code || 'AccessDeniedAwsUsers' === $error->Code ) {
 			$error_response = [
 				'code'    => 'access_denied',
-				'message' => __( 'Invalid Amazon Credentials', 'mediavine' ),
+				'message' => __( 'Amazon: API Access Not Enabled', 'mediavine' ),
 				'data'    => [
 					'status'    => 401,
-					'message'   => __( "Your Access Key ID does not have Amazon's Product Advertising API access.", 'mediavine' ),
+					'message'   => __( "Amazon reports your Access Key doesn't have Product Advertising API access. If you're using AWS credentials, Amazon requires you to migrate them through Associates Central.", 'mediavine' ),
 					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( "Sign up for Amazon's Product Advertising API", 'mediavine' ),
+					'link_text' => __( 'Manage Credentials in Amazon Associates Central', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=AccessDeniedException',
 				],
 			];
 		}
 
-		// More human readable code for InvalidPartnerTag
+		// AssociateNotEligible - account doesn't meet eligibility requirements (10 sales in 30 days)
+		if ( 'AssociateNotEligible' === $error->Code ) {
+			$error_response = [
+				'code'    => 'associate_not_eligible',
+				'message' => __( 'Amazon: API Access Paused', 'mediavine' ),
+				'data'    => [
+					'status'    => 403,
+					'message'   => __( "Amazon requires 10 qualified sales in the trailing 30 days to access their Product Advertising API. Once you meet this threshold, API access restores automatically. You can still add products manually.", 'mediavine' ),
+					'link_url'  => 'https://affiliate-program.amazon.com/home/reports/summary',
+					'link_text' => __( 'View Your Amazon Associates Dashboard', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=AssociateEligibilityException',
+				],
+			];
+		}
+
+		// InvalidPartnerTag - Store ID/tracking tag doesn't match credentials
 		if ( 'InvalidPartnerTag' === $error->Code ) {
 			$error_response = [
 				'code'    => 'invalid_partner',
-				'message' => __( 'Invalid Partner Tag', 'mediavine' ),
+				'message' => __( 'Amazon: Invalid Store ID', 'mediavine' ),
 				'data'    => [
 					'status'    => 400,
-					'message'   => __( 'The partner tag is not mapped to a valid associate store with your access key.', 'mediavine' ),
-					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( "Sign up for Amazon's Product Advertising API", 'mediavine' ),
+					'message'   => __( "Amazon reports your Store ID (Partner Tag) doesn't match your API credentials. Your Store ID looks like \"yoursite-20\" - make sure it's from the same Amazon account as your API keys. Common mistake: using your Access Key ID instead of your Store ID.", 'mediavine' ),
+					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_text' => __( 'Check Your Store ID in Settings', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=InvalidPartnerTagException',
 				],
 			];
 		}
 
-		// More human readable code for InvalidAssociate
+		// InvalidAssociate - credentials not linked to approved store
 		if ( 'InvalidAssociate' === $error->Code ) {
 			$error_response = [
 				'code'    => 'invalid_associate',
-				'message' => __( 'Invalid Partner Tag', 'mediavine' ),
+				'message' => __( 'Amazon: Account Not Approved', 'mediavine' ),
 				'data'    => [
 					'status'    => 403,
-					'message'   => __( 'Your access key is not mapped to primary of approved associate store.', 'mediavine' ),
+					'message'   => __( "Amazon reports your credentials aren't linked to an approved Associates account. This usually means your Associates application is still pending, or you're using credentials from a different Amazon account than your approved store.", 'mediavine' ),
 					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( "Sign up for Amazon's Product Advertising API", 'mediavine' ),
+					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=AssociateValidationException',
 				],
 			];
 		}
 
-		// More human readable code for InvalidSignature
+		// InvalidSignature - credentials incorrect or still provisioning
 		if ( 'InvalidSignature' === $error->Code ) {
 			$error_response = [
 				'code'    => 'invalid_signature',
-				'message' => __( 'Invalid Amazon Credentials', 'mediavine' ),
+				'message' => __( 'Amazon: Invalid Credentials', 'mediavine' ),
 				'data'    => [
 					'status'    => 401,
-					'message'   => __( 'Your Amazon Affiliates credentials appear to be incorrect. It is also possible they may still be provisioning, which normally takes around 24-48 hours. Please review your settings or manually add an image and title.', 'mediavine' ),
+					'message'   => __( "Amazon couldn't validate your credentials. Check that your Secret Key is correct - it's a 40-character string, not your Store ID. If you just created new credentials, Amazon takes up to 48 hours to activate them.", 'mediavine' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Amazon Affiliates Settings', 'mediavine' ),
+					'link_text' => __( 'Review Your Credentials in Settings', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=InvalidSignatureException',
 				],
 			];
 		}
 
-		// More human readable code for IncompleteSignature
+		// IncompleteSignature - Secret Key missing or malformed
 		if ( 'IncompleteSignature' === $error->Code ) {
 			$error_response = [
 				'code'    => 'incomplete_signature',
-				'message' => __( 'Invalid Amazon Credentials', 'mediavine' ),
+				'message' => __( 'Amazon: Missing Secret Key', 'mediavine' ),
 				'data'    => [
-					'status'  => 400,
-					'message' => __( 'The request signature did not include all of the required components.', 'mediavine' ),
+					'status'    => 400,
+					'message'   => __( "Amazon reports your Secret Key is missing or incomplete. Your Secret Key is a 40-character string that looks like \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\". Make sure you copied the entire key without extra spaces.", 'mediavine' ),
+					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_text' => __( 'Re-enter Your Secret Key in Settings', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=IncompleteSignatureException',
 				],
 			];
 		}
 
-		// More human readable code for TooManyRequests
+		// TooManyRequests - rate limit exceeded
 		if ( 'TooManyRequests' === $error->Code ) {
 			$error_response = [
 				'code'    => 'too_many_requests',
-				'message' => __( 'Too Many Requests', 'mediavine' ),
+				'message' => __( 'Amazon: Rate Limit Exceeded', 'mediavine' ),
 				'data'    => [
 					'status'    => 429,
-					'message'   => __( "The request was denied due to request throttling. Please take a break and reduce the number of requests made to the Amazon Product Advertising API. For some reason Amazon also gives this error if you haven't had three qualifying purchases through your affiliate account within the past 30 days.", 'mediavine' ),
-					'link_url'  => 'https://webservices.amazon.com/paapi5/documentation/contact-us.html',
-					'link_text' => __( 'If this error still persists after at least an hour, and your account has had enough qualifying purchases, please contact Amazon support.', 'mediavine' ),
+					'message'   => __( "Amazon is rate-limiting your requests because you've exceeded their API limits. Wait a few minutes before trying again.", 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=TooManyRequestsException',
 				],
 			];
 		}
 
-		// More human readable code for RequestExpired
+		// RequestExpired - server clock out of sync
 		if ( 'RequestExpired' === $error->Code ) {
 			$error_response = [
 				'code'    => 'request_expired',
-				'message' => __( 'request_expired', 'mediavine' ),
+				'message' => __( 'Amazon: Request Expired', 'mediavine' ),
 				'data'    => [
-					'status'  => 401,
-					'message' => __( 'The request is past expiry date or the request date (either with 15 minute padding), or the request date occurs more than 15 minutes in the future.', 'mediavine' ),
+					'status'    => 401,
+					'message'   => __( "Amazon rejected the request because your server's clock is out of sync. Amazon requires requests to be within 15 minutes of the actual time. Contact your hosting provider to sync your server's clock.", 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=RequestExpiredException',
 				],
 			];
 		}
 
-		// More human readable code for UnrecognizedClient
+		// UnrecognizedClient - Access Key ID not recognized
 		if ( 'UnrecognizedClient' === $error->Code ) {
 			$error_response = [
 				'code'    => 'unrecognized_client',
-				'message' => __( 'Invalid Amazon Credentials', 'mediavine' ),
+				'message' => __( 'Amazon: Unknown Access Key', 'mediavine' ),
 				'data'    => [
 					'status'    => 401,
-					'message'   => __( 'Your Amazon Affiliates Access Key ID or security token appear to be invalid. Please review your credentials.', 'mediavine' ),
+					'message'   => __( "Amazon doesn't recognize your Access Key ID. Your Access Key is a 20-character string starting with \"AKIA\". Common mistakes: using your Store ID instead, extra spaces, or using old/deleted credentials. Generate new credentials in Amazon Associates if needed.", 'mediavine' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Amazon Affiliates Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Access Key in Settings', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=UnrecognizedClientException',
 				],
 			];
 		}
 
-		// More human readable code for InvalidParameterValue
+		// InvalidParameterValue / MissingParameter
 		if ( 'InvalidParameterValue' === $error->Code || 'MissingParameter' === $error->Code ) {
 			$error_response = [
 				'code'    => 'invalid_or_missing_parameter',
-				'message' => __( 'Invalid Parameter', 'mediavine' ),
+				'message' => __( 'Amazon: Invalid Request', 'mediavine' ),
 				'data'    => [
-					'status'  => 400,
-					'message' => __( 'Parameter is either invalid or missing. Please check your input and try again.', 'mediavine' ),
+					'status'    => 400,
+					'message'   => __( 'Amazon reports an invalid or missing parameter in the request. This is usually a temporary issue - please try again.', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=ValidationException',
 				],
 			];
 		}
 
-		// Human readable code for UnknownOperation
+		// UnknownOperation
 		if ( 'UnknownOperation' === $error->Code ) {
 			$error_response = [
 				'code'    => 'unknown_operation',
-				'message' => __( 'Operation Unknown', 'mediavine' ),
+				'message' => __( 'Amazon: Unknown Operation', 'mediavine' ),
 				'data'    => [
-					'status'  => 404,
-					'message' => __( 'The operation requested is invalid. Please verify that the operation name is typed correctly.', 'mediavine' ),
+					'status'    => 404,
+					'message'   => __( 'Amazon received an unknown API operation. This is likely a plugin issue - please contact support.', 'mediavine' ),
+					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=UnknownOperationException',
 				],
 			];
 		}
@@ -405,8 +456,7 @@ class Amazon {
 
 		// If we are not registered, we need a register error
 		if (
-			! Settings::get_setting( self::$settings_group . '_api_token', false ) ||
-			! Settings::get_setting( self::$settings_group . '_api_email_confirmed', false )
+			! Settings::get_setting( self::$settings_group . '_api_token', false )
 		) {
 			return new \WP_Error(
 				'create_not_registered',

@@ -19,6 +19,19 @@ class Creations_Views extends Creations {
 
 	public static $available_image_sizes = false;
 
+	public static $studio_script_enqueued = false;
+
+	/**
+	 * Tracks whether a Create card has been rendered on the current page.
+	 */
+	public static $has_card = false;
+
+	/**
+	 * Tracks whether the first card's primary image has been rendered with LCP attributes.
+	 * Only the first card on the page should get fetchpriority="high".
+	 */
+	public static $lcp_image_rendered = false;
+
 	public $creations_jump_to_recipe = null;
 
 	public static function get_instance() {
@@ -30,14 +43,57 @@ class Creations_Views extends Creations {
 		return self::$instance;
 	}
 
+	/**
+	 * Enqueue studio script once per page
+	 *
+	 * Interactive mode features (servings adjustment, interactive widgets) require
+	 * a Pro subscription. If user doesn't have access, the script is not loaded
+	 * and cards display in standard, non-interactive format.
+	 */
+	public static function enqueue_studio_script() {
+		// Studio script powers interactive features (servings, checklists, unit conversion)
+		// available on both Pro and Free+ tiers — only free users are excluded.
+		if ( self::$studio_script_enqueued ) {
+			return;
+		}
+		if ( ! GateKeeper::is_pro_or_higher() ) {
+			return;
+		}
+
+		$site_url = site_url();
+
+		$logging_enabled = Settings::get_setting('mv_create_enable_logging', false);
+
+		$debug = Plugin::is_dev_mode() || $logging_enabled ? "data-create-studio-debug='true'" : "";
+		$timestamp = time();
+		$studio_script = self::$create_studio_base_url . "/embed/main.js";
+		if ($debug) {
+			$studio_script .= "?v=$timestamp";
+		}
+
+		// Add script to footer with data attributes
+		add_action('wp_footer', function() use ($studio_script, $site_url, $debug) {
+			printf('<script defer type="module" id="create-studio-embed" data-site-url="%s" src="%s" %s></script>',
+			esc_attr($site_url),
+			esc_url($studio_script),
+			$debug);
+		}, 20);
+
+		// Force Autoptimize to NOT aggregate inline scripts so it doesn't break JS
+		add_filter('autoptimize_js_include_inline', '__return_false');
+		self::$studio_script_enqueued = true;
+	}
+
 	function init() {
 	   $this->creations_jump_to_recipe = Creations_Jump_To_Recipe::get_instance();
+		add_filter( 'mv_create_custom_css_settings_value', 'wp_strip_all_tags' );
 		add_action('init', [ $this, 'add_image_sizes' ]);
 		add_action('image_size_names_choose', [ $this, 'add_image_size_names' ]);
 		add_action('wp_enqueue_scripts', [ $this, 'register_styles' ]);
 		add_action('wp_enqueue_scripts', [ $this, 'register_scripts' ]);
 		add_action('wp_head', [ $this, 'lists_rounded_corners' ]);
 		add_action('wp_head', [ $this, 'css_variables' ]);
+		add_action('wp_footer', [ $this, 'output_custom_css' ], 999);
 
 		add_filter('script_loader_tag', [ $this, 'add_async_attribute' ], 10, 2);
 		add_filter('style_loader_tag', [ $this, 'add_async_styles' ], 10, 3);
@@ -46,6 +102,12 @@ class Creations_Views extends Creations {
 
 		add_shortcode('mv_create', [ $this, 'mv_create_shortcode' ]);
 		add_shortcode('mv_recipe', [ $this, 'mv_recipe_shortcode' ]);
+
+		// Theme preview banner for admins
+		if ( ! empty( $_GET['create_theme'] ) ) {
+			add_action( 'wp_footer', [ $this, 'render_theme_preview_banner' ] );
+		}
+		add_action( 'admin_post_mv_create_apply_theme', [ $this, 'handle_apply_theme' ] );
 
 		// If MCP is disabled, we don't want a dead shortcode displayed
 		if ( ! shortcode_exists('mv_video') ) {
@@ -104,55 +166,55 @@ class Creations_Views extends Creations {
 			$properties[] = '--mv-create-base-font-size: 1em;';
 			$properties[] = '--mv-create-title-primary: 1.875em;'; // mv-create-title-primary
 			$properties[] = '--mv-create-title-secondary: 1.5em;'; // mv-create-title-secondary
-			$properties[] = '--mv-create-subtitles: 1.125em'; // --mv-create-subtitles - sub-titles used inside
+			$properties[] = '--mv-create-subtitles: 1.125em;'; // --mv-create-subtitles - sub-titles used inside
 		}
 
-		if (
-			( ! empty($color) && '#' !== $color ) ||
-			( ! empty($secondary_color) && '#' !== $secondary_color )
-		) {
-			// push on to array
-			$properties[] = '--mv-create-base: ' . esc_attr($color) . ' !important;';
-			$properties[] = '--mv-create-secondary-base: ' . esc_attr($secondary_color) . ' !important;';
+		$has_primary   = ! empty($color) && '#' !== $color;
+		$has_secondary = ! empty($secondary_color) && '#' !== $secondary_color;
 
-			$color_alt = Creations_Views_Colors::darken($color, 20);
-			if ( Creations_Views_Colors::is_dark($color) ) {
-				$color_alt    = Creations_Views_Colors::lighten($color, 20);
-				$properties[] = '--mv-create-alt: ' . esc_attr($color_alt) . ' !important;';
-			}
+		if ( $has_primary || $has_secondary ) {
+			// Primary color properties
+			if ( $has_primary ) {
+				$properties[] = '--mv-create-base: ' . esc_attr($color) . ' !important;';
 
-			$color_hover = Creations_Views_Colors::darken($color_alt, 20);
-			if ( Creations_Views_Colors::is_dark($color_alt) ) {
-				$color_hover  = Creations_Views_Colors::lighten($color_alt, 20);
-				$properties[] = '--mv-create-alt-hover: ' . esc_attr($color_hover) . ' !important;';
-			}
+				$color_alt = Creations_Views_Colors::darken($color, 20);
+				if ( Creations_Views_Colors::is_dark($color) ) {
+					$color_alt    = Creations_Views_Colors::lighten($color, 20);
+					$properties[] = '--mv-create-alt: ' . esc_attr($color_alt) . ' !important;';
+				}
 
-			$color_text = '#000';
-			if ( Creations_Views_Colors::is_dark($color) ) {
-				$color_text   = '#fff';
+				$color_hover = Creations_Views_Colors::darken($color_alt, 20);
+				if ( Creations_Views_Colors::is_dark($color_alt) ) {
+					$color_hover  = Creations_Views_Colors::lighten($color_alt, 20);
+					$properties[] = '--mv-create-alt-hover: ' . esc_attr($color_hover) . ' !important;';
+				}
+
+				$color_text    = Creations_Views_Colors::contrast_text( $color );
 				$properties[] = '--mv-create-text: ' . esc_attr($color_text) . ' !important;';
 			}
 
-			$secondary_color_alt = Creations_Views_Colors::darken($secondary_color, 20);
-			if ( Creations_Views_Colors::is_dark($secondary_color) ) {
-				$color_alt    = Creations_Views_Colors::lighten($secondary_color, 20);
-				$properties[] = '--mv-create-alt: ' . esc_attr($color_alt) . ' !important;';
-			}
+			// Secondary color properties — only output when secondary is actually set
+			if ( $has_secondary ) {
+				$properties[] = '--mv-create-secondary-base: ' . esc_attr($secondary_color) . ' !important;';
 
-			$secondary_color_hover = Creations_Views_Colors::darken($secondary_color_alt, 20);
-			if ( Creations_Views_Colors::is_dark($secondary_color_alt) ) {
-				$secondary_color_hover = Creations_Views_Colors::lighten($secondary_color_alt, 20);
-				$properties[]          = '--mv-create-secondary-alt-hover: ' . esc_attr($secondary_color_hover) . ' !important;';
-			}
+				$secondary_color_alt = Creations_Views_Colors::darken($secondary_color, 20);
+				if ( Creations_Views_Colors::is_dark($secondary_color) ) {
+					$secondary_color_alt = Creations_Views_Colors::lighten($secondary_color, 20);
+					$properties[]        = '--mv-create-secondary-alt: ' . esc_attr($secondary_color_alt) . ' !important;';
+				}
 
-			$secondary_color_text = '#000';
-			if ( Creations_Views_Colors::is_dark($secondary_color) ) {
-				$secondary_color_text = '#fff';
+				$secondary_color_hover = Creations_Views_Colors::darken($secondary_color_alt, 20);
+				if ( Creations_Views_Colors::is_dark($secondary_color_alt) ) {
+					$secondary_color_hover = Creations_Views_Colors::lighten($secondary_color_alt, 20);
+					$properties[]          = '--mv-create-secondary-alt-hover: ' . esc_attr($secondary_color_hover) . ' !important;';
+				}
+
+				$secondary_color_text = Creations_Views_Colors::contrast_text( $secondary_color );
 				$properties[]         = '--mv-create-secondary-text: ' . esc_attr($secondary_color_text) . ' !important;';
+				$properties[] = '--mv-create-secondary-base-trans: ' . esc_attr(Creations_Views_Colors::to_rgba($secondary_color, .8)) . ' !important;';
+				$properties[] = '--mv-star-fill: ' . esc_attr(Creations_Views_Colors::mix($secondary_color, '#fff')) . ' !important;';
+				$properties[] = '--mv-star-fill-hover: ' . esc_attr($secondary_color) . ' !important;';
 			}
-			$properties[] = '--mv-create-secondary-base-trans: ' . esc_attr(Creations_Views_Colors::to_rgba($secondary_color, .8)) . ' !important;';
-			$properties[] = '--mv-star-fill: ' . esc_attr(Creations_Views_Colors::mix($secondary_color, '#fff')) . ' !important;';
-			$properties[] = '--mv-star-fill-hover: ' . esc_attr($secondary_color) . ' !important;';
 		}
 		if ( ! empty($properties) ) { ?>
 			<style>
@@ -161,6 +223,26 @@ class Creations_Views extends Creations {
 				}
 			</style>
 		<?php
+		}
+
+	}
+
+	/**
+	 * Output custom CSS in the footer so it loads after all theme stylesheets.
+	 *
+	 * Theme stylesheets may be enqueued late (during shortcode rendering) or
+	 * injected by the dev server, so outputting in wp_footer guarantees the
+	 * custom CSS always has the final word on specificity.
+	 *
+	 * Only outputs on pages where a Create card was rendered.
+	 */
+	public function output_custom_css() {
+		if ( empty( self::$has_card ) ) {
+			return;
+		}
+		$custom_css = \Mediavine\Settings::get_setting( 'mv_create_custom_css' );
+		if ( ! empty( $custom_css ) && GateKeeper::can_access( GateKeeper::FEATURE_CUSTOM_CSS ) ) {
+			echo '<style id="mv-create-custom-css">' . wp_strip_all_tags( $custom_css ) . '</style>';
 		}
 	}
 
@@ -248,8 +330,8 @@ class Creations_Views extends Creations {
 	 * @return string script tag to be outputted
 	 */
 	public function add_async_styles( $tag, $handle, $href ) {
-		$prefix = 'mv-create-card/css';
-		if ( substr($handle, 0, strlen($prefix)) === $prefix ) {
+		$prefix = 'mv-create-card_';
+		if ( 'mv-create-card-base' === $handle || substr($handle, 0, strlen($prefix)) === $prefix ) {
 			$new_tag  = '<link rel="stylesheet preload" class="mv-create-styles" href="' . $href . '" as="style">';
 			$new_tag .= "<noscript>$tag</noscript>";
 
@@ -260,16 +342,21 @@ class Creations_Views extends Creations {
 	}
 
 	public function register_styles() {
+		$base_url = apply_filters('mv_recipe_stylesheet', Plugin::assets_url() . 'client/build/card-base.' . Plugin::VERSION . '.css');
+		wp_register_style('mv-create-card-base', $base_url, [], Plugin::VERSION);
+
 		 $card_styles = [
 			 'big-image',
 			 'centered',
 			 'centered-dark',
 			 'dark',
 			 'square',
+			 'editorial',
+			 'modern',
 		 ];
 		foreach ( $card_styles as $card_style ) {
 			$style_url = apply_filters('mv_recipe_stylesheet', Plugin::assets_url() . "client/build/card-$card_style." . Plugin::VERSION . '.css');
-			wp_register_style("mv-create-card_$card_style", $style_url, [], Plugin::VERSION);
+			wp_register_style("mv-create-card_$card_style", $style_url, [ 'mv-create-card-base' ], Plugin::VERSION);
 		}
 	}
 
@@ -294,9 +381,11 @@ class Creations_Views extends Creations {
 		$handle     = Plugin::PLUGIN_DOMAIN . '/client.js';
 		$script_url = Plugin::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.js';
 		if ( apply_filters('mv_create_dev_mode', false) ) {
-			$script_url = '//localhost:8080/bundle.js';
+			$client_dev_port = apply_filters( 'mv_create_client_dev_port', defined( 'MV_CREATE_CLIENT_DEV_PORT' ) ? MV_CREATE_CLIENT_DEV_PORT : 8080 );
+			$script_url = 'http://localhost:' . $client_dev_port . '/bundle.js';
 		}
 		wp_register_script($handle, $script_url, [], Plugin::VERSION, true);
+
 
 		// Get user-supplied element to mount reviews UI on, but revert to null if "enable" option isn't set.
 		$reviews_div            = \Mediavine\Settings::get_setting(self::$settings_group . '_public_reviews_el');
@@ -332,6 +421,13 @@ class Creations_Views extends Creations {
 					'jtc_enabled'     => (bool) \Mediavine\Settings::get_setting('mv_create_enable_jump_to_recipe', false),
 					'asset_url'       => self::assets_url(),
 					'wakeLockEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_hands_free_mode', false),
+					'canReplyToReviews' => \Mediavine\Permissions::is_user_authorized(),
+					'checklistsEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_checklists', false) && GateKeeper::can_access( GateKeeper::FEATURE_CHECKLISTS ),
+					'checklistSections' => \Mediavine\Settings::get_setting('mv_create_checklist_sections', 'ingredients'),
+					'unitConversionEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_unit_conversion', false) && GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION ),
+					'ctaVariant' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_variant', 'inline-banner'),
+					'ctaTitle' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_title', ''),
+					'ctaSubtitle' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_subtitle', ''),
 				],
 			]
 		);
@@ -380,7 +476,10 @@ class Creations_Views extends Creations {
 
 		$allowed['a']['data-derive-button-from'] = true;
 
-		$allowed['form']['class'] = true;
+		$allowed['form']['class']  = true;
+		$allowed['form']['method'] = true;
+		$allowed['form']['action'] = true;
+		$allowed['form']['target'] = true;
 
 		// SVGs
 		$allowed['svg']  = [
@@ -597,6 +696,11 @@ class Creations_Views extends Creations {
 
 			$published_creation['classes'][] = $has_img_class;
 
+			// Add photo ratio class for list layouts
+			if ( 'list' === $atts['type'] && 'mv_create_no_ratio' !== $img_size ) {
+				$published_creation['classes'][] = 'mv-create-list-ratio-' . str_replace( 'mv_create_', '', $img_size );
+			}
+
 			$published_creation['classes'] = implode(' ', $published_creation['classes']);
 
 			if ( isset($published_creation['images'][ $img_size ]) ) {
@@ -661,6 +765,8 @@ class Creations_Views extends Creations {
 
 				$atts['layout'] = $published_creation['layout'];
 				$img_sizes      = self::get_all_image_sizes(__FUNCTION__);
+				$photo_ratio    = self::get_image_size();
+				$has_ratio      = ( 'mv_create_no_ratio' !== $photo_ratio );
 
 				// Order list items by position because we can't guarantee DB write order
 				usort(
@@ -677,7 +783,10 @@ class Creations_Views extends Creations {
 					}
 				);
 
-				$published_creation['list_items_between_ads'] = \Mediavine\Settings::get_setting(self::$settings_group . '_list_items_between_ads', 3);
+				$list_ads_enabled = \Mediavine\Settings::get_setting( self::$settings_group . '_list_ads_enabled', Plugin_Checker::has_mv_ads() ? '1' : '0' );
+				$published_creation['list_items_between_ads'] = $list_ads_enabled
+					? \Mediavine\Settings::get_setting( self::$settings_group . '_list_items_between_ads', 3 )
+					: 0;
 				global $post;
 				foreach ( $published_creation['list_items'] as $key => &$item ) {
 					if (
@@ -692,9 +801,9 @@ class Creations_Views extends Creations {
 					// Thumbnail url logic
 					$layout_image_sizes   = [
 						'circles'  => 'mv_create_1x1',
-						'grid'     => 'mv_create_16x9',
-						'hero'     => 'mv_create_vert',
-						'numbered' => 'mv_create_vert',
+						'grid'     => $has_ratio ? $photo_ratio : 'mv_create_16x9',
+						'hero'     => $has_ratio ? $photo_ratio : 'mv_create_vert',
+						'numbered' => $has_ratio ? $photo_ratio : 'mv_create_vert',
 					];
 					$thumbnail_image_size = 'mv_create_1x1';
 					if ( array_key_exists($atts['layout'], $layout_image_sizes) ) {
@@ -702,8 +811,8 @@ class Creations_Views extends Creations {
 					}
 
 					// Generate thumbnail if it doesn't exist
-					// Skip synchronous image processing during REST API requests to avoid timeouts
-					if ( ! defined('REST_REQUEST') || ! REST_REQUEST ) {
+					// Skip synchronous image processing during REST API requests or in admin to avoid timeouts
+					if ( ( ! defined('REST_REQUEST') || ! REST_REQUEST ) && ! is_admin() ) {
 						Images::check_image_size($item['thumbnail_id'], $img_sizes);
 					}
 					$highest_res_image = Images::get_highest_available_image_size($item['thumbnail_id'], $thumbnail_image_size);
@@ -726,13 +835,16 @@ class Creations_Views extends Creations {
 					);
 
 					// Get permalink for all non-external items, including CPTs
-					if ( 'external' !== $item['content_type'] ) {
+					// Products use their URL from the products table, not a permalink
+					if ( 'external' !== $item['content_type'] && 'product' !== $item['content_type'] ) {
 						$item['url'] = get_the_permalink($item['canonical_post_id']);
 					}
 
 					// Provide button text
 					if ( ! empty($item['link_text']) ) {
 						$item['btn_text'] = $item['link_text'];
+					} elseif ( 'product' === $item['content_type'] ) {
+						$item['btn_text'] = __('View Product', 'mediavine');
 					} elseif ( 'recipe' === $item['secondary_type'] ) {
 						$item['btn_text'] = __('Get the Recipe', 'mediavine');
 					} elseif ( 'diy' === $item['secondary_type'] ) {
@@ -840,8 +952,20 @@ class Creations_Views extends Creations {
 				}
 			}
 
+			// Add unit conversion data if feature is enabled and card is a recipe
+			$uc_is_recipe   = 'recipe' === $atts['type'];
+			$uc_gatekeeper  = GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION );
+			$uc_setting     = Settings::get_setting( 'mv_create_enable_unit_conversion', false );
+
+			if ( $uc_is_recipe && $uc_gatekeeper && $uc_setting ) {
+				$conversion_data = self::get_unit_conversion_data( $creation->id );
+				if ( ! empty( $conversion_data ) ) {
+					$published_creation['unit_conversions'] = $conversion_data;
+				}
+			}
+
 			// Remove hardcoded ad hints from instructions
-			$published_creation['instructions'] = str_replace('<div class="mv-create-target"><div class="mv_slot_target" data-slot="recipe"></div></div>', '', $published_creation['instructions']);
+			$published_creation['instructions'] = str_replace('<div class="mv-create-target"><div class="mv_slot_target" data-slot="recipe"></div></div>', '', (string) $published_creation['instructions']);
 
 			// Remove meta span tags from instructions
 			$mv_schema_meta_regex               = get_shortcode_regex([ 'mv_schema_meta' ]);
@@ -1052,6 +1176,47 @@ class Creations_Views extends Creations {
 		return false;
 	}
 
+	/**
+	 * Build unit conversion data for frontend localization.
+	 *
+	 * Checks for cached conversions in metadata. If not cached and the feature
+	 * is enabled, triggers lazy computation via the Unit_Conversion service.
+	 *
+	 * @param int $creation_id The creation ID.
+	 * @return array|null Conversion data for frontend, or null if unavailable.
+	 */
+	public static function get_unit_conversion_data( $creation_id ) {
+		$converter = Unit_Conversion::get_instance();
+		$cached    = $converter->get_cached_conversions( $creation_id );
+
+		// Lazy compute on first frontend request if not cached
+		if ( empty( $cached ) ) {
+			$result = $converter->convert_creation( $creation_id );
+			if ( is_wp_error( $result ) ) {
+				return null;
+			}
+			if ( empty( $result ) ) {
+				return null;
+			}
+			$cached = $result;
+		}
+
+		if ( empty( $cached['ingredients'] ) ) {
+			return null;
+		}
+
+		$default_system = Settings::get_setting( 'mv_create_unit_conversion_default_system', 'auto' );
+		$label          = Settings::get_setting( 'mv_create_unit_conversion_label', 'Unit Conversion' );
+
+		return [
+			'enabled'        => true,
+			'default_system' => $default_system,
+			'source_system'  => $cached['source_system'] ?? 'us_customary',
+			'label'          => $label,
+			'conversions'    => $cached['ingredients'],
+		];
+	}
+
 	public static function create_list_item_extra( $item ) {
 		ob_start();
 		?>
@@ -1140,6 +1305,23 @@ class Creations_Views extends Creations {
 			$atts['style'] = $default_card_style;
 		}
 
+		// Theme preview override (admin only)
+		if ( ! empty( $_GET['create_theme'] ) && current_user_can( 'manage_options' ) ) {
+			$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ) );
+			$valid_themes  = [ 'square', 'dark', 'centered', 'centered-dark', 'big-image', 'editorial', 'modern' ];
+			if ( in_array( $preview_theme, $valid_themes, true ) ) {
+				$atts['style'] = $preview_theme;
+			}
+		}
+
+		// Apply theme fallback for gated themes if user doesn't have Pro access
+		// Allow admins to preview gated themes via ?create_theme= without fallback
+		$gated_themes    = [ 'editorial', 'modern' ];
+		$is_theme_preview = ! empty( $_GET['create_theme'] ) && current_user_can( 'manage_options' );
+		if ( in_array( $atts['style'], $gated_themes, true ) && ! GateKeeper::is_pro_or_higher() && ! $is_theme_preview ) {
+			$atts['style'] = 'big-image'; // Fallback to Hero Image theme
+		}
+
 		// Print view
 		$print = false;
 		if ( isset($atts['print']) ) {
@@ -1168,6 +1350,11 @@ class Creations_Views extends Creations {
 
 		// Prep creation
 		$atts['creation'] = self::prep_creation_view($atts);
+
+		// Adjust products priority based on position setting (must be after creation is prepped)
+		if ( 'list' !== $atts['type'] && ! empty( $atts['creation'] ) ) {
+			Creations_Views_Hooks::adjust_products_priority( $atts );
+		}
 
 		// Don't display a card if there's no creation data
 		if ( empty($atts['creation']) ) {
@@ -1253,13 +1440,12 @@ class Creations_Views extends Creations {
 		remove_filter('wp_kses_allowed_html', [ $this, 'create_wp_kses' ], 10);
 
 		if ( ! empty($creation_view) ) {
+			self::$has_card = true;
 			if ( ! apply_filters('mv_create_dev_mode', false) ) {
 				wp_enqueue_style('mv-create-card_' . $atts['style']);
 			}
 			wp_enqueue_script(Plugin::PLUGIN_DOMAIN . '/client.js');
-
-			// Force Autoptimize to NOT aggregate inline scripts so it doesn't break JS
-			add_filter('autoptimize_js_include_inline', '__return_false');
+			self::enqueue_studio_script();
 
 			// Converts heading tags down if setting requires
 			$creation_view = self::adjust_headings_level($creation_view, $atts['creation']);
@@ -1826,5 +2012,373 @@ class Creations_Views extends Creations {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Handle the "Apply Theme" action from the preview banner.
+	 */
+	public function handle_apply_theme() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'flavor' ) );
+		}
+
+		check_admin_referer( 'mv_create_apply_theme' );
+
+		$theme        = sanitize_text_field( wp_unslash( $_GET['create_theme'] ?? '' ) );
+		$valid_themes = [ 'square', 'dark', 'centered', 'centered-dark', 'big-image', 'editorial', 'modern' ];
+
+		if ( ! in_array( $theme, $valid_themes, true ) ) {
+			wp_die( esc_html__( 'Invalid theme.', 'flavor' ) );
+		}
+
+		$gated_themes = [ 'editorial', 'modern' ];
+		if ( in_array( $theme, $gated_themes, true ) && ! GateKeeper::is_pro_or_higher() ) {
+			wp_die( esc_html__( 'This theme requires a Pro subscription.', 'flavor' ) );
+		}
+
+		\Mediavine\Settings::update_setting( self::$settings_group . '_card_style', $theme );
+
+		$referer = wp_get_referer();
+		$redirect = $referer ? remove_query_arg( 'create_theme', $referer ) : admin_url();
+
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+	/**
+	 * Render a floating banner when previewing a card theme via ?create_theme=
+	 *
+	 * Styled to match the ThemeSelector modal action bar from the admin UI.
+	 */
+	public function render_theme_preview_banner() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ) );
+		$gated_themes  = [ 'editorial', 'modern' ];
+		$is_pro        = GateKeeper::is_pro_or_higher();
+		$is_premium    = in_array( $preview_theme, $gated_themes, true ) && ! $is_pro;
+		$upgrade_url   = GateKeeper::get_upgrade_url();
+		$theme_options = [
+			'square'        => 'Simple Square',
+			'dark'          => 'Dark Simple Square',
+			'centered'      => 'Classy Circle',
+			'centered-dark' => 'Dark Classy Circle',
+			'big-image'     => 'Hero Image',
+			'editorial'     => 'Editorial',
+			'modern'        => 'Modern',
+		];
+
+		if ( ! isset( $theme_options[ $preview_theme ] ) ) {
+			return;
+		}
+
+		$dismiss_url = remove_query_arg( 'create_theme' );
+		$apply_url   = wp_nonce_url(
+			add_query_arg(
+				[
+					'action'       => 'mv_create_apply_theme',
+					'create_theme' => $preview_theme,
+				],
+				admin_url( 'admin-post.php' )
+			),
+			'mv_create_apply_theme'
+		);
+
+		$base_url  = remove_query_arg( 'create_theme' );
+		$bar_class = $is_premium ? ' mv-preview-bar--pro' : '';
+		?>
+		<style>
+			#mv-create-theme-preview-bar {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				z-index: 999999;
+				padding: 14px 24px;
+				border-top: 1px solid #e8e6e3;
+				background: #fff;
+				font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+				box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+			}
+			#mv-create-theme-preview-bar * {
+				box-sizing: border-box;
+			}
+			.mv-preview-bar__inner {
+				max-width: 800px;
+				margin: 0 auto;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 16px;
+			}
+			.mv-preview-bar__info {
+				flex: 1;
+				min-width: 0;
+			}
+			.mv-preview-bar__label {
+				font-size: 0.8125rem;
+				color: #78716c;
+				margin: 0 0 2px;
+			}
+			.mv-preview-bar__name {
+				font-size: 0.9375rem;
+				font-weight: 600;
+				color: #1c1917;
+				margin: 0;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.mv-preview-bar__badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				padding: 2px 8px;
+				font-size: 0.6875rem;
+				font-weight: 600;
+				color: #3d5b6d;
+				background: #f0f5f7;
+				border-radius: 9999px;
+				text-transform: uppercase;
+				letter-spacing: 0.02em;
+			}
+			.mv-preview-bar__badge--premium {
+				color: #d4af37;
+				background: rgba(212, 175, 55, 0.1);
+			}
+			.mv-preview-bar__actions {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				flex-shrink: 0;
+			}
+			.mv-preview-bar__select {
+				height: 34px;
+				padding: 0 32px 0 12px;
+				font-family: inherit;
+				font-size: 0.8125rem;
+				color: #44403c;
+				background: #fff;
+				border: 1px solid #e8e6e3;
+				border-radius: 8px;
+				cursor: pointer;
+				appearance: none;
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
+				background-repeat: no-repeat;
+				background-position: right 10px center;
+				transition: all 150ms ease;
+			}
+			.mv-preview-bar__select:hover {
+				border-color: #d4d1cc;
+				background-color: #fafaf9;
+			}
+			.mv-preview-bar__select:focus-visible {
+				outline: 2px solid #3d5b6d;
+				outline-offset: 2px;
+			}
+			.mv-preview-bar__btn-cancel {
+				display: inline-flex;
+				align-items: center;
+				height: 34px;
+				padding: 0 14px;
+				font-family: inherit;
+				font-size: 0.8125rem;
+				font-weight: 500;
+				color: #57534e;
+				background: transparent;
+				border: 1px solid #e8e6e3;
+				border-radius: 8px;
+				cursor: pointer;
+				text-decoration: none;
+				transition: all 150ms ease;
+			}
+			.mv-preview-bar__btn-cancel:hover {
+				background: #f5f4f3;
+				border-color: #d4d1cc;
+				color: #292524;
+				text-decoration: none;
+			}
+			.mv-preview-bar__btn-cancel:focus-visible {
+				outline: 2px solid #3d5b6d;
+				outline-offset: 2px;
+			}
+			.mv-preview-bar__btn-apply {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				height: 34px;
+				padding: 0 16px;
+				font-family: inherit;
+				font-size: 0.8125rem;
+				font-weight: 600;
+				color: #fff;
+				background: #3d5b6d;
+				border: none;
+				border-radius: 8px;
+				cursor: pointer;
+				text-decoration: none;
+				transition: all 150ms ease;
+			}
+			.mv-preview-bar__btn-apply:hover {
+				background: #2d4555;
+				color: #fff;
+				text-decoration: none;
+			}
+			.mv-preview-bar__btn-apply:focus-visible {
+				outline: 2px solid #3d5b6d;
+				outline-offset: 2px;
+			}
+			.mv-preview-bar__btn-apply svg {
+				width: 14px;
+				height: 14px;
+				fill: currentColor;
+			}
+			/* Pro/Premium variant */
+			#mv-create-theme-preview-bar.mv-preview-bar--pro {
+				background: #1c1917;
+				border-top-color: #44403c;
+				box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+			}
+			.mv-preview-bar--pro .mv-preview-bar__label {
+				color: #a8a29e;
+			}
+			.mv-preview-bar--pro .mv-preview-bar__name {
+				color: #fff;
+			}
+			.mv-preview-bar--pro .mv-preview-bar__select {
+				color: #e7e5e4;
+				background-color: #292524;
+				border-color: #44403c;
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8a29e' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
+			}
+			.mv-preview-bar--pro .mv-preview-bar__select:hover {
+				border-color: #57534e;
+				background-color: #1c1917;
+			}
+			.mv-preview-bar--pro .mv-preview-bar__btn-cancel {
+				color: #a8a29e;
+				border-color: #44403c;
+			}
+			.mv-preview-bar--pro .mv-preview-bar__btn-cancel:hover {
+				background: #292524;
+				border-color: #57534e;
+				color: #e7e5e4;
+			}
+			.mv-preview-bar__btn-upgrade {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				height: 34px;
+				padding: 0 16px;
+				font-family: inherit;
+				font-size: 0.8125rem;
+				font-weight: 600;
+				color: #d4af37;
+				background: transparent;
+				border: 1px solid #d4af37;
+				border-radius: 8px;
+				cursor: pointer;
+				text-decoration: none;
+				transition: all 150ms ease;
+			}
+			.mv-preview-bar__btn-upgrade:hover {
+				background: rgba(212, 175, 55, 0.1);
+				color: #d4af37;
+				text-decoration: none;
+			}
+			.mv-preview-bar__btn-upgrade:focus-visible {
+				outline: 2px solid #d4af37;
+				outline-offset: 2px;
+			}
+			@media (max-width: 640px) {
+				.mv-preview-bar__inner {
+					flex-direction: column;
+					align-items: stretch;
+					gap: 8px;
+				}
+				#mv-create-theme-preview-bar {
+					padding: 12px 16px;
+				}
+				.mv-preview-bar__actions {
+					justify-content: flex-end;
+				}
+			}
+		</style>
+		<div id="mv-create-theme-preview-bar" class="<?php echo esc_attr( trim( $bar_class ) ); ?>">
+			<div class="mv-preview-bar__inner">
+				<div class="mv-preview-bar__info">
+					<p class="mv-preview-bar__label"><?php esc_html_e( 'Previewing theme', 'flavor' ); ?></p>
+					<p class="mv-preview-bar__name">
+						<?php echo esc_html( $theme_options[ $preview_theme ] ); ?>
+						<?php if ( $is_premium ) : ?>
+							<span class="mv-preview-bar__badge mv-preview-bar__badge--premium">
+								<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+								<?php esc_html_e( 'Premium', 'flavor' ); ?>
+							</span>
+						<?php else : ?>
+							<span class="mv-preview-bar__badge">
+								<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+								<?php esc_html_e( 'Preview', 'flavor' ); ?>
+							</span>
+						<?php endif; ?>
+					</p>
+				</div>
+				<div class="mv-preview-bar__actions">
+					<select id="mv-preview-bar-select" class="mv-preview-bar__select">
+						<?php foreach ( $theme_options as $value => $label ) :
+							$option_label = $label;
+							if ( in_array( $value, $gated_themes, true ) && ! $is_pro ) {
+								$option_label .= ' (Premium)';
+							}
+						?>
+							<option
+								value="<?php echo esc_url( add_query_arg( 'create_theme', $value, $base_url ) ); ?>"
+								<?php selected( $value, $preview_theme ); ?>
+							>
+								<?php echo esc_html( $option_label ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					<a href="<?php echo esc_url( $dismiss_url ); ?>" class="mv-preview-bar__btn-cancel">
+						<?php esc_html_e( 'Cancel', 'flavor' ); ?>
+					</a>
+					<?php if ( $is_premium ) : ?>
+						<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" class="mv-preview-bar__btn-upgrade">
+							<?php esc_html_e( 'Upgrade to Pro', 'flavor' ); ?>
+						</a>
+					<?php else : ?>
+						<a href="<?php echo esc_url( $apply_url ); ?>" class="mv-preview-bar__btn-apply">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+							<?php esc_html_e( 'Apply Theme', 'flavor' ); ?>
+						</a>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+		<script>
+		(function() {
+			var select = document.getElementById('mv-preview-bar-select');
+			if (!select) return;
+
+			// Get the card hash: preserve existing hash, or find the first card on the page.
+			function getCardHash() {
+				var existing = window.location.hash;
+				if (existing && existing.indexOf('mv-creation') !== -1) {
+					return existing;
+				}
+				var card = document.querySelector('[id^="mv-creation-"]');
+				return card ? '#' + card.id : '';
+			}
+
+			select.addEventListener('change', function() {
+				if (this.value) {
+					window.location.href = this.value + getCardHash();
+				}
+			});
+		})();
+		</script>
+		<?php
 	}
 }

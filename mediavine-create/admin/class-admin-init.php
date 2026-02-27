@@ -11,6 +11,11 @@ class Admin_Init extends Plugin {
 	public static $mv_create_url_params = [
 		'post_type=mv_create',
 		'page=mv_settings',
+		'page=mv_create_welcome',
+		'page=create_editor',
+		'page=create_dashboard',
+		'page=import',
+		'page=theme_elements',
 	];
 
 	/**
@@ -53,7 +58,7 @@ class Admin_Init extends Plugin {
 		}
 
 		// SECURITY CHECKED: Nothing in this query can be sanitized.
-		$key_match_statement = "SELECT id, original_object_id from {$wpdb->prefix}mv_creations WHERE original_object_id";
+		$key_match_statement = "SELECT id, original_object_id from {$wpdb->prefix}mv_creations WHERE original_object_id IS NOT NULL AND original_object_id != 0";
 		$results             = $wpdb->get_results( $key_match_statement );
 		$keys                = [];
 		foreach ( $results as $result ) {
@@ -65,32 +70,45 @@ class Admin_Init extends Plugin {
 		$amazon_provision_lock = (bool) Amazon::get_transient_timeout( 'mv_create_amazon_provision' );
 
 		return [
-			'__URL__'           => esc_url_raw( rest_url() ),
-			'__NONCE__'         => wp_create_nonce( 'wp_rest' ),
-			'__ADMIN_URL__'     => esc_url_raw( admin_url() ),
-			'__STATIC__'        => MV_CREATE_URL . 'ui/static',
-			'__SETTINGS__'      => $settings,
-			'__SHAPES__'        => $shapes,
-			'__AUTHORS__'       => $sanitized_authors,
-			'__MCP__'           => self::$mcp_data,
-			'__KEY_LOOKUP__'    => $keys,
-			'__CUSTOM_FIELDS__' => self::custom_fields(),
-			'__META_BLOCKS__'   => Creations_Meta_Blocks::get_meta_block_slugs(),
-			'__USER__'          => [
+			'__VERSION__'            => Plugin::VERSION,
+			'__WP_VERSION__'         => $GLOBALS['wp_version'],
+			'__PHP_VERSION__'        => PHP_VERSION,
+			'__URL__'                => esc_url_raw( rest_url() ),
+			'__NONCE__'              => wp_create_nonce( 'wp_rest' ),
+			'__ADMIN_NONCE__'        => wp_create_nonce( 'mv_create_admin' ),
+			'__ADMIN_URL__'          => esc_url_raw( admin_url() ),
+			'__STATIC__'             => MV_CREATE_URL . 'ui/static',
+			'__SITE_URL__'           => esc_url_raw( site_url() ),
+			'__CREATE_STUDIO_URL__'  => esc_url_raw( self::$create_studio_base_url ),
+			'__CURRENT_USER_EMAIL__' => $current_user->user_email,
+			'__SETTINGS__'           => $settings,
+			'__SERVICES_URL__'       => esc_url_raw( self::$js_services_api_url ),
+			'__SHAPES__'             => $shapes,
+			'__AUTHORS__'            => $sanitized_authors,
+			'__MCP__'                => self::$mcp_data,
+			'__KEY_LOOKUP__'         => $keys,
+			'__CUSTOM_FIELDS__'      => self::custom_fields(),
+			'__META_BLOCKS__'        => Creations_Meta_Blocks::get_meta_block_slugs(),
+			'__USER__'               => [
 				'current_user_email'      => $current_user->user_email,
+				'studio_email'            => User_Verification_Meta::get_email( $current_user->ID ),
 				'current_firstname'       => $current_user->user_firstname,
+				'display_name'            => $current_user->display_name,
 				'current_lastname'        => $current_user->user_lastname,
-				'site_url'                => site_url(),
+				'avatar_url'              => get_avatar_url( $current_user->ID, [ 'size' => 96 ] ),
+				'site_url'                => esc_url_raw( site_url() ),
 				'mediavine_publisher'     => self::$mcp_enabled,
 				'current_user_authorized' => \Mediavine\Permissions::is_user_authorized(),
 			],
-			'__FLAGS__'         => [
+			'__FLAGS__'              => [
 				'NO_DOM_DOC'            => class_exists( 'DOMDocument' ) === false,
 				'AMAZON_PROVISION_LOCK' => $amazon_provision_lock,
+				'DEV_MODE'              => Plugin::is_dev_mode(),
 			],
-			'__ALLOWED_TYPES__' => [
+			'__ALLOWED_TYPES__'      => [
 				json_decode( \Mediavine\Settings::get_setting( 'mv_create_allowed_types' ) ),
 			],
+			'__SERVING_ADJUSTMENT_LABEL__' => \Mediavine\Settings::get_setting( 'mv_create_servings_adjustment_label' ),
 		];
 	}
 
@@ -176,18 +194,27 @@ class Admin_Init extends Plugin {
 			}
 		}
 
-		// For post.php and post-new.php, check if it's a built-in post type (post, page, etc.)
-		// Load the script on built-in post types to allow adding Create cards to posts
+		// For post.php and post-new.php, check if ANY editor is present
+		// This covers all post types including Ultimate Recipe, Osetin, and custom post types
 		if ( strpos( $current_url, 'post.php' ) !== false || strpos( $current_url, 'post-new.php' ) !== false ) {
 			$screen = get_current_screen();
-			if ( $screen && isset( $screen->post_type ) ) {
-				$post_type = get_post_type_object( $screen->post_type );
-				// Load script if post type is built-in (not a custom post type)
-				if ( $post_type && false === $post_type->_builtin ) {
-					return false;
-				}
+
+			// Gutenberg/block editor
+			if ( $screen && ! empty( $screen->is_block_editor ) ) {
 				return true;
 			}
+
+			// Classic editor - check if post type supports editor
+			if ( $screen && $screen->post_type && post_type_supports( $screen->post_type, 'editor' ) ) {
+				return true;
+			}
+
+			// Fallback: if screen exists and has an edit base, load Create
+			if ( $screen && $screen->base === 'post' ) {
+				return true;
+			}
+
+			return false;
 		}
 
 		return false;
@@ -247,37 +274,45 @@ class Admin_Init extends Plugin {
 		}
 		wp_enqueue_style( 'mv-font/proxima-nova', $proxima_nova_cdn );
 
-		$script_url      = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
-		$fake_script_url = Plugin::assets_url() . 'admin/ui/assets/fake-for-importers.js';
+		$script_url = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
 
 		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			$script_url = '//localhost:3000/app.build.' . self::VERSION . '.js';
+			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
+			$script_url = 'http://localhost:' . $dev_port . '/app.build.' . self::VERSION . '.js';
 		}
 
 		if ( $this::is_create_admin_url() ) {
 			wp_enqueue_media();
 
-			$deps = ['lodash'];
+			// Core dependencies that should always be loaded
+			$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-api-fetch', 'wp-data' ];
+
+			// Add editor dependencies when available (for Gutenberg sidebar/plugins)
 			if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
-				$deps = array_merge( $deps, [ 'wp-plugins', 'wp-i18n', 'wp-element' ] );
+				$deps = array_merge( $deps, [ 'wp-plugins', 'wp-editor' ] );
 			}
 
-			wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '/mv-create.js', $fake_script_url, $deps, self::VERSION, true );
+			// In block editor context, ensure we load before the editor initializes
+			$screen = get_current_screen();
+			$in_footer = true;
+			if ( $screen && ! empty( $screen->is_block_editor ) ) {
+				// Load in header for block editor to ensure blocks register before editor parses content
+				$in_footer = false;
+				$deps[] = 'wp-edit-post';
+			}
 
-			wp_localize_script( Plugin::PLUGIN_DOMAIN . '/mv-create.js', 'MV_CREATE', self::localization() );
-
-			// Use traditional script enqueuing (Script Modules API not used)
 			wp_register_script(
 				Plugin::PLUGIN_DOMAIN . '-script',
 				$script_url,
 				$deps,
 				self::VERSION,
-				true
+				$in_footer
 			);
+
+			wp_localize_script( Plugin::PLUGIN_DOMAIN . '-script', 'MV_CREATE', self::localization() );
 
 			if ( ! wp_script_is( 'mv-blocks' ) ) {
 				wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine', plugin_dir_path( __DIR__ ) . 'languages/' );
-				wp_enqueue_script( Plugin::PLUGIN_DOMAIN . 'create-const' );
 				wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
 			}
 
@@ -307,6 +342,16 @@ class Admin_Init extends Plugin {
 		$shapes         = \Mediavine\Create\Shapes::get_shapes();
 		$allowed_shapes = \Mediavine\Settings::get_setting( 'mv_create_allowed_types' );
 		$allowed_shapes = json_decode( $allowed_shapes );
+
+		// Dashboard page - first submenu item
+		add_submenu_page(
+			'edit.php?post_type=mv_create',
+			__( 'Dashboard', 'mediavine' ),
+			__( 'Dashboard', 'mediavine' ),
+			'manage_options',
+			'create_dashboard',
+			[ $this, 'dashboard_page' ]
+		);
 
 		$menu_keys = [
 			'recipe' => __( 'Recipes', 'mediavine' ),
@@ -366,6 +411,56 @@ class Admin_Init extends Plugin {
 			'mv_settings',
 			[ $this, 'menu_page' ]
 		);
+
+		// Editor page under Create menu. Registered under the real parent so
+		// WordPress keeps the submenu open and handles capabilities correctly.
+		// The menu item is hidden via CSS in editor_hide_menu_item().
+		add_submenu_page(
+			'edit.php?post_type=mv_create',
+			__( 'Edit Create Card', 'mediavine' ),
+			__( 'Edit Card', 'mediavine' ),
+			'edit_posts',
+			'create_editor',
+			[ $this, 'editor_page' ]
+		);
+
+		// Hidden welcome page (no menu item)
+		add_submenu_page(
+			'',
+			__( 'Welcome to Create 2.0', 'mediavine' ),
+			__( 'Welcome', 'mediavine' ),
+			'manage_options',
+			'mv_create_welcome',
+			[ $this, 'welcome_page' ]
+		);
+
+		// Theme Elements page (dev mode only)
+		if ( Plugin::is_dev_mode() ) {
+			add_submenu_page(
+				'edit.php?post_type=mv_create',
+				__( 'Theme Elements', 'mediavine' ),
+				__( 'Theme Elements', 'mediavine' ),
+				'manage_options',
+				'theme_elements',
+				[ $this, 'theme_elements_page' ]
+			);
+		}
+
+		// Move Dashboard right after the auto-generated "All Cards" entry (position 1).
+		// Position 0 must stay as the default item since WordPress uses it as
+		// the parent menu href.
+		global $submenu;
+		$parent = 'edit.php?post_type=mv_create';
+		if ( isset( $submenu[ $parent ] ) ) {
+			foreach ( $submenu[ $parent ] as $key => $item ) {
+				if ( 'create_dashboard' === $item[2] ) {
+					unset( $submenu[ $parent ][ $key ] );
+					$submenu[ $parent ] = array_values( $submenu[ $parent ] );
+					array_splice( $submenu[ $parent ], 1, 0, [ $item ] );
+					break;
+				}
+			}
+		}
 	}
 
 	function card_page() {
@@ -380,6 +475,30 @@ class Admin_Init extends Plugin {
 
 			// Blank function prevents PHP notice
 			function menu_page() {}
+
+			function dashboard_page() {
+			?>
+			<div id="MVRoot" data-page="dashboard"></div>
+			<?php
+		}
+
+		function editor_page() {
+			?>
+			<div id="MVRoot" data-page="editor"></div>
+			<?php
+		}
+
+		function welcome_page() {
+				?>
+				<div id="MVRoot" data-page="welcome"></div>
+				<?php
+			}
+
+		function theme_elements_page() {
+			?>
+			<div id="MVRoot" data-page="theme-elements"></div>
+			<?php
+		}
 
 			function media_buttons( $editor_id ) {
 				if ( 'content' !== $editor_id ) {
@@ -430,7 +549,7 @@ class Admin_Init extends Plugin {
 				[
 					[
 						'slug'  => 'mediavine-create',
-						'title' => __( 'Create by Mediavine', 'mediavine' ),
+						'title' => __( 'Create', 'mediavine' ),
 						'icon'  => 'mediavine',
 					],
 				]
@@ -440,13 +559,41 @@ class Admin_Init extends Plugin {
 	}
 
 	/**
+	 * Register the Create script early so it can be referenced by block registration.
+	 * This runs on 'init' before register_gutenberg_blocks.
+	 */
+	function register_create_script() {
+		$script_url  = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
+		$is_dev_mode = apply_filters( 'mv_create_dev_mode', false );
+
+		if ( $is_dev_mode ) {
+			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
+			$script_url = 'http://localhost:' . $dev_port . '/app.build.' . self::VERSION . '.js';
+		}
+
+		// Register script early with block editor dependencies
+		wp_register_script(
+			Plugin::PLUGIN_DOMAIN . '-script',
+			$script_url,
+			[ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-components', 'wp-api-fetch', 'wp-data' ],
+			self::VERSION,
+			false // Load in header
+		);
+	}
+
+	/**
 	 * Register Gutenberg blocks server-side
+	 *
+	 * This server-side registration provides:
+	 * - Block type recognition so Gutenberg doesn't show "unsupported block" errors
+	 * - Attribute schema for proper serialization
+	 * - Render callback for frontend output
+	 * - Script dependency so WordPress loads our script when blocks are used
 	 */
 	function register_gutenberg_blocks() {
 		// Get allowed types from settings
 		$allowed_shapes = \Mediavine\Settings::get_setting( 'mv_create_allowed_types' );
 		$allowed_shapes = json_decode( $allowed_shapes );
-
 		// Default to all types if none specified
 		if ( empty( $allowed_shapes ) ) {
 			$allowed_shapes = ['recipe', 'list', 'diy'];
@@ -462,6 +609,7 @@ class Admin_Init extends Plugin {
 			}
 
 			register_block_type( $block_name, [
+				'api_version' => 3,
 				'editor_script' => Plugin::PLUGIN_DOMAIN . '-script',
 				'render_callback' => [ $this, 'render_block' ],
 				'attributes' => [
@@ -508,6 +656,156 @@ class Admin_Init extends Plugin {
 		return $shortcode;
 	}
 
+	/**
+	 * Enqueue scripts specifically for the block editor.
+	 * This runs at the right time for Gutenberg integration.
+	 */
+	function enqueue_block_editor_assets() {
+		// The main admin_enqueue_scripts might not have run yet, so register the script here too
+		$script_url = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
+
+		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
+			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
+			$script_url = 'http://localhost:' . $dev_port . '/app.build.' . self::VERSION . '.js';
+		}
+
+		// If script is not registered yet, register it
+		if ( ! wp_script_is( Plugin::PLUGIN_DOMAIN . '-script', 'registered' ) ) {
+			$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-plugins', 'wp-edit-post', 'wp-api-fetch', 'wp-data' ];
+
+			wp_register_script(
+				Plugin::PLUGIN_DOMAIN . '-script',
+				$script_url,
+				$deps,
+				self::VERSION,
+				false // Load in header for block editor
+			);
+
+			wp_localize_script( Plugin::PLUGIN_DOMAIN . '-script', 'MV_CREATE', self::localization() );
+			wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine', plugin_dir_path( __DIR__ ) . 'languages/' );
+		}
+
+		wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
+	}
+
+	/**
+	 * Highlight the correct submenu item (Recipes, How-Tos, Lists) when on the editor page.
+	 *
+	 * @param string $submenu_file The submenu file slug.
+	 * @return string
+	 */
+	function editor_submenu_file( $submenu_file ) {
+		global $plugin_page;
+		if ( 'create_editor' === $plugin_page ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$type = isset( $_GET['type'] ) ? sanitize_text_field( wp_unslash( $_GET['type'] ) ) : '';
+			if ( $type ) {
+				return $type;
+			}
+		}
+		return $submenu_file;
+	}
+
+	/**
+	 * Hide the "Edit Card" link from the Create submenu sidebar via CSS.
+	 *
+	 * The editor page is registered under the real Create parent so WordPress
+	 * can properly highlight the menu. But we don't want the "Edit Card" link
+	 * visible in the sidebar — it's accessed via collection/card links.
+	 */
+	function editor_hide_menu_item() {
+		?>
+		<style>
+			#adminmenu a[href*="page=create_editor"] { display: none !important; }
+		</style>
+		<?php
+	}
+
+	/**
+	 * Redirect post.php Create editor URLs to admin.php?page=create_editor
+	 * and repair bad object_id values on the editor page.
+	 *
+	 * WordPress core's post.php validates the post type of the loaded post before
+	 * our React app can mount. If a creation's object_id points to a non-mv_create
+	 * post (e.g., wprm_recipe from an old import), post.php dies with "Invalid post type."
+	 *
+	 * This hook:
+	 * 1. Redirects post.php?post_type=mv_create URLs to admin.php?page=create_editor
+	 *    to avoid WordPress core's post type validation entirely.
+	 * 2. On the admin.php editor page, repairs the creation's object_id if it doesn't
+	 *    point to a valid mv_create post.
+	 */
+	function maybe_repair_creation_object_id() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check
+		$current_url = static::get_current_url();
+		if ( ! $current_url ) {
+			return;
+		}
+
+		// Redirect post.php Create editor URLs to admin.php?page=create_editor
+		if (
+			strpos( $current_url, 'post.php' ) !== false &&
+			strpos( $current_url, 'post_type=mv_create' ) !== false &&
+			strpos( $current_url, 'action=edit' ) !== false
+		) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$id   = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$type = isset( $_GET['type'] ) ? sanitize_text_field( wp_unslash( $_GET['type'] ) ) : null;
+
+			if ( $id && $type ) {
+				$redirect_url = admin_url( 'admin.php?page=create_editor&id=' . $id . '&type=' . $type );
+				wp_safe_redirect( $redirect_url );
+				exit;
+			}
+		}
+
+		// On the admin.php editor page, repair bad object_id values
+		if ( strpos( $current_url, 'page=create_editor' ) === false ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$creation_id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+		if ( ! $creation_id ) {
+			return;
+		}
+
+		// Look up the creation
+		$creation = self::$models_v2->mv_creations->find_one( $creation_id );
+		if ( ! $creation || ! isset( $creation->object_id ) ) {
+			return;
+		}
+
+		// Check if object_id points to a valid mv_create post
+		$post = get_post( $creation->object_id );
+		if ( $post && 'mv_create' === $post->post_type ) {
+			return; // Already correct
+		}
+
+		// object_id is missing or points to wrong post type — create a new mv_create post
+		$mv_create_post_id = wp_insert_post(
+			[
+				'post_title'  => $creation->title ?? '',
+				'post_type'   => 'mv_create',
+				'post_status' => 'publish',
+			],
+			true
+		);
+
+		if ( is_wp_error( $mv_create_post_id ) ) {
+			return;
+		}
+
+		// Update the creation's object_id
+		self::$models_v2->mv_creations->update_without_modified_date(
+			[
+				'id'        => $creation_id,
+				'object_id' => $mv_create_post_id,
+			]
+		);
+	}
+
 	function init() {
 		global $wp_version;
 		// version-check for filter compatibility
@@ -516,13 +814,20 @@ class Admin_Init extends Plugin {
 			$block_categories_filter = 'block_categories_all';
 		}
 
+		add_action( 'admin_init', [ $this, 'maybe_repair_creation_object_id' ] );
+		add_filter( 'submenu_file', [ $this, 'editor_submenu_file' ] );
+		add_action( 'admin_head', [ $this, 'editor_hide_menu_item' ] );
 		add_action( 'admin_head', [ $this, 'admin_head' ] );
 		add_action( 'admin_footer', [ $this, 'admin_footer' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ], 11 );
 		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		add_action( 'media_buttons', [ $this, 'media_buttons' ] );
-		add_action( 'init', [ $this, 'register_gutenberg_blocks' ] );
+		// Register script first (priority 5), then blocks (priority 10)
+		add_action( 'init', [ $this, 'register_create_script' ], 5 );
+		add_action( 'init', [ $this, 'register_gutenberg_blocks' ], 10 );
 		add_filter( $block_categories_filter, [ $this, 'block_categories' ], 10, 1 );
+		// Also enqueue for block editor specifically with early priority
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_editor_assets' ], 1 );
 	}
 
 }
