@@ -313,8 +313,22 @@ class Images {
 
 		// Add width and height attributes to prevent CLS
 		if ( ! empty( $image_meta['width'] ) && ! empty( $image_meta['height'] ) ) {
-			$attributes .= 'width="' . intval( $image_meta['width'] ) . '" ';
-			$attributes .= 'height="' . intval( $image_meta['height'] ) . '" ';
+			$img_width  = intval( $image_meta['width'] );
+			$img_height = intval( $image_meta['height'] );
+
+			// For unconstrained sizes (height 9999), use actual image dimensions
+			if ( $img_height >= 9999 && is_array( $image ) && ! empty( $image['object_id'] ) ) {
+				$actual_size = wp_get_attachment_image_src( $image['object_id'], $image['image_size'] );
+				if ( ! empty( $actual_size ) ) {
+					$img_width  = $actual_size[1];
+					$img_height = $actual_size[2];
+				}
+			}
+
+			if ( $img_height < 9999 ) {
+				$attributes .= 'width="' . $img_width . '" ';
+				$attributes .= 'height="' . $img_height . '" ';
+			}
 		}
 
 		// Add fetchpriority for the first card image (LCP optimization)

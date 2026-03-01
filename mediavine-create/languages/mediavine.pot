@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.0.12\n"
+"Project-Id-Version: Create 2.0.13\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-27T03:28:13+00:00\n"
+"POT-Creation-Date: 2026-03-01T13:01:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
@@ -474,72 +474,72 @@ msgstr ""
 msgid "Disable Jump-to-Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:133
+#: lib/creations/class-creations-views.php:154
 msgid "Facebook Page:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:137
+#: lib/creations/class-creations-views.php:158
 msgid "Instagram:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:141
+#: lib/creations/class-creations-views.php:162
 msgid "Pinterest Profile:"
 msgstr ""
 
 #. Translators: Type of card. Will output either 'recipe' or 'project'
-#: lib/creations/class-creations-views.php:645
+#: lib/creations/class-creations-views.php:666
 #, php-format
 msgid "Did you make this %s?"
 msgstr ""
 
 #. Translators: Social Service name with link
-#: lib/creations/class-creations-views.php:664
+#: lib/creations/class-creations-views.php:685
 #, php-format
 msgid "Please leave a comment on the blog or share a photo on %s"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:847
+#: lib/creations/class-creations-views.php:868
 msgid "View Product"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:849
+#: lib/creations/class-creations-views.php:870
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:851
+#: lib/creations/class-creations-views.php:872
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:853
+#: lib/creations/class-creations-views.php:874
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:874
-#: lib/creations/class-creations-views.php:1497
+#: lib/creations/class-creations-views.php:895
+#: lib/creations/class-creations-views.php:1518
 #: lib/creations/class-creations.php:766
 #: lib/importers/sources/class-import-purr.php:107
 msgid "Prep Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:880
+#: lib/creations/class-creations-views.php:901
 #: lib/creations/class-creations.php:767
 msgid "Active Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:886
-#: lib/creations/class-creations-views.php:1499
+#: lib/creations/class-creations-views.php:907
+#: lib/creations/class-creations-views.php:1520
 #: lib/creations/class-creations.php:768
 #: lib/importers/class-mv-recipe-importer.php:910
 #: lib/importers/sources/class-import-purr.php:108
 msgid "Additional Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:892
-#: lib/creations/class-creations-views.php:1519
+#: lib/creations/class-creations-views.php:913
+#: lib/creations/class-creations-views.php:1540
 msgid "Total Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:896
+#: lib/creations/class-creations-views.php:917
 #: lib/i18n/class-translation.php:45
 #: lib/views/v1/big-image/shortcode-mv-create-title.php:12
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:19
@@ -555,105 +555,105 @@ msgstr ""
 msgid "Yield"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:900
+#: lib/creations/class-creations-views.php:921
 #: lib/i18n/class-translation.php:51
 #: lib/views/v1/shortcode-mv-create-footer.php:56
 msgid "Category"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:904
-#: lib/creations/class-creations-views.php:1088
+#: lib/creations/class-creations-views.php:925
+#: lib/creations/class-creations-views.php:1109
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:908
-#: lib/creations/class-creations-views.php:1382
+#: lib/creations/class-creations-views.php:929
+#: lib/creations/class-creations-views.php:1403
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:913
-#: lib/creations/class-creations-views.php:1385
+#: lib/creations/class-creations-views.php:934
+#: lib/creations/class-creations-views.php:1406
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:916
+#: lib/creations/class-creations-views.php:937
 msgid "Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:919
-#: lib/creations/class-creations-views.php:1527
+#: lib/creations/class-creations-views.php:940
+#: lib/creations/class-creations-views.php:1548
 msgid "Difficulty"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1093
+#: lib/creations/class-creations-views.php:1114
 #: lib/i18n/class-translation.php:60
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1098
+#: lib/creations/class-creations-views.php:1119
 #: lib/i18n/class-translation.php:61
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1103
+#: lib/creations/class-creations-views.php:1124
 #: lib/i18n/class-translation.php:62
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1108
+#: lib/creations/class-creations-views.php:1129
 #: lib/i18n/class-translation.php:63
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1113
+#: lib/creations/class-creations-views.php:1134
 #: lib/i18n/class-translation.php:64
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1118
+#: lib/creations/class-creations-views.php:1139
 #: lib/i18n/class-translation.php:65
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1123
+#: lib/creations/class-creations-views.php:1144
 #: lib/i18n/class-translation.php:66
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1128
+#: lib/creations/class-creations-views.php:1149
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1133
+#: lib/creations/class-creations-views.php:1154
 #: lib/i18n/class-translation.php:68
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1138
+#: lib/creations/class-creations-views.php:1159
 #: lib/i18n/class-translation.php:69
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1143
+#: lib/creations/class-creations-views.php:1164
 #: lib/i18n/class-translation.php:70
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1148
+#: lib/creations/class-creations-views.php:1169
 #: lib/i18n/class-translation.php:71
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1380
+#: lib/creations/class-creations-views.php:1401
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1498
+#: lib/creations/class-creations-views.php:1519
 #: lib/creations/class-creations.php:773
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:695
 #: lib/importers/sources/class-import-cookbook.php:132
@@ -671,65 +671,65 @@ msgstr ""
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1531
+#: lib/creations/class-creations-views.php:1552
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1578
+#: lib/creations/class-creations-views.php:1599
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1579
+#: lib/creations/class-creations-views.php:1600
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1582
+#: lib/creations/class-creations-views.php:1603
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1583
+#: lib/creations/class-creations-views.php:1604
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1586
+#: lib/creations/class-creations-views.php:1607
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1587
+#: lib/creations/class-creations-views.php:1608
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1590
+#: lib/creations/class-creations-views.php:1611
 #: lib/products/class-amazon.php:610
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1591
+#: lib/creations/class-creations-views.php:1612
 #: lib/products/class-amazon.php:611
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1594
+#: lib/creations/class-creations-views.php:1615
 #: lib/products/class-amazon.php:615
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1595
+#: lib/creations/class-creations-views.php:1616
 #: lib/products/class-amazon.php:616
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1598
+#: lib/creations/class-creations-views.php:1619
 #: lib/products/class-amazon.php:627
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1599
+#: lib/creations/class-creations-views.php:1620
 #: lib/products/class-amazon.php:628
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1793
+#: lib/creations/class-creations-views.php:1814
 msgid "No Card with ID found"
 msgstr ""
 
@@ -3104,14 +3104,14 @@ msgstr ""
 msgid "Toggle ingredient group"
 msgstr ""
 
-#: admin/ui/build/app.build.2.0.12.js:6357
+#: admin/ui/build/app.build.2.0.13.js:6356
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.2.0.12.js:6357
+#: admin/ui/build/app.build.2.0.13.js:6356
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.2.0.12.js:6357
+#: admin/ui/build/app.build.2.0.13.js:6356
 msgid "Description"
 msgstr ""

@@ -71,6 +71,27 @@ class Creations_Views extends Creations {
 			$studio_script .= "?v=$timestamp";
 		}
 
+		$css_url = self::$create_studio_base_url . "/embed/entry.css";
+		if ($debug) {
+			// JS uses Date.getTime() (milliseconds) for cache-busting; we can't predict
+			// that exact value, so skip the CSS preload in debug mode to avoid a wasted
+			// preload on a URL that won't match what main.js actually requests.
+			$preload_css = false;
+		} else {
+			$preload_css = true;
+		}
+
+		// Emit preconnect + preload hints early in <head> so the browser can
+		// fetch main.js and entry.css in parallel during HTML parsing, rather
+		// than waiting for main.js to execute and dynamically inject the CSS link.
+		add_action('wp_head', function() use ($studio_script, $css_url, $preload_css) {
+			echo '<link rel="preconnect" href="https://create.studio" crossorigin>' . "\n";
+			printf('<link rel="preload" href="%s" as="script" crossorigin>' . "\n", esc_url($studio_script));
+			if ($preload_css) {
+				printf('<link rel="preload" href="%s" as="style">' . "\n", esc_url($css_url));
+			}
+		}, 5);
+
 		// Add script to footer with data attributes
 		add_action('wp_footer', function() use ($studio_script, $site_url, $debug) {
 			printf('<script defer type="module" id="create-studio-embed" data-site-url="%s" src="%s" %s></script>',
