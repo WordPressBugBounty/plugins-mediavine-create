@@ -202,6 +202,7 @@ class Creations_Views extends Creations {
 				if ( Creations_Views_Colors::is_dark($color) ) {
 					$color_alt    = Creations_Views_Colors::lighten($color, 20);
 					$properties[] = '--mv-create-alt: ' . esc_attr($color_alt) . ' !important;';
+					$properties[] = '--mv-create-alt-text: ' . esc_attr( Creations_Views_Colors::contrast_text( $color_alt ) ) . ' !important;';
 				}
 
 				$color_hover = Creations_Views_Colors::darken($color_alt, 20);

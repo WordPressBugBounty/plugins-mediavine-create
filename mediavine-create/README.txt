@@ -143,6 +143,16 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.0.14 =
+
+* FIX: Card editor keyboard shortcut (Cmd+S) now properly publishes changes
+* FIX: Multiple theme display fixes for Centered Dark, Square, and Modern layouts
+* ENHANCEMENT: Now choose sections for the Checklists feature (ingredients, instructions) (Premium)
+
+= 2.0.13 =
+
+* FIX: Images no longer appear extended vertically in some situations
+
 = 2.0.0 =
 
 * FEATURE: New Dashboard page with stats, tips & announcements, setup checklist, and achievements

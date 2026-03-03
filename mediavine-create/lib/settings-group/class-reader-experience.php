@@ -241,6 +241,34 @@ class Reader_Experience implements Settings_Group {
 					'gated'        => 'checklists',
 				],
 			],
+			[
+				'slug'  => Plugin::$settings_group . '_checklist_sections',
+				'value' => 'ingredients',
+				'group' => Plugin::$settings_group . '_reader_experience',
+				'order' => 101,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Checklist Sections', 'mediavine' ),
+					'instructions' => __( 'Choose which sections display interactive checkboxes.', 'mediavine' ),
+					'default'      => 'ingredients',
+					'gated'        => 'checklists',
+					'dependent_on' => Plugin::$settings_group . '_enable_checklists',
+					'options'      => [
+						[
+							'label' => __( 'Ingredients Only', 'mediavine' ),
+							'value' => 'ingredients',
+						],
+						[
+							'label' => __( 'Instructions Only', 'mediavine' ),
+							'value' => 'instructions',
+						],
+						[
+							'label' => __( 'Both', 'mediavine' ),
+							'value' => 'both',
+						],
+					],
+				],
+			],
 		];
 	}
 
