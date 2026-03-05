@@ -115,6 +115,11 @@ class GateKeeper {
 	const SETTING_SUBSCRIPTION_SYNCED_AT = 'mv_create_subscription_synced_at';
 
 	/**
+	 * Setting slug for active paid subscription count (multi-site discount).
+	 */
+	const SETTING_ACTIVE_PAID_COUNT = 'mv_create_active_paid_count';
+
+	/**
 	 * List of all gated features that require Pro or higher tier.
 	 *
 	 * @var array
@@ -450,6 +455,10 @@ class GateKeeper {
 
 		// Store the subscription tier.
 		self::update_subscription_setting( self::SETTING_SUBSCRIPTION_TIER, $subscription_tier );
+
+		// Store active paid subscription count (for multi-site discount messaging).
+		$active_paid_count = isset( $status['active_paid_count'] ) ? (int) $status['active_paid_count'] : 0;
+		self::update_subscription_setting( self::SETTING_ACTIVE_PAID_COUNT, $active_paid_count );
 
 		// Store the sync timestamp in ISO 8601 format.
 		$synced_at = gmdate( 'c' );

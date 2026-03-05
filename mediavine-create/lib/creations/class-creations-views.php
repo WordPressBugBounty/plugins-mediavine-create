@@ -598,6 +598,16 @@ class Creations_Views extends Creations {
 				$published_creation['classes'][] = 'mv-create-aggressive-buttons';
 			}
 
+			$aggressive_widgets = \Mediavine\Settings::get_setting(self::$settings_group . '_aggressive_widgets');
+			if ( $aggressive_widgets ) {
+				$published_creation['classes'][] = 'mv-create-aggressive-widgets';
+			}
+
+			$aggressive_nutrition = \Mediavine\Settings::get_setting(self::$settings_group . '_aggressive_nutrition');
+			if ( $aggressive_nutrition ) {
+				$published_creation['classes'][] = 'mv-create-aggressive-nutrition';
+			}
+
 			$center_cards = \Mediavine\Settings::get_setting(self::$settings_group . '_center_cards', true);
 			if ( $center_cards ) {
 				$published_creation['classes'][] = 'mv-create-center-cards';
@@ -1373,9 +1383,10 @@ class Creations_Views extends Creations {
 		// Prep creation
 		$atts['creation'] = self::prep_creation_view($atts);
 
-		// Adjust products priority based on position setting (must be after creation is prepped)
+		// Adjust products and video priority based on position settings (must be after creation is prepped)
 		if ( 'list' !== $atts['type'] && ! empty( $atts['creation'] ) ) {
 			Creations_Views_Hooks::adjust_products_priority( $atts );
+			Creations_Views_Hooks::adjust_video_priority( $atts );
 		}
 
 		// Don't display a card if there's no creation data

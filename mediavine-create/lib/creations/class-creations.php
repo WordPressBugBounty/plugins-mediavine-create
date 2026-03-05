@@ -111,6 +111,8 @@ class Creations extends Plugin {
 		'products_display_mode'   => 'varchar(50)',
 		'products_section_title'  => 'varchar(255)',
 		'products_position'       => 'varchar(50)',
+		'video_shortcode'         => 'longtext',
+		'video_position'          => 'varchar(50)',
 	];
 
 	// Key only used for secondary terms

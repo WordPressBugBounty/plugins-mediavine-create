@@ -288,11 +288,12 @@ class Create_Studio_Client {
 		$data = $response['data'];
 
 		return [
-			'connected'         => ! empty( $data['connected'] ),
-			'subscription_tier' => isset( $data['subscription_tier'] ) ? $data['subscription_tier'] : 'free',
-			'site_id'           => isset( $data['site_id'] ) ? (int) $data['site_id'] : 0,
-			'site_url'          => isset( $data['site_url'] ) ? $data['site_url'] : '',
-			'site_name'         => isset( $data['site_name'] ) ? $data['site_name'] : '',
+			'connected'          => ! empty( $data['connected'] ),
+			'subscription_tier'  => isset( $data['subscription_tier'] ) ? $data['subscription_tier'] : 'free',
+			'site_id'            => isset( $data['site_id'] ) ? (int) $data['site_id'] : 0,
+			'site_url'           => isset( $data['site_url'] ) ? $data['site_url'] : '',
+			'site_name'          => isset( $data['site_name'] ) ? $data['site_name'] : '',
+			'active_paid_count'  => isset( $data['active_paid_count'] ) ? (int) $data['active_paid_count'] : 0,
 		];
 	}
 

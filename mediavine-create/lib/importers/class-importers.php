@@ -84,11 +84,22 @@ class Importers {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$standalone_plugin = 'create-recipe-importers/mediavine-recipe-importer.php';
+		$standalone_slugs = [
+			'mediavine-recipe-importers/mediavine-recipe-importer.php',
+			'create-recipe-importers/mediavine-recipe-importer.php',
+		];
 
-		if ( is_plugin_active( $standalone_plugin ) ) {
+		$active_slug = null;
+		foreach ( $standalone_slugs as $slug ) {
+			if ( is_plugin_active( $slug ) ) {
+				$active_slug = $slug;
+				break;
+			}
+		}
+
+		if ( $active_slug ) {
 			// Deactivate standalone plugin
-			deactivate_plugins( $standalone_plugin );
+			deactivate_plugins( $active_slug );
 
 			// Enable integrated importers
 			Settings::update_setting( 'mv_create_enable_importers', true );

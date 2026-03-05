@@ -601,6 +601,97 @@ class Creations_Views_Hooks extends Creations_Views {
 	}
 
 	/**
+	 * Get the hook priority for video based on position setting and theme style.
+	 *
+	 * @param string $position Position setting value.
+	 * @param string $style Card theme style.
+	 * @return int|null Hook priority, or null to keep the default.
+	 */
+	public static function get_video_priority( $position, $style ) {
+		$theme_priorities = [
+			'square'        => [
+				'supplies'     => 30,
+				'instructions' => 40,
+				'notes'        => 50,
+			],
+			'centered'      => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+			],
+			'centered-dark' => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+			],
+			'big-image'     => [
+				'supplies'     => 50,
+				'instructions' => 60,
+				'notes'        => 70,
+			],
+			'editorial'     => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+			],
+			'modern'        => [
+				'supplies'     => 20,
+				'instructions' => 30,
+				'notes'        => 40,
+			],
+		];
+
+		$priorities = $theme_priorities[ $style ] ?? $theme_priorities['square'];
+
+		switch ( $position ) {
+			case 'above_supplies':
+				return $priorities['supplies'] - 5;
+			case 'above_instructions':
+				return $priorities['instructions'] - 5;
+			case 'below_instructions':
+				return $priorities['instructions'] + 5;
+			case 'below_notes':
+				return $priorities['notes'] + 5;
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * Adjust video hook priority based on card and global settings.
+	 *
+	 * @param array $args Card rendering arguments.
+	 */
+	public static function adjust_video_priority( $args ) {
+		$position = null;
+		if ( ! empty( $args['creation']['video_position'] ) ) {
+			$position = $args['creation']['video_position'];
+		} else {
+			$position = \Mediavine\Settings::get_setting( 'mv_create_video_position', '' );
+		}
+
+		if ( empty( $position ) ) {
+			return;
+		}
+
+		$style    = $args['style'] ?? 'square';
+		$priority = self::get_video_priority( $position, $style );
+
+		if ( null === $priority ) {
+			return;
+		}
+
+		// Remove video hook from all possible priorities
+		$possible_priorities = [ 50, 55, 60, 80 ];
+		foreach ( $possible_priorities as $p ) {
+			remove_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], $p );
+		}
+
+		// Re-add at the correct priority
+		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], $priority );
+	}
+
+	/**
 	 * Get the hook priority for products based on position setting and theme style.
 	 *
 	 * @param string $position Position setting value.

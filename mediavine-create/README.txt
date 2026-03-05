@@ -143,6 +143,17 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.1.1 =
+
+* ENHANCEMENT: Add aggressive CSS settings for widget and nutrition styles with theme override protection
+* FIX: Fix reviews filtering error when relationships are undefined
+
+= 2.1.0 =
+
+* FEATURE: Add video shortcode support and per-card video position controls
+* FIX: Fix Create editor crashing in TinyMCE/Classic Editor
+* FIX: Duplicating a card from a collection view now succeeds
+
 = 2.0.14 =
 
 * FIX: Card editor keyboard shortcut (Cmd+S) now properly publishes changes

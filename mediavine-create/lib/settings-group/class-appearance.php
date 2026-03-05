@@ -233,6 +233,32 @@ class Appearance implements Settings_Group {
 				],
 			],
 			[
+				'slug'  => Plugin::$settings_group . '_aggressive_widgets',
+				'value' => false,
+				'group' => Plugin::$settings_group . '_appearance',
+				'order' => 61,
+				'data'  => [
+					'type'         => 'checkbox',
+					'label'        => __( 'Aggressive Widget CSS', 'mediavine' ),
+					'instructions' => __( 'Some themes override font sizes and spacing on card widgets (servings adjuster, unit conversion). This forces the intended widget styling.', 'mediavine' ),
+					'default'      => __( 'Disabled', 'mediavine' ),
+					'subgroup'     => 'css_overrides',
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_aggressive_nutrition',
+				'value' => false,
+				'group' => Plugin::$settings_group . '_appearance',
+				'order' => 62,
+				'data'  => [
+					'type'         => 'checkbox',
+					'label'        => __( 'Aggressive Nutrition CSS', 'mediavine' ),
+					'instructions' => __( 'Some themes override font sizes and spacing in the nutrition label. This forces the intended nutrition styling.', 'mediavine' ),
+					'default'      => __( 'Disabled', 'mediavine' ),
+					'subgroup'     => 'css_overrides',
+				],
+			],
+			[
 				'slug'  => Plugin::$settings_group . '_custom_css',
 				'value' => '',
 				'group' => Plugin::$settings_group . '_appearance',

@@ -41,7 +41,8 @@ class Reader_Experience implements Settings_Group {
 			self::interactive_features_settings(),
 			self::reviews_settings(),
 			self::social_sharing_settings(),
-			self::products_settings()
+			self::products_settings(),
+			self::video_settings()
 		);
 	}
 
@@ -479,6 +480,46 @@ class Reader_Experience implements Settings_Group {
 					'instructions' => __( 'The content for the social footer on how-to cards. If left blank, "Please leave a comment on the blog or share a photo on {service_name}" will display.', 'mediavine' ),
 					'default'      => '',
 					'dependent_on' => Plugin::$settings_group . '_social_footer',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Video settings
+	 *
+	 * @return array[]
+	 */
+	private static function video_settings() {
+		return [
+			[
+				'slug'  => Plugin::$settings_group . '_video_position',
+				'value' => '',
+				'group' => Plugin::$settings_group . '_reader_experience',
+				'order' => 390,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Video Section Position', 'mediavine' ),
+					'instructions' => __( 'Choose where the video section appears on recipe and how-to cards. Individual cards can override this setting.', 'mediavine' ),
+					'default'      => __( 'Below Notes', 'mediavine' ),
+					'options'      => [
+						[
+							'label' => __( 'Default (Below Notes)', 'mediavine' ),
+							'value' => '',
+						],
+						[
+							'label' => __( 'Above Supplies', 'mediavine' ),
+							'value' => 'above_supplies',
+						],
+						[
+							'label' => __( 'Above Instructions', 'mediavine' ),
+							'value' => 'above_instructions',
+						],
+						[
+							'label' => __( 'Below Instructions', 'mediavine' ),
+							'value' => 'below_instructions',
+						],
+					],
 				],
 			],
 		];

@@ -604,7 +604,7 @@ class Creations_API extends Creations {
 			'on'            => date( 'Y-m-d H:i:s' ),
 		];
 		$creation->metadata                = wp_json_encode( $metadata );
-		$creation->title                   = "{$creation->title} -- CLONED";
+		$creation->title                   = "Copy of {$creation->title}";
 		$new                               = $model->create( (array) $creation );
 		// duplicate related content (nutrition, products_map, supplies, images, relations)
 		// we specifically don't duplicate reviews because that doesn't make sense

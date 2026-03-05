@@ -1,2 +1,295 @@
 @import url(https://cdn.mediavine.com/fonts/ProximaNova/stylesheet.css);
-.mce-content-body .mv-shortcode-placeholder[data-mce-selected]{outline-color:#3d5b6d}.mv-shortcode-placeholder{display:-ms-flexbox;display:flex;position:relative;margin:0 0 10px;padding:20px;border:1px solid #dedede;background:#f6f6f6;-ms-flex-pack:justify;justify-content:space-between}.mv-shortcode-placeholder[contentEditable=false]{cursor:move}.mv-shortcode-placeholder .mceItem-left,.mv-shortcode-placeholder .mceItem-right{-ms-flex:1;flex:1}.mv-shortcode-placeholder .mceItem-left{position:relative;z-index:2;display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;min-width:280px;-ms-flex-pack:justify;justify-content:space-between}.mv-shortcode-placeholder .mceItem-left h3{color:#fff}.mv-shortcode-heading{margin:0;padding:0;font-size:20px;font-weight:700}.mv-shortcode-description,.mv-shortcode-heading{font-family:'Proxima Nova', Helvetica, sans-serif;;line-height:1.4}.mv-shortcode-description{margin:.25em 0 1em;font-size:13px;font-style:italic}.mv-shortcode-button{display:-ms-flexbox;display:flex;width:100%;max-width:250px;margin:0;padding:8px;border:2px solid #3d5b6d;background:#3d5b6d;cursor:pointer}.mv-shortcode-placeholder:active .mv-shortcode-button,.mv-shortcode-placeholder:focus .mv-shortcode-button,.mv-shortcode-placeholder:hover .mv-shortcode-button{background:#78b1b6}.mv-logo{width:30px;height:34px;-ms-flex:0 0 40px;flex:0 0 40px}.mv-content{padding-left:10px;color:#fff;font-family:'Proxima Nova', Helvetica, sans-serif;;font-size:16px;font-weight:700;line-height:34px;-ms-flex:1;flex:1}.mv-delete{display:none;position:absolute;z-index:100;top:5px;right:5px;width:25px;height:25px;color:#fff;background-color:rgba(0,0,0,.5);font-size:25px;cursor:pointer}@supports (-webkit-overflow-scrolling:touch){.mv-shortcode-button *{cursor:pointer}.mv-content{line-height:21px}.mv-content:after{display:block;font-size:.7em;line-height:1em;content:"Tap 'Edit Recipe' button above"}.mv-delete{display:none}}.mv-delete .dashicons{padding-top:2px;padding-left:3px}.mv-shortcode-placeholder:active .mv-delete,.mv-shortcode-placeholder:focus .mv-delete,.mv-shortcode-placeholder:hover .mv-delete{display:block}.mv-delete:active,.mv-delete:focus,.mv-delete:hover{background-color:#c43225}.mv-shortcode-placeholder{background:#333}.mv-shortcode-placeholder br:first-child:last-child{display:none}.mv-shortcode-placeholder .mv-thumbnail{position:absolute;top:0;left:0;height:100%;width:100%;z-index:1;opacity:.2;background-position:50%;background-size:cover}[data-type=video] .mv-content:after{content:" video"}
+
+/* Hide stray <br> that TinyMCE inserts */
+.mv-shortcode-placeholder br:first-child:last-child {
+  display: none;
+}
+
+/* Ensure shortcode blocks are full-width */
+[data-shortcode] {
+  display: block;
+  width: 100%;
+}
+
+/* Override TinyMCE's default selected outline */
+.mce-content-body [data-shortcode][data-mce-selected] {
+  outline: none !important;
+}
+
+.mce-content-body [data-shortcode][data-mce-selected] .mv-shortcode-placeholder {
+  border-color: #3d5b6d;
+  box-shadow: 0 0 0 1px #3d5b6d;
+}
+
+/* ============================================
+   Base card container
+   ============================================ */
+.mv-shortcode-placeholder {
+  position: relative;
+  margin: 20px 40px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f8f9fa;
+  overflow: hidden;
+  font-family: 'Proxima Nova', Helvetica, sans-serif;
+  transition: border-color 0.15s ease;
+}
+
+.mv-shortcode-placeholder[contentEditable=false] {
+  cursor: pointer;
+}
+
+[data-shortcode]:hover .mv-shortcode-placeholder,
+[data-shortcode]:focus .mv-shortcode-placeholder {
+  border-color: #3d5b6d;
+}
+
+/* ============================================
+   With thumbnail — full image card (16:9)
+   ============================================ */
+.mv-shortcode-placeholder.has-thumbnail {
+  max-height: 360px;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  background: #1a1a1a;
+  border-color: transparent;
+}
+
+[data-shortcode]:hover .mv-shortcode-placeholder.has-thumbnail,
+[data-shortcode]:focus .mv-shortcode-placeholder.has-thumbnail {
+  border-color: #3d5b6d;
+}
+
+/* Thumbnail background */
+.mv-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-position: center;
+  background-size: cover;
+}
+
+/* Gradient overlay on thumbnail */
+.mv-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+}
+
+/* Caption on thumbnail card (bottom-left) */
+.mv-shortcode-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mv-shortcode-caption .mv-shortcode-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mv-shortcode-caption .mv-shortcode-heading {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   Without thumbnail — compact card
+   ============================================ */
+.mv-shortcode-compact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.mv-shortcode-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f4f8;
+  border-radius: 8px;
+}
+
+.mv-shortcode-icon .dashicons {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #3d5b6d;
+}
+
+.mv-shortcode-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ============================================
+   Shared typography
+   ============================================ */
+.mv-shortcode-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  color: #3d5b6d;
+}
+
+.mv-shortcode-heading {
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  font-family: 'Proxima Nova', Helvetica, sans-serif;
+  color: #1a1a1a;
+}
+
+.mv-shortcode-description {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.4;
+  color: #888;
+}
+
+/* ============================================
+   Hover action overlay (Edit / Replace)
+   ============================================ */
+.mv-shortcode-hover-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 4px;
+}
+
+.mv-shortcode-placeholder.has-thumbnail .mv-shortcode-hover-actions {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.mv-shortcode-placeholder:not(.has-thumbnail) .mv-shortcode-hover-actions {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+[data-shortcode]:hover .mv-shortcode-hover-actions,
+[data-shortcode]:focus .mv-shortcode-hover-actions,
+[data-shortcode][data-mce-selected] .mv-shortcode-hover-actions {
+  display: flex;
+}
+
+/* Action buttons */
+.mv-action-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Proxima Nova', Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.4;
+}
+
+.mv-action-primary {
+  background: #3d5b6d;
+  color: #fff;
+  border: 2px solid #3d5b6d;
+}
+
+.mv-action-primary:hover {
+  background: #2d4a59;
+  border-color: #2d4a59;
+}
+
+.mv-action-secondary {
+  background: #fff;
+  color: #3d5b6d;
+  border: 2px solid #3d5b6d;
+}
+
+.mv-action-secondary:hover {
+  background: #f5f5f5;
+}
+
+/* ============================================
+   Delete button
+   ============================================ */
+.mv-delete {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  /* Center the dashicon */
+  align-items: center;
+  justify-content: center;
+}
+
+[data-shortcode]:hover .mv-delete,
+[data-shortcode]:focus .mv-delete,
+[data-shortcode]:active .mv-delete,
+[data-shortcode][data-mce-selected] .mv-delete {
+  display: flex !important;
+}
+
+.mv-delete:hover,
+.mv-delete:focus,
+.mv-delete:active {
+  background-color: #c43225;
+}
+
+.mv-delete .dashicons {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  position: relative;
+  padding: 0;
+}
+
+/* ============================================
+   Mobile
+   ============================================ */
+@supports (-webkit-overflow-scrolling: touch) {
+  .mv-action-button {
+    cursor: pointer;
+  }
+  .mv-delete {
+    display: none;
+  }
+}
