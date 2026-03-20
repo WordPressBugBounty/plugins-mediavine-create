@@ -143,6 +143,10 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.1.2 =
+
+* FIX: Photo credits are now correctly attributed with bulk list item imports (Premium)
+
 = 2.1.1 =
 
 * ENHANCEMENT: Add aggressive CSS settings for widget and nutrition styles with theme override protection
