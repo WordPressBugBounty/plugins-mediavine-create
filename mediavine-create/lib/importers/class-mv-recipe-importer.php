@@ -2187,6 +2187,8 @@ class MV_Recipe_Importer extends Plugin {
 		}
 		self::save_imported_recipes( $imported );
 
+		do_action( 'mv_create_bulk_import_completed', $imported );
+
 		$response = new \WP_REST_Response();
 
 		$response->set_status( 200 );

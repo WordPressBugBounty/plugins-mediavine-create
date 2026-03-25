@@ -297,6 +297,7 @@ return array(
     'Mediavine\\Create\\Supplies_API' => $baseDir . '/lib/supplies/class-supplies-api.php',
     'Mediavine\\Create\\Theme_Checker' => $baseDir . '/lib/helpers/class-theme-checker.php',
     'Mediavine\\Create\\Translation' => $baseDir . '/lib/i18n/class-translation.php',
+    'Mediavine\\Create\\Trial_API' => $baseDir . '/lib/settings/class-trial-api.php',
     'Mediavine\\Create\\Unit_Conversion' => $baseDir . '/lib/unit-conversion/class-unit-conversion.php',
     'Mediavine\\Create\\User_Verification' => $baseDir . '/lib/settings/class-user-verification.php',
     'Mediavine\\Create\\User_Verification_Meta' => $baseDir . '/lib/settings/class-user-verification-meta.php',

@@ -539,6 +539,44 @@ class Creations_API extends Creations {
 		return $response;
 	}
 
+	public function find_published( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		$params   = $request->get_params();
+		$creation = self::$models_v2->mv_creations->find_one( (int) $params['id'] );
+
+		if ( empty( $creation ) ) {
+			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine' ), [ 'request_params' => $params ] );
+		}
+
+		if ( empty( $creation->published ) ) {
+			return new \WP_Error( 404, __( 'The Create Card has not been published', 'mediavine' ), [ 'request_params' => $params ] );
+		}
+
+		$published = json_decode( $creation->published );
+
+		$response->set_data( $published );
+		$response->set_status( 200 );
+		return $response;
+	}
+
+	public function find_json_ld( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		$params   = $request->get_params();
+		$creation = self::$models_v2->mv_creations->find_one( (int) $params['id'] );
+
+		if ( empty( $creation ) ) {
+			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine' ), [ 'request_params' => $params ] );
+		}
+
+		if ( empty( $creation->json_ld ) ) {
+			return new \WP_Error( 404, __( 'The Create Card has no JSON-LD', 'mediavine' ), [ 'request_params' => $params ] );
+		}
+
+		$json_ld = json_decode( $creation->json_ld );
+
+		$response->set_data( $json_ld );
+		$response->set_status( 200 );
+		return $response;
+	}
+
 	public function destroy( \WP_REST_Request $request, \WP_REST_Response $response ) {
 		$params   = $request->get_params();
 		$creation = ( new MV_DBI( 'mv_creations' ) )->find_one( (int) $params['id'] );

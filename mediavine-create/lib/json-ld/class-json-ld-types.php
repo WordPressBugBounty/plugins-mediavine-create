@@ -645,11 +645,14 @@ class JSON_LD_Types {
 				continue;
 			}
 			
+			$author_name = ! empty( $review->author_name ) ? $review->author_name : __( 'Anonymous', 'mediavine' );
+			$author_name = mb_substr( $author_name, 0, Reviews_API::MAX_AUTHOR_NAME_LENGTH );
+
 			$review_item = [
 				'@type'         => 'Review',
 				'author'        => [
 					'@type' => 'Person',
-					'name'  => ! empty( $review->author_name ) ? $review->author_name : __( 'Anonymous', 'mediavine' ),
+					'name'  => $author_name,
 				],
 				'datePublished' => gmdate( 'c', strtotime( $review->created ) ),
 				'reviewRating'  => [
@@ -659,13 +662,13 @@ class JSON_LD_Types {
 					'worstRating' => '1',
 				],
 			];
-			
+
 			if ( ! empty( $review->review_content ) ) {
-				$review_item['reviewBody'] = wp_kses( $review->review_content, [] );
+				$review_item['reviewBody'] = mb_substr( wp_strip_all_tags( $review->review_content ), 0, Reviews_API::MAX_REVIEW_CONTENT_LENGTH );
 			}
-			
+
 			if ( ! empty( $review->review_title ) ) {
-				$review_item['name'] = wp_kses( $review->review_title, [] );
+				$review_item['name'] = mb_substr( wp_strip_all_tags( $review->review_title ), 0, Reviews_API::MAX_REVIEW_TITLE_LENGTH );
 			}
 			
 			$review_array[] = $review_item;

@@ -362,6 +362,7 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\Supplies_API' => __DIR__ . '/../..' . '/lib/supplies/class-supplies-api.php',
         'Mediavine\\Create\\Theme_Checker' => __DIR__ . '/../..' . '/lib/helpers/class-theme-checker.php',
         'Mediavine\\Create\\Translation' => __DIR__ . '/../..' . '/lib/i18n/class-translation.php',
+        'Mediavine\\Create\\Trial_API' => __DIR__ . '/../..' . '/lib/settings/class-trial-api.php',
         'Mediavine\\Create\\Unit_Conversion' => __DIR__ . '/../..' . '/lib/unit-conversion/class-unit-conversion.php',
         'Mediavine\\Create\\User_Verification' => __DIR__ . '/../..' . '/lib/settings/class-user-verification.php',
         'Mediavine\\Create\\User_Verification_Meta' => __DIR__ . '/../..' . '/lib/settings/class-user-verification-meta.php',

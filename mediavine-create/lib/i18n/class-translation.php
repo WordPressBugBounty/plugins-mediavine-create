@@ -79,6 +79,7 @@ class Translation extends Plugin {
 			'NAME_REQUIRED'        => __( 'Name is required', 'mediavine' ),
 			'RESPONSE_REQUIRED'    => __( 'Response is required', 'mediavine' ),
 			'ADMIN'                => __( 'Admin', 'mediavine' ),
+			'URLS_NOT_ALLOWED'     => __( 'URLs are not allowed in reviews', 'mediavine' ),
 		];
 	}
 

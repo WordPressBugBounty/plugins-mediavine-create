@@ -288,13 +288,39 @@ class Create_Studio_Client {
 		$data = $response['data'];
 
 		return [
-			'connected'          => ! empty( $data['connected'] ),
-			'subscription_tier'  => isset( $data['subscription_tier'] ) ? $data['subscription_tier'] : 'free',
-			'site_id'            => isset( $data['site_id'] ) ? (int) $data['site_id'] : 0,
-			'site_url'           => isset( $data['site_url'] ) ? $data['site_url'] : '',
-			'site_name'          => isset( $data['site_name'] ) ? $data['site_name'] : '',
-			'active_paid_count'  => isset( $data['active_paid_count'] ) ? (int) $data['active_paid_count'] : 0,
+			'connected'              => ! empty( $data['connected'] ),
+			'subscription_tier'      => isset( $data['subscription_tier'] ) ? $data['subscription_tier'] : 'free',
+			'site_id'                => isset( $data['site_id'] ) ? (int) $data['site_id'] : 0,
+			'site_url'               => isset( $data['site_url'] ) ? $data['site_url'] : '',
+			'site_name'              => isset( $data['site_name'] ) ? $data['site_name'] : '',
+			'active_paid_count'      => isset( $data['active_paid_count'] ) ? (int) $data['active_paid_count'] : 0,
+			'total_site_count'       => isset( $data['total_site_count'] ) ? (int) $data['total_site_count'] : 1,
+			'is_trialing'            => ! empty( $data['is_trialing'] ),
+			'trial_days_remaining'   => isset( $data['trial_days_remaining'] ) ? (int) $data['trial_days_remaining'] : 0,
+			'trial_end'              => isset( $data['trial_end'] ) ? $data['trial_end'] : '',
+			'trial_extensions'       => isset( $data['trial_extensions'] ) ? $data['trial_extensions'] : [],
+			'trial_eligible'         => ! empty( $data['trial_eligible'] ),
 		];
+	}
+
+	/**
+	 * Extend the trial by completing an onboarding step.
+	 *
+	 * POST /subscriptions/trial-extend
+	 *
+	 * @param string $step The onboarding step identifier.
+	 * @return array|\WP_Error Response data or \WP_Error.
+	 */
+	public static function extend_trial( $step ) {
+		$site_id = self::get_site_id();
+		if ( empty( $site_id ) ) {
+			return new \WP_Error( 'no_site_id', 'Site is not connected' );
+		}
+
+		return self::request( 'POST', '/subscriptions/trial-extend', [
+			'siteId' => $site_id,
+			'step'   => $step,
+		] );
 	}
 
 	/**

@@ -143,6 +143,15 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.2.0 =
+
+* FEATURE: Try Pro free for 14 days — unlock premium features like servings adjustment, unit conversion, checklists, and interactive mode
+* FEATURE: Earn up to 7 bonus trial days by completing onboarding steps
+* FIX: Prevent caching plugins from serving stale REST API responses when editing Create cards
+* FIX: Default list button text now uses first option from Button Action Defaults setting instead of hardcoded value
+* FIX: Category and Cuisine fields in the editor now display names instead of IDs
+* FIX: Amazon link scraping now shows specific error messages with actionable links instead of generic errors
+
 = 2.1.2 =
 
 * FIX: Photo credits are now correctly attributed with bulk list item imports (Premium)

@@ -40,6 +40,11 @@ class GateKeeper {
 	const TIER_FREE_PLUS = 'free-plus';
 
 	/**
+	 * Subscription tier constant for trial users (same features as free-plus).
+	 */
+	const TIER_TRIAL = 'trial';
+
+	/**
 	 * Feature identifier for Editorial theme.
 	 */
 	const FEATURE_THEME_EDITORIAL = 'theme_editorial';
@@ -120,6 +125,49 @@ class GateKeeper {
 	const SETTING_ACTIVE_PAID_COUNT = 'mv_create_active_paid_count';
 
 	/**
+	 * Setting slug for total site count (all canonical sites for the user).
+	 */
+	const SETTING_TOTAL_SITE_COUNT = 'mv_create_total_site_count';
+
+	/**
+	 * Setting slug for trial status.
+	 */
+	const SETTING_IS_TRIALING = 'mv_create_is_trialing';
+
+	/**
+	 * Setting slug for trial days remaining.
+	 */
+	const SETTING_TRIAL_DAYS_REMAINING = 'mv_create_trial_days_remaining';
+
+	/**
+	 * Setting slug for trial end date.
+	 */
+	const SETTING_TRIAL_END = 'mv_create_trial_end';
+
+	/**
+	 * Setting slug for trial eligibility.
+	 */
+	const SETTING_TRIAL_ELIGIBLE = 'mv_create_trial_eligible';
+
+	/**
+	 * Setting slug for trial extensions (JSON object of redeemed steps).
+	 */
+	const SETTING_TRIAL_EXTENSIONS = 'mv_create_trial_extensions';
+
+	/**
+	 * Map of setting slugs to trial extension step keys.
+	 *
+	 * @var array
+	 */
+	private static $setting_to_trial_step = [
+		'mv_create_enable_servings_adjustment'    => 'servings_adjustment',
+		'mv_create_enable_unit_conversion'        => 'unit_conversion',
+		'mv_create_enable_checklists'             => 'checklists',
+		'mv_create_widget_toolbar_layout'         => 'toolbar_layout',
+		'mv_create_card_style'                    => 'premium_theme',
+	];
+
+	/**
 	 * List of all gated features that require Pro or higher tier.
 	 *
 	 * @var array
@@ -192,12 +240,23 @@ class GateKeeper {
 
 	public static function init() {
 		add_action( 'admin_init', [ __CLASS__, 'maybe_sync_subscription' ] );
+		add_action( 'mv_create_sync_subscription', [ __CLASS__, 'sync_subscription' ] );
 		add_action( 'mv_create_setting_updated_mv_create_enable_interactive_mode', [ __CLASS__, 'sync_interactive_mode' ] );
 		add_action( 'mv_create_setting_updated_mv_create_enable_interactive_mode', [ __CLASS__, 'maybe_disable_hands_free_mode' ] );
 		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_button_text', [ __CLASS__, 'sync_interactive_mode_button_text' ] );
 		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_cta_variant', [ __CLASS__, 'sync_interactive_mode_cta_variant' ] );
 		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_cta_title', [ __CLASS__, 'sync_interactive_mode_cta_title' ] );
 		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_cta_subtitle', [ __CLASS__, 'sync_interactive_mode_cta_subtitle' ] );
+
+		// Auto-detect trial extension steps when features are enabled.
+		foreach ( self::$setting_to_trial_step as $setting_slug => $step ) {
+			add_action( 'mv_create_setting_updated_' . $setting_slug, [ __CLASS__, 'maybe_extend_trial_on_setting' ] );
+		}
+
+		// Auto-detect trial extension steps for actions (not settings).
+		add_action( 'mv_create_bulk_import_completed', [ __CLASS__, 'maybe_extend_trial_bulk_import' ] );
+		add_action( 'mv_create_review_managed', [ __CLASS__, 'maybe_extend_trial_review' ] );
+		add_action( 'mv_review_response_created', [ __CLASS__, 'maybe_extend_trial_review' ] );
 	}
 
 	/**
@@ -365,8 +424,12 @@ class GateKeeper {
 			return;
 		}
 
-		// Perform the sync.
-		self::sync_subscription();
+		// Defer the sync to avoid blocking admin page render with an
+		// outbound HTTP request. wp_schedule_single_event fires on the
+		// next page load via WP-Cron (or immediately with alternate cron).
+		if ( ! wp_next_scheduled( 'mv_create_sync_subscription' ) ) {
+			wp_schedule_single_event( time(), 'mv_create_sync_subscription' );
+		}
 	}
 
 	/**
@@ -387,7 +450,7 @@ class GateKeeper {
 		}
 
 		// Validate tier is a known value.
-		$valid_tiers = [ self::TIER_FREE, self::TIER_PRO, self::TIER_FREE_PLUS ];
+		$valid_tiers = [ self::TIER_FREE, self::TIER_PRO, self::TIER_FREE_PLUS, self::TIER_TRIAL ];
 		if ( ! in_array( $tier, $valid_tiers, true ) ) {
 			return self::TIER_FREE;
 		}
@@ -448,7 +511,7 @@ class GateKeeper {
 		}
 
 		// Validate the tier value.
-		$valid_tiers = [ self::TIER_FREE, self::TIER_PRO, self::TIER_FREE_PLUS ];
+		$valid_tiers = [ self::TIER_FREE, self::TIER_PRO, self::TIER_FREE_PLUS, self::TIER_TRIAL ];
 		if ( ! in_array( $subscription_tier, $valid_tiers, true ) ) {
 			$subscription_tier = self::TIER_FREE;
 		}
@@ -456,9 +519,26 @@ class GateKeeper {
 		// Store the subscription tier.
 		self::update_subscription_setting( self::SETTING_SUBSCRIPTION_TIER, $subscription_tier );
 
-		// Store active paid subscription count (for multi-site discount messaging).
+		// Store active paid subscription count and total site count (for multi-site discount messaging).
 		$active_paid_count = isset( $status['active_paid_count'] ) ? (int) $status['active_paid_count'] : 0;
 		self::update_subscription_setting( self::SETTING_ACTIVE_PAID_COUNT, $active_paid_count );
+		$total_site_count = isset( $status['total_site_count'] ) ? (int) $status['total_site_count'] : 1;
+		self::update_subscription_setting( self::SETTING_TOTAL_SITE_COUNT, $total_site_count );
+
+		// Store trial status fields.
+		$is_trialing = ! empty( $status['is_trialing'] );
+		self::update_subscription_setting( self::SETTING_IS_TRIALING, $is_trialing ? '1' : '' );
+		self::update_subscription_setting( self::SETTING_TRIAL_DAYS_REMAINING, isset( $status['trial_days_remaining'] ) ? (int) $status['trial_days_remaining'] : 0 );
+		self::update_subscription_setting( self::SETTING_TRIAL_END, isset( $status['trial_end'] ) ? $status['trial_end'] : '' );
+
+		// Store trial extensions (redeemed steps).
+		if ( isset( $status['trial_extensions'] ) && is_array( $status['trial_extensions'] ) ) {
+			self::update_subscription_setting( self::SETTING_TRIAL_EXTENSIONS, wp_json_encode( $status['trial_extensions'] ) );
+		}
+
+		// Store trial eligibility.
+		$trial_eligible = ! empty( $status['trial_eligible'] );
+		self::update_subscription_setting( self::SETTING_TRIAL_ELIGIBLE, $trial_eligible ? '1' : '' );
 
 		// Store the sync timestamp in ISO 8601 format.
 		$synced_at = gmdate( 'c' );
@@ -540,12 +620,12 @@ class GateKeeper {
 	 *
 	 * Pro and Free+ tiers both have full feature access.
 	 *
-	 * @return bool True if tier is 'pro' or 'free-plus'.
+	 * @return bool True if tier is 'pro', 'free-plus', or 'trial'.
 	 */
 	public static function is_pro_or_higher() {
 		$tier = self::get_subscription_tier();
 
-		return in_array( $tier, [ self::TIER_PRO, self::TIER_FREE_PLUS ], true );
+		return in_array( $tier, [ self::TIER_PRO, self::TIER_FREE_PLUS, self::TIER_TRIAL ], true );
 	}
 
 	/**
@@ -617,5 +697,137 @@ class GateKeeper {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Check if the site is currently in a Pro trial.
+	 *
+	 * @return bool True if the site is trialing.
+	 */
+	public static function is_trialing() {
+		return ! empty( Settings::get_setting( self::SETTING_IS_TRIALING ) );
+	}
+
+	/**
+	 * Get the number of trial days remaining.
+	 *
+	 * @return int Days remaining in the trial, or 0 if not trialing.
+	 */
+	public static function get_trial_days_remaining() {
+		return (int) Settings::get_setting( self::SETTING_TRIAL_DAYS_REMAINING );
+	}
+
+	/**
+	 * Get the trial end date.
+	 *
+	 * @return string ISO 8601 trial end date, or empty string if not trialing.
+	 */
+	public static function get_trial_end() {
+		return (string) Settings::get_setting( self::SETTING_TRIAL_END );
+	}
+
+	/**
+	 * Get the trial extensions (redeemed steps).
+	 *
+	 * @return array Associative array of step keys to redemption timestamps.
+	 */
+	public static function get_trial_extensions() {
+		$raw = Settings::get_setting( self::SETTING_TRIAL_EXTENSIONS );
+		if ( empty( $raw ) ) {
+			return [];
+		}
+		$decoded = json_decode( $raw, true );
+		return is_array( $decoded ) ? $decoded : [];
+	}
+
+	/**
+	 * Auto-extend trial when a mapped setting is enabled.
+	 *
+	 * Fires on `mv_create_setting_updated_{slug}` for settings in $setting_to_trial_step.
+	 *
+	 * @param object $setting The setting object with slug and value.
+	 */
+	public static function maybe_extend_trial_on_setting( $setting ) {
+		// Don't trigger during Studio syncs.
+		if ( self::$syncing_from_studio ) {
+			return;
+		}
+
+		// Only act when the setting is being enabled (truthy value).
+		if ( empty( $setting->value ) ) {
+			return;
+		}
+
+		// Only extend if currently trialing.
+		if ( ! self::is_trialing() ) {
+			return;
+		}
+
+		$step = isset( self::$setting_to_trial_step[ $setting->slug ] ) ? self::$setting_to_trial_step[ $setting->slug ] : null;
+		if ( ! $step ) {
+			return;
+		}
+
+		// For premium_theme step, only trigger on actual premium themes.
+		if ( 'premium_theme' === $step ) {
+			$premium_themes = [ 'editorial', 'modern' ];
+			if ( ! in_array( $setting->value, $premium_themes, true ) ) {
+				return;
+			}
+		}
+
+		// For toolbar_layout step, skip the default value.
+		if ( 'toolbar_layout' === $step && 'toolbar' === $setting->value ) {
+			return;
+		}
+
+		// Check if step already redeemed locally to avoid unnecessary API call.
+		$extensions = self::get_trial_extensions();
+		if ( isset( $extensions[ $step ] ) ) {
+			return;
+		}
+
+		// Fire-and-forget: call the trial extension API.
+		Trial_API::handle_extend_step( $step );
+	}
+
+	/**
+	 * Extend trial when a bulk import is completed.
+	 *
+	 * Hooked to: mv_create_bulk_import_completed
+	 *
+	 * @param mixed $imported The imported data (unused).
+	 */
+	public static function maybe_extend_trial_bulk_import( $imported = null ) {
+		if ( ! self::is_trialing() ) {
+			return;
+		}
+
+		$extensions = self::get_trial_extensions();
+		if ( isset( $extensions['bulk_import'] ) ) {
+			return;
+		}
+
+		Trial_API::handle_extend_step( 'bulk_import' );
+	}
+
+	/**
+	 * Extend trial when a review is managed or responded to.
+	 *
+	 * Hooked to: mv_create_review_managed, mv_review_response_created
+	 *
+	 * @param mixed $data The review data (unused).
+	 */
+	public static function maybe_extend_trial_review( $data = null ) {
+		if ( ! self::is_trialing() ) {
+			return;
+		}
+
+		$extensions = self::get_trial_extensions();
+		if ( isset( $extensions['review_management'] ) ) {
+			return;
+		}
+
+		Trial_API::handle_extend_step( 'review_management' );
 	}
 }

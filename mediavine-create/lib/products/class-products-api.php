@@ -346,6 +346,11 @@ class Products_API extends Products {
 	 * @return array|\WP_Error|Response
 	 */
 	public function scrape( Request $request, Response $response ) {
+		$simulated = $this->maybe_simulate_scrape_error( $request );
+		if ( $simulated ) {
+			return $simulated;
+		}
+
 		$params = $request->get_params();
 		$link   = $params['link'];
 
@@ -425,6 +430,11 @@ class Products_API extends Products {
 	 * @return array|\WP_Error|Response
 	 */
 	public function scrape_non_amazon( Request $request, Response $response ) {
+		$simulated = $this->maybe_simulate_scrape_error( $request );
+		if ( $simulated ) {
+			return $simulated;
+		}
+
 		$params = $request->get_params();
 		$link   = $params['link'];
 
@@ -612,6 +622,33 @@ class Products_API extends Products {
 	 */
 	public function reset_amazon_provision() {
 		delete_transient( 'mv_create_amazon_provision' );
+	}
+
+	/**
+	 * Check if a debug error should be simulated for scrape requests.
+	 * Only active when WP_DEBUG is enabled. Pass ?simulate_error=error_code
+	 * alongside a scrape request to trigger the corresponding Amazon error.
+	 *
+	 * @param Request $request WordPress Request object
+	 * @return \WP_Error|null WP_Error if simulating, null otherwise
+	 */
+	private function maybe_simulate_scrape_error( Request $request ) {
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return null;
+		}
+
+		$error_code = $request->get_param( 'simulate_error' );
+		if ( empty( $error_code ) ) {
+			return null;
+		}
+
+		// Reuse the debug endpoint to get the mock error
+		$debug_request = new \WP_REST_Request( 'GET' );
+		$debug_request->set_param( 'error_code', $error_code );
+
+		$debug_response = $this->debug_amazon_error( $debug_request, new \WP_REST_Response() );
+
+		return is_wp_error( $debug_response ) ? $debug_response : null;
 	}
 
 	/**

@@ -3,6 +3,44 @@
 namespace Mediavine;
 
 class Cache_Manager {
+
+	/**
+	 * Hooks into WordPress to prevent caching of Create REST API responses.
+	 *
+	 * @return void
+	 */
+	public static function init() {
+		add_filter( 'rest_post_dispatch', [ __CLASS__, 'prevent_rest_api_caching' ], 10, 3 );
+	}
+
+	/**
+	 * Adds no-cache headers to Create REST API responses.
+	 *
+	 * Prevents caching plugins (LiteSpeed Cache, etc.) from serving stale
+	 * API responses, which causes edits to appear lost in the admin UI.
+	 *
+	 * @param \WP_REST_Response $response The response object.
+	 * @param \WP_REST_Server   $server   The REST server instance.
+	 * @param \WP_REST_Request  $request  The request object.
+	 * @return \WP_REST_Response
+	 */
+	public static function prevent_rest_api_caching( $response, $server, $request ) {
+		$route = $request->get_route();
+
+		// Only prevent caching on admin editing routes under /creations/.
+		// Exclude public read-only endpoints that benefit from caching.
+		if (
+			preg_match( '#^/mv-create/v1/creations(?:/|$)#', $route )
+			&& ! preg_match( '#/(published|json_?ld|print)$#', $route )
+		) {
+			$response->header( 'Cache-Control', 'no-cache, no-store, must-revalidate' );
+			$response->header( 'Pragma', 'no-cache' );
+			$response->header( 'Expires', '0' );
+		}
+
+		return $response;
+	}
+
 	/**
 	 * Clears single post cache on a variety of caching plugins
 	 * @param  int $id  Id of the post

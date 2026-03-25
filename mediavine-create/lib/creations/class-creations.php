@@ -1481,6 +1481,46 @@ class Creations extends Plugin {
 
 		register_rest_route(
 			$namespace,
+			'/creations/(?P<id>\d+)/published',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => function ( \WP_REST_Request $request ) {
+						return API_Services::middleware(
+							[
+								[ $this->api, 'find_published' ],
+							],
+							$request
+						);
+					},
+					'args'                => CreationsArgs\validate_id(),
+					'permission_callback' => '__return_true',
+				],
+			]
+		);
+
+		register_rest_route(
+			$namespace,
+			'/creations/(?P<id>\d+)/json_ld',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => function ( \WP_REST_Request $request ) {
+						return API_Services::middleware(
+							[
+								[ $this->api, 'find_json_ld' ],
+							],
+							$request
+						);
+					},
+					'args'                => CreationsArgs\validate_id(),
+					'permission_callback' => '__return_true',
+				],
+			]
+		);
+
+		register_rest_route(
+			$namespace,
 			'/creations/(?P<id>\d+)/publish',
 			[
 				[

@@ -185,6 +185,11 @@ class Bulk_Scrape_API {
 			$response_data['remaining_urls'] = $remaining_urls;
 		}
 
+		// Fire action for trial extension detection.
+		if ( ! empty( $results ) ) {
+			do_action( 'mv_create_bulk_import_completed', $results );
+		}
+
 		return new WP_REST_Response( $response_data, 200 );
 	}
 

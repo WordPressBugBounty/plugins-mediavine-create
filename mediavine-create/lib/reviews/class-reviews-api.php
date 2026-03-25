@@ -3,6 +3,12 @@ namespace Mediavine\Create;
 
 class Reviews_API extends Reviews {
 
+	const MAX_AUTHOR_NAME_LENGTH   = 99;
+	const MAX_REVIEW_TITLE_LENGTH  = 200;
+	const MAX_REVIEW_CONTENT_LENGTH = 1000;
+	const MAX_EMAIL_LENGTH         = 254;
+	const RATE_LIMIT_PER_HOUR      = 5;
+
 	private static $min_rating = 4;
 
 	private static $instance = null;
@@ -24,11 +30,13 @@ class Reviews_API extends Reviews {
 	 * Sanitize parameters
 	 *
 	 * @param array $params
+	 * @param array $raw_params Original unsanitized params for HTML detection.
 	 *
 	 * @return array
 	 */
-	function sanitize( $params ) {
-		$cleaned = [];
+	function sanitize( $params, &$raw_params = [] ) {
+		$raw_params = $params;
+		$cleaned    = [];
 		foreach ( $params as $key => $value ) {
 			if ( 'review_content' === $key ) {
 				$cleaned[ $key ] = sanitize_textarea_field( $value );
@@ -43,12 +51,13 @@ class Reviews_API extends Reviews {
 	/**
 	 * Validate reviews to check for missing fields
 	 *
-	 * @param array $params
-	 * @param array $rating_status
+	 * @param array $params Sanitized parameters.
+	 * @param array $rating_status Rating status from resolve_rating_status.
+	 * @param array $raw_params Original unsanitized parameters for HTML detection.
 	 *
 	 * @return array
 	 */
-	function validate_review( $params, $rating_status ) {
+	function validate_review( $params, $rating_status, $raw_params = [] ) {
 
 		$more_required = false;
 		$error         = false;
@@ -77,14 +86,54 @@ class Reviews_API extends Reviews {
 		}
 
 		if ( isset( $params['review_title'] ) ) {
+			if ( mb_strlen( $params['review_title'] ) > self::MAX_REVIEW_TITLE_LENGTH ) {
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'Title is Too Long', 'mediavine' ),
+						'details' => __( 'Title must be 200 characters or fewer', 'mediavine' ),
+					], 'error'
+				);
+			}
 			$new_review['review_title'] = $params['review_title'];
 		}
 
+		// Reject URLs in content from non-authenticated users
+		if ( ! \Mediavine\Permissions::is_user_authorized() && isset( $params['review_content'] ) ) {
+			if ( preg_match( '/https?:\/\/|www\./i', $params['review_content'] ) ) {
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'URLs Not Allowed', 'mediavine' ),
+						'details' => __( 'Reviews cannot contain URLs', 'mediavine' ),
+					], 'error'
+				);
+			}
+		}
+
 		if ( isset( $params['review_content'] ) ) {
+			if ( mb_strlen( $params['review_content'] ) > self::MAX_REVIEW_CONTENT_LENGTH ) {
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'Review is Too Long', 'mediavine' ),
+						'details' => __( 'Review must be 1000 characters or fewer', 'mediavine' ),
+					], 'error'
+				);
+			}
 			$new_review['review_content'] = $params['review_content'];
 		}
 
 		if ( isset( $params['author_email'] ) ) {
+			if ( mb_strlen( $params['author_email'] ) > self::MAX_EMAIL_LENGTH ) {
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'Email is Too Long', 'mediavine' ),
+						'details' => __( 'Email must be 254 characters or fewer', 'mediavine' ),
+					], 'error'
+				);
+			}
 			$is_email = is_email( $params['author_email'] );
 			if ( $is_email || $params['rating'] >= self::$min_rating ) {
 				$new_review['author_email'] = $is_email;
@@ -100,12 +149,43 @@ class Reviews_API extends Reviews {
 		}
 
 		if ( isset( $params['author_name'] ) ) {
-			$new_review['author_name'] = $params['author_name'];
+			if ( mb_strlen( $params['author_name'] ) > self::MAX_AUTHOR_NAME_LENGTH ) {
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'Name is Too Long', 'mediavine' ),
+						'details' => __( 'Name must be 99 characters or fewer', 'mediavine' ),
+					], 'error'
+				);
+			} elseif ( ! empty( $raw_params['author_name'] ) && wp_strip_all_tags( $raw_params['author_name'] ) !== $raw_params['author_name'] ) {
+				// Detect HTML by stripping tags from the raw input and comparing.
+				// Using wp_strip_all_tags() avoids false positives from sanitize_text_field()
+				// which also normalizes whitespace, octets, and special characters.
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'Name Contains Invalid Characters', 'mediavine' ),
+						'details' => __( 'Name cannot contain HTML or special markup', 'mediavine' ),
+					], 'error'
+				);
+			} elseif ( preg_match( '/https?:\/\/|www\./i', $params['author_name'] ) ) {
+				$error  = true;
+				$errors = $this::$api_services->normalize_errors(
+					$errors, 422, [
+						'title'   => __( 'Name Contains URL', 'mediavine' ),
+						'details' => __( 'Name cannot contain URLs', 'mediavine' ),
+					], 'error'
+				);
+			}
+
+			if ( ! $error ) {
+				$new_review['author_name'] = $params['author_name'];
+			}
 		}
 
 		if ( $more_required ) {
 
-			if ( is_numeric( $new_review['author_name'] ) ) {
+			if ( isset( $new_review['author_name'] ) && is_numeric( $new_review['author_name'] ) ) {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
@@ -241,20 +321,41 @@ class Reviews_API extends Reviews {
 		$response    = $this::$api_services->default_response;
 		$status_code = $this::$api_services->default_status;
 
+		// Check rate limit (read-only, does not increment)
+		$rate_limit_check = $this->check_review_rate_limit( false );
+		if ( $rate_limit_check['exceeded'] ) {
+			$status_code        = 429;
+			$response['errors'] = $this::$api_services->normalize_errors(
+				[], $status_code, [
+					'title'   => __( 'Rate Limit Exceeded', 'mediavine' ),
+					'details' => __( 'You are submitting reviews too quickly. Please try again later.', 'mediavine' ),
+				], 'error'
+			);
+			return new \WP_REST_Response( $response, $status_code );
+		}
+
+		// Honeypot check — hidden field should be empty.
+		// Return 201 to avoid signaling detection to bots.
+		$honeypot = $request->get_param( 'create_website' );
+		if ( ! empty( $honeypot ) ) {
+			return new \WP_REST_Response( [ 'data' => (object) [ 'id' => 0 ] ], 201 );
+		}
+
 		$sanitized = $request->sanitize_params();
 		if ( is_wp_error( $sanitized ) ) {
 			$status_code        = 403;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				$response['errors'], $status_code, [
 					'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-					'details' => __( 'You\'re submission includes unsafe characters', 'mediavine' ),
+					'details' => __( 'Your submission includes unsafe characters', 'mediavine' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
 		}
 
-		$params = $this::$api_services->process_inbound( $request );
-		$params = $this->sanitize( $params );
+		$raw_params = [];
+		$params     = $this::$api_services->process_inbound( $request );
+		$params     = $this->sanitize( $params, $raw_params );
 
 		// TODO: change recipe_id param to creation so we can remove this
 		if ( empty( $params['creation'] ) && ! empty( $params['recipe_id'] ) ) {
@@ -267,7 +368,7 @@ class Reviews_API extends Reviews {
 			return new \WP_REST_Response( $rating_status['response'], $rating_status['status'] );
 		}
 
-		$result = $this->validate_review( $params, $rating_status );
+		$result = $this->validate_review( $params, $rating_status, $raw_params );
 
 		$new_review = $result['review'];
 		$error      = $result['error'];
@@ -277,6 +378,8 @@ class Reviews_API extends Reviews {
 			$inserted = self::$models->reviews->insert( $new_review );
 
 			if ( $inserted ) {
+				// Increment rate limit only on successful insert
+				$this->check_review_rate_limit( true );
 
 				$this->Reviews->update_creation_rating( $inserted );
 				$response    = [];
@@ -327,14 +430,15 @@ class Reviews_API extends Reviews {
 			$response['errors'] = $this::$api_services->normalize_errors(
 				$response['errors'], $status_code, [
 					'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-					'details' => __( 'You\'re submission includes unsafe characters', 'mediavine' ),
+					'details' => __( 'Your submission includes unsafe characters', 'mediavine' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
 		}
 
-		$params = $this::$api_services->process_inbound( $request );
-		$params = $this->sanitize( $params );
+		$raw_params = [];
+		$params     = $this::$api_services->process_inbound( $request );
+		$params     = $this->sanitize( $params, $raw_params );
 
 		// Is this an authorized edit request?
 		if ( ! $this->is_authorized_review_update( $params ) ) {
@@ -376,7 +480,7 @@ class Reviews_API extends Reviews {
 			$rating_status['more_required'] = false;
 		}
 
-		$result = $this->validate_review( $params, $rating_status );
+		$result = $this->validate_review( $params, $rating_status, $raw_params );
 
 		$new_review = $result['review'];
 		$error      = $result['error'];
@@ -388,6 +492,7 @@ class Reviews_API extends Reviews {
 			if ( $updated ) {
 				$updated->updated = true;
 				$this->Reviews->update_creation_rating( $updated );
+				do_action( 'mv_create_review_managed', $updated );
 				if ( \Mediavine\Permissions::is_user_authorized() && ! empty( $params['edited_by_admin'] ) ) {
 					$this->maybe_unlock_moderator_achievement();
 				}
@@ -492,23 +597,39 @@ class Reviews_API extends Reviews {
 		}
 
 		// Filter by has_content (boolean: true = has title or content, false = rating only)
+		// Applied post-query because it checks two columns with OR logic.
 		$has_content_filter = null;
 		if ( isset( $params['has_content'] ) ) {
 			$has_content_filter = filter_var( $params['has_content'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 		}
 
-		// Min rating filter will be applied post-query (for >= comparison)
-		$min_rating = isset( $params['min_rating'] ) && is_numeric( $params['min_rating'] )
-			? floatval( $params['min_rating'] )
+		// Rating range filters — pushed to DB via conditions.
+		if ( isset( $params['min_rating'] ) && is_numeric( $params['min_rating'] ) ) {
+			$query_args['conditions'][] = [ 'rating', '>=', floatval( $params['min_rating'] ) ];
+		}
+		if ( isset( $params['max_rating'] ) && is_numeric( $params['max_rating'] ) ) {
+			$query_args['conditions'][] = [ 'rating', '<=', floatval( $params['max_rating'] ) ];
+		}
+
+		// Content length filters — pushed to DB via conditions.
+		if ( isset( $params['min_content_length'] ) && is_numeric( $params['min_content_length'] ) ) {
+			$query_args['conditions'][] = [ 'CHAR_LENGTH(review_content)', '>=', intval( $params['min_content_length'] ) ];
+		}
+		if ( isset( $params['max_content_length'] ) && is_numeric( $params['max_content_length'] ) ) {
+			$query_args['conditions'][] = [ 'CHAR_LENGTH(review_content)', '<=', intval( $params['max_content_length'] ) ];
+		}
+
+		// Parse suggested_featured early so we can skip LIMIT when active.
+		// Post-query filters need the full result set to find optimal reviews.
+		$suggested_featured = isset( $params['suggested_featured'] )
+			? filter_var( $params['suggested_featured'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE )
 			: null;
 
-		// Max rating filter will be applied post-query
-		$max_rating = isset( $params['max_rating'] ) && is_numeric( $params['max_rating'] )
-			? floatval( $params['max_rating'] )
-			: null;
-
-		if ( ! empty( $params['limit'] ) ) {
-			$limit               = sanitize_text_field( $params['limit'] );
+		// When suggested_featured is active, skip the DB limit so
+		// post-query filtering has the full result set to choose from.
+		$limit = 0;
+		if ( ! empty( $params['limit'] ) && true !== $suggested_featured ) {
+			$limit               = intval( sanitize_text_field( $params['limit'] ) );
 			$query_args['limit'] = $limit;
 		}
 
@@ -524,7 +645,7 @@ class Reviews_API extends Reviews {
 		}
 
 		if ( isset( $params['offset'] ) ) {
-			$offset               = sanitize_text_field( $params['offset'] );
+			$offset               = intval( sanitize_text_field( $params['offset'] ) );
 			$query_args['offset'] = $offset;
 		}
 
@@ -543,25 +664,7 @@ class Reviews_API extends Reviews {
 
 		$reviews = $this->Reviews->find( $query_args, $search );
 
-		// Apply min_rating filter post-query (for >= comparison not supported by DBI)
-		if ( is_array( $reviews ) && null !== $min_rating ) {
-			$reviews = array_filter( $reviews, function( $review ) use ( $min_rating ) {
-				$rating = isset( $review->rating ) ? floatval( $review->rating ) : 0;
-				return $rating >= $min_rating;
-			} );
-			$reviews = array_values( $reviews ); // Re-index array
-		}
-
-		// Apply max_rating filter post-query (for <= comparison not supported by DBI)
-		if ( is_array( $reviews ) && null !== $max_rating ) {
-			$reviews = array_filter( $reviews, function( $review ) use ( $max_rating ) {
-				$rating = isset( $review->rating ) ? floatval( $review->rating ) : 0;
-				return $rating <= $max_rating;
-			} );
-			$reviews = array_values( $reviews ); // Re-index array
-		}
-
-		// Apply has_content filter post-query
+		// Apply has_content filter post-query (OR across two columns)
 		if ( is_array( $reviews ) && null !== $has_content_filter ) {
 			$reviews = array_filter( $reviews, function( $review ) use ( $has_content_filter ) {
 				$title   = isset( $review->review_title ) ? $review->review_title : '';
@@ -572,34 +675,8 @@ class Reviews_API extends Reviews {
 			$reviews = array_values( $reviews ); // Re-index array
 		}
 
-		// Content length filters (for review_content specifically)
-		$min_content_length = isset( $params['min_content_length'] ) && is_numeric( $params['min_content_length'] )
-			? intval( $params['min_content_length'] )
-			: null;
-		$max_content_length = isset( $params['max_content_length'] ) && is_numeric( $params['max_content_length'] )
-			? intval( $params['max_content_length'] )
-			: null;
-
-		if ( is_array( $reviews ) && ( null !== $min_content_length || null !== $max_content_length ) ) {
-			$reviews = array_filter( $reviews, function( $review ) use ( $min_content_length, $max_content_length ) {
-				$content_length = isset( $review->review_content ) ? mb_strlen( $review->review_content ) : 0;
-				if ( null !== $min_content_length && $content_length < $min_content_length ) {
-					return false;
-				}
-				if ( null !== $max_content_length && $content_length > $max_content_length ) {
-					return false;
-				}
-				return true;
-			} );
-			$reviews = array_values( $reviews );
-		}
-
 		// Suggested featured filter: optimal reviews for featuring (140-300 chars, highest rated, with content)
 		// Falls back to any review with content if no optimal matches
-		$suggested_featured = isset( $params['suggested_featured'] )
-			? filter_var( $params['suggested_featured'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE )
-			: null;
-
 		if ( is_array( $reviews ) && true === $suggested_featured ) {
 			// First, filter to only reviews with content
 			$reviews_with_content = array_filter( $reviews, function( $review ) {
@@ -622,6 +699,11 @@ class Reviews_API extends Reviews {
 				$rating_b = isset( $b->rating ) ? floatval( $b->rating ) : 0;
 				return $rating_b <=> $rating_a;
 			} );
+		}
+
+		// Apply limit after post-query filtering when suggested_featured bypassed the DB limit.
+		if ( is_array( $reviews ) && true === $suggested_featured && ! empty( $params['limit'] ) ) {
+			$reviews = array_slice( $reviews, 0, intval( $params['limit'] ) );
 		}
 
 		if ( is_array( $reviews ) ) {
@@ -694,21 +776,21 @@ class Reviews_API extends Reviews {
 
 		$review = self::$models->reviews->select_one_by_id( $params['id'] );
 
-		$review->review_title   = wp_strip_all_tags( $review->review_title );
-		$review->review_content = wp_strip_all_tags( $review->review_content );
-		$review->author_email   = wp_strip_all_tags( $review->author_email );
-		$review->author_name    = wp_strip_all_tags( $review->author_name );
-		$review->type           = wp_strip_all_tags( $review->type );
-
-		// The email should never be publicly available
-		if ( ! \Mediavine\Permissions::is_user_authorized() ) {
-			unset( $review->author_email );
-		}
-
-		// Do not display handshake. Ever.
-		unset( $review->handshake );
-
 		if ( $review ) {
+			$review->review_title   = wp_strip_all_tags( $review->review_title );
+			$review->review_content = wp_strip_all_tags( $review->review_content );
+			$review->author_email   = wp_strip_all_tags( $review->author_email );
+			$review->author_name    = wp_strip_all_tags( $review->author_name );
+			$review->type           = wp_strip_all_tags( $review->type );
+
+			// The email should never be publicly available
+			if ( ! \Mediavine\Permissions::is_user_authorized() ) {
+				unset( $review->author_email );
+			}
+
+			// Do not display handshake. Ever.
+			unset( $review->handshake );
+
 			$response    = [];
 			$response    = $this::$api_services->prepare_item_for_response( $review, $request );
 			$status_code = 200;
@@ -774,6 +856,73 @@ class Reviews_API extends Reviews {
 			'unlocked_at' => gmdate( 'c' ),
 		];
 		update_option( 'mv_create_achievements', wp_json_encode( $achievements ) );
+	}
+
+	/**
+	 * Check if review submission rate limit has been exceeded.
+	 *
+	 * @param bool $increment Whether to increment the submission count.
+	 * @return array Array with 'exceeded' boolean.
+	 */
+	private function check_review_rate_limit( $increment = false ) {
+		if ( \Mediavine\Permissions::is_user_authorized() ) {
+			return [ 'exceeded' => false ];
+		}
+
+		$transient_key = 'mv_review_rate_limit_' . md5( self::get_client_ip() );
+		$submissions   = get_transient( $transient_key );
+
+		if ( ! $submissions ) {
+			$submissions = [];
+		}
+
+		$current_time = time();
+		$hour_ago     = $current_time - 3600;
+
+		$submissions = array_filter( $submissions, function( $timestamp ) use ( $hour_ago ) {
+			return $timestamp > $hour_ago;
+		} );
+
+		if ( count( $submissions ) >= self::RATE_LIMIT_PER_HOUR ) {
+			return [ 'exceeded' => true ];
+		}
+
+		if ( $increment ) {
+			$submissions[] = $current_time;
+			set_transient( $transient_key, $submissions, 3600 );
+		}
+
+		return [ 'exceeded' => false ];
+	}
+
+	/**
+	 * Get the client IP address, checking proxy headers when available.
+	 *
+	 * Prefers HTTP_X_FORWARDED_FOR and HTTP_X_REAL_IP (common behind load
+	 * balancers and reverse proxies like Cloudflare, Nginx, AWS ALB) before
+	 * falling back to REMOTE_ADDR.
+	 *
+	 * @return string Client IP address.
+	 */
+	private static function get_client_ip() {
+		// X-Forwarded-For may contain a chain: "client, proxy1, proxy2".
+		// The first (leftmost) IP is the original client.
+		if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ips = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+			$ip  = trim( $ips[0] );
+			if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+				return $ip;
+			}
+		}
+
+		if ( ! empty( $_SERVER['HTTP_X_REAL_IP'] ) ) {
+			$ip = trim( $_SERVER['HTTP_X_REAL_IP'] );
+			if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+				return $ip;
+			}
+		}
+
+		return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 	}
 
 	function init() {

@@ -39,7 +39,7 @@ class Unit_Conversion extends Plugin {
 	 *
 	 * @var int
 	 */
-	const VERSION = 1;
+	const VERSION = 2;
 
 	/**
 	 * Map of Unicode fraction characters to their ASCII equivalents.
@@ -202,7 +202,7 @@ class Unit_Conversion extends Plugin {
 	 * @return array|\WP_Error The conversion data or a WP_Error.
 	 */
 	public function convert_creation( $creation_id, $force = false ) {
-		if ( ! $force ) {
+		if ( ! $force && ! Plugin::is_dev_mode() ) {
 			$cached = $this->get_cached_conversions( $creation_id );
 			if ( ! empty( $cached ) ) {
 				return $cached;
@@ -247,6 +247,16 @@ class Unit_Conversion extends Plugin {
 			$unit   = $supply->unit ?? '';
 			$amount = isset( $supply->amount ) ? $this->normalize_amount( (string) $supply->amount ) : '';
 
+			// DEBUG: Log raw supply fields for density conversion debugging
+			error_log( sprintf(
+				'[UnitConversion] Supply #%d — item: %s | amount: %s | unit: %s | original_text: %s',
+				$supply->id ?? 0,
+				var_export( $supply->item ?? null, true ),
+				var_export( $supply->amount ?? null, true ),
+				var_export( $supply->unit ?? null, true ),
+				substr( strip_tags( $supply->original_text ?? '' ), 0, 80 )
+			) );
+
 			// Fall back to parsing original_text when unit column is empty.
 			if ( empty( $unit ) && ! empty( $supply->original_text ) ) {
 				$parsed = $this->parse_amount_unit( strip_tags( $supply->original_text ) );
@@ -270,6 +280,7 @@ class Unit_Conversion extends Plugin {
 				'id'     => (int) $supply->id,
 				'amount' => $amount,
 				'unit'   => $unit,
+				'item'   => $supply->item ?? '',
 			];
 
 			if ( ! empty( $supply->max_amount ) ) {
@@ -458,7 +469,14 @@ class Unit_Conversion extends Plugin {
 			return null;
 		}
 
-		return $metadata[ self::METADATA_KEY ];
+		$cached = $metadata[ self::METADATA_KEY ];
+
+		// Invalidate cache when VERSION changes (e.g., density-based conversions added)
+		if ( empty( $cached['version'] ) || (int) $cached['version'] < self::VERSION ) {
+			return null;
+		}
+
+		return $cached;
 	}
 
 	/**

@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.1.2\n"
+"Project-Id-Version: Create 2.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-19T19:51:02+00:00\n"
+"POT-Creation-Date: 2026-03-24T20:50:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
@@ -47,12 +47,12 @@ msgid "Dashboard"
 msgstr ""
 
 #: admin/class-admin-init.php:357
-#: class-plugin.php:1393
+#: class-plugin.php:1397
 msgid "Recipes"
 msgstr ""
 
 #: admin/class-admin-init.php:358
-#: class-plugin.php:1400
+#: class-plugin.php:1404
 msgid "How-Tos"
 msgstr ""
 
@@ -100,99 +100,99 @@ msgstr ""
 msgid "Theme Elements"
 msgstr ""
 
-#: class-plugin.php:554
+#: class-plugin.php:558
 #: lib/settings/class-site-verification.php:436
 msgid "Product Registration"
 msgstr ""
 
-#: class-plugin.php:555
+#: class-plugin.php:559
 #: lib/settings/class-site-verification.php:437
 msgid "In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs."
 msgstr ""
 
-#: class-plugin.php:889
+#: class-plugin.php:893
 msgid "Thanks for installing Create!"
 msgstr ""
 
 #. translators: %1$s: link to importer setting, %2$s: closing anchor tag
-#: class-plugin.php:893
+#: class-plugin.php:897
 #, php-format
 msgid "If you're moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes."
 msgstr ""
 
-#: class-plugin.php:1323
+#: class-plugin.php:1327
 msgid "CSS Class"
 msgstr ""
 
-#: class-plugin.php:1324
+#: class-plugin.php:1328
 msgid "Add an additional CSS class to this card."
 msgstr ""
 
-#: class-plugin.php:1329
+#: class-plugin.php:1333
 msgid "Custom Nutrition Disclaimer"
 msgstr ""
 
-#: class-plugin.php:1330
+#: class-plugin.php:1334
 msgid "Example: Nutrition information isn't always accurate."
 msgstr ""
 
-#: class-plugin.php:1336
+#: class-plugin.php:1340
 msgid "Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1337
+#: class-plugin.php:1341
 msgid "Override the default affiliate message for this card."
 msgstr ""
 
-#: class-plugin.php:1343
+#: class-plugin.php:1347
 msgid "Show Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1344
+#: class-plugin.php:1348
 msgid "Check this box to display an affiliate message on this List."
 msgstr ""
 
-#: class-plugin.php:1353
+#: class-plugin.php:1357
 msgid "Social Footer Icon"
 msgstr ""
 
-#: class-plugin.php:1354
+#: class-plugin.php:1358
 msgid "Override the default social footer icon for this card."
 msgstr ""
 
-#: class-plugin.php:1367
+#: class-plugin.php:1371
 msgid "Social Footer Heading"
 msgstr ""
 
-#: class-plugin.php:1368
+#: class-plugin.php:1372
 msgid "Override the default social footer heading for this card."
 msgstr ""
 
-#: class-plugin.php:1374
+#: class-plugin.php:1378
 msgid "Social Footer Content"
 msgstr ""
 
-#: class-plugin.php:1375
+#: class-plugin.php:1379
 msgid "Override the default social footer content for this card."
 msgstr ""
 
-#: class-plugin.php:1392
+#: class-plugin.php:1396
 #: lib/class-admin-bar.php:141
 msgid "Recipe"
 msgstr ""
 
-#: class-plugin.php:1399
+#: class-plugin.php:1403
 #: lib/class-admin-bar.php:142
 msgid "How-To"
 msgstr ""
 
-#: class-plugin.php:1406
+#: class-plugin.php:1410
 #: lib/class-admin-bar.php:143
 #: lib/settings-group/class-reader-experience.php:552
 msgid "List"
 msgstr ""
 
-#: class-plugin.php:1407
+#: class-plugin.php:1411
 msgid "Lists"
 msgstr ""
 
@@ -433,24 +433,34 @@ msgid "A conflict occurred and the Creation could not be updated"
 msgstr ""
 
 #: lib/creations/class-creations-api.php:472
+#: lib/creations/class-creations-api.php:547
+#: lib/creations/class-creations-api.php:566
 msgid "The Create Card could not be found"
 msgstr ""
 
 #: lib/creations/class-creations-api.php:504
-#: lib/creations/class-creations-api.php:579
+#: lib/creations/class-creations-api.php:617
 #: lib/unit-conversion/class-unit-conversion.php:178
 msgid "Creation not found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:548
+#: lib/creations/class-creations-api.php:551
+msgid "The Create Card has not been published"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:570
+msgid "The Create Card has no JSON-LD"
+msgstr ""
+
+#: lib/creations/class-creations-api.php:586
 #: lib/product-maps/class-products-map-api.php:285
-#: lib/products/class-products-api.php:863
-#: lib/reviews/class-reviews-api.php:750
+#: lib/products/class-products-api.php:900
+#: lib/reviews/class-reviews-api.php:832
 #: lib/supplies/class-supplies-api.php:110
 msgid "Entry Could Not Be Deleted"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:548
+#: lib/creations/class-creations-api.php:586
 msgid "A conflict occurred and the Creation could not be deleted"
 msgstr ""
 
@@ -487,59 +497,43 @@ msgid "Pinterest Profile:"
 msgstr ""
 
 #. Translators: Type of card. Will output either 'recipe' or 'project'
-#: lib/creations/class-creations-views.php:677
+#: lib/creations/class-creations-views.php:696
 #, php-format
 msgid "Did you make this %s?"
 msgstr ""
 
 #. Translators: Social Service name with link
-#: lib/creations/class-creations-views.php:696
+#: lib/creations/class-creations-views.php:715
 #, php-format
 msgid "Please leave a comment on the blog or share a photo on %s"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:879
-msgid "View Product"
-msgstr ""
-
-#: lib/creations/class-creations-views.php:881
-msgid "Get the Recipe"
-msgstr ""
-
-#: lib/creations/class-creations-views.php:883
-msgid "Read the Guide"
-msgstr ""
-
-#: lib/creations/class-creations-views.php:885
-msgid "Continue Reading"
-msgstr ""
-
-#: lib/creations/class-creations-views.php:906
-#: lib/creations/class-creations-views.php:1530
+#: lib/creations/class-creations-views.php:915
+#: lib/creations/class-creations-views.php:1572
 #: lib/creations/class-creations.php:768
 #: lib/importers/sources/class-import-purr.php:107
 msgid "Prep Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:912
+#: lib/creations/class-creations-views.php:921
 #: lib/creations/class-creations.php:769
 msgid "Active Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:918
-#: lib/creations/class-creations-views.php:1532
+#: lib/creations/class-creations-views.php:927
+#: lib/creations/class-creations-views.php:1574
 #: lib/creations/class-creations.php:770
 #: lib/importers/class-mv-recipe-importer.php:910
 #: lib/importers/sources/class-import-purr.php:108
 msgid "Additional Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:924
-#: lib/creations/class-creations-views.php:1552
+#: lib/creations/class-creations-views.php:933
+#: lib/creations/class-creations-views.php:1594
 msgid "Total Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:928
+#: lib/creations/class-creations-views.php:937
 #: lib/i18n/class-translation.php:45
 #: lib/views/v1/big-image/shortcode-mv-create-title.php:12
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:19
@@ -555,105 +549,121 @@ msgstr ""
 msgid "Yield"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:932
+#: lib/creations/class-creations-views.php:941
 #: lib/i18n/class-translation.php:51
 #: lib/views/v1/shortcode-mv-create-footer.php:56
 msgid "Category"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:936
-#: lib/creations/class-creations-views.php:1120
+#: lib/creations/class-creations-views.php:945
+#: lib/creations/class-creations-views.php:1129
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:940
-#: lib/creations/class-creations-views.php:1415
+#: lib/creations/class-creations-views.php:949
+#: lib/creations/class-creations-views.php:1457
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:945
-#: lib/creations/class-creations-views.php:1418
+#: lib/creations/class-creations-views.php:954
+#: lib/creations/class-creations-views.php:1460
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:948
+#: lib/creations/class-creations-views.php:957
 msgid "Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:951
-#: lib/creations/class-creations-views.php:1560
+#: lib/creations/class-creations-views.php:960
+#: lib/creations/class-creations-views.php:1602
 msgid "Difficulty"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1125
+#: lib/creations/class-creations-views.php:1134
 #: lib/i18n/class-translation.php:60
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1130
+#: lib/creations/class-creations-views.php:1139
 #: lib/i18n/class-translation.php:61
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1135
+#: lib/creations/class-creations-views.php:1144
 #: lib/i18n/class-translation.php:62
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1140
+#: lib/creations/class-creations-views.php:1149
 #: lib/i18n/class-translation.php:63
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1145
+#: lib/creations/class-creations-views.php:1154
 #: lib/i18n/class-translation.php:64
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1150
+#: lib/creations/class-creations-views.php:1159
 #: lib/i18n/class-translation.php:65
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1155
+#: lib/creations/class-creations-views.php:1164
 #: lib/i18n/class-translation.php:66
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1160
+#: lib/creations/class-creations-views.php:1169
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1165
+#: lib/creations/class-creations-views.php:1174
 #: lib/i18n/class-translation.php:68
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1170
+#: lib/creations/class-creations-views.php:1179
 #: lib/i18n/class-translation.php:69
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1175
+#: lib/creations/class-creations-views.php:1184
 #: lib/i18n/class-translation.php:70
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1180
+#: lib/creations/class-creations-views.php:1189
 #: lib/i18n/class-translation.php:71
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1413
+#: lib/creations/class-creations-views.php:1275
+msgid "View Product"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1279
+msgid "Get the Recipe"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1283
+msgid "Read the Guide"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1291
+msgid "Continue Reading"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:1455
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1531
+#: lib/creations/class-creations-views.php:1573
 #: lib/creations/class-creations.php:775
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:695
 #: lib/importers/sources/class-import-cookbook.php:132
@@ -671,65 +681,65 @@ msgstr ""
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1564
+#: lib/creations/class-creations-views.php:1606
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1611
+#: lib/creations/class-creations-views.php:1653
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1612
+#: lib/creations/class-creations-views.php:1654
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1615
+#: lib/creations/class-creations-views.php:1657
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1616
+#: lib/creations/class-creations-views.php:1658
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1619
+#: lib/creations/class-creations-views.php:1661
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1620
+#: lib/creations/class-creations-views.php:1662
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1623
+#: lib/creations/class-creations-views.php:1665
 #: lib/products/class-amazon.php:610
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1624
+#: lib/creations/class-creations-views.php:1666
 #: lib/products/class-amazon.php:611
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1627
+#: lib/creations/class-creations-views.php:1669
 #: lib/products/class-amazon.php:615
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1628
+#: lib/creations/class-creations-views.php:1670
 #: lib/products/class-amazon.php:616
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1631
+#: lib/creations/class-creations-views.php:1673
 #: lib/products/class-amazon.php:627
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1632
+#: lib/creations/class-creations-views.php:1674
 #: lib/products/class-amazon.php:628
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1826
+#: lib/creations/class-creations-views.php:1868
 msgid "No Card with ID found"
 msgstr ""
 
@@ -1082,6 +1092,10 @@ msgstr ""
 msgid "Admin"
 msgstr ""
 
+#: lib/i18n/class-translation.php:82
+msgid "URLs are not allowed in reviews"
+msgstr ""
+
 #. translators: %s: field name
 #: lib/images/class-images-api.php:26
 #, php-format
@@ -1203,22 +1217,20 @@ msgstr ""
 
 #: lib/importers/class-mv-recipe-importer.php:1074
 #: lib/reviews/class-review-responses-api.php:209
-#: lib/reviews/class-reviews-api.php:249
-#: lib/reviews/class-reviews-api.php:329
+#: lib/reviews/class-reviews-api.php:349
+#: lib/reviews/class-reviews-api.php:432
 #: lib/settings/class-settings-api.php:38
 #: lib/settings/class-settings-api.php:225
 msgid "Unsafe Content Submission"
 msgstr ""
 
 #: lib/importers/class-mv-recipe-importer.php:1075
-#: lib/reviews/class-reviews-api.php:250
-#: lib/reviews/class-reviews-api.php:330
 #: lib/settings/class-settings-api.php:39
 #: lib/settings/class-settings-api.php:226
 msgid "You're submission includes unsafe characters"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:2353
+#: lib/importers/class-mv-recipe-importer.php:2355
 msgid "Post not found"
 msgstr ""
 
@@ -1297,7 +1309,7 @@ msgstr ""
 msgid " grams unsaturated fat"
 msgstr ""
 
-#: lib/json-ld/class-json-ld-types.php:652
+#: lib/json-ld/class-json-ld-types.php:648
 msgid "Anonymous"
 msgstr ""
 
@@ -1309,15 +1321,15 @@ msgstr ""
 msgid "Bulk import is a Pro feature. Please upgrade to access this feature."
 msgstr ""
 
-#: lib/lists/class-bulk-scrape-api.php:338
+#: lib/lists/class-bulk-scrape-api.php:343
 msgid "Post not found or not published."
 msgstr ""
 
-#: lib/lists/class-bulk-scrape-api.php:380
+#: lib/lists/class-bulk-scrape-api.php:385
 msgid "Create card not found."
 msgstr ""
 
-#: lib/lists/class-bulk-scrape-api.php:569
+#: lib/lists/class-bulk-scrape-api.php:574
 msgid "Could not scrape URL. No title or image found."
 msgstr ""
 
@@ -1345,147 +1357,147 @@ msgid "An error occurred, but no error data was provided by the API."
 msgstr ""
 
 #: lib/products/class-amazon.php:284
-#: lib/products/class-products-api.php:662
+#: lib/products/class-products-api.php:699
 msgid "Amazon: API Access Not Enabled"
 msgstr ""
 
 #: lib/products/class-amazon.php:287
-#: lib/products/class-products-api.php:665
+#: lib/products/class-products-api.php:702
 msgid "Amazon reports your Access Key doesn't have Product Advertising API access. If you're using AWS credentials, Amazon requires you to migrate them through Associates Central."
 msgstr ""
 
 #: lib/products/class-amazon.php:289
-#: lib/products/class-products-api.php:667
+#: lib/products/class-products-api.php:704
 msgid "Manage Credentials in Amazon Associates Central"
 msgstr ""
 
 #: lib/products/class-amazon.php:299
-#: lib/products/class-products-api.php:673
+#: lib/products/class-products-api.php:710
 msgid "Amazon: API Access Paused"
 msgstr ""
 
 #: lib/products/class-amazon.php:302
-#: lib/products/class-products-api.php:676
+#: lib/products/class-products-api.php:713
 msgid "Amazon requires 10 qualified sales in the trailing 30 days to access their Product Advertising API. Once you meet this threshold, API access restores automatically. You can still add products manually."
 msgstr ""
 
 #: lib/products/class-amazon.php:304
-#: lib/products/class-products-api.php:678
+#: lib/products/class-products-api.php:715
 msgid "View Your Amazon Associates Dashboard"
 msgstr ""
 
 #: lib/products/class-amazon.php:314
-#: lib/products/class-products-api.php:684
+#: lib/products/class-products-api.php:721
 msgid "Amazon: Invalid Store ID"
 msgstr ""
 
 #: lib/products/class-amazon.php:317
-#: lib/products/class-products-api.php:687
+#: lib/products/class-products-api.php:724
 msgid "Amazon reports your Store ID (Partner Tag) doesn't match your API credentials. Your Store ID looks like \"yoursite-20\" - make sure it's from the same Amazon account as your API keys. Common mistake: using your Access Key ID instead of your Store ID."
 msgstr ""
 
 #: lib/products/class-amazon.php:319
-#: lib/products/class-products-api.php:689
+#: lib/products/class-products-api.php:726
 msgid "Check Your Store ID in Settings"
 msgstr ""
 
 #: lib/products/class-amazon.php:329
-#: lib/products/class-products-api.php:695
+#: lib/products/class-products-api.php:732
 msgid "Amazon: Account Not Approved"
 msgstr ""
 
 #: lib/products/class-amazon.php:332
-#: lib/products/class-products-api.php:698
+#: lib/products/class-products-api.php:735
 msgid "Amazon reports your credentials aren't linked to an approved Associates account. This usually means your Associates application is still pending, or you're using credentials from a different Amazon account than your approved store."
 msgstr ""
 
 #: lib/products/class-amazon.php:334
-#: lib/products/class-products-api.php:700
+#: lib/products/class-products-api.php:737
 msgid "Check Your Account in Amazon Associates Central"
 msgstr ""
 
 #: lib/products/class-amazon.php:344
-#: lib/products/class-products-api.php:706
+#: lib/products/class-products-api.php:743
 msgid "Amazon: Invalid Credentials"
 msgstr ""
 
 #: lib/products/class-amazon.php:347
-#: lib/products/class-products-api.php:709
+#: lib/products/class-products-api.php:746
 msgid "Amazon couldn't validate your credentials. Check that your Secret Key is correct - it's a 40-character string, not your Store ID. If you just created new credentials, Amazon takes up to 48 hours to activate them."
 msgstr ""
 
 #: lib/products/class-amazon.php:349
-#: lib/products/class-products-api.php:711
+#: lib/products/class-products-api.php:748
 msgid "Review Your Credentials in Settings"
 msgstr ""
 
 #: lib/products/class-amazon.php:359
-#: lib/products/class-products-api.php:717
+#: lib/products/class-products-api.php:754
 msgid "Amazon: Missing Secret Key"
 msgstr ""
 
 #: lib/products/class-amazon.php:362
-#: lib/products/class-products-api.php:720
+#: lib/products/class-products-api.php:757
 msgid "Amazon reports your Secret Key is missing or incomplete. Your Secret Key is a 40-character string that looks like \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\". Make sure you copied the entire key without extra spaces."
 msgstr ""
 
 #: lib/products/class-amazon.php:364
-#: lib/products/class-products-api.php:722
+#: lib/products/class-products-api.php:759
 msgid "Re-enter Your Secret Key in Settings"
 msgstr ""
 
 #: lib/products/class-amazon.php:374
-#: lib/products/class-products-api.php:728
+#: lib/products/class-products-api.php:765
 msgid "Amazon: Rate Limit Exceeded"
 msgstr ""
 
 #: lib/products/class-amazon.php:377
-#: lib/products/class-products-api.php:731
+#: lib/products/class-products-api.php:768
 msgid "Amazon is rate-limiting your requests because you've exceeded their API limits. Wait a few minutes before trying again."
 msgstr ""
 
 #: lib/products/class-amazon.php:387
-#: lib/products/class-products-api.php:737
+#: lib/products/class-products-api.php:774
 msgid "Amazon: Request Expired"
 msgstr ""
 
 #: lib/products/class-amazon.php:390
-#: lib/products/class-products-api.php:740
+#: lib/products/class-products-api.php:777
 msgid "Amazon rejected the request because your server's clock is out of sync. Amazon requires requests to be within 15 minutes of the actual time. Contact your hosting provider to sync your server's clock."
 msgstr ""
 
 #: lib/products/class-amazon.php:400
-#: lib/products/class-products-api.php:746
+#: lib/products/class-products-api.php:783
 msgid "Amazon: Unknown Access Key"
 msgstr ""
 
 #: lib/products/class-amazon.php:403
-#: lib/products/class-products-api.php:749
+#: lib/products/class-products-api.php:786
 msgid "Amazon doesn't recognize your Access Key ID. Your Access Key is a 20-character string starting with \"AKIA\". Common mistakes: using your Store ID instead, extra spaces, or using old/deleted credentials. Generate new credentials in Amazon Associates if needed."
 msgstr ""
 
 #: lib/products/class-amazon.php:405
-#: lib/products/class-products-api.php:751
+#: lib/products/class-products-api.php:788
 msgid "Check Your Access Key in Settings"
 msgstr ""
 
 #: lib/products/class-amazon.php:415
-#: lib/products/class-products-api.php:757
+#: lib/products/class-products-api.php:794
 msgid "Amazon: Invalid Request"
 msgstr ""
 
 #: lib/products/class-amazon.php:418
-#: lib/products/class-products-api.php:760
+#: lib/products/class-products-api.php:797
 msgid "Amazon reports an invalid or missing parameter in the request. This is usually a temporary issue - please try again."
 msgstr ""
 
 #: lib/products/class-amazon.php:428
-#: lib/products/class-products-api.php:766
+#: lib/products/class-products-api.php:803
 msgid "Amazon: Unknown Operation"
 msgstr ""
 
 #: lib/products/class-amazon.php:431
-#: lib/products/class-products-api.php:769
+#: lib/products/class-products-api.php:806
 msgid "Amazon received an unknown API operation. This is likely a plugin issue - please contact support."
 msgstr ""
 
@@ -1498,7 +1510,7 @@ msgid "Create must be registered to access pro features like Amazon product scra
 msgstr ""
 
 #: lib/products/class-amazon.php:468
-#: lib/products/class-products-api.php:790
+#: lib/products/class-products-api.php:827
 msgid "Register Create"
 msgstr ""
 
@@ -1563,74 +1575,74 @@ msgstr ""
 msgid "The product is missing a link"
 msgstr ""
 
-#: lib/products/class-products-api.php:386
-#: lib/products/class-products-api.php:496
+#: lib/products/class-products-api.php:391
+#: lib/products/class-products-api.php:506
 msgid "No Data Found"
 msgstr ""
 
-#: lib/products/class-products-api.php:388
-#: lib/products/class-products-api.php:498
+#: lib/products/class-products-api.php:393
+#: lib/products/class-products-api.php:508
 msgid "The Product link scrape did not turn up any results"
 msgstr ""
 
-#: lib/products/class-products-api.php:651
+#: lib/products/class-products-api.php:688
 msgid "Missing error_code parameter"
 msgstr ""
 
-#: lib/products/class-products-api.php:654
+#: lib/products/class-products-api.php:691
 msgid "Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning"
 msgstr ""
 
-#: lib/products/class-products-api.php:775
+#: lib/products/class-products-api.php:812
 msgid "Plugin Conflict Detected"
 msgstr ""
 
-#: lib/products/class-products-api.php:778
+#: lib/products/class-products-api.php:815
 msgid "Another plugin is conflicting with Create's Amazon integration. This is a known issue with some Amazon affiliate plugins. Try deactivating other Amazon-related plugins, or add products manually."
 msgstr ""
 
-#: lib/products/class-products-api.php:780
+#: lib/products/class-products-api.php:817
 msgid "Contact Create Support"
 msgstr ""
 
-#: lib/products/class-products-api.php:785
+#: lib/products/class-products-api.php:822
 msgid "Create Registration Required"
 msgstr ""
 
-#: lib/products/class-products-api.php:788
+#: lib/products/class-products-api.php:825
 msgid "Amazon product scraping requires Create to be registered. Register your site to enable this feature, or add products manually."
 msgstr ""
 
-#: lib/products/class-products-api.php:795
+#: lib/products/class-products-api.php:832
 msgid "Amazon Integration Not Configured"
 msgstr ""
 
-#: lib/products/class-products-api.php:798
+#: lib/products/class-products-api.php:835
 msgid "Amazon Affiliates needs to be enabled and configured in Create settings before you can scrape Amazon products."
 msgstr ""
 
-#: lib/products/class-products-api.php:800
+#: lib/products/class-products-api.php:837
 msgid "Configure Amazon Affiliates"
 msgstr ""
 
-#: lib/products/class-products-api.php:805
+#: lib/products/class-products-api.php:842
 msgid "Amazon: Credentials Still Activating"
 msgstr ""
 
-#: lib/products/class-products-api.php:808
+#: lib/products/class-products-api.php:845
 msgid "Amazon takes up to 48 hours to activate new API credentials. You can add products manually while waiting, or try again later."
 msgstr ""
 
-#: lib/products/class-products-api.php:817
+#: lib/products/class-products-api.php:854
 msgid "Unknown error code"
 msgstr ""
 
-#: lib/products/class-products-api.php:821
+#: lib/products/class-products-api.php:858
 #, php-format
 msgid "The error code \"%s\" is not recognized. Available codes: %s"
 msgstr ""
 
-#: lib/products/class-products-api.php:865
+#: lib/products/class-products-api.php:902
 msgid "A conflict occurred and the product could not be deleted"
 msgstr ""
 
@@ -1726,7 +1738,7 @@ msgid "Invalid Email"
 msgstr ""
 
 #: lib/reviews/class-review-responses-api.php:76
-#: lib/reviews/class-reviews-api.php:96
+#: lib/reviews/class-reviews-api.php:145
 msgid "Email address provided is invalid"
 msgstr ""
 
@@ -1739,10 +1751,13 @@ msgid "Responding to reviews requires a Pro subscription"
 msgstr ""
 
 #: lib/reviews/class-review-responses-api.php:210
+#: lib/reviews/class-reviews-api.php:350
+#: lib/reviews/class-reviews-api.php:433
 msgid "Your submission includes unsafe characters"
 msgstr ""
 
 #: lib/reviews/class-review-responses-api.php:237
+#: lib/reviews/class-reviews-api.php:330
 msgid "Rate Limit Exceeded"
 msgstr ""
 
@@ -1831,79 +1846,139 @@ msgstr ""
 msgid "A Review ID variable was included but was non-numeric"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:69
+#: lib/reviews/class-reviews-api.php:78
 msgid "Missing required fields"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:70
+#: lib/reviews/class-reviews-api.php:79
 msgid "Through no fault of yours, something is wrong"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:95
-msgid "Email is Invalid"
+#: lib/reviews/class-reviews-api.php:93
+msgid "Title is Too Long"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:112
-msgid "Name cannot be a number"
+#: lib/reviews/class-reviews-api.php:94
+msgid "Title must be 200 characters or fewer"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:113
-msgid "Name of author cannot be a number"
+#: lib/reviews/class-reviews-api.php:107
+msgid "URLs Not Allowed"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:122
-msgid "Name is Required"
+#: lib/reviews/class-reviews-api.php:108
+msgid "Reviews cannot contain URLs"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:123
-msgid "Name is required for reviews less than 4 Stars"
+#: lib/reviews/class-reviews-api.php:119
+msgid "Review is Too Long"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:120
+msgid "Review must be 1000 characters or fewer"
 msgstr ""
 
 #: lib/reviews/class-reviews-api.php:132
-msgid "Email is Required"
+msgid "Email is Too Long"
 msgstr ""
 
 #: lib/reviews/class-reviews-api.php:133
+msgid "Email must be 254 characters or fewer"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:144
+msgid "Email is Invalid"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:156
+msgid "Name is Too Long"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:157
+msgid "Name must be 99 characters or fewer"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:167
+msgid "Name Contains Invalid Characters"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:168
+msgid "Name cannot contain HTML or special markup"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:175
+msgid "Name Contains URL"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:176
+msgid "Name cannot contain URLs"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:192
+msgid "Name cannot be a number"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:193
+msgid "Name of author cannot be a number"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:202
+msgid "Name is Required"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:203
+msgid "Name is required for reviews less than 4 Stars"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:212
+msgid "Email is Required"
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:213
 msgid "Email is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:142
+#: lib/reviews/class-reviews-api.php:222
 msgid "Title is Required"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:143
+#: lib/reviews/class-reviews-api.php:223
 msgid "Title is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:152
+#: lib/reviews/class-reviews-api.php:232
 msgid "Message is Required"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:153
+#: lib/reviews/class-reviews-api.php:233
 msgid "Message is required for reviews less than 4 Stars"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:343
+#: lib/reviews/class-reviews-api.php:331
+msgid "You are submitting reviews too quickly. Please try again later."
+msgstr ""
+
+#: lib/reviews/class-reviews-api.php:447
 msgid "You are not authorized to edit this review."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:353
+#: lib/reviews/class-reviews-api.php:457
 msgid "Editing reviews requires a Pro subscription"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:452
+#: lib/reviews/class-reviews-api.php:557
 msgid "You are not allowed to view all reviews."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:462
+#: lib/reviews/class-reviews-api.php:567
 msgid "This creation is not associated with a public post."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:736
+#: lib/reviews/class-reviews-api.php:818
 msgid "Review Not Found"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:750
+#: lib/reviews/class-reviews-api.php:832
 msgid "A conflict occurred and the single review could not be deleted"
 msgstr ""
 
@@ -2058,7 +2133,7 @@ msgstr ""
 #: lib/settings-group/class-lists.php:50
 #: lib/settings-group/class-reader-experience.php:172
 #: lib/settings-group/class-reader-experience.php:292
-#: lib/settings-group/class-reader-experience.php:611
+#: lib/settings-group/class-reader-experience.php:615
 #: lib/settings-group/class-recipes.php:142
 #: lib/settings-group/class-recipes.php:156
 msgid "Enabled"
@@ -2180,7 +2255,7 @@ msgstr ""
 #: lib/settings-group/class-advanced.php:323
 #: lib/settings-group/class-advanced.php:338
 #: lib/settings-group/class-reader-experience.php:580
-#: lib/settings-group/class-reader-experience.php:596
+#: lib/settings-group/class-reader-experience.php:600
 msgid "After Video"
 msgstr ""
 
@@ -2196,7 +2271,7 @@ msgstr ""
 
 #: lib/settings-group/class-advanced.php:334
 #: lib/settings-group/class-reader-experience.php:504
-#: lib/settings-group/class-reader-experience.php:592
+#: lib/settings-group/class-reader-experience.php:596
 msgid "Below Notes"
 msgstr ""
 
@@ -2860,6 +2935,7 @@ msgid "Above Supplies"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:519
+#: lib/settings-group/class-reader-experience.php:592
 msgid "Below Instructions"
 msgstr ""
 
@@ -2892,11 +2968,11 @@ msgstr ""
 msgid "Choose where the products section appears on recipe and how-to cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:609
+#: lib/settings-group/class-reader-experience.php:613
 msgid "Show Affiliate Disclaimer"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:610
+#: lib/settings-group/class-reader-experience.php:614
 msgid "Display an affiliate disclaimer below the products section when using the text list display mode. This helps with FTC compliance for affiliate links."
 msgstr ""
 
@@ -3134,7 +3210,7 @@ msgstr ""
 msgid "A conflict occurred and the Supply could not be deleted"
 msgstr ""
 
-#: lib/unit-conversion/class-unit-conversion.php:398
+#: lib/unit-conversion/class-unit-conversion.php:409
 msgid "Unit conversion API request failed"
 msgstr ""
 
@@ -3161,14 +3237,14 @@ msgstr ""
 msgid "Toggle ingredient group"
 msgstr ""
 
-#: admin/ui/build/app.build.2.1.2.js:7332
+#: admin/ui/build/app.build.2.2.0.js:7143
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.2.1.2.js:7332
+#: admin/ui/build/app.build.2.2.0.js:7143
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.2.1.2.js:7332
+#: admin/ui/build/app.build.2.2.0.js:7143
 msgid "Description"
 msgstr ""

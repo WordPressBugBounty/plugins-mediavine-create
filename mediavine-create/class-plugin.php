@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.1.2';
+	const VERSION = '2.2.0';
 
 	const DB_VERSION = '2.1.1';
 
@@ -282,6 +282,7 @@ class Plugin {
 
 		self::$views        = \Mediavine\View_Loader::get_instance( MV_CREATE_DIR );
 		self::$api_services = \Mediavine\Create\API_Services::get_instance();
+		\Mediavine\Cache_Manager::init();
 		self::$models_v2    = \Mediavine\MV_DBI::get_models(
 			[
 				'mv_images',
@@ -451,6 +452,9 @@ class Plugin {
 
 		// Initialize Feedback API for error reporting to Create Studio.
 		Feedback_API::init();
+
+		// Initialize Trial API for trial extension proxy.
+		Trial_API::init();
 
 		// Initialize Bulk Scrape API for list bulk import feature
 		$Bulk_Scrape_API = new Bulk_Scrape_API();

@@ -903,7 +903,7 @@ class Webhook_Handler {
 		}
 
 		$tier        = $data['tier'];
-		$valid_tiers = [ GateKeeper::TIER_FREE, GateKeeper::TIER_PRO, GateKeeper::TIER_FREE_PLUS ];
+		$valid_tiers = [ GateKeeper::TIER_FREE, GateKeeper::TIER_PRO, GateKeeper::TIER_FREE_PLUS, GateKeeper::TIER_TRIAL ];
 
 		if ( ! in_array( $tier, $valid_tiers, true ) ) {
 			return new \WP_REST_Response( [ 'error' => 'Invalid tier' ], 400 );
@@ -925,6 +925,41 @@ class Webhook_Handler {
 				'group' => 'mv_create_subscription',
 			]
 		);
+
+		// Store trial fields from enhanced webhook payload.
+		$is_trialing = ! empty( $data['is_trialing'] );
+		Settings::create_settings(
+			[
+				'slug'  => GateKeeper::SETTING_IS_TRIALING,
+				'value' => $is_trialing ? '1' : '',
+				'group' => 'mv_create_subscription',
+			]
+		);
+		Settings::create_settings(
+			[
+				'slug'  => GateKeeper::SETTING_TRIAL_DAYS_REMAINING,
+				'value' => isset( $data['trial_days_remaining'] ) ? (int) $data['trial_days_remaining'] : 0,
+				'group' => 'mv_create_subscription',
+			]
+		);
+		Settings::create_settings(
+			[
+				'slug'  => GateKeeper::SETTING_TRIAL_END,
+				'value' => isset( $data['trial_end'] ) ? $data['trial_end'] : '',
+				'group' => 'mv_create_subscription',
+			]
+		);
+
+		// Store active paid count if provided.
+		if ( isset( $data['active_paid_count'] ) ) {
+			Settings::create_settings(
+				[
+					'slug'  => GateKeeper::SETTING_ACTIVE_PAID_COUNT,
+					'value' => (int) $data['active_paid_count'],
+					'group' => 'mv_create_subscription',
+				]
+			);
+		}
 
 		Settings::reset_settings();
 
@@ -983,28 +1018,30 @@ class Webhook_Handler {
 
 		$updated = [];
 
-		foreach ( $data['settings'] as $key => $value ) {
-			if ( ! isset( self::$allowed_webhook_settings[ $key ] ) ) {
-				continue;
+		try {
+			foreach ( $data['settings'] as $key => $value ) {
+				if ( ! isset( self::$allowed_webhook_settings[ $key ] ) ) {
+					continue;
+				}
+
+				$config   = self::$allowed_webhook_settings[ $key ];
+				$slug     = $config['slug'];
+				$sanitize = $config['sanitize'];
+
+				// For boolval, convert to the format Create settings expect (truthy string or empty).
+				if ( 'boolval' === $sanitize ) {
+					$sanitized = $value ? '1' : '';
+				} else {
+					$sanitized = call_user_func( $sanitize, $value );
+				}
+
+				Settings::update_setting( $slug, $sanitized );
+				$updated[ $key ] = $sanitized;
 			}
-
-			$config   = self::$allowed_webhook_settings[ $key ];
-			$slug     = $config['slug'];
-			$sanitize = $config['sanitize'];
-
-			// For boolval, convert to the format Create settings expect (truthy string or empty).
-			if ( 'boolval' === $sanitize ) {
-				$sanitized = $value ? '1' : '';
-			} else {
-				$sanitized = call_user_func( $sanitize, $value );
-			}
-
-			Settings::update_setting( $slug, $sanitized );
-			$updated[ $key ] = $sanitized;
+		} finally {
+			// Always clear guard flag, even if an exception occurs.
+			GateKeeper::$syncing_from_studio = false;
 		}
-
-		// Clear guard flag.
-		GateKeeper::$syncing_from_studio = false;
 
 		if ( empty( $updated ) ) {
 			return new \WP_REST_Response( [ 'error' => 'No recognized settings in payload' ], 400 );

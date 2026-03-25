@@ -438,6 +438,13 @@ class Creations_Views extends Creations {
 				'__PROMPT_THRESHOLD__' => $ratings_prompt_threshold,
 				'__SUBMIT_THRESHOLD__' => $ratings_submit_threshold,
 				'__PX_BETWEEN_ADS__'   => $px_btwn_ads,
+				'__USER_ID__'          => get_current_user_id(),
+				'__REVIEW_LIMITS__'    => [
+					'author_name'    => Reviews_API::MAX_AUTHOR_NAME_LENGTH,
+					'review_title'   => Reviews_API::MAX_REVIEW_TITLE_LENGTH,
+					'review_content' => Reviews_API::MAX_REVIEW_CONTENT_LENGTH,
+					'email'          => Reviews_API::MAX_EMAIL_LENGTH,
+				],
 				'__OPTIONS__'          => [
 					'reviews_ctas'    => (bool) \Mediavine\Settings::get_setting('mv_create_reviews_ctas', false),
 					'jtc_enabled'     => (bool) \Mediavine\Settings::get_setting('mv_create_enable_jump_to_recipe', false),
@@ -567,6 +574,18 @@ class Creations_Views extends Creations {
 		$creation = \Mediavine\Create\Publish::maybe_republish($creation);
 
 		$published_creation = json_decode($creation->published ?: '{}', true);
+
+		// Merge card-level fields that live outside the published JSON blob.
+		// Always use the DB column as source of truth, overriding any stale
+		// values that may have been captured in the published JSON at publish time.
+		if ( $published_creation ) {
+			$card_fields = [ 'video_position', 'products_position', 'products_display_mode', 'products_section_title' ];
+			foreach ( $card_fields as $field ) {
+				if ( isset( $creation->$field ) ) {
+					$published_creation[ $field ] = $creation->$field;
+				}
+			}
+		}
 
 		// If a card specifies its own layout (for instance, for Lists)
 		// it should override the style
@@ -873,17 +892,7 @@ class Creations_Views extends Creations {
 					}
 
 					// Provide button text
-					if ( ! empty($item['link_text']) ) {
-						$item['btn_text'] = $item['link_text'];
-					} elseif ( 'product' === $item['content_type'] ) {
-						$item['btn_text'] = __('View Product', 'mediavine');
-					} elseif ( 'recipe' === $item['secondary_type'] ) {
-						$item['btn_text'] = __('Get the Recipe', 'mediavine');
-					} elseif ( 'diy' === $item['secondary_type'] ) {
-						$item['btn_text'] = __('Read the Guide', 'mediavine');
-					} else {
-						$item['btn_text'] = __('Continue Reading', 'mediavine');
-					}
+					$item['btn_text'] = self::resolve_list_item_button_text( $item );
 
 					if ( 'card' === $item['content_type'] ) {
 						// We don't wany any unassociated cards
@@ -1219,9 +1228,9 @@ class Creations_Views extends Creations {
 	 */
 	public static function get_unit_conversion_data( $creation_id ) {
 		$converter = Unit_Conversion::get_instance();
-		$cached    = $converter->get_cached_conversions( $creation_id );
+		$cached    = Plugin::is_dev_mode() ? null : $converter->get_cached_conversions( $creation_id );
 
-		// Lazy compute on first frontend request if not cached
+		// Lazy compute on first frontend request if not cached (or dev mode)
 		if ( empty( $cached ) ) {
 			$result = $converter->convert_creation( $creation_id );
 			if ( is_wp_error( $result ) ) {
@@ -1247,6 +1256,39 @@ class Creations_Views extends Creations {
 			'label'          => $label,
 			'conversions'    => $cached['ingredients'],
 		];
+	}
+
+	/**
+	 * Resolve the button text for a list item.
+	 *
+	 * Priority: item link_text > content/type defaults > first custom button option > hardcoded fallback.
+	 *
+	 * @param array $item List item data with optional link_text, content_type, secondary_type keys.
+	 * @return string
+	 */
+	public static function resolve_list_item_button_text( $item ) {
+		if ( ! empty( $item['link_text'] ) ) {
+			return $item['link_text'];
+		}
+
+		if ( 'product' === ( $item['content_type'] ?? '' ) ) {
+			return __( 'View Product', 'mediavine' );
+		}
+
+		if ( 'recipe' === ( $item['secondary_type'] ?? '' ) ) {
+			return __( 'Get the Recipe', 'mediavine' );
+		}
+
+		if ( 'diy' === ( $item['secondary_type'] ?? '' ) ) {
+			return __( 'Read the Guide', 'mediavine' );
+		}
+
+		$custom_buttons = \Mediavine\Settings::get_setting( self::$settings_group . '_custom_buttons', 'Continue Reading\nRead More\nGet Recipe' );
+		$buttons        = preg_split( '/\\\\n|\n/', $custom_buttons );
+
+		$first = trim( $buttons[0] ?? '' );
+
+		return '' !== $first ? $first : __( 'Continue Reading', 'mediavine' );
 	}
 
 	public static function create_list_item_extra( $item ) {
@@ -1383,10 +1425,10 @@ class Creations_Views extends Creations {
 		// Prep creation
 		$atts['creation'] = self::prep_creation_view($atts);
 
-		// Adjust products and video priority based on position settings (must be after creation is prepped)
+		// Adjust video first, then products (products may position relative to video)
 		if ( 'list' !== $atts['type'] && ! empty( $atts['creation'] ) ) {
-			Creations_Views_Hooks::adjust_products_priority( $atts );
 			Creations_Views_Hooks::adjust_video_priority( $atts );
+			Creations_Views_Hooks::adjust_products_priority( $atts );
 		}
 
 		// Don't display a card if there's no creation data

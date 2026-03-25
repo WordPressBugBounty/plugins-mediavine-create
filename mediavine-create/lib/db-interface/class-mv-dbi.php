@@ -1054,7 +1054,7 @@ class MV_DBI {
 		$build_sql = "SELECT $this->select FROM `$this->table_name`";
 		$order_sql = $this->paginate_and_order();
 
-		if ( $search_params || ! empty( $args['where'] ) && is_array( $args['where'] ) ) {
+		if ( $search_params || ! empty( $args['where'] ) && is_array( $args['where'] ) || ! empty( $args['conditions'] ) ) {
 			$where_statement  = '';
 			$search_statement = '';
 			$prepare_array    = [];
@@ -1086,6 +1086,19 @@ class MV_DBI {
 							$in               = implode( ', ', $fill );
 							$where_statement .= $key . ' ' . $statement . ' (' . $in . ')';
 						}
+
+						// Comparison operators: ['column' => ['>=' => 5]]
+						$allowed_operators = [ '>=', '<=', '>', '<', '!=' ];
+						$operator_key      = key( $value );
+						if ( in_array( $operator_key, $allowed_operators, true ) ) {
+							$comp_value         = current( $value );
+							$sprintf_identifier = $this->get_sprintf( $comp_value );
+							if ( $sprintf_identifier ) {
+								$prepare_array[]  = $comp_value;
+								$where_statement .= $key . ' ' . $operator_key . ' ' . $sprintf_identifier;
+							}
+						}
+
 						continue;
 					}
 
@@ -1099,6 +1112,30 @@ class MV_DBI {
 					} else {
 						$where_statement .= $key . ' = ' . $sprintf_identifier;
 					}
+				}
+			}
+
+			// Additional conditions: [['column', '>=', value], ['column', '<=', value]]
+			// Allows multiple conditions on the same column (unlike the where array).
+			if ( ! empty( $args['conditions'] ) && is_array( $args['conditions'] ) ) {
+				$allowed_operators = [ '=', '!=', '>=', '<=', '>', '<' ];
+				foreach ( $args['conditions'] as $condition ) {
+					if ( ! is_array( $condition ) || count( $condition ) < 3 ) {
+						continue;
+					}
+					list( $col, $op, $val ) = $condition;
+					if ( ! in_array( $op, $allowed_operators, true ) ) {
+						continue;
+					}
+					$sprintf_identifier = $this->get_sprintf( $val );
+					if ( ! $sprintf_identifier ) {
+						continue;
+					}
+					if ( ! empty( $where_statement ) ) {
+						$where_statement .= ' AND ';
+					}
+					$prepare_array[]  = $val;
+					$where_statement .= $col . ' ' . $op . ' ' . $sprintf_identifier;
 				}
 			}
 

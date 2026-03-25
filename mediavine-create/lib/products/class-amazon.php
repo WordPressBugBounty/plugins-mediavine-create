@@ -315,7 +315,7 @@ class Amazon {
 				'data'    => [
 					'status'    => 400,
 					'message'   => __( "Amazon reports your Store ID (Partner Tag) doesn't match your API credentials. Your Store ID looks like \"yoursite-20\" - make sure it's from the same Amazon account as your API keys. Common mistake: using your Access Key ID instead of your Store ID.", 'mediavine' ),
-					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_url'  => admin_url( 'edit.php?page=settings&post_type=mv_create&setting=mv_create_paapi_tag' ),
 					'link_text' => __( 'Check Your Store ID in Settings', 'mediavine' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=InvalidPartnerTagException',
 				],
@@ -345,7 +345,7 @@ class Amazon {
 				'data'    => [
 					'status'    => 401,
 					'message'   => __( "Amazon couldn't validate your credentials. Check that your Secret Key is correct - it's a 40-character string, not your Store ID. If you just created new credentials, Amazon takes up to 48 hours to activate them.", 'mediavine' ),
-					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_url'  => admin_url( 'edit.php?post_type=mv_create&page=settings#affiliates' ),
 					'link_text' => __( 'Review Your Credentials in Settings', 'mediavine' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=InvalidSignatureException',
 				],
@@ -360,7 +360,7 @@ class Amazon {
 				'data'    => [
 					'status'    => 400,
 					'message'   => __( "Amazon reports your Secret Key is missing or incomplete. Your Secret Key is a 40-character string that looks like \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\". Make sure you copied the entire key without extra spaces.", 'mediavine' ),
-					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_url'  => admin_url( 'edit.php?page=settings&post_type=mv_create&setting=mv_create_paapi_secret_key' ),
 					'link_text' => __( 'Re-enter Your Secret Key in Settings', 'mediavine' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=IncompleteSignatureException',
 				],
@@ -401,7 +401,7 @@ class Amazon {
 				'data'    => [
 					'status'    => 401,
 					'message'   => __( "Amazon doesn't recognize your Access Key ID. Your Access Key is a 20-character string starting with \"AKIA\". Common mistakes: using your Store ID instead, extra spaces, or using old/deleted credentials. Generate new credentials in Amazon Associates if needed.", 'mediavine' ),
-					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_url'  => admin_url( 'edit.php?page=settings&post_type=mv_create&setting=mv_create_paapi_access_key' ),
 					'link_text' => __( 'Check Your Access Key in Settings', 'mediavine' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=UnrecognizedClientException',
 				],
@@ -464,7 +464,7 @@ class Amazon {
 				[
 					'status'    => 401,
 					'message'   => __( 'Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title.', 'mediavine' ),
-					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_api' ),
+					'link_url'  => admin_url( 'edit.php?post_type=mv_create&page=settings#create-studio' ),
 					'link_text' => __( 'Register Create', 'mediavine' ),
 				]
 			);
@@ -477,7 +477,7 @@ class Amazon {
 			[
 				'status'    => 401,
 				'message'   => __( 'Amazon Affiliates is not enabled or fully setup to process Amazon links. Please activate Amazon Affiliates or manually add an image and title.', 'mediavine' ),
-				'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+				'link_url'  => admin_url( 'edit.php?page=settings&post_type=mv_create&setting=mv_create_enable_amazon' ),
 				'link_text' => __( 'Activate Amazon Affiliates', 'mediavine' ),
 			]
 		);

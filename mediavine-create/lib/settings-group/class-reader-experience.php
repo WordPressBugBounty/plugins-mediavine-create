@@ -589,6 +589,10 @@ class Reader_Experience implements Settings_Group {
 							'value' => 'above_instructions',
 						],
 						[
+							'label' => __( 'Below Instructions', 'mediavine' ),
+							'value' => 'below_instructions',
+						],
+						[
 							'label' => __( 'Below Notes', 'mediavine' ),
 							'value' => 'below_notes',
 						],

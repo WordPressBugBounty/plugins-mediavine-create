@@ -64,7 +64,7 @@ class Lists implements Settings_Group {
 			],
 			[
 				'slug'  => Plugin::$settings_group . '_custom_buttons',
-				'value' => 'Read More\nGet Recipe',
+				'value' => 'Continue Reading\nRead More\nGet Recipe',
 				'group' => Plugin::$settings_group . '_lists',
 				'order' => 126,
 				'data'  => [
