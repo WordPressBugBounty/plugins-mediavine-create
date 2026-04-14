@@ -547,6 +547,16 @@ class Bulk_Scrape_API {
 			}
 		}
 
+		// Extract alt text for the lead image.
+		$thumbnail_alt = '';
+		$alt_fields    = [ 'lead_image_alt', 'image_alt', 'og_image_alt' ];
+		foreach ( $alt_fields as $field ) {
+			if ( ! empty( $scraped_data[ $field ] ) ) {
+				$thumbnail_alt = $scraped_data[ $field ];
+				break;
+			}
+		}
+
 		return [
 			'url'    => $url,
 			'status' => 'success',
@@ -555,6 +565,7 @@ class Bulk_Scrape_API {
 				'title'         => $this->sanitize_title( isset( $scraped_data['title'] ) ? $scraped_data['title'] : '' ),
 				'description'   => $description,
 				'thumbnail_uri' => $thumbnail,
+				'thumbnail_alt' => $thumbnail_alt,
 				'source'        => isset( $scraped_data['source'] ) ? $scraped_data['source'] : 'external-service',
 			],
 		];

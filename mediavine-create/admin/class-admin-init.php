@@ -12,6 +12,7 @@ class Admin_Init extends Plugin {
 		'post_type=mv_create',
 		'page=mv_settings',
 		'page=mv_create_welcome',
+		'page=create_home',
 		'page=create_editor',
 		'page=create_dashboard',
 		'page=import',
@@ -343,7 +344,18 @@ class Admin_Init extends Plugin {
 		$allowed_shapes = \Mediavine\Settings::get_setting( 'mv_create_allowed_types' );
 		$allowed_shapes = json_decode( $allowed_shapes );
 
-		// Dashboard page - first submenu item
+		// Router page — hidden submenu entry that redirects to the user's
+		// preferred default page via maybe_redirect_default_admin_page().
+		add_submenu_page(
+			'edit.php?post_type=mv_create',
+			__( 'Create', 'mediavine' ),
+			__( 'Create', 'mediavine' ),
+			'edit_posts',
+			'create_home',
+			'__return_null'
+		);
+
+		// Dashboard page
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
 			__( 'Dashboard', 'mediavine' ),
@@ -446,19 +458,47 @@ class Admin_Init extends Plugin {
 			);
 		}
 
-		// Move Dashboard right after the auto-generated "All Cards" entry (position 1).
-		// Position 0 must stay as the default item since WordPress uses it as
-		// the parent menu href.
+		// Reorder submenu and set the parent menu href to the router page.
+		//
+		// WordPress uses $submenu[$parent][0][2] as the href for the top-level
+		// menu item. For CPT menus, position 0 is auto-generated as "All {type}"
+		// with the slug set to the full parent URL (e.g. edit.php?post_type=mv_create).
+		// We change position 0's slug to the router URL so the parent menu link
+		// goes through the router, then add "All Create Cards" as its own entry.
 		global $submenu;
 		$parent = 'edit.php?post_type=mv_create';
 		if ( isset( $submenu[ $parent ] ) ) {
+			$dashboard = null;
+
 			foreach ( $submenu[ $parent ] as $key => $item ) {
 				if ( 'create_dashboard' === $item[2] ) {
+					$dashboard = $item;
 					unset( $submenu[ $parent ][ $key ] );
-					$submenu[ $parent ] = array_values( $submenu[ $parent ] );
-					array_splice( $submenu[ $parent ], 1, 0, [ $item ] );
-					break;
+				} elseif ( 'create_home' === $item[2] ) {
+					unset( $submenu[ $parent ][ $key ] );
 				}
+			}
+
+			$submenu[ $parent ] = array_values( $submenu[ $parent ] );
+
+			// Position 0 is the auto-generated "All Create Cards" entry.
+			// Change its slug to the router URL so clicking the top-level
+			// "Create" menu item goes through the router. Keep the label.
+			if ( isset( $submenu[ $parent ][0] ) ) {
+				$all_cards_label = $submenu[ $parent ][0][0];
+				$all_cards_cap   = $submenu[ $parent ][0][1];
+
+				// Point position 0 to the router page (full URL so WP uses it directly).
+				$submenu[ $parent ][0][2] = 'edit.php?post_type=mv_create&page=create_home';
+
+				// Re-add "All Create Cards" as a real submenu entry at position 2.
+				$all_cards_item = [ $all_cards_label, $all_cards_cap, $parent ];
+				array_splice( $submenu[ $parent ], 1, 0, [ $all_cards_item ] );
+			}
+
+			// Insert Dashboard at position 1 (right after the router, before All Cards).
+			if ( $dashboard ) {
+				array_splice( $submenu[ $parent ], 1, 0, [ $dashboard ] );
 			}
 		}
 	}
@@ -716,6 +756,7 @@ class Admin_Init extends Plugin {
 	function editor_hide_menu_item() {
 		?>
 		<style>
+			#adminmenu .wp-submenu a[href*="page=create_home"],
 			#adminmenu a[href*="page=create_editor"] { display: none !important; }
 		</style>
 		<?php
@@ -806,6 +847,43 @@ class Admin_Init extends Plugin {
 		);
 	}
 
+	/**
+	 * Redirect the create_home router page to the user's preferred admin page.
+	 *
+	 * Runs on admin_init (before output) so we can safely redirect.
+	 */
+	function maybe_redirect_default_admin_page() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['page'] ) || 'create_home' !== $_GET['page'] ) {
+			return;
+		}
+
+		$default_page = \Mediavine\Settings::get_setting( 'mv_create_default_admin_page' );
+
+		$slug_map = [
+			'dashboard' => 'create_dashboard',
+			'all_cards' => null, // special case — go to the CPT list
+			'recipe'    => 'recipe',
+			'diy'       => 'diy',
+			'list'      => 'list',
+		];
+
+		// Default to dashboard if the setting is empty or unrecognised.
+		if ( empty( $default_page ) || ! array_key_exists( $default_page, $slug_map ) ) {
+			$default_page = 'dashboard';
+		}
+
+		if ( null === $slug_map[ $default_page ] ) {
+			// "All Cards" — the CPT list table with no page param.
+			$url = admin_url( 'edit.php?post_type=mv_create' );
+		} else {
+			$url = admin_url( 'edit.php?post_type=mv_create&page=' . $slug_map[ $default_page ] );
+		}
+
+		wp_safe_redirect( $url );
+		exit;
+	}
+
 	function init() {
 		global $wp_version;
 		// version-check for filter compatibility
@@ -814,6 +892,7 @@ class Admin_Init extends Plugin {
 			$block_categories_filter = 'block_categories_all';
 		}
 
+		add_action( 'admin_init', [ $this, 'maybe_redirect_default_admin_page' ] );
 		add_action( 'admin_init', [ $this, 'maybe_repair_creation_object_id' ] );
 		add_filter( 'submenu_file', [ $this, 'editor_submenu_file' ] );
 		add_action( 'admin_head', [ $this, 'editor_hide_menu_item' ] );

@@ -868,13 +868,19 @@ class Creations_Views extends Creations {
 					}
 					$highest_res_image = Images::get_highest_available_image_size($item['thumbnail_id'], $thumbnail_image_size);
 
+					$item_alt_text = get_post_meta( $item['thumbnail_id'], '_wp_attachment_image_alt', true );
+					if ( empty( $item_alt_text ) ) {
+						/* translators: %s: list item title */
+						$item_alt_text = sprintf( __( 'Image for %s', 'mediavine' ), $item['title'] );
+					}
+
 					$item['thumbnail_url'] = wp_get_attachment_image(
 						$item['thumbnail_id'],
 						$highest_res_image,
 						false,
 						[
 							'class'          => 'mv-list-single-img no_pin ggnoads',
-							'alt'            => '',
+							'alt'            => $item_alt_text,
 							'data-pin-nopin' => 'true',
 						]
 					);
@@ -1993,10 +1999,14 @@ class Creations_Views extends Creations {
 	public static function img( $item ) {
 		$external_thumbnail_url = self::get_external_thumbnail_url($item);
 		if ( ! empty($item['asin']) && ! empty($external_thumbnail_url) ) {
-			return sprintf('<img src="%s" data-pin-nopin="true" />', $external_thumbnail_url);
+			$alt = ! empty( $item['title'] )
+				/* translators: %s: list item title */
+				? sprintf( __( 'Image for %s', 'mediavine' ), $item['title'] )
+				: '';
+			return sprintf('<img src="%s" alt="%s" data-pin-nopin="true" />', $external_thumbnail_url, esc_attr( $alt ));
 		}
 
-		return str_replace('<img', '<img aria-hidden="true" ', $item['thumbnail_url']);
+		return $item['thumbnail_url'];
 	}
 
 	/**

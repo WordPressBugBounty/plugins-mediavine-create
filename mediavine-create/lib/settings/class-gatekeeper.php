@@ -105,6 +105,11 @@ class GateKeeper {
 	const FEATURE_CUSTOM_CSS = 'custom_css';
 
 	/**
+	 * Feature identifier for sync scroll in the list editor.
+	 */
+	const FEATURE_SYNC_SCROLL = 'sync_scroll';
+
+	/**
 	 * TTL for subscription cache in seconds (1 hour).
 	 */
 	const SUBSCRIPTION_TTL = 3600;
@@ -185,6 +190,7 @@ class GateKeeper {
 		self::FEATURE_UNIT_CONVERSION,
 		self::FEATURE_LIST_BULK_IMPORT,
 		self::FEATURE_CUSTOM_CSS,
+		self::FEATURE_SYNC_SCROLL,
 	];
 
 	/**
@@ -219,6 +225,7 @@ class GateKeeper {
 		'products_position'      => 'after_video',
 		// Toggle features — disable on downgrade
 		'enable_checklists'              => '',
+		'enable_sync_scroll'             => '',
 		'enable_interactive_mode'        => '',
 		'interactive_mode_button_text'   => '',
 		'enable_unit_conversion'         => '',

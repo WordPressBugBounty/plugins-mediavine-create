@@ -502,6 +502,14 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 
 			$relation['thumbnail_id'] = Images::get_attachment_id_from_url( $relation['thumbnail_uri'] );
 
+			// Set alt text on the sideloaded attachment if available.
+			if ( ! empty( $relation['thumbnail_id'] ) && ! empty( $relation['thumbnail_alt'] ) ) {
+				$existing_alt = get_post_meta( $relation['thumbnail_id'], '_wp_attachment_image_alt', true );
+				if ( empty( $existing_alt ) ) {
+					update_post_meta( $relation['thumbnail_id'], '_wp_attachment_image_alt', sanitize_text_field( $relation['thumbnail_alt'] ) );
+				}
+			}
+
 			return $relation;
 		}
 

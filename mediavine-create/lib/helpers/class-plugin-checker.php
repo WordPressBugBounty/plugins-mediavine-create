@@ -199,11 +199,27 @@ class Plugin_Checker {
 	}
 
 	/**
-	 * Checks if site running Mediavine or Journey ads.
+	 * Checks if site should use Mediavine ad slots.
+	 *
+	 * Respects the ad_provider setting:
+	 * - 'mediavine': always true
+	 * - 'none': always false
+	 * - 'auto' (default): checks for Mediavine Control Panel or Journey site
+	 *
 	 * @return bool
 	 */
 	public static function has_mv_ads() {
-		// MV ads
+		$provider = \Mediavine\Settings::get_setting( 'mv_create_ad_provider', 'auto' );
+
+		if ( 'mediavine' === $provider ) {
+			return true;
+		}
+
+		if ( 'none' === $provider ) {
+			return false;
+		}
+
+		// Auto-detect: check for Mediavine Control Panel or Journey site
 		if ( self::is_mcp_active() && get_option( 'MVCP_site_id' ) ) {
 			return true;
 		}

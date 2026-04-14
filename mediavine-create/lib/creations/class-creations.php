@@ -981,6 +981,11 @@ class Creations extends Plugin {
 
 		<head>
 			<?php
+			// Dequeue importers scripts — they crash inside the preview iframe
+			// because there's no ThemeProvider context.
+			wp_dequeue_script( 'mv_create/importers.js' );
+			wp_dequeue_script( 'mv_create/importers-block.js' );
+
 			/**
 			 * Fires before the card preview's wp_head() is rendered
 			 */

@@ -143,6 +143,16 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.3.0 =
+
+* FEATURE: Ad Provider setting — choose whether Mediavine ad slot markup appears in your cards, or disable it for non-Mediavine ad setups
+* FEATURE: Redesigned list editor with permanent search panel, inline/top/bottom placement controls, and direct URL scraping
+* FEATURE: Sticky formatting toolbar in recipe and how-to editors — no more scrolling up to access bold, links, and headings
+* ENHANCEMENT: Copy-to-clipboard button on error details so you can easily share issues with support
+* FIX: Resolve editor crashes related to Slate selection sync, importer page rendering, and card preview errors
+* FIX: Eliminate layout reflow triggered by card size detection, improving PageSpeed scores
+
+
 = 2.2.0 =
 
 * FEATURE: Try Pro free for 14 days — unlock premium features like servings adjustment, unit conversion, checklists, and interactive mode

@@ -2,22 +2,24 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.2.0\n"
+"Project-Id-Version: Create 2.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-03-24T20:50:17+00:00\n"
+"POT-Creation-Date: 2026-04-14T17:51:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
 
 #. Plugin Name of the plugin
 #: mediavine-create.php
-#: admin/class-admin-init.php:409
-#: admin/class-admin-init.php:552
+#: admin/class-admin-init.php:351
+#: admin/class-admin-init.php:352
+#: admin/class-admin-init.php:421
+#: admin/class-admin-init.php:592
 msgid "Create"
 msgstr ""
 
@@ -41,22 +43,26 @@ msgstr ""
 msgid "https://create.studio/"
 msgstr ""
 
-#: admin/class-admin-init.php:349
-#: admin/class-admin-init.php:350
+#: admin/class-admin-init.php:361
+#: admin/class-admin-init.php:362
+#: lib/settings-group/class-advanced.php:273
+#: lib/settings-group/class-advanced.php:276
 msgid "Dashboard"
 msgstr ""
 
-#: admin/class-admin-init.php:357
+#: admin/class-admin-init.php:369
 #: class-plugin.php:1397
+#: lib/settings-group/class-advanced.php:284
 msgid "Recipes"
 msgstr ""
 
-#: admin/class-admin-init.php:358
+#: admin/class-admin-init.php:370
 #: class-plugin.php:1404
+#: lib/settings-group/class-advanced.php:288
 msgid "How-Tos"
 msgstr ""
 
-#: admin/class-admin-init.php:384
+#: admin/class-admin-init.php:396
 #: lib/i18n/class-translation.php:52
 #: lib/settings-group/class-reader-experience.php:560
 #: lib/settings-group/class-reader-experience.php:567
@@ -65,38 +71,38 @@ msgstr ""
 msgid "Recommended Products"
 msgstr ""
 
-#: admin/class-admin-init.php:385
+#: admin/class-admin-init.php:397
 msgid "User Reviews"
 msgstr ""
 
-#: admin/class-admin-init.php:400
-#: admin/class-admin-init.php:408
+#: admin/class-admin-init.php:412
+#: admin/class-admin-init.php:420
 msgid "Create Plugin Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:401
+#: admin/class-admin-init.php:413
 msgid "Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:420
+#: admin/class-admin-init.php:432
 #: lib/class-admin-bar.php:97
 msgid "Edit Create Card"
 msgstr ""
 
-#: admin/class-admin-init.php:421
+#: admin/class-admin-init.php:433
 msgid "Edit Card"
 msgstr ""
 
-#: admin/class-admin-init.php:430
+#: admin/class-admin-init.php:442
 msgid "Welcome to Create 2.0"
 msgstr ""
 
-#: admin/class-admin-init.php:431
+#: admin/class-admin-init.php:443
 msgid "Welcome"
 msgstr ""
 
-#: admin/class-admin-init.php:441
-#: admin/class-admin-init.php:442
+#: admin/class-admin-init.php:453
+#: admin/class-admin-init.php:454
 msgid "Theme Elements"
 msgstr ""
 
@@ -193,6 +199,7 @@ msgid "List"
 msgstr ""
 
 #: class-plugin.php:1411
+#: lib/settings-group/class-advanced.php:292
 msgid "Lists"
 msgstr ""
 
@@ -508,32 +515,39 @@ msgstr ""
 msgid "Please leave a comment on the blog or share a photo on %s"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:915
-#: lib/creations/class-creations-views.php:1572
+#. translators: %s: list item title
+#: lib/creations/class-creations-views.php:874
+#: lib/creations/class-creations-views.php:2004
+#, php-format
+msgid "Image for %s"
+msgstr ""
+
+#: lib/creations/class-creations-views.php:921
+#: lib/creations/class-creations-views.php:1578
 #: lib/creations/class-creations.php:768
 #: lib/importers/sources/class-import-purr.php:107
 msgid "Prep Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:921
+#: lib/creations/class-creations-views.php:927
 #: lib/creations/class-creations.php:769
 msgid "Active Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:927
-#: lib/creations/class-creations-views.php:1574
+#: lib/creations/class-creations-views.php:933
+#: lib/creations/class-creations-views.php:1580
 #: lib/creations/class-creations.php:770
 #: lib/importers/class-mv-recipe-importer.php:910
 #: lib/importers/sources/class-import-purr.php:108
 msgid "Additional Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:933
-#: lib/creations/class-creations-views.php:1594
+#: lib/creations/class-creations-views.php:939
+#: lib/creations/class-creations-views.php:1600
 msgid "Total Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:937
+#: lib/creations/class-creations-views.php:943
 #: lib/i18n/class-translation.php:45
 #: lib/views/v1/big-image/shortcode-mv-create-title.php:12
 #: lib/views/v1/centered-dark/shortcode-mv-create-nutrition.php:19
@@ -549,121 +563,121 @@ msgstr ""
 msgid "Yield"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:941
+#: lib/creations/class-creations-views.php:947
 #: lib/i18n/class-translation.php:51
 #: lib/views/v1/shortcode-mv-create-footer.php:56
 msgid "Category"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:945
-#: lib/creations/class-creations-views.php:1129
+#: lib/creations/class-creations-views.php:951
+#: lib/creations/class-creations-views.php:1135
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:949
-#: lib/creations/class-creations-views.php:1457
+#: lib/creations/class-creations-views.php:955
+#: lib/creations/class-creations-views.php:1463
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:954
-#: lib/creations/class-creations-views.php:1460
+#: lib/creations/class-creations-views.php:960
+#: lib/creations/class-creations-views.php:1466
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:957
+#: lib/creations/class-creations-views.php:963
 msgid "Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:960
-#: lib/creations/class-creations-views.php:1602
+#: lib/creations/class-creations-views.php:966
+#: lib/creations/class-creations-views.php:1608
 msgid "Difficulty"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1134
+#: lib/creations/class-creations-views.php:1140
 #: lib/i18n/class-translation.php:60
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1139
+#: lib/creations/class-creations-views.php:1145
 #: lib/i18n/class-translation.php:61
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1144
+#: lib/creations/class-creations-views.php:1150
 #: lib/i18n/class-translation.php:62
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1149
+#: lib/creations/class-creations-views.php:1155
 #: lib/i18n/class-translation.php:63
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1154
+#: lib/creations/class-creations-views.php:1160
 #: lib/i18n/class-translation.php:64
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1159
+#: lib/creations/class-creations-views.php:1165
 #: lib/i18n/class-translation.php:65
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1164
+#: lib/creations/class-creations-views.php:1170
 #: lib/i18n/class-translation.php:66
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1169
+#: lib/creations/class-creations-views.php:1175
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1174
+#: lib/creations/class-creations-views.php:1180
 #: lib/i18n/class-translation.php:68
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1179
+#: lib/creations/class-creations-views.php:1185
 #: lib/i18n/class-translation.php:69
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1184
+#: lib/creations/class-creations-views.php:1190
 #: lib/i18n/class-translation.php:70
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1189
+#: lib/creations/class-creations-views.php:1195
 #: lib/i18n/class-translation.php:71
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1275
+#: lib/creations/class-creations-views.php:1281
 msgid "View Product"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1279
+#: lib/creations/class-creations-views.php:1285
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1283
+#: lib/creations/class-creations-views.php:1289
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1291
+#: lib/creations/class-creations-views.php:1297
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1455
+#: lib/creations/class-creations-views.php:1461
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1573
+#: lib/creations/class-creations-views.php:1579
 #: lib/creations/class-creations.php:775
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:695
 #: lib/importers/sources/class-import-cookbook.php:132
@@ -681,65 +695,65 @@ msgstr ""
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1606
+#: lib/creations/class-creations-views.php:1612
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1653
+#: lib/creations/class-creations-views.php:1659
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1654
+#: lib/creations/class-creations-views.php:1660
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1657
+#: lib/creations/class-creations-views.php:1663
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1658
+#: lib/creations/class-creations-views.php:1664
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1661
+#: lib/creations/class-creations-views.php:1667
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1662
+#: lib/creations/class-creations-views.php:1668
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1665
+#: lib/creations/class-creations-views.php:1671
 #: lib/products/class-amazon.php:610
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1666
+#: lib/creations/class-creations-views.php:1672
 #: lib/products/class-amazon.php:611
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1669
+#: lib/creations/class-creations-views.php:1675
 #: lib/products/class-amazon.php:615
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1670
+#: lib/creations/class-creations-views.php:1676
 #: lib/products/class-amazon.php:616
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1673
+#: lib/creations/class-creations-views.php:1679
 #: lib/products/class-amazon.php:627
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1674
+#: lib/creations/class-creations-views.php:1680
 #: lib/products/class-amazon.php:628
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1868
+#: lib/creations/class-creations-views.php:1874
 msgid "No Card with ID found"
 msgstr ""
 
@@ -1329,7 +1343,7 @@ msgstr ""
 msgid "Create card not found."
 msgstr ""
 
-#: lib/lists/class-bulk-scrape-api.php:574
+#: lib/lists/class-bulk-scrape-api.php:585
 msgid "Could not scrape URL. No title or image found."
 msgstr ""
 
@@ -1659,15 +1673,15 @@ msgstr ""
 msgid "No relations were found for the given create card"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:565
+#: lib/relations/class-relations-api.php:573
 msgid "Product list items require Mediavine Create Pro"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:574
+#: lib/relations/class-relations-api.php:582
 msgid "Product ID is required for product list items"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:586
+#: lib/relations/class-relations-api.php:594
 #, php-format
 msgid "Product with ID %d not found"
 msgstr ""
@@ -2050,8 +2064,9 @@ msgstr ""
 #: lib/settings-group/class-advanced.php:75
 #: lib/settings-group/class-advanced.php:88
 #: lib/settings-group/class-advanced.php:164
-#: lib/settings-group/class-advanced.php:200
-#: lib/settings-group/class-advanced.php:365
+#: lib/settings-group/class-advanced.php:188
+#: lib/settings-group/class-advanced.php:213
+#: lib/settings-group/class-advanced.php:412
 #: lib/settings-group/class-appearance.php:191
 #: lib/settings-group/class-appearance.php:218
 #: lib/settings-group/class-appearance.php:231
@@ -2060,7 +2075,7 @@ msgstr ""
 #: lib/settings-group/class-display.php:120
 #: lib/settings-group/class-display.php:132
 #: lib/settings-group/class-display.php:144
-#: lib/settings-group/class-list-ads.php:34
+#: lib/settings-group/class-list-ads.php:59
 #: lib/settings-group/class-lists.php:62
 #: lib/settings-group/class-pro.php:122
 #: lib/settings-group/class-reader-experience.php:241
@@ -2121,15 +2136,15 @@ msgstr ""
 
 #: lib/settings-group/class-advanced.php:152
 #: lib/settings-group/class-advanced.php:176
-#: lib/settings-group/class-advanced.php:188
-#: lib/settings-group/class-advanced.php:353
+#: lib/settings-group/class-advanced.php:201
+#: lib/settings-group/class-advanced.php:400
 #: lib/settings-group/class-appearance.php:130
 #: lib/settings-group/class-appearance.php:178
 #: lib/settings-group/class-appearance.php:204
 #: lib/settings-group/class-display.php:62
 #: lib/settings-group/class-display.php:108
 #: lib/settings-group/class-display.php:156
-#: lib/settings-group/class-list-ads.php:34
+#: lib/settings-group/class-list-ads.php:59
 #: lib/settings-group/class-lists.php:50
 #: lib/settings-group/class-reader-experience.php:172
 #: lib/settings-group/class-reader-experience.php:292
@@ -2156,138 +2171,158 @@ msgid "By default, we'll save your work as you edit, even if you haven't publish
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:186
+msgid "Enable Sync Scroll"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:187
+msgid "When enabled, scrolling the list editor will automatically scroll the preview to the corresponding item."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:199
 #: lib/settings-group/class-reader-experience.php:290
 msgid "Allow Reviews"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:187
+#: lib/settings-group/class-advanced.php:200
 #: lib/settings-group/class-reader-experience.php:291
 msgid "Unchecking this box will prevent users from being able to leave reviews on your recipe cards."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:198
+#: lib/settings-group/class-advanced.php:211
 #: lib/settings-group/class-reader-experience.php:302
 msgid "Display Review CTAs"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:199
+#: lib/settings-group/class-advanced.php:212
 #: lib/settings-group/class-reader-experience.php:303
 msgid "Display prompts encouraging site visitors to leave reviews."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:211
+#: lib/settings-group/class-advanced.php:224
 msgid "Global Affiliate Message"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:212
+#: lib/settings-group/class-advanced.php:225
 msgid "Set the default affiliate disclaimer message with this text. Affiliate messaging can be overridden in individual posts."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:224
+#: lib/settings-group/class-advanced.php:237
 msgid "Allowed Types"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:225
+#: lib/settings-group/class-advanced.php:238
 msgid "If any types are selected, only they will be available for adding new cards. Existing cards of disallowed types will still function properly."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:236
+#: lib/settings-group/class-advanced.php:249
 msgid "Default Card View"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:237
+#: lib/settings-group/class-advanced.php:250
 msgid "When adding a card to a post, choose whether to show the card browser or the create new card form by default."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:238
-#: lib/settings-group/class-advanced.php:241
+#: lib/settings-group/class-advanced.php:251
+#: lib/settings-group/class-advanced.php:254
 msgid "Browse Existing Cards"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:245
+#: lib/settings-group/class-advanced.php:258
 msgid "Create New Card"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:258
+#: lib/settings-group/class-advanced.php:271
+msgid "Default Admin Page"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:272
+msgid "Choose which page loads when you click the Create menu item in the WordPress admin sidebar."
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:280
+msgid "All Create Cards"
+msgstr ""
+
+#: lib/settings-group/class-advanced.php:305
 msgid "Allowed Custom Post Types"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:259
+#: lib/settings-group/class-advanced.php:306
 msgid "If enabled, will allow specific custom post types to be added to Lists"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:271
+#: lib/settings-group/class-advanced.php:318
 #: lib/settings-group/class-reader-experience.php:315
 msgid "Allow Anonymous Ratings"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:272
+#: lib/settings-group/class-advanced.php:319
 #: lib/settings-group/class-reader-experience.php:316
 msgid "If enabled, 4 and 5 star reviews will be submitted when the star is clicked. Users leaving a star rating will then see a popup modal prompting them to leave an optional review. Disabling this will not sumbit the rating until after the review has been added. The prompt will still display."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:283
+#: lib/settings-group/class-advanced.php:330
 #: lib/settings-group/class-reader-experience.php:327
 msgid "Enable Public Reviews"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:295
+#: lib/settings-group/class-advanced.php:342
 #: lib/settings-group/class-reader-experience.php:339
 msgid "Comments Section"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:308
+#: lib/settings-group/class-advanced.php:355
 msgid "Prevent Image Size Generation"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:309
+#: lib/settings-group/class-advanced.php:356
 msgid "If enabled, will disable specific image sizes created by Create"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:321
+#: lib/settings-group/class-advanced.php:368
 msgid "Products Position"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:322
+#: lib/settings-group/class-advanced.php:369
 msgid "Choose where the products section appears within your recipe and how-to cards."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:323
-#: lib/settings-group/class-advanced.php:338
+#: lib/settings-group/class-advanced.php:370
+#: lib/settings-group/class-advanced.php:385
 #: lib/settings-group/class-reader-experience.php:580
 #: lib/settings-group/class-reader-experience.php:600
 msgid "After Video"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:326
+#: lib/settings-group/class-advanced.php:373
 msgid "Above Supplies/Ingredients"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:330
+#: lib/settings-group/class-advanced.php:377
 #: lib/settings-group/class-reader-experience.php:515
 #: lib/settings-group/class-reader-experience.php:588
 msgid "Above Instructions"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:334
+#: lib/settings-group/class-advanced.php:381
 #: lib/settings-group/class-reader-experience.php:504
 #: lib/settings-group/class-reader-experience.php:596
 msgid "Below Notes"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:351
+#: lib/settings-group/class-advanced.php:398
 msgid "Enable Confetti Shortcut"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:352
+#: lib/settings-group/class-advanced.php:399
 msgid "Press Shift+C anywhere in Create to launch celebratory confetti. Disable to remove this keyboard shortcut."
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:363
+#: lib/settings-group/class-advanced.php:410
 msgid "Enable Recipe Importers"
 msgstr ""
 
-#: lib/settings-group/class-advanced.php:364
+#: lib/settings-group/class-advanced.php:411
 msgid "Import recipes from other recipe plugins like WP Recipe Maker, Tasty Recipes, and more."
 msgstr ""
 
@@ -2566,46 +2601,66 @@ msgid "Select an aspect ratio for photo display. Some card styles, such as Class
 msgstr ""
 
 #: lib/settings-group/class-list-ads.php:32
-msgid "Enable Ads in Lists"
+msgid "Ad Provider"
 msgstr ""
 
 #: lib/settings-group/class-list-ads.php:33
-msgid "Enable ad slot insertion between list items."
+msgid "Choose your ad provider. \"Auto-detect\" checks for Mediavine Control Panel automatically."
+msgstr ""
+
+#: lib/settings-group/class-list-ads.php:36
+msgid "Auto-detect"
+msgstr ""
+
+#: lib/settings-group/class-list-ads.php:40
+msgid "Mediavine"
 msgstr ""
 
 #: lib/settings-group/class-list-ads.php:44
+msgid "Other / None"
+msgstr ""
+
+#: lib/settings-group/class-list-ads.php:57
+msgid "Enable Ads in Lists"
+msgstr ""
+
+#: lib/settings-group/class-list-ads.php:58
+msgid "Enable ad slot insertion between list items."
+msgstr ""
+
+#: lib/settings-group/class-list-ads.php:69
 msgid "List Items Between Ads"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:45
+#: lib/settings-group/class-list-ads.php:70
 msgid "Choose the number of list items between each ad in the card."
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:48
+#: lib/settings-group/class-list-ads.php:73
 msgid "Disable ads in lists"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:52
+#: lib/settings-group/class-list-ads.php:77
 msgid "2"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:56
+#: lib/settings-group/class-list-ads.php:81
 msgid "3"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:60
+#: lib/settings-group/class-list-ads.php:85
 msgid "4"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:64
+#: lib/settings-group/class-list-ads.php:89
 msgid "5"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:81
+#: lib/settings-group/class-list-ads.php:105
 msgid "Ad Slot HTML"
 msgstr ""
 
-#: lib/settings-group/class-list-ads.php:82
+#: lib/settings-group/class-list-ads.php:106
 msgid "Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped."
 msgstr ""
 
@@ -3237,14 +3292,14 @@ msgstr ""
 msgid "Toggle ingredient group"
 msgstr ""
 
-#: admin/ui/build/app.build.2.2.0.js:7143
+#: admin/ui/build/app.build.2.3.0.js:7651
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.2.2.0.js:7143
+#: admin/ui/build/app.build.2.3.0.js:7651
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.2.2.0.js:7143
+#: admin/ui/build/app.build.2.3.0.js:7651
 msgid "Description"
 msgstr ""

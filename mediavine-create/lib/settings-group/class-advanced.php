@@ -177,6 +177,19 @@ class Advanced implements Settings_Group {
 				],
 			],
 			[
+				'slug'  => Plugin::$settings_group . '_enable_sync_scroll',
+				'value' => false,
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 86,
+				'data'  => [
+					'type'         => 'checkbox',
+					'label'        => __( 'Enable Sync Scroll', 'mediavine' ),
+					'instructions' => __( 'When enabled, scrolling the list editor will automatically scroll the preview to the corresponding item.', 'mediavine' ),
+					'default'      => __( 'Disabled', 'mediavine' ),
+					'gated'        => 'sync_scroll',
+				],
+			],
+			[
 				'slug'  => Plugin::$settings_group . '_allow_reviews',
 				'value' => true,
 				'group' => Plugin::$settings_group . '_advanced',
@@ -244,6 +257,40 @@ class Advanced implements Settings_Group {
 						[
 							'label' => __( 'Create New Card', 'mediavine' ),
 							'value' => 'create',
+						],
+					],
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_default_admin_page',
+				'value' => 'dashboard',
+				'group' => Plugin::$settings_group . '_advanced',
+				'order' => 2,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Default Admin Page', 'mediavine' ),
+					'instructions' => __( 'Choose which page loads when you click the Create menu item in the WordPress admin sidebar.', 'mediavine' ),
+					'default'      => __( 'Dashboard', 'mediavine' ),
+					'options'      => [
+						[
+							'label' => __( 'Dashboard', 'mediavine' ),
+							'value' => 'dashboard',
+						],
+						[
+							'label' => __( 'All Create Cards', 'mediavine' ),
+							'value' => 'all_cards',
+						],
+						[
+							'label' => __( 'Recipes', 'mediavine' ),
+							'value' => 'recipe',
+						],
+						[
+							'label' => __( 'How-Tos', 'mediavine' ),
+							'value' => 'diy',
+						],
+						[
+							'label' => __( 'Lists', 'mediavine' ),
+							'value' => 'list',
 						],
 					],
 				],

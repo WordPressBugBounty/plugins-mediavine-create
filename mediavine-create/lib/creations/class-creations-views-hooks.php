@@ -444,7 +444,7 @@ class Creations_Views_Hooks extends Creations_Views {
 	public static function mv_create_list_ads_grid( $args, $row, $count ) {
 		$ads_enabled = apply_filters(
 			'mv_create_list_ads_enabled',
-			Plugin_Checker::has_mv_ads() || (bool) \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ads_enabled', '0' )
+			(bool) \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ads_enabled', Plugin_Checker::has_mv_ads() ? '1' : '0' )
 		);
 
 		if (
@@ -474,7 +474,7 @@ class Creations_Views_Hooks extends Creations_Views {
 	public static function mv_create_list_ads( $args, $i, $count ) {
 		$ads_enabled = apply_filters(
 			'mv_create_list_ads_enabled',
-			Plugin_Checker::has_mv_ads() || (bool) \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ads_enabled', '0' )
+			(bool) \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ads_enabled', Plugin_Checker::has_mv_ads() ? '1' : '0' )
 		);
 
 		if (
@@ -504,14 +504,14 @@ class Creations_Views_Hooks extends Creations_Views {
 	 * @return string Ad slot HTML.
 	 */
 	private static function get_list_ad_html( $args, $index, $count ) {
-		$default_html = '<div class="mv-list-adwrap"><div class="mv_slot_target" data-slot="content"></div></div>';
-
-		// For non-MV publishers, use their custom ad HTML
-		if ( ! Plugin_Checker::has_mv_ads() ) {
+		if ( Plugin_Checker::has_mv_ads() ) {
+			$default_html = '<div class="mv-list-adwrap"><div class="mv_slot_target" data-slot="content"></div></div>';
+		} else {
+			// For non-MV publishers, use their custom ad HTML (or nothing)
 			$custom_html = trim( \Mediavine\Settings::get_setting( Plugin::$settings_group . '_list_ad_custom_html', '' ) );
-			if ( ! empty( $custom_html ) ) {
-				$default_html = self::sanitize_custom_list_ad_html( $custom_html );
-			}
+			$default_html = ! empty( $custom_html )
+				? '<div class="mv-list-adwrap">' . self::sanitize_custom_list_ad_html( $custom_html ) . '</div>'
+				: '';
 		}
 
 		/**

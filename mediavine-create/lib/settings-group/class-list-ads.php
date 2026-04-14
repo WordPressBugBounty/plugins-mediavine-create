@@ -19,19 +19,44 @@ class List_Ads implements Settings_Group {
 	 * @inheritDoc
 	 */
 	public static function settings() {
-		$has_mv_ads = Plugin_Checker::has_mv_ads();
+		$has_mcp = Plugin_Checker::is_mcp_active();
 
 		$settings = [
 			[
+				'slug'  => Plugin::$settings_group . '_ad_provider',
+				'value' => 'auto',
+				'group' => Plugin::$settings_group . '_ads',
+				'order' => 100,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Ad Provider', 'mediavine' ),
+					'instructions' => __( 'Choose your ad provider. "Auto-detect" checks for Mediavine Control Panel automatically.', 'mediavine' ),
+					'options'      => [
+						[
+							'label' => __( 'Auto-detect', 'mediavine' ),
+							'value' => 'auto',
+						],
+						[
+							'label' => __( 'Mediavine', 'mediavine' ),
+							'value' => 'mediavine',
+						],
+						[
+							'label' => __( 'Other / None', 'mediavine' ),
+							'value' => 'none',
+						],
+					],
+				],
+			],
+			[
 				'slug'  => Plugin::$settings_group . '_list_ads_enabled',
-				'value' => $has_mv_ads ? '1' : '0',
+				'value' => $has_mcp ? '1' : '0',
 				'group' => Plugin::$settings_group . '_ads',
 				'order' => 105,
 				'data'  => [
 					'type'         => 'checkbox',
 					'label'        => __( 'Enable Ads in Lists', 'mediavine' ),
 					'instructions' => __( 'Enable ad slot insertion between list items.', 'mediavine' ),
-					'default'      => $has_mv_ads ? __( 'Enabled', 'mediavine' ) : __( 'Disabled', 'mediavine' ),
+					'default'      => $has_mcp ? __( 'Enabled', 'mediavine' ) : __( 'Disabled', 'mediavine' ),
 				],
 			],
 			[
@@ -69,21 +94,19 @@ class List_Ads implements Settings_Group {
 			],
 		];
 
-		// Non-MV publishers enter custom HTML for their ad slot
-		if ( ! $has_mv_ads ) {
-			$settings[] = [
-				'slug'  => Plugin::$settings_group . '_list_ad_custom_html',
-				'value' => '',
-				'group' => Plugin::$settings_group . '_ads',
-				'order' => 107,
-				'data'  => [
-					'type'         => 'textarea',
-					'label'        => __( 'Ad Slot HTML', 'mediavine' ),
-					'instructions' => __( 'Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped.', 'mediavine' ),
-					'default'      => '',
-				],
-			];
-		}
+		// Custom ad HTML for non-Mediavine publishers (visibility controlled by admin UI)
+		$settings[] = [
+			'slug'  => Plugin::$settings_group . '_list_ad_custom_html',
+			'value' => '',
+			'group' => Plugin::$settings_group . '_ads',
+			'order' => 107,
+			'data'  => [
+				'type'         => 'textarea',
+				'label'        => __( 'Ad Slot HTML', 'mediavine' ),
+				'instructions' => __( 'Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped.', 'mediavine' ),
+				'default'      => '',
+			],
+		];
 
 		return $settings;
 	}
