@@ -136,7 +136,7 @@ class Products_Map extends Plugin {
 	 * @return array Array of asins, otherwise empty
 	 */
 	public static function get_existing_asins_for_creation( $creation_id, $products ) {
-		$amazon = Amazon::get_instance();
+		$amazon = Amazon_Adapter::get_instance();
 		// retrieve original product maps for this creation
 		$original_product_maps = self::$models_v2->mv_products_map->where_many( [
 			[ 'creation', '=', $creation_id ],

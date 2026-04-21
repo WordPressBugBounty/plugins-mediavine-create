@@ -42,7 +42,7 @@ class Products_API extends Products {
 		$product = Arr::only( $product['data'], $fields_to_update );
 
 		// get Amazon data here
-		$amazon_scraper = Amazon::get_instance();
+		$amazon_scraper = Amazon_Adapter::get_instance();
 		$asin           = $amazon_scraper->get_asin_from_link( $product['link'] );
 
 		if ( ! empty( $asin ) && 10 === Str::length( $asin ) ) {
@@ -368,7 +368,7 @@ class Products_API extends Products {
 
 		// If the result doesn't exist or doesn't have a thumbnail, we make a fresh attempt.
 		if ( ! $result || ! empty( $result->thumbnail_id ) || empty( $result->external_thumbnail_url ) ) {
-			$amazon_scraper = Amazon::get_instance();
+			$amazon_scraper = Amazon_Adapter::get_instance();
 			$asin           = ! empty( $result->asin ) ? $result->asin : $amazon_scraper->get_asin_from_link( $link );
 			if ( ! empty( $asin ) && Str::length( $asin ) === 10 ) {
 				$scraped = $amazon_scraper->get_products_by_asin( $asin );
@@ -452,7 +452,7 @@ class Products_API extends Products {
 
 		// If the result doesn't exist or doesn't have a thumbnail, we make a fresh attempt.
 		if ( ! $result || ! empty( $result->thumbnail_id ) || empty( $result->external_thumbnail_url ) ) {
-			$amazon_scraper = Amazon::get_instance();
+			$amazon_scraper = Amazon_Adapter::get_instance();
 			$asin           = ! empty( $result->asin ) ? $result->asin : $amazon_scraper->get_asin_from_link( $link );
 			// If an ASIN was found, use PAAPI instead of the external scraper
 			if ( ! empty( $asin ) && Str::length( $asin ) === 10 ) {
@@ -688,7 +688,7 @@ class Products_API extends Products {
 				__( 'Missing error_code parameter', 'mediavine' ),
 				[
 					'status'  => 400,
-					'message' => __( 'Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning', 'mediavine' ),
+					'message' => __( 'Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning, creators_api_not_setup, creators_unauthorized, creators_access_denied, creators_rate_limited, creators_validation_error, creators_not_found, creators_oauth_error, creators_api_error', 'mediavine' ),
 				]
 			);
 		}
@@ -844,6 +844,81 @@ class Products_API extends Products {
 					'status'    => 403,
 					'message'   => __( "Amazon takes up to 48 hours to activate new API credentials. You can add products manually while waiting, or try again later.", 'mediavine' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/register-for-pa-api.html#:~:text=credentials%20take%20up%20to%2072%20hours',
+				]
+			),
+			// Creators API errors
+			'creators_api_not_setup'     => new \WP_Error(
+				'creators_api_not_setup',
+				__( 'Amazon Creators API Not Setup', 'mediavine' ),
+				[
+					'status'    => 401,
+					'message'   => __( 'Amazon Creators API is not enabled or fully configured. Please enter your Creators API credentials from Associates Central, or manually add an image and title.', 'mediavine' ),
+					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_text' => __( 'Configure Amazon Affiliates', 'mediavine' ),
+				]
+			),
+			'creators_unauthorized'      => new \WP_Error(
+				'creators_unauthorized',
+				__( 'Amazon: Authentication Failed', 'mediavine' ),
+				[
+					'status'    => 401,
+					'message'   => __( 'Amazon rejected your Creators API credentials. Please verify your Credential ID and Secret in Associates Central.', 'mediavine' ),
+					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine' ),
+				]
+			),
+			'creators_access_denied'     => new \WP_Error(
+				'creators_access_denied',
+				__( 'Amazon: Access Denied', 'mediavine' ),
+				[
+					'status'    => 403,
+					'message'   => __( "Amazon denied access to the Creators API. This may mean your credentials don't have the required permissions, or your Associates account isn't eligible.", 'mediavine' ),
+					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
+					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine' ),
+				]
+			),
+			'creators_rate_limited'      => new \WP_Error(
+				'creators_rate_limited',
+				__( 'Amazon: Rate Limit Exceeded', 'mediavine' ),
+				[
+					'status'  => 429,
+					'message' => __( "Amazon is rate-limiting your requests. Wait a few minutes before trying again.", 'mediavine' ),
+				]
+			),
+			'creators_validation_error'  => new \WP_Error(
+				'creators_validation_error',
+				__( 'Amazon: Invalid Request', 'mediavine' ),
+				[
+					'status'  => 400,
+					'message' => __( 'Amazon reports an invalid request to the Creators API. This is usually a temporary issue - please try again.', 'mediavine' ),
+				]
+			),
+			'creators_not_found'         => new \WP_Error(
+				'creators_not_found',
+				__( 'Amazon: Resource Not Found', 'mediavine' ),
+				[
+					'status'    => 404,
+					'message'   => __( 'The requested Amazon resource was not found. Please verify your Partner Tag and region settings.', 'mediavine' ),
+					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_text' => __( 'Check Your Settings', 'mediavine' ),
+				]
+			),
+			'creators_oauth_error'       => new \WP_Error(
+				'creators_oauth_error',
+				__( 'Amazon: OAuth Authentication Failed', 'mediavine' ),
+				[
+					'status'    => 401,
+					'message'   => __( 'Amazon rejected your Creators API credentials during OAuth authentication. Please verify your Credential ID and Secret in Associates Central.', 'mediavine' ),
+					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
+					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine' ),
+				]
+			),
+			'creators_api_error'         => new \WP_Error(
+				'creators_api_error',
+				__( 'Amazon: Creators API Error', 'mediavine' ),
+				[
+					'status'  => 500,
+					'message' => __( 'An unexpected error occurred with the Amazon Creators API. Please try again later.', 'mediavine' ),
 				]
 			),
 		];

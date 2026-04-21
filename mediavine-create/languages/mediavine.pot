@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.3.0\n"
+"Project-Id-Version: Create 2.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-14T17:51:24+00:00\n"
+"POT-Creation-Date: 2026-04-21T18:29:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
@@ -51,13 +51,13 @@ msgid "Dashboard"
 msgstr ""
 
 #: admin/class-admin-init.php:369
-#: class-plugin.php:1397
+#: class-plugin.php:1400
 #: lib/settings-group/class-advanced.php:284
 msgid "Recipes"
 msgstr ""
 
 #: admin/class-admin-init.php:370
-#: class-plugin.php:1404
+#: class-plugin.php:1407
 #: lib/settings-group/class-advanced.php:288
 msgid "How-Tos"
 msgstr ""
@@ -106,99 +106,99 @@ msgstr ""
 msgid "Theme Elements"
 msgstr ""
 
-#: class-plugin.php:558
+#: class-plugin.php:561
 #: lib/settings/class-site-verification.php:436
 msgid "Product Registration"
 msgstr ""
 
-#: class-plugin.php:559
+#: class-plugin.php:562
 #: lib/settings/class-site-verification.php:437
 msgid "In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs."
 msgstr ""
 
-#: class-plugin.php:893
+#: class-plugin.php:896
 msgid "Thanks for installing Create!"
 msgstr ""
 
 #. translators: %1$s: link to importer setting, %2$s: closing anchor tag
-#: class-plugin.php:897
+#: class-plugin.php:900
 #, php-format
 msgid "If you're moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes."
 msgstr ""
 
-#: class-plugin.php:1327
+#: class-plugin.php:1330
 msgid "CSS Class"
 msgstr ""
 
-#: class-plugin.php:1328
+#: class-plugin.php:1331
 msgid "Add an additional CSS class to this card."
 msgstr ""
 
-#: class-plugin.php:1333
+#: class-plugin.php:1336
 msgid "Custom Nutrition Disclaimer"
 msgstr ""
 
-#: class-plugin.php:1334
+#: class-plugin.php:1337
 msgid "Example: Nutrition information isn't always accurate."
 msgstr ""
 
-#: class-plugin.php:1340
+#: class-plugin.php:1343
 msgid "Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1341
+#: class-plugin.php:1344
 msgid "Override the default affiliate message for this card."
 msgstr ""
 
-#: class-plugin.php:1347
+#: class-plugin.php:1350
 msgid "Show Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1348
+#: class-plugin.php:1351
 msgid "Check this box to display an affiliate message on this List."
 msgstr ""
 
-#: class-plugin.php:1357
+#: class-plugin.php:1360
 msgid "Social Footer Icon"
 msgstr ""
 
-#: class-plugin.php:1358
+#: class-plugin.php:1361
 msgid "Override the default social footer icon for this card."
 msgstr ""
 
-#: class-plugin.php:1371
+#: class-plugin.php:1374
 msgid "Social Footer Heading"
 msgstr ""
 
-#: class-plugin.php:1372
+#: class-plugin.php:1375
 msgid "Override the default social footer heading for this card."
 msgstr ""
 
-#: class-plugin.php:1378
+#: class-plugin.php:1381
 msgid "Social Footer Content"
 msgstr ""
 
-#: class-plugin.php:1379
+#: class-plugin.php:1382
 msgid "Override the default social footer content for this card."
 msgstr ""
 
-#: class-plugin.php:1396
+#: class-plugin.php:1399
 #: lib/class-admin-bar.php:141
 msgid "Recipe"
 msgstr ""
 
-#: class-plugin.php:1403
+#: class-plugin.php:1406
 #: lib/class-admin-bar.php:142
 msgid "How-To"
 msgstr ""
 
-#: class-plugin.php:1410
+#: class-plugin.php:1413
 #: lib/class-admin-bar.php:143
 #: lib/settings-group/class-reader-experience.php:552
 msgid "List"
 msgstr ""
 
-#: class-plugin.php:1411
+#: class-plugin.php:1414
 #: lib/settings-group/class-advanced.php:292
 msgid "Lists"
 msgstr ""
@@ -461,7 +461,7 @@ msgstr ""
 
 #: lib/creations/class-creations-api.php:586
 #: lib/product-maps/class-products-map-api.php:285
-#: lib/products/class-products-api.php:900
+#: lib/products/class-products-api.php:975
 #: lib/reviews/class-reviews-api.php:832
 #: lib/supplies/class-supplies-api.php:110
 msgid "Entry Could Not Be Deleted"
@@ -1362,6 +1362,268 @@ msgstr ""
 msgid "A conflict occurred and the Product Maps could not be deleted"
 msgstr ""
 
+#: lib/products/class-amazon-creators.php:182
+#: lib/products/class-amazon.php:463
+msgid "Register to Access PRO Features"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:185
+#: lib/products/class-amazon.php:466
+msgid "Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:187
+#: lib/products/class-amazon.php:468
+#: lib/products/class-products-api.php:827
+msgid "Register Create"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:194
+#: lib/products/class-products-api.php:852
+msgid "Amazon Creators API Not Setup"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:197
+#: lib/products/class-products-api.php:855
+msgid "Amazon Creators API is not enabled or fully configured. Please enter your Creators API credentials from Associates Central, or manually add an image and title."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:199
+#: lib/products/class-products-api.php:837
+#: lib/products/class-products-api.php:857
+msgid "Configure Amazon Affiliates"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:251
+msgid "Amazon: OAuth Token Request Failed"
+msgstr ""
+
+#. translators: %s: the transport-level error message
+#: lib/products/class-amazon-creators.php:256
+#, php-format
+msgid "Could not obtain an OAuth token from Amazon. Error: %s"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:289
+msgid "Unknown error"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:295
+#: lib/products/class-products-api.php:908
+msgid "Amazon: OAuth Authentication Failed"
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: Amazon's error detail, 3: guidance
+#: lib/products/class-amazon-creators.php:300
+#, php-format
+msgid "Amazon rejected your Creators API credentials (HTTP %1$d): %2$s %3$s"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:306
+#: lib/products/class-amazon-creators.php:609
+#: lib/products/class-products-api.php:867
+#: lib/products/class-products-api.php:913
+msgid "Check Your Credentials in Settings"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:327
+msgid "This usually means the Credential ID or Credential Secret is incorrect, or your credentials are still provisioning (allow up to 48 hours after creation)."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:328
+msgid "Your credentials do not have access to the Creators API scope. Verify the credentials were created in Associates Central under Tools > Creators API."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:329
+msgid "Your Associates account may not be approved for the Creators API yet, or it was disabled. Check your account status in Associates Central."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:330
+msgid "The client_credentials grant was rejected. Double-check your Credential ID and Secret for copy/paste errors (including trailing spaces)."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:331
+msgid "The request was rejected as malformed. Please report this to support."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:333
+msgid "Please verify your Credential ID and Secret in Associates Central."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:438
+msgid "Amazon: Creators API Request Failed"
+msgstr ""
+
+#. translators: %s: the transport-level error message
+#: lib/products/class-amazon-creators.php:443
+#, php-format
+msgid "Could not reach the Amazon Creators API. Error: %s"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:508
+msgid "The requested API operation was not recognized by Amazon. This is likely a bug in the plugin — please report it."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:509
+msgid "Amazon could not parse the request. This is likely a bug in the plugin — please report it."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:510
+msgid "One or more request fields failed validation. See the field list for details."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:511
+msgid "Your Creators API credentials are not linked to the Associate Tag for this marketplace. Verify the tag and marketplace selection in settings."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:512
+msgid "The Associate Tag is invalid or is not mapped to the store associated with your credentials. Double-check the tag in your settings."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:515
+msgid "Your Associates account does not currently meet the eligibility requirements (10 qualified sales in the trailing 30 days). Access is restored within 2 days of new qualified sales."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:516
+msgid "Amazon rejected the authorization check. Verify your credentials and Associate Tag are for the same account/marketplace."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:519
+msgid "The access token expired. The plugin will automatically refresh it on the next request."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:520
+msgid "The access token is invalid or malformed. The plugin will regenerate it on the next request."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:521
+msgid "The token issuer does not match the expected issuer for this marketplace. Verify that the selected marketplace matches the region where your credentials were created."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:522
+msgid "The access token is missing required claims. This is likely an issue with how the plugin obtained the token — please report it."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:523
+msgid "The access token is missing its key identifier. This is likely an issue with how the plugin obtained the token — please report it."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:524
+msgid "Your client credentials are not registered for the Creators API. Verify you generated them from Associates Central > Tools > Creators API."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:525
+msgid "The client identifier does not match the expected value. Double-check your Credential ID for typos or extra whitespace."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:526
+msgid "The request was missing authentication credentials. This is likely a plugin bug — please report it."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:542
+#, php-format
+msgid "[Reason: %s]"
+msgstr ""
+
+#. translators: %s: comma-separated list of invalid field names
+#: lib/products/class-amazon-creators.php:548
+#, php-format
+msgid "Invalid fields: %s"
+msgstr ""
+
+#. translators: 1: resource type (e.g. "Item"), 2: resource ID (e.g. ASIN)
+#: lib/products/class-amazon-creators.php:556
+#, php-format
+msgid "Resource: %1$s \"%2$s\""
+msgstr ""
+
+#. translators: %d: number of seconds
+#: lib/products/class-amazon-creators.php:566
+#, php-format
+msgid "Retry after %d seconds."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:598
+#: lib/products/class-products-api.php:903
+msgid "Check Your Settings"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:607
+#: lib/products/class-products-api.php:862
+msgid "Amazon: Authentication Failed"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:608
+msgid "Amazon rejected your Creators API credentials."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:616
+#: lib/products/class-products-api.php:872
+msgid "Amazon: Access Denied"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:617
+msgid "Amazon denied access to the Creators API."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:620
+#: lib/products/class-amazon.php:334
+#: lib/products/class-products-api.php:737
+#: lib/products/class-products-api.php:877
+msgid "Check Your Account in Amazon Associates Central"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:627
+#: lib/products/class-amazon.php:374
+#: lib/products/class-products-api.php:765
+#: lib/products/class-products-api.php:882
+msgid "Amazon: Rate Limit Exceeded"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:628
+#: lib/products/class-products-api.php:885
+msgid "Amazon is rate-limiting your requests. Wait a few minutes before trying again."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:635
+#: lib/products/class-amazon.php:415
+#: lib/products/class-products-api.php:794
+#: lib/products/class-products-api.php:890
+msgid "Amazon: Invalid Request"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:636
+msgid "Amazon reports an invalid request."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:643
+#: lib/products/class-products-api.php:898
+msgid "Amazon: Resource Not Found"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:644
+msgid "The requested Amazon resource was not found."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:654
+msgid "Amazon: Server Error"
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:655
+msgid "Amazon reported an unexpected server error. Please try again in a few minutes."
+msgstr ""
+
+#: lib/products/class-amazon-creators.php:678
+#: lib/products/class-products-api.php:918
+msgid "Amazon: Creators API Error"
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: lib/products/class-amazon-creators.php:682
+#, php-format
+msgid "An error occurred with the Amazon Creators API (HTTP %d)."
+msgstr ""
+
 #: lib/products/class-amazon.php:265
 msgid "Unknown API Error"
 msgstr ""
@@ -1425,11 +1687,6 @@ msgstr ""
 msgid "Amazon reports your credentials aren't linked to an approved Associates account. This usually means your Associates application is still pending, or you're using credentials from a different Amazon account than your approved store."
 msgstr ""
 
-#: lib/products/class-amazon.php:334
-#: lib/products/class-products-api.php:737
-msgid "Check Your Account in Amazon Associates Central"
-msgstr ""
-
 #: lib/products/class-amazon.php:344
 #: lib/products/class-products-api.php:743
 msgid "Amazon: Invalid Credentials"
@@ -1458,11 +1715,6 @@ msgstr ""
 #: lib/products/class-amazon.php:364
 #: lib/products/class-products-api.php:759
 msgid "Re-enter Your Secret Key in Settings"
-msgstr ""
-
-#: lib/products/class-amazon.php:374
-#: lib/products/class-products-api.php:765
-msgid "Amazon: Rate Limit Exceeded"
 msgstr ""
 
 #: lib/products/class-amazon.php:377
@@ -1495,11 +1747,6 @@ msgstr ""
 msgid "Check Your Access Key in Settings"
 msgstr ""
 
-#: lib/products/class-amazon.php:415
-#: lib/products/class-products-api.php:794
-msgid "Amazon: Invalid Request"
-msgstr ""
-
 #: lib/products/class-amazon.php:418
 #: lib/products/class-products-api.php:797
 msgid "Amazon reports an invalid or missing parameter in the request. This is usually a temporary issue - please try again."
@@ -1513,19 +1760,6 @@ msgstr ""
 #: lib/products/class-amazon.php:431
 #: lib/products/class-products-api.php:806
 msgid "Amazon received an unknown API operation. This is likely a plugin issue - please contact support."
-msgstr ""
-
-#: lib/products/class-amazon.php:463
-msgid "Register to Access PRO Features"
-msgstr ""
-
-#: lib/products/class-amazon.php:466
-msgid "Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title."
-msgstr ""
-
-#: lib/products/class-amazon.php:468
-#: lib/products/class-products-api.php:827
-msgid "Register Create"
 msgstr ""
 
 #: lib/products/class-amazon.php:476
@@ -1604,7 +1838,7 @@ msgid "Missing error_code parameter"
 msgstr ""
 
 #: lib/products/class-products-api.php:691
-msgid "Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning"
+msgid "Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning, creators_api_not_setup, creators_unauthorized, creators_access_denied, creators_rate_limited, creators_validation_error, creators_not_found, creators_oauth_error, creators_api_error"
 msgstr ""
 
 #: lib/products/class-products-api.php:812
@@ -1635,10 +1869,6 @@ msgstr ""
 msgid "Amazon Affiliates needs to be enabled and configured in Create settings before you can scrape Amazon products."
 msgstr ""
 
-#: lib/products/class-products-api.php:837
-msgid "Configure Amazon Affiliates"
-msgstr ""
-
 #: lib/products/class-products-api.php:842
 msgid "Amazon: Credentials Still Activating"
 msgstr ""
@@ -1647,16 +1877,40 @@ msgstr ""
 msgid "Amazon takes up to 48 hours to activate new API credentials. You can add products manually while waiting, or try again later."
 msgstr ""
 
-#: lib/products/class-products-api.php:854
+#: lib/products/class-products-api.php:865
+msgid "Amazon rejected your Creators API credentials. Please verify your Credential ID and Secret in Associates Central."
+msgstr ""
+
+#: lib/products/class-products-api.php:875
+msgid "Amazon denied access to the Creators API. This may mean your credentials don't have the required permissions, or your Associates account isn't eligible."
+msgstr ""
+
+#: lib/products/class-products-api.php:893
+msgid "Amazon reports an invalid request to the Creators API. This is usually a temporary issue - please try again."
+msgstr ""
+
+#: lib/products/class-products-api.php:901
+msgid "The requested Amazon resource was not found. Please verify your Partner Tag and region settings."
+msgstr ""
+
+#: lib/products/class-products-api.php:911
+msgid "Amazon rejected your Creators API credentials during OAuth authentication. Please verify your Credential ID and Secret in Associates Central."
+msgstr ""
+
+#: lib/products/class-products-api.php:921
+msgid "An unexpected error occurred with the Amazon Creators API. Please try again later."
+msgstr ""
+
+#: lib/products/class-products-api.php:929
 msgid "Unknown error code"
 msgstr ""
 
-#: lib/products/class-products-api.php:858
+#: lib/products/class-products-api.php:933
 #, php-format
 msgid "The error code \"%s\" is not recognized. Available codes: %s"
 msgstr ""
 
-#: lib/products/class-products-api.php:902
+#: lib/products/class-products-api.php:977
 msgid "A conflict occurred and the product could not be deleted"
 msgstr ""
 
@@ -2332,9 +2586,9 @@ msgstr ""
 
 #: lib/settings-group/class-affiliates.php:23
 msgid ""
-"When enabled, recommended products in Create cards have the ability to pull data from Amazon, using the Product Advertising API Version 5.0 (PA API 5).\n"
+"When enabled, recommended products in Create cards have the ability to pull data from Amazon.\n"
 "\n"
-"\t\t\t\t\t\tYou will need to register with Amazon as an affiliate and use your own Product Advertising/Amazon Affiliates Access Key, Secret, and Store ID.\n"
+"\t\t\t\t\t\tYou will need to register with Amazon as an affiliate and use your credentials from Associates Central.\n"
 "\n"
 "\t\t\t\t\t\tImages will be pulled directly from Amazon and refreshed every 24 hours per their terms and conditions.\n"
 "\n"
@@ -2342,31 +2596,62 @@ msgid ""
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:43
-msgid "Amazon Marketplace"
+msgid "Amazon Marketplace / Creators API Region"
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:44
-msgid "Select the Amazon marketplace your affiliate account is registered with."
+msgid "Select the Amazon marketplace your affiliate account is registered with. This also determines the Creators API region used for requests."
 msgstr ""
 
 #: lib/settings-group/class-affiliates.php:68
-msgid "Amazon Affiliates Access Key"
-msgstr ""
-
-#: lib/settings-group/class-affiliates.php:69
-msgid "The Amazon Affiliates Access Key"
-msgstr ""
-
-#: lib/settings-group/class-affiliates.php:81
-msgid "Amazon Affiliates Secret Access Key"
-msgstr ""
-
-#: lib/settings-group/class-affiliates.php:94
 msgid "Amazon Associate Tag"
 msgstr ""
 
-#: lib/settings-group/class-affiliates.php:95
-msgid "The Amazon Associate Tag/Store ID for the selected marketplace."
+#: lib/settings-group/class-affiliates.php:69
+msgid "The Amazon Associate Tag/Store ID for the selected marketplace. Required for both the Creators API and the legacy PA-API."
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:84
+msgid "Creators API Credential ID"
+msgstr ""
+
+#. translators: %s: link to Amazon Associates Central Creators API tools
+#: lib/settings-group/class-affiliates.php:87
+#, php-format
+msgid "Your Credential ID from Amazon Associates Central. Find this under %s."
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:88
+msgid "Tools &rsaquo; Creators API"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:101
+msgid "Creators API Credential Secret"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:102
+msgid "Your Credential Secret from Amazon Associates Central. Please note that Amazon may take time to provision new credentials."
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:115
+msgid "PA-API Access Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:116
+msgid "The PA-API 5.0 Access Key. Please migrate to the Creators API credentials above."
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:119
+#: lib/settings-group/class-affiliates.php:133
+msgid "April 30, 2026"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:129
+msgid "PA-API Secret Key"
+msgstr ""
+
+#: lib/settings-group/class-affiliates.php:130
+msgid "The PA-API 5.0 Secret Key. Amazon generally takes 48 hours to provision this key. Please migrate to the Creators API credentials above."
 msgstr ""
 
 #: lib/settings-group/class-appearance.php:20
@@ -3292,14 +3577,14 @@ msgstr ""
 msgid "Toggle ingredient group"
 msgstr ""
 
-#: admin/ui/build/app.build.2.3.0.js:7651
+#: admin/ui/build/app.build.2.4.1.js:7666
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.2.3.0.js:7651
+#: admin/ui/build/app.build.2.4.1.js:7666
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.2.3.0.js:7651
+#: admin/ui/build/app.build.2.4.1.js:7666
 msgid "Description"
 msgstr ""

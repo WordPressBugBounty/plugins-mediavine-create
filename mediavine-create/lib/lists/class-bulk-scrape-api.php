@@ -414,7 +414,7 @@ class Bulk_Scrape_API {
 	 * @return array Result array.
 	 */
 	private function scrape_amazon_url( $url ) {
-		$amazon_scraper = Amazon::get_instance();
+		$amazon_scraper = Amazon_Adapter::get_instance();
 		$asin           = $amazon_scraper->get_asin_from_link( $url );
 
 		// If we can't extract ASIN, fall back to external scraper.

@@ -32,7 +32,7 @@ class Products_Map_API extends Products {
 			return $response;
 		}
 
-		$amazon_scraper = Amazon::get_instance();
+		$amazon_scraper = Amazon_Adapter::get_instance();
 		$existing_asins = Products_Map::get_existing_asins_for_creation( $creation_id, $products_map );
 
 		/**

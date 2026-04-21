@@ -54,7 +54,7 @@ class Relations extends Plugin {
 	function init() {
 		$this->api = new Relations_API();
 
-		$this->amazon       = Amazon::get_instance();
+		$this->amazon       = Amazon_Adapter::get_instance();
 		$this->amazon_queue = new Queue(
 			[
 				'queue_name'     => 'mv_amazon_link_queue',

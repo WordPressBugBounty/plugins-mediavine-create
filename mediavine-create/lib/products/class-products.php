@@ -80,8 +80,8 @@ class Products extends Plugin {
 	public $plural = 'product';
 
 	/**
-	 * Instance of Amazon object
-	 * @var Amazon
+	 * Instance of Amazon object (Amazon or Amazon_Creators via adapter)
+	 * @var Amazon|Amazon_Creators
 	 */
 	private $amazon;
 
@@ -119,7 +119,7 @@ class Products extends Plugin {
 		}
 
 		// Attempt to create a new thumbnail, but only if no ASIN
-		$has_asin = Amazon::get_instance()->get_asin_from_link($product['link']);
+		$has_asin = Amazon_Adapter::get_instance()->get_asin_from_link($product['link']);
 		if ( ! empty($product['remote_thumbnail_uri']) && empty($product['asin']) && ! $has_asin ) {
 			// Some results won't include protocol -or- use relative URLs, so we coerce these to absolute URLs.
 			if ( strpos($product['remote_thumbnail_uri'], 'http') === false ) {
@@ -215,7 +215,7 @@ class Products extends Plugin {
 				'auto_unlock'    => false,
 			]
 		);
-		$this->amazon       = Amazon::get_instance();
+		$this->amazon       = Amazon_Adapter::get_instance();
 		$this->api          = new Products_API();
 
 		add_filter('mv_custom_schema', [ $this, 'custom_schema' ]);

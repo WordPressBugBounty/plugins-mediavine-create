@@ -143,6 +143,19 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.4.1 =
+
+* FEATURE: Added a "Sync subscription" button to the Create Studio settings for free-tier users, giving you a self-serve way to refresh your subscription state if it becomes stale
+* FIX: Resolved a 500 error when saving Amazon product relations on sites configured with the new Amazon Creators API
+* FIX: The Button Action, Category, and Cuisine dropdowns inside list items are no longer clipped by the editor panes and now display the full list of options
+
+
+= 2.4.0 =
+
+* FEATURE: Amazon Creators API integration — replaces the legacy PA-API ahead of Amazon's April 30, 2026 deprecation, with clearer, actionable error messages when credentials or product requests fail
+* FIX: Recipe and how-to editors now also have fixed-height, independently-scrolling panes, matching the list editor
+* FIX: Sticky section headers in the recipe, how-to, and list editors no longer hide behind the control bar
+
 = 2.3.0 =
 
 * FEATURE: Ad Provider setting — choose whether Mediavine ad slot markup appears in your cards, or disable it for non-Mediavine ad setups

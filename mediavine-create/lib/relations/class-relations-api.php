@@ -416,7 +416,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			}
 
 			// Amazon affiliate isn't set up
-			$amazon_scraper = Amazon::get_instance();
+			$amazon_scraper = Amazon_Adapter::get_instance();
 			if ( ! $amazon_scraper->amazon_affiliates_setup() ) {
 				return false;
 			}
@@ -516,14 +516,14 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Find the previous ASIN in $existing_asins, if it doesn't exist, scrape the URL for the meta data
 		 *
-		 * @param string $asin ASIN to be scraped
-		 * @param array  $existing_asins Array of existing ASINs to check against
-		 * @param Amazon $amazon_scraper Amazon scraper class instance
-		 * @param array  $original_relations Original relations to pull meta from if the key does exist
+		 * @param string                  $asin ASIN to be scraped
+		 * @param array                   $existing_asins Array of existing ASINs to check against
+		 * @param Amazon|Amazon_Creators  $amazon_scraper Scraper instance returned by Amazon_Adapter (legacy or Creators)
+		 * @param array                   $original_relations Original relations to pull meta from if the key does exist
 		 *
 		 * @return array|\WP_Error JSON decoded Amazon metadata or WP_Error if the link can't be scraped
 		 */
-		public function get_amazon_products_metadata( $asin, $existing_asins, Amazon $amazon_scraper, $original_relations ) {
+		public function get_amazon_products_metadata( $asin, $existing_asins, $amazon_scraper, $original_relations ) {
 			// find the previous ASIN in $existing_asins array
 			// this key should also match the position of the existing list item
 			$key    = array_search( $asin, $existing_asins, true );

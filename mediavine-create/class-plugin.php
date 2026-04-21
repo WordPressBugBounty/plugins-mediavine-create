@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.3.0';
+	const VERSION = '2.4.1';
 
 	const DB_VERSION = '2.1.1';
 
@@ -455,6 +455,9 @@ class Plugin {
 
 		// Initialize Trial API for trial extension proxy.
 		Trial_API::init();
+
+		// Initialize Subscription API for user-invoked subscription sync.
+		Subscription_API::init();
 
 		// Initialize Bulk Scrape API for list bulk import feature
 		$Bulk_Scrape_API = new Bulk_Scrape_API();
