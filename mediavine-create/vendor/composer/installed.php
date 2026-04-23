@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'mischief-marmot/mediavine-create',
-        'pretty_version' => 'dev-d7b9761ae366cef9f3f292a8bd0a447dd98fc725',
-        'version' => 'dev-d7b9761ae366cef9f3f292a8bd0a447dd98fc725',
-        'reference' => 'd7b9761ae366cef9f3f292a8bd0a447dd98fc725',
+        'pretty_version' => 'dev-release/2.4.2',
+        'version' => 'dev-release/2.4.2',
+        'reference' => 'cfd25d94f4aa4324fac9c6aa4f4aab9506800721',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -38,9 +38,9 @@
             'dev_requirement' => false,
         ),
         'mischief-marmot/mediavine-create' => array(
-            'pretty_version' => 'dev-d7b9761ae366cef9f3f292a8bd0a447dd98fc725',
-            'version' => 'dev-d7b9761ae366cef9f3f292a8bd0a447dd98fc725',
-            'reference' => 'd7b9761ae366cef9f3f292a8bd0a447dd98fc725',
+            'pretty_version' => 'dev-release/2.4.2',
+            'version' => 'dev-release/2.4.2',
+            'reference' => 'cfd25d94f4aa4324fac9c6aa4f4aab9506800721',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -143,11 +143,16 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.4.2 =
+
+* FIX: The Bulk Link Import Wizard and list Bulk Edit modal now appear above the editor overlay when opened from the Gutenberg block editor, instead of being hidden behind it (Premium)
+
+
 = 2.4.1 =
 
-* FEATURE: Added a "Sync subscription" button to the Create Studio settings for free-tier users, giving you a self-serve way to refresh your subscription state if it becomes stale
-* FIX: Resolved a 500 error when saving Amazon product relations on sites configured with the new Amazon Creators API
-* FIX: The Button Action, Category, and Cuisine dropdowns inside list items are no longer clipped by the editor panes and now display the full list of options
+* ENHANCEMENT: Added a "Sync subscription" button to the Create Studio settings for free-tier users, giving you a self-serve way to refresh your subscription state if it becomes stale
+* FIX: Resolved an error when saving Amazon product relations on sites configured with the new Amazon Creators API
+* FIX: The Button Text dropdown inside list items is no longer clipped by the editor pane and now display the full list of options
 
 
 = 2.4.0 =
