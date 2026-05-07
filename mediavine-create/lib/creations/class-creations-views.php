@@ -113,7 +113,6 @@ class Creations_Views extends Creations {
 		add_action('wp_enqueue_scripts', [ $this, 'register_styles' ]);
 		add_action('wp_enqueue_scripts', [ $this, 'register_scripts' ]);
 		add_action('wp_head', [ $this, 'lists_rounded_corners' ]);
-		add_action('wp_head', [ $this, 'css_variables' ]);
 		add_action('wp_footer', [ $this, 'output_custom_css' ], 999);
 
 		add_filter('script_loader_tag', [ $this, 'add_async_attribute' ], 10, 2);
@@ -172,81 +171,81 @@ class Creations_Views extends Creations {
 		return $tag;
 	}
 
-	public function css_variables() {
-	   $color            = \Mediavine\Settings::get_setting('mv_create_color');
-		$secondary_color = \Mediavine\Settings::get_setting('mv_create_secondary_color');
+	/**
+	 * Build the CSS custom properties for the card's color theme.
+	 *
+	 * Returned as an inline style string applied directly to each
+	 * .mv-create-card element. A wp_head <style> block was previously used,
+	 * but Remove-Unused-CSS optimizers (WP Rocket RUCSS, etc.) strip it
+	 * because the rule body is just custom-property declarations they can't
+	 * tie back to a "used" selector. Element style attributes are not
+	 * touched by those optimizers.
+	 */
+	public static function get_card_inline_style() {
+		static $cached = null;
+		if ( null !== $cached ) {
+			return $cached;
+		}
 
-		$color           = trim($color);
-		$secondary_color = trim($secondary_color);
+		$color           = trim( (string) \Mediavine\Settings::get_setting( 'mv_create_color' ) );
+		$secondary_color = trim( (string) \Mediavine\Settings::get_setting( 'mv_create_secondary_color' ) );
 
 		$properties = [];
 
-		$inherit_font_size = \Mediavine\Settings::get_setting('mv_create_inherit_theme_fontsize', false);
+		$inherit_font_size = \Mediavine\Settings::get_setting( 'mv_create_inherit_theme_fontsize', false );
 		if ( $inherit_font_size ) {
 			$properties[] = 'font-size: 1em;';
 			$properties[] = '--mv-create-base-font-size: 1em;';
-			$properties[] = '--mv-create-title-primary: 1.875em;'; // mv-create-title-primary
-			$properties[] = '--mv-create-title-secondary: 1.5em;'; // mv-create-title-secondary
-			$properties[] = '--mv-create-subtitles: 1.125em;'; // --mv-create-subtitles - sub-titles used inside
+			$properties[] = '--mv-create-title-primary: 1.875em;';
+			$properties[] = '--mv-create-title-secondary: 1.5em;';
+			$properties[] = '--mv-create-subtitles: 1.125em;';
 		}
 
-		$has_primary   = ! empty($color) && '#' !== $color;
-		$has_secondary = ! empty($secondary_color) && '#' !== $secondary_color;
+		$has_primary   = ! empty( $color ) && '#' !== $color;
+		$has_secondary = ! empty( $secondary_color ) && '#' !== $secondary_color;
 
-		if ( $has_primary || $has_secondary ) {
-			// Primary color properties
-			if ( $has_primary ) {
-				$properties[] = '--mv-create-base: ' . esc_attr($color) . ' !important;';
+		if ( $has_primary ) {
+			$properties[] = '--mv-create-base: ' . $color . ' !important;';
 
-				$color_alt = Creations_Views_Colors::darken($color, 20);
-				if ( Creations_Views_Colors::is_dark($color) ) {
-					$color_alt    = Creations_Views_Colors::lighten($color, 20);
-					$properties[] = '--mv-create-alt: ' . esc_attr($color_alt) . ' !important;';
-					$properties[] = '--mv-create-alt-text: ' . esc_attr( Creations_Views_Colors::contrast_text( $color_alt ) ) . ' !important;';
-				}
-
-				$color_hover = Creations_Views_Colors::darken($color_alt, 20);
-				if ( Creations_Views_Colors::is_dark($color_alt) ) {
-					$color_hover  = Creations_Views_Colors::lighten($color_alt, 20);
-					$properties[] = '--mv-create-alt-hover: ' . esc_attr($color_hover) . ' !important;';
-				}
-
-				$color_text    = Creations_Views_Colors::contrast_text( $color );
-				$properties[] = '--mv-create-text: ' . esc_attr($color_text) . ' !important;';
+			$color_alt = Creations_Views_Colors::darken( $color, 20 );
+			if ( Creations_Views_Colors::is_dark( $color ) ) {
+				$color_alt    = Creations_Views_Colors::lighten( $color, 20 );
+				$properties[] = '--mv-create-alt: ' . $color_alt . ' !important;';
+				$properties[] = '--mv-create-alt-text: ' . Creations_Views_Colors::contrast_text( $color_alt ) . ' !important;';
 			}
 
-			// Secondary color properties — only output when secondary is actually set
-			if ( $has_secondary ) {
-				$properties[] = '--mv-create-secondary-base: ' . esc_attr($secondary_color) . ' !important;';
-
-				$secondary_color_alt = Creations_Views_Colors::darken($secondary_color, 20);
-				if ( Creations_Views_Colors::is_dark($secondary_color) ) {
-					$secondary_color_alt = Creations_Views_Colors::lighten($secondary_color, 20);
-					$properties[]        = '--mv-create-secondary-alt: ' . esc_attr($secondary_color_alt) . ' !important;';
-				}
-
-				$secondary_color_hover = Creations_Views_Colors::darken($secondary_color_alt, 20);
-				if ( Creations_Views_Colors::is_dark($secondary_color_alt) ) {
-					$secondary_color_hover = Creations_Views_Colors::lighten($secondary_color_alt, 20);
-					$properties[]          = '--mv-create-secondary-alt-hover: ' . esc_attr($secondary_color_hover) . ' !important;';
-				}
-
-				$secondary_color_text = Creations_Views_Colors::contrast_text( $secondary_color );
-				$properties[]         = '--mv-create-secondary-text: ' . esc_attr($secondary_color_text) . ' !important;';
-				$properties[] = '--mv-create-secondary-base-trans: ' . esc_attr(Creations_Views_Colors::to_rgba($secondary_color, .8)) . ' !important;';
-				$properties[] = '--mv-star-fill: ' . esc_attr(Creations_Views_Colors::mix($secondary_color, '#fff')) . ' !important;';
-				$properties[] = '--mv-star-fill-hover: ' . esc_attr($secondary_color) . ' !important;';
+			$color_hover = Creations_Views_Colors::darken( $color_alt, 20 );
+			if ( Creations_Views_Colors::is_dark( $color_alt ) ) {
+				$color_hover  = Creations_Views_Colors::lighten( $color_alt, 20 );
+				$properties[] = '--mv-create-alt-hover: ' . $color_hover . ' !important;';
 			}
-		}
-		if ( ! empty($properties) ) { ?>
-			<style>
-				.mv-create-card {
-					<?php echo esc_attr(implode("\n", $properties)); ?>
-				}
-			</style>
-		<?php
+
+			$properties[] = '--mv-create-text: ' . Creations_Views_Colors::contrast_text( $color ) . ' !important;';
 		}
 
+		if ( $has_secondary ) {
+			$properties[] = '--mv-create-secondary-base: ' . $secondary_color . ' !important;';
+
+			$secondary_color_alt = Creations_Views_Colors::darken( $secondary_color, 20 );
+			if ( Creations_Views_Colors::is_dark( $secondary_color ) ) {
+				$secondary_color_alt = Creations_Views_Colors::lighten( $secondary_color, 20 );
+				$properties[]        = '--mv-create-secondary-alt: ' . $secondary_color_alt . ' !important;';
+			}
+
+			$secondary_color_hover = Creations_Views_Colors::darken( $secondary_color_alt, 20 );
+			if ( Creations_Views_Colors::is_dark( $secondary_color_alt ) ) {
+				$secondary_color_hover = Creations_Views_Colors::lighten( $secondary_color_alt, 20 );
+				$properties[]          = '--mv-create-secondary-alt-hover: ' . $secondary_color_hover . ' !important;';
+			}
+
+			$properties[] = '--mv-create-secondary-text: ' . Creations_Views_Colors::contrast_text( $secondary_color ) . ' !important;';
+			$properties[] = '--mv-create-secondary-base-trans: ' . Creations_Views_Colors::to_rgba( $secondary_color, 0.8 ) . ' !important;';
+			$properties[] = '--mv-star-fill: ' . Creations_Views_Colors::mix( $secondary_color, '#fff' ) . ' !important;';
+			$properties[] = '--mv-star-fill-hover: ' . $secondary_color . ' !important;';
+		}
+
+		$cached = implode( ' ', $properties );
+		return $cached;
 	}
 
 	/**
@@ -849,6 +848,15 @@ class Creations_Views extends Creations {
 						continue;
 					}
 
+					// Section dividers (explicit type or legacy text-with-no-media)
+					// don't get image/url/button prep — promote the legacy heuristic
+					// to an explicit content_type so downstream code (templates,
+					// JSON-LD, numbering) handles it consistently.
+					if ( self::is_list_item_divider( $item ) ) {
+						$item['content_type'] = 'divider';
+						continue;
+					}
+
 					// Thumbnail url logic
 					$layout_image_sizes   = [
 						'circles'  => 'mv_create_1x1',
@@ -1262,6 +1270,30 @@ class Creations_Views extends Creations {
 			'label'          => $label,
 			'conversions'    => $cached['ingredients'],
 		];
+	}
+
+	/**
+	 * Returns true if a list item should render as a section divider.
+	 *
+	 * Either explicitly content_type='divider', or a legacy text item with
+	 * no thumbnail, url, or button text — the pre-2.0 shape that publishers
+	 * used as section headings inside numbered lists.
+	 *
+	 * @param array $item List item data.
+	 * @return bool
+	 */
+	public static function is_list_item_divider( $item ) {
+		$type = $item['content_type'] ?? '';
+		if ( 'divider' === $type ) {
+			return true;
+		}
+		if ( 'text' !== $type ) {
+			return false;
+		}
+		$has_media  = ! empty( $item['thumbnail_id'] );
+		$has_url    = ! empty( $item['url'] );
+		$has_button = ! empty( $item['link_text'] ) || ! empty( $item['btn_text'] );
+		return ! $has_media && ! $has_url && ! $has_button;
 	}
 
 	/**

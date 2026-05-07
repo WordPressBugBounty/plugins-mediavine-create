@@ -7,8 +7,16 @@
 	foreach ( $args['creation']['list_items'] as $item ) {
 		do_action( 'mv_create_list_before_single', $args );
 
-		// Text list item
-		if ( 'text' === $item['content_type'] ) {
+		// Section divider — bare title + description, no number, no image container.
+		if ( \Mediavine\Create\Creations_Views::is_list_item_divider( $item ) ) {
+			?>
+			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="mv-list-text" data-mv-create-list-content-type="divider">
+				<h2 class="mv-list-single-title"><?php echo esc_html( $item['title'] ); ?></h2>
+				<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
+			</div>
+			<?php
+			// Dividers do not consume a number — fall through without incrementing $i.
+		} elseif ( 'text' === $item['content_type'] ) {
 			?>
 			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="mv-list-text mv-list-single" data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>">
 				<div class="mv-list-item-number">

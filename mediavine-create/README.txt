@@ -143,6 +143,22 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.4.4 =
+
+* FIX: Create Studio widget buttons (Interactive Mode, Servings Adjustments, and Unit Conversion) no longer have their colors overridden when the Aggressive Buttons option is enabled
+* FIX: List items with only a title and description once again render as inline section dividers in lists instead of showing empty image placeholders and breaking the numbering sequence
+* FIX: Card color customizations are preserved when Remove-Unused-CSS optimizers like WP Rocket RUCSS and Autoptimize are active
+
+
+= 2.4.3 =
+
+* FIX: The editor no longer crashes on existing recipes when another plugin returns malformed supplies, ingredients, or products data; affected cards now show an inline notice and auto-report the issue
+* FIX: Prevents third-party SEO and redirect plugins (Yoast SEO Premium, Redirection, 301 Redirects) from intercepting Create's REST endpoints and breaking the editor
+* FIX: Photo credit and alt text are now preserved when scraping a URL into a list item
+* FIX: Disconnected sites no longer hit a PHP warning when pasting a non-Amazon product URL; scraping UI is now hidden until you connect to Create Studio
+* FIX: Author, Category, Cuisine, and other taxonomy dropdowns now appear in front of the card editor when opened from a Gutenberg block, instead of being hidden behind it
+
+
 = 2.4.2 =
 
 * FIX: The Bulk Link Import Wizard and list Bulk Edit modal now appear above the editor overlay when opened from the Gutenberg block editor, instead of being hidden behind it (Premium)

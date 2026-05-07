@@ -471,6 +471,16 @@ class Products_API extends Products {
 			//do external scrape
 			if ( empty( $asin ) ) {
 				$api_token_setting = \Mediavine\Settings::get_settings( 'mv_create_api_token' );
+				if ( empty( $api_token_setting ) || empty( $api_token_setting->value ) ) {
+					return new \WP_Error(
+						401,
+						__( 'Site is not connected to Create Studio', 'mediavine' ),
+						[
+							'message'    => __( 'Connect this site to Create Studio to scrape external URLs.', 'mediavine' ),
+							'error_code' => 'not_connected',
+						]
+					);
+				}
 				$services_api_url = self::$services_api_url;
 				$scrape_url = $services_api_url . '/scraper/scrape';
 				$scraped           = wp_remote_post(
@@ -487,15 +497,18 @@ class Products_API extends Products {
 				if ( is_wp_error( $scraped ) ) {
 					return $scraped;
 				}
-				if ( ! empty( $scraped['body'] ) ) {
-					$result = json_decode( $scraped['body'], true )['data'];
-					// $result = [
-					// 	'remote_thumbnail_uri'
-					// ]
+				$decoded = ! empty( $scraped['body'] ) ? json_decode( $scraped['body'], true ) : null;
+				if ( ! empty( $decoded['data'] ) ) {
+					$result = $decoded['data'];
 					if ( ! empty( $existing ) ) {
 						$result['rescraped'] = true;
 						$result['existing']  = $existing;
 					}
+				} else {
+					// Match the pre-existing behavior: a response without a usable data
+					// payload should fall through to the 404 "No Data Found" branch
+					// below, even if a stdClass row was loaded earlier in this request.
+					$result = null;
 				}
 			}
 		}

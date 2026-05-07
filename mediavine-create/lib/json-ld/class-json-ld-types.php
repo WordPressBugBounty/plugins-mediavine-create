@@ -929,6 +929,12 @@ class JSON_LD_Types {
 				$item = (object) $item;
 			}
 
+			// Section dividers (explicit type or legacy text-with-no-media)
+			// are not list items and must not appear in ItemList.
+			if ( \Mediavine\Create\Creations_Views::is_list_item_divider( (array) $item ) ) {
+				continue;
+			}
+
 			// Handle text items with fragment URLs
 			if ( 'text' === $item->content_type ) {
 				// Text items need the list's canonical URL with a fragment identifier

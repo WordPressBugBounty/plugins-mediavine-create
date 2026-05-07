@@ -56,8 +56,10 @@ if ( $args['creation'] ) {
 	 * @hooked mv_creation_json_ld - 10
 	 */
 	do_action( 'mv_create_card_before', $args );
+
+	$card_inline_style = trim( 'position: relative; ' . \Mediavine\Create\Creations_Views::get_card_inline_style() );
 	?>
-	<section id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>" class="<?php echo esc_attr( $args['creation']['classes'] ); ?> <?php echo esc_attr( $custom_class ); ?>"<?php echo $cs_config_attr; ?> style="position: relative;">
+	<section id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>" class="<?php echo esc_attr( $args['creation']['classes'] ); ?> <?php echo esc_attr( $custom_class ); ?>"<?php echo $cs_config_attr; ?> style="<?php echo esc_attr( $card_inline_style ); ?>">
 		<?php
 		/**
 		 * mv_create_card_before_wrapper hook.

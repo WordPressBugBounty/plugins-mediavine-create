@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.4.2';
+	const VERSION = '2.4.4';
 
 	const DB_VERSION = '2.4.1';
 
@@ -283,6 +283,7 @@ class Plugin {
 		self::$views        = \Mediavine\View_Loader::get_instance( MV_CREATE_DIR );
 		self::$api_services = \Mediavine\Create\API_Services::get_instance();
 		\Mediavine\Cache_Manager::init();
+		\Mediavine\Create\REST_Redirect_Guard::init();
 		self::$models_v2    = \Mediavine\MV_DBI::get_models(
 			[
 				'mv_images',
@@ -366,6 +367,7 @@ class Plugin {
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'add_initial_revision_to_cards' ], 85 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'queue_existing_amazon_products' ], 90 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_services_api' ], 95 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'purge_used_css_caches_for_widget_safelist' ], 100 );
 
 		// Fixes
 		add_action( 'mv_fix_video_description_queue_action', [ $this, 'fix_video_description' ] );
@@ -1256,6 +1258,38 @@ class Plugin {
 				self::$settings_group . '_enable_hands_free_mode'
 			)
 		);
+	}
+
+	/**
+	 * Forces cache plugins to regenerate "used CSS" snapshots that may have
+	 * pruned `.cs-*` / `.mv-create-*` selectors before the new safelist
+	 * filters in the rascal classes were registered.
+	 *
+	 * Sites running WP Rocket's "Remove Unused CSS" or LiteSpeed's "Unique
+	 * CSS" will keep serving the stale snapshot — and the broken widget
+	 * styling — until their cached copy is invalidated. The new filters
+	 * (Wp_Rocket::rucss_safelist, Litespeed_Cache::ucss_whitelist) only
+	 * apply when those caches are regenerated.
+	 *
+	 * Runs once on upgrade from < 2.4.4.
+	 *
+	 * @param string $last_plugin_version The previous plugin version.
+	 * @return void
+	 */
+	public function purge_used_css_caches_for_widget_safelist( $last_plugin_version ) {
+		if ( ! version_compare( $last_plugin_version, '2.4.4', '<' ) ) {
+			return;
+		}
+
+		// WP Rocket — clears page caches and the Used CSS table along with them.
+		if ( function_exists( 'rocket_clean_domain' ) ) {
+			rocket_clean_domain();
+		}
+
+		// LiteSpeed Cache — public purge_all() also wipes the UCSS folder.
+		if ( class_exists( '\LiteSpeed\Purge' ) && method_exists( '\LiteSpeed\Purge', 'purge_all' ) ) {
+			\LiteSpeed\Purge::purge_all( 'Mediavine Create 2.4.4 widget CSS safelist' );
+		}
 	}
 
 	/**

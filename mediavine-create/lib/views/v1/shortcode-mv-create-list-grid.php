@@ -10,8 +10,25 @@
 		foreach ( $args['creation']['list_items'] as $item ) {
 			do_action( 'mv_create_list_before_single', $args );
 
-			// Text list item
-			if ( 'text' === $item['content_type'] ) {
+			// Section divider — full-row, bare title + description.
+			if ( \Mediavine\Create\Creations_Views::is_list_item_divider( $item ) ) {
+				if ( 0 !== $i && 1 === $i % 2 ) {
+					do_action( 'mv_create_list_after_row', $args, $r, $total_items );
+				}
+				// Dividers occupy a full row but do not consume a numbered position.
+				++$r;
+				++$i;
+				++$total_items;
+				if ( 0 !== $i % 2 ) {
+					++$i;
+				}
+				?>
+				<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="mv-list-text" data-mv-create-list-content-type="divider">
+					<h2 class="mv-list-single-title"><?php echo esc_html( $item['title'] ); ?></h2>
+					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
+				</div>
+				<?php
+			} elseif ( 'text' === $item['content_type'] ) {
 				// It looks weird to have the ad split the title and items,
 				// so if an ad should be displayed, do it above the title
 				if ( 0 !== $i && 1 === $i % 2 ) {
