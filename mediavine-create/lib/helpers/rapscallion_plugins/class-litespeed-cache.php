@@ -25,8 +25,12 @@ class Litespeed_Cache extends Rascal_Plugin {
 	 *
 	 * UCSS strips selectors it can't see in the rendered HTML at scan time.
 	 * Create Studio widgets mount via JS after the scan, so without this
-	 * their `.cs-*` styles get pruned. LiteSpeed's whitelist accepts plain
-	 * selector strings (regex via `/^.../` is also supported as of v6).
+	 * their `.cs-*` styles get pruned.
+	 *
+	 * LiteSpeed's allowlist matches whole selectors as they appear in CSS,
+	 * with `*` wildcard support (see the "Wildcard * supported" hint in
+	 * `tpl/page_optm/settings_tuning_css.tpl.php` and the v7 changelog).
+	 * The list is forwarded as-is to QUIC.cloud's UCSS generator.
 	 *
 	 * @param array $whitelist Selector strings UCSS must not prune.
 	 * @return array
@@ -35,8 +39,8 @@ class Litespeed_Cache extends Rascal_Plugin {
 		if ( ! is_array( $whitelist ) ) {
 			$whitelist = [];
 		}
-		$whitelist[] = '.cs-';
-		$whitelist[] = '.mv-create-';
+		$whitelist[] = '.cs-*';
+		$whitelist[] = '.mv-create-*';
 
 		return $whitelist;
 	}

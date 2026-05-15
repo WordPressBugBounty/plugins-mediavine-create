@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.4.4';
+	const VERSION = '2.4.5';
 
 	const DB_VERSION = '2.4.1';
 
@@ -1271,13 +1271,13 @@ class Plugin {
 	 * (Wp_Rocket::rucss_safelist, Litespeed_Cache::ucss_whitelist) only
 	 * apply when those caches are regenerated.
 	 *
-	 * Runs once on upgrade from < 2.4.4.
+	 * Runs once on upgrade from < 2.4.5.
 	 *
 	 * @param string $last_plugin_version The previous plugin version.
 	 * @return void
 	 */
 	public function purge_used_css_caches_for_widget_safelist( $last_plugin_version ) {
-		if ( ! version_compare( $last_plugin_version, '2.4.4', '<' ) ) {
+		if ( ! version_compare( $last_plugin_version, '2.4.5', '<' ) ) {
 			return;
 		}
 
@@ -1288,7 +1288,7 @@ class Plugin {
 
 		// LiteSpeed Cache — public purge_all() also wipes the UCSS folder.
 		if ( class_exists( '\LiteSpeed\Purge' ) && method_exists( '\LiteSpeed\Purge', 'purge_all' ) ) {
-			\LiteSpeed\Purge::purge_all( 'Mediavine Create 2.4.4 widget CSS safelist' );
+			\LiteSpeed\Purge::purge_all( 'Mediavine Create 2.4.5 widget CSS safelist' );
 		}
 	}
 

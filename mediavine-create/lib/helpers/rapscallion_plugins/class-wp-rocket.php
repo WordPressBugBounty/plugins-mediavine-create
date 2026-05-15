@@ -41,6 +41,11 @@ class Wp_Rocket extends Rascal_Plugin {
 	 * The card chrome's `.mv-create-*` selectors can also be partially pruned
 	 * when widgets are dynamically inserted into the card.
 	 *
+	 * Values are sent as-is to WP Rocket's SaaS as regex patterns (no `/`
+	 * delimiters). This matches WP Rocket's own migration convention which
+	 * rewrites user-entered `.class` entries to `(.*).class`. See
+	 * inc/Engine/Optimization/RUCSS/Admin/Settings.php::update_safelist_items.
+	 *
 	 * @param array $safelist Regex patterns of selectors RUCSS must not prune.
 	 * @return array
 	 */
@@ -48,8 +53,8 @@ class Wp_Rocket extends Rascal_Plugin {
 		if ( ! is_array( $safelist ) ) {
 			$safelist = [];
 		}
-		$safelist[] = '/\.cs-/';
-		$safelist[] = '/\.mv-create-/';
+		$safelist[] = '(.*).cs-';
+		$safelist[] = '(.*).mv-create-';
 
 		return $safelist;
 	}

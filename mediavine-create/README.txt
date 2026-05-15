@@ -143,6 +143,12 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.4.5 =
+
+* FIX: Recipe importer verify screen no longer appears blank due to a React conflict between the importer and editor bundles
+* FIX: Create Studio widget styles (Interactive Mode toolbar, Servings Adjustments, Unit Conversion) are no longer stripped on live sites by WP Rocket Remove Unused CSS or LiteSpeed Unused CSS optimizers
+
+
 = 2.4.4 =
 
 * FIX: Create Studio widget buttons (Interactive Mode, Servings Adjustments, and Unit Conversion) no longer have their colors overridden when the Aggressive Buttons option is enabled
