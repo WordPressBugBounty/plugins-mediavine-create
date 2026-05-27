@@ -116,9 +116,65 @@ class Webhook_Handler {
 			case 'settings_update':
 				return self::handle_settings_update( $data );
 
+			case 'unit_conversion_refresh':
+				return self::handle_unit_conversion_refresh( $data );
+
 			default:
 				return new \WP_REST_Response( [ 'error' => 'Unknown webhook type' ], 400 );
 		}
+	}
+
+	/**
+	 * Handle a "unit_conversion_refresh" webhook.
+	 *
+	 * Forces a re-fetch of the creation's unit conversions from Studio,
+	 * rebuilding the cached metadata blob with the current schema version.
+	 * Sent by Studio when a widget on the publisher's page detects that the
+	 * PHP-emitted data-cs-config.unitConversion.version trails its expected
+	 * schema version — the webhook is the firewall-friendly back-channel
+	 * (signed RS256, recognized UA) that the in-page widget can't safely
+	 * do directly with a cross-origin POST into WP-REST.
+	 *
+	 * Throttled by a 60-second transient lock per creation so concurrent
+	 * widget signals from many readers coalesce to a single refresh.
+	 *
+	 * @param array $data { creation_id: int }
+	 * @return \WP_REST_Response
+	 */
+	private static function handle_unit_conversion_refresh( array $data ) {
+		$creation_id = isset( $data['creation_id'] ) ? (int) $data['creation_id'] : 0;
+		if ( $creation_id <= 0 ) {
+			return new \WP_REST_Response( [ 'error' => 'Missing or invalid creation_id' ], 400 );
+		}
+
+		$lock_key = 'cs_uc_refresh_lock_' . $creation_id;
+		if ( get_transient( $lock_key ) ) {
+			return new \WP_REST_Response( [ 'status' => 'throttled', 'creation_id' => $creation_id ], 200 );
+		}
+		set_transient( $lock_key, 1, 60 );
+
+		$converter = Unit_Conversion::get_instance();
+		$result    = $converter->convert_creation( $creation_id, true );
+
+		if ( is_wp_error( $result ) ) {
+			delete_transient( $lock_key );
+			return new \WP_REST_Response(
+				[
+					'error'       => $result->get_error_message(),
+					'creation_id' => $creation_id,
+				],
+				500
+			);
+		}
+
+		return new \WP_REST_Response(
+			[
+				'status'      => 'refreshed',
+				'creation_id' => $creation_id,
+				'version'     => isset( $result['version'] ) ? (int) $result['version'] : null,
+			],
+			200
+		);
 	}
 
 	/**

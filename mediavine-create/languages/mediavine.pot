@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.4.5\n"
+"Project-Id-Version: Create 2.4.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-15T17:25:31+00:00\n"
+"POT-Creation-Date: 2026-05-26T21:19:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine\n"
@@ -447,7 +447,7 @@ msgstr ""
 
 #: lib/creations/class-creations-api.php:504
 #: lib/creations/class-creations-api.php:617
-#: lib/unit-conversion/class-unit-conversion.php:178
+#: lib/unit-conversion/class-unit-conversion.php:191
 msgid "Creation not found"
 msgstr ""
 
@@ -517,13 +517,13 @@ msgstr ""
 
 #. translators: %s: list item title
 #: lib/creations/class-creations-views.php:882
-#: lib/creations/class-creations-views.php:2036
+#: lib/creations/class-creations-views.php:2043
 #, php-format
 msgid "Image for %s"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:929
-#: lib/creations/class-creations-views.php:1610
+#: lib/creations/class-creations-views.php:1617
 #: lib/creations/class-creations.php:768
 #: lib/importers/sources/class-import-purr.php:107
 msgid "Prep Time"
@@ -535,7 +535,7 @@ msgid "Active Time"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:941
-#: lib/creations/class-creations-views.php:1612
+#: lib/creations/class-creations-views.php:1619
 #: lib/creations/class-creations.php:770
 #: lib/importers/class-mv-recipe-importer.php:910
 #: lib/importers/sources/class-import-purr.php:108
@@ -543,7 +543,7 @@ msgid "Additional Time"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:947
-#: lib/creations/class-creations-views.php:1632
+#: lib/creations/class-creations-views.php:1639
 msgid "Total Time"
 msgstr ""
 
@@ -576,13 +576,13 @@ msgid "Calories"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:963
-#: lib/creations/class-creations-views.php:1495
+#: lib/creations/class-creations-views.php:1502
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:968
-#: lib/creations/class-creations-views.php:1498
+#: lib/creations/class-creations-views.php:1505
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
@@ -592,7 +592,7 @@ msgid "Cost"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:974
-#: lib/creations/class-creations-views.php:1640
+#: lib/creations/class-creations-views.php:1647
 msgid "Difficulty"
 msgstr ""
 
@@ -656,28 +656,28 @@ msgstr ""
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1313
+#: lib/creations/class-creations-views.php:1320
 msgid "View Product"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1317
+#: lib/creations/class-creations-views.php:1324
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1321
+#: lib/creations/class-creations-views.php:1328
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1329
+#: lib/creations/class-creations-views.php:1336
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1493
+#: lib/creations/class-creations-views.php:1500
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1611
+#: lib/creations/class-creations-views.php:1618
 #: lib/creations/class-creations.php:775
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:695
 #: lib/importers/sources/class-import-cookbook.php:132
@@ -695,65 +695,65 @@ msgstr ""
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1644
+#: lib/creations/class-creations-views.php:1651
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1691
+#: lib/creations/class-creations-views.php:1698
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1692
+#: lib/creations/class-creations-views.php:1699
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1695
+#: lib/creations/class-creations-views.php:1702
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1696
+#: lib/creations/class-creations-views.php:1703
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1699
+#: lib/creations/class-creations-views.php:1706
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1700
+#: lib/creations/class-creations-views.php:1707
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1703
+#: lib/creations/class-creations-views.php:1710
 #: lib/products/class-amazon.php:610
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1704
+#: lib/creations/class-creations-views.php:1711
 #: lib/products/class-amazon.php:611
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1707
+#: lib/creations/class-creations-views.php:1714
 #: lib/products/class-amazon.php:615
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1708
+#: lib/creations/class-creations-views.php:1715
 #: lib/products/class-amazon.php:616
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1711
+#: lib/creations/class-creations-views.php:1718
 #: lib/products/class-amazon.php:627
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1712
+#: lib/creations/class-creations-views.php:1719
 #: lib/products/class-amazon.php:628
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1906
+#: lib/creations/class-creations-views.php:1913
 msgid "No Card with ID found"
 msgstr ""
 
@@ -2261,7 +2261,7 @@ msgid "A conflict occurred and the single review could not be deleted"
 msgstr ""
 
 #. translators: %s: reviewer's name
-#: lib/reviews/class-reviews-models.php:112
+#: lib/reviews/class-reviews-models.php:139
 #, php-format
 msgid "Review from %s"
 msgstr ""
@@ -3555,7 +3555,7 @@ msgstr ""
 msgid "A conflict occurred and the Supply could not be deleted"
 msgstr ""
 
-#: lib/unit-conversion/class-unit-conversion.php:409
+#: lib/unit-conversion/class-unit-conversion.php:422
 msgid "Unit conversion API request failed"
 msgstr ""
 
@@ -3582,14 +3582,14 @@ msgstr ""
 msgid "Toggle ingredient group"
 msgstr ""
 
-#: admin/ui/build/app.build.2.4.5.js:7717
+#: admin/ui/build/app.build.2.4.6.js:7717
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.2.4.5.js:7717
+#: admin/ui/build/app.build.2.4.6.js:7717
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.2.4.5.js:7717
+#: admin/ui/build/app.build.2.4.6.js:7717
 msgid "Description"
 msgstr ""

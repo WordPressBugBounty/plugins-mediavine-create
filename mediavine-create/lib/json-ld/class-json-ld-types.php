@@ -707,7 +707,11 @@ class JSON_LD_Types {
 			libxml_use_internal_errors( true );
 		}
 		// Use UTF-8 encoding declaration to properly handle UTF-8 content
-		$load = $dom->loadHTML( htmlspecialchars_decode( utf8_decode( htmlentities( do_shortcode( $value ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false ) ) ) );
+		$entities = htmlentities( do_shortcode( $value ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false );
+		$decoded  = function_exists( 'mb_convert_encoding' )
+			? mb_convert_encoding( $entities, 'ISO-8859-1', 'UTF-8' )
+			: $entities;
+		$load     = $dom->loadHTML( htmlspecialchars_decode( $decoded ) );
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( false );
 		}

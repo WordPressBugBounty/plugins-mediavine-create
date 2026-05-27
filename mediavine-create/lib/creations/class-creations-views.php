@@ -1269,6 +1269,13 @@ class Creations_Views extends Creations {
 			'source_system'  => $cached['source_system'] ?? 'us_customary',
 			'label'          => $label,
 			'conversions'    => $cached['ingredients'],
+			// Emitted into data-cs-config so the widget can compare against its
+			// own expected schema version and run a fresh fetch when the markup
+			// trails it. We emit the version stored alongside the cached blob
+			// (sourced from Studio's /conversions/batch response) rather than
+			// Unit_Conversion::VERSION, so a schema bump on the server reaches
+			// the widget without waiting for a plugin code update.
+			'version'        => isset( $cached['version'] ) ? (int) $cached['version'] : Unit_Conversion::VERSION,
 		];
 	}
 

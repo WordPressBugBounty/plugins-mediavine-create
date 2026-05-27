@@ -9,7 +9,7 @@
  * Plugin Name:       Create
  * Plugin URI:        https://create.studio/plugin
  * Description:       Create custom recipe and how to cards to be displayed in posts.
- * Version:           2.4.5
+ * Version:           2.4.6
  * Requires at least: 6.5
  * Requires PHP:      7.4
  *

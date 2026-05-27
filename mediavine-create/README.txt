@@ -3,7 +3,7 @@ Contributors: mischiefmarmot
 Donate link: https://create.studio
 Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: trunk
 License: GPLv2 or later
@@ -142,6 +142,16 @@ Please report security bugs found in the source code of the Create plugin throug
 13. A published List card in the Hero Image style.
 
 == Changelog ==
+
+= 2.4.6 =
+
+* ENHANCEMENT: Typing a new value into a card-editor taxonomy dropdown (Author, Cuisine, Category, etc.) now creates the term and saves reliably
+* FIX: Hero lists with photo ratios keep the Pinterest pin button and item titles visible, including on narrow viewports
+* FIX: Searching reviews in the admin now matches by card title
+* FIX: Cleared PHP 8.2+ deprecation notices in recipe-step JSON-LD parsing
+* IMPROVEMENT: Confirmed compatibility with WordPress 7.0
+* SECURITY: Routine update of bundled JavaScript dependencies
+
 
 = 2.4.5 =
 

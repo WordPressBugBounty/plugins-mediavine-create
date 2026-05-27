@@ -35,11 +35,24 @@ class Unit_Conversion extends Plugin {
 	const METADATA_KEY = 'unit_conversions';
 
 	/**
-	 * Metadata schema version.
+	 * Floor metadata schema version. Bumping this invalidates cached blobs
+	 * whose version trails it, forcing a fresh fetch from Studio on next
+	 * page render. The version actually stored on each cached blob comes
+	 * from the schema_version field of the Studio /conversions/batch
+	 * response, so cached.version is always whatever Studio reported the
+	 * last time the plugin fetched.
+	 *
+	 * v4 matches Studio's bump for the dbId-keyed conversions shape
+	 * (create-studio#82). Plugin-side cached blobs under the previous
+	 * positional-keyed shape get invalidated on next page render.
+	 *
+	 * v5 invalidates plugin-side caches alongside the unit-conversion
+	 * widget update so visitors get the new widget plus a fresh response
+	 * payload on first render after upgrade.
 	 *
 	 * @var int
 	 */
-	const VERSION = 2;
+	const VERSION = 5;
 
 	/**
 	 * Map of Unicode fraction characters to their ASCII equivalents.
@@ -442,9 +455,24 @@ class Unit_Conversion extends Plugin {
 			}
 		}
 
+		// The API detects each ingredient's actual system and returns the
+		// dominant one here. For all-metric recipes this comes back as 'metric'
+		// (previously hard-coded as 'us_customary', which mis-labeled the data
+		// to the widget and produced a dead toggle).
+		$detected_source = $api_response['source_system'] ?? 'us_customary';
+		if ( ! in_array( $detected_source, [ 'us_customary', 'metric' ], true ) ) {
+			$detected_source = 'us_customary';
+		}
+
+		// Trust Studio's reported schema version when present so the plugin's
+		// cached blob carries the same value as whatever the API just produced.
+		$schema_version = isset( $api_response['schema_version'] ) && is_numeric( $api_response['schema_version'] )
+			? (int) $api_response['schema_version']
+			: self::VERSION;
+
 		return [
-			'version'       => self::VERSION,
-			'source_system' => 'us_customary',
+			'version'       => $schema_version,
+			'source_system' => $detected_source,
 			'generated_at'  => gmdate( 'c' ),
 			'ingredients'   => $ingredients_map,
 		];
@@ -471,7 +499,11 @@ class Unit_Conversion extends Plugin {
 
 		$cached = $metadata[ self::METADATA_KEY ];
 
-		// Invalidate cache when VERSION changes (e.g., density-based conversions added)
+		// Invalidate when the cached version trails the plugin's floor. The
+		// stored cached['version'] comes from the Studio API response, so
+		// schema bumps on the server flow into newly-cached blobs naturally;
+		// the floor only invalidates pre-existing blobs when this constant
+		// itself moves forward.
 		if ( empty( $cached['version'] ) || (int) $cached['version'] < self::VERSION ) {
 			return null;
 		}

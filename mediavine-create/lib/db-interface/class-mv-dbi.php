@@ -1141,6 +1141,12 @@ class MV_DBI {
 
 			if ( $search_params ) {
 				foreach ( $search_params as $key => $value ) {
+					// Array value means "column IN (...)" — OR'd into the search group.
+					$is_in_clause = is_array( $value );
+					if ( $is_in_clause && empty( $value ) ) {
+						continue;
+					}
+
 					if ( strlen( $search_statement ) === 0 ) {
 						if ( strlen( $where_statement ) ) {
 							$search_statement .= ' AND ';
@@ -1149,10 +1155,23 @@ class MV_DBI {
 					} else {
 						$search_statement .= ' OR';
 					}
-					$search_statement .= " $key LIKE '%%%s%%' ";
-					$prepare_array[]   = $value;
+
+					if ( $is_in_clause ) {
+						$fill = [];
+						foreach ( $value as $item ) {
+							$sprintf_identifier = $this->get_sprintf( $item );
+							$fill[]             = $sprintf_identifier ? $sprintf_identifier : "'%s'";
+							$prepare_array[]    = $item;
+						}
+						$search_statement .= " $key IN (" . implode( ', ', $fill ) . ') ';
+					} else {
+						$search_statement .= " $key LIKE '%%%s%%' ";
+						$prepare_array[]   = $value;
+					}
 				}
-				$search_statement .= ')';
+				if ( strlen( $search_statement ) > 0 ) {
+					$search_statement .= ')';
+				}
 			}
 			$build_sql          = $build_sql . ' WHERE ' . $where_statement . $search_statement . $order_sql;
 			$prepared_statement = $wpdb->prepare( $build_sql, $prepare_array );
