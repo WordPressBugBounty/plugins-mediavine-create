@@ -143,6 +143,11 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.4.7 =
+
+* FIX: In the List editor, URLs that can't be scraped can now be added manually again; use "Add it anyway" to insert the link and fill in the title, image, and details yourself
+
+
 = 2.4.6 =
 
 * ENHANCEMENT: Typing a new value into a card-editor taxonomy dropdown (Author, Cuisine, Category, etc.) now creates the term and saves reliably
