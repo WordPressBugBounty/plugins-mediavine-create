@@ -230,9 +230,10 @@ class View_Loader {
 			'g'       => [ 'fill' => true ],
 			'title'   => [ 'title' => true ],
 			'path'    => [
-				'd'     => true,
-				'fill'  => true,
-				'class' => true,
+				'd'         => true,
+				'fill'      => true,
+				'class'     => true,
+				'transform' => true,
 			],
 			'rect'    => [
 				'x'      => true,

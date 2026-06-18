@@ -44,6 +44,66 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Server-render the star-rating markup the Reviews app would otherwise inject
+	 * on hydration. Rendering it up front gives the reviews block its final height
+	 * at first paint, so mounting the Preact app causes no layout shift (the cause
+	 * of the mobile CLS this addresses). The app still hydrates over this markup to
+	 * manage live state (submitting a rating); the static output it replaces is the
+	 * same size, so the swap is invisible.
+	 *
+	 * Mirrors the Stars SVG in client/src/Reviews/Stars/index.js and the reviewcount
+	 * in client/src/Reviews/Ratings/Base.js — keep the three in sync.
+	 *
+	 * @param mixed $rating Average rating for the card.
+	 * @param mixed $total  Number of ratings.
+	 * @return string Inner HTML for the `.mv-create-reviews` container.
+	 */
+	public static function render_review_stars( $rating, $total ) {
+		$total   = (int) $total;
+		$rating  = (float) $rating;
+		// The app shows the average only when ratings exist; otherwise empty stars.
+		$display = $total > 0 ? $rating : 0;
+		// Pick a pre-generated clip class (0–50 = 0.0–5.0 stars in 0.1 steps).
+		// All styling lives in Stars.scss because the views run through wp_kses,
+		// which strips inline `style`; classes survive. See Stars.scss.
+		$clip_class = 'mv-stars-r-' . max( 0, min( 50, (int) round( $display * 10 ) ) );
+
+		$paths = '';
+		for ( $i = 0; $i < 5; $i++ ) {
+			$paths .= '<path d="M6,0,7.875,3.75,12,4.35,9,7.275,9.675,11.4,6,9.45,2.325,11.4,3,7.275,0,4.35l4.125-.6Z" transform="translate(' . ( $i * 14 ) . ')"></path>';
+		}
+
+		// width/height give the SVGs an intrinsic size so they stay bounded even
+		// before the (async-loaded) card stylesheet applies — otherwise they'd
+		// render at the ~150px replaced-element default and flash/shift. CSS
+		// overrides both once it loads.
+		$empty_svg  = '<svg class="mv-stars-svg mv-stars-empty" width="150" height="25" aria-hidden="true" viewBox="0 0 68 11.4" preserveAspectRatio="none">' . $paths . '</svg>';
+		$filled_svg = '<svg class="mv-stars-svg mv-stars-filled ' . $clip_class . '" width="150" height="25" aria-hidden="true" viewBox="0 0 68 11.4" preserveAspectRatio="none">' . $paths . '</svg>';
+
+		$stars = sprintf(
+			'<div class="mv-reviews-stars mv-stars mv-star-ratings " aria-label="%s">%s%s</div>',
+			esc_attr( $display . ' out of 5 stars' ),
+			$empty_svg,
+			$filled_svg
+		);
+
+		if ( $total > 0 ) {
+			/* translators: %s: average star rating, e.g. "4.9" */
+			$stars_label   = sprintf( __( '%s Stars', 'mediavine' ), sprintf( '%.1f', $rating ) );
+			$reviews_label = $total > 1
+				/* translators: %s: number of reviews */
+				? sprintf( __( '%s Reviews', 'mediavine' ), $total )
+				/* translators: %s: number of reviews */
+				: sprintf( __( '%s Review', 'mediavine' ), $total );
+			$count = '<span>' . esc_html( $stars_label . ' (' . $reviews_label . ')' ) . '</span>';
+		} else {
+			$count = esc_html( __( 'No Ratings', 'mediavine' ) );
+		}
+
+		return '<div class="mv-reviews"><div>' . $stars . '</div><div class="mv-reviews-reviewcount">' . $count . '</div></div>';
+	}
+
+	/**
 	 * Enqueue studio script once per page
 	 *
 	 * Interactive mode features (servings adjustment, interactive widgets) require

@@ -143,6 +143,14 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.5.0 =
+
+* FEATURE: Insert fractions (½, ⅓, ¼…) and the degree symbol directly into ingredient fields, just like you already can in instructions
+* FIX: Recipe cards no longer grow and push content down as they scroll into view on mobile, reducing CLS potential
+* FIX: You can type "?" in the post editor again after inserting a recipe card
+* FIX: Dropdown fields in the card editor (Diet, Author, Cuisine, etc.) now match the height of the text-input fields (fixed after WP ui update increased base input size)
+
+
 = 2.4.7 =
 
 * FIX: In the List editor, URLs that can't be scraped can now be added manually again; use "Add it anyway" to insert the link and fill in the title, image, and details yourself
