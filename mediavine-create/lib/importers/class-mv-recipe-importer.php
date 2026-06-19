@@ -77,7 +77,25 @@ class MV_Recipe_Importer extends Plugin {
 
 	function __construct() {
 		$this->mv_creations = new \Mediavine\Create\Creations();
-		$this->importers    = [
+	}
+
+	/**
+	 * Importer registry keyed by slug.
+	 *
+	 * Built lazily rather than in the constructor: each `plugin_meta` name
+	 * calls __(), and this importer is instantiated during plugin bootstrap
+	 * (Importers::init), which runs before the `init` action where our
+	 * textdomain is loaded. Translating at construction time trips
+	 * WordPress 6.7+'s _load_textdomain_just_in_time notice. Consumers only
+	 * read the registry during REST requests, long after `init`.
+	 *
+	 * @return array
+	 */
+	public function get_importers() {
+		if ( ! empty( $this->importers ) ) {
+			return $this->importers;
+		}
+		$this->importers = [
 			'cookbook'                 => [
 				'importer'    => Import_Cookbook::class,
 				'recipes'     => [],
@@ -144,6 +162,8 @@ class MV_Recipe_Importer extends Plugin {
 				'plugin_meta' => [ 'name' => __( 'Zip Recipes', 'mediavine' ) ],
 			],
 		];
+
+		return $this->importers;
 	}
 
 
@@ -1088,7 +1108,7 @@ class MV_Recipe_Importer extends Plugin {
 		$post_id = isset( $params['post_id'] ) ? $params['post_id'] : null;
 
 		if ( $post_id ) {
-			$data = Collection::make( $this->importers )
+			$data = Collection::make( $this->get_importers() )
 			->map(
 				function( $importer, $name ) use ( $post_id ) {
 					$recipes = call_user_func( [ $importer['importer'], 'find_recipes' ], $post_id );
@@ -1128,7 +1148,7 @@ class MV_Recipe_Importer extends Plugin {
 		 * Map over the importers to scan for recipes.
 		 * Cache the results so we can skip scanning an importer if it's been scanned before.
 		 */
-		$data = Collection::make( $this->importers )
+		$data = Collection::make( $this->get_importers() )
 			->map(
 				function( $importer, $name ) use ( $cached ) {
 					if ( isset( $cached[ $name ]['completed'] ) ) {

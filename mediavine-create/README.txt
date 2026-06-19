@@ -143,6 +143,12 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.5.1 =
+
+* FIX: In the User Reviews page, the "Search for a card" dropdown now appears under the search box so you can actually pick a card to filter by
+* FIX: Resolved a "translation loading was triggered too early" notice (WordPress 6.7+) by deferring recipe-importer translations until after init
+
+
 = 2.5.0 =
 
 * FEATURE: Insert fractions (½, ⅓, ¼…) and the degree symbol directly into ingredient fields, just like you already can in instructions

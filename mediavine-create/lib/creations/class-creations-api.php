@@ -222,6 +222,13 @@ class Creations_API extends Creations {
 			$query_args['show_trash'] = $show_trash;
 		}
 
+		// Parse exclude_type (comma-separated) so callers can hide card types
+		// from the results, e.g. the reviews card picker hides List cards.
+		$exclude_type_in = [];
+		if ( ! empty( $params['exclude_type'] ) ) {
+			$exclude_type_in = array_map( 'trim', explode( ',', $params['exclude_type'] ) );
+		}
+
 		// Check if we need to use custom SQL for advanced filters
 		$has_linked_posts_filter = ! empty( $params['linked_posts'] ) && in_array( $params['linked_posts'], [ 'has', 'none' ], true );
 		$has_created_after       = ! empty( $params['created_after'] );
@@ -229,9 +236,10 @@ class Creations_API extends Creations {
 		$has_missing_fields      = ! empty( $params['missing_fields'] ) && filter_var( $params['missing_fields'], FILTER_VALIDATE_BOOLEAN );
 		$has_post_id             = ! empty( $params['post_id'] ) && is_numeric( $params['post_id'] );
 		$has_type_in             = ! empty( $query_args['type_in'] );
+		$has_exclude_type        = ! empty( $exclude_type_in );
 
 		// If any advanced filter is set, use custom SQL
-		if ( $has_linked_posts_filter || $has_created_after || $has_created_before || $has_missing_fields || $has_post_id || $has_type_in ) {
+		if ( $has_linked_posts_filter || $has_created_after || $has_created_before || $has_missing_fields || $has_post_id || $has_type_in || $has_exclude_type ) {
 			global $wpdb;
 			$table_name = $wpdb->prefix . 'mv_creations';
 
@@ -300,6 +308,16 @@ class Creations_API extends Creations {
 				$type_placeholders = implode( ', ', array_fill( 0, count( $query_args['type_in'] ), '%s' ) );
 				$where_conditions[] = "type IN ($type_placeholders)";
 				foreach ( $query_args['type_in'] as $type_val ) {
+					$prepare_params[] = sanitize_text_field( $type_val );
+				}
+			}
+
+			// Handle exclude_type filter (e.g. "list") — used by the reviews card
+			// picker so List cards (which have no reviews) never appear there.
+			if ( $has_exclude_type ) {
+				$exclude_placeholders = implode( ', ', array_fill( 0, count( $exclude_type_in ), '%s' ) );
+				$where_conditions[]   = "type NOT IN ($exclude_placeholders)";
+				foreach ( $exclude_type_in as $type_val ) {
 					$prepare_params[] = sanitize_text_field( $type_val );
 				}
 			}

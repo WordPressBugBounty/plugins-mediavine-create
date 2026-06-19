@@ -53,8 +53,8 @@ class Reviews_Models extends Reviews {
 	/**
 	 * Build the search_params array passed to MV_DBI::find/get_count.
 	 *
-	 * Searches review fields (author/title/content) and also resolves the term
-	 * against card titles in mv_creations so typing a card name returns its reviews.
+	 * Searches review fields only (author/title/content). Finding reviews by
+	 * card name is handled by the card picker, which filters by creation ID.
 	 *
 	 * @param string|null $search User-supplied search term.
 	 * @return array|null
@@ -64,39 +64,11 @@ class Reviews_Models extends Reviews {
 			return null;
 		}
 
-		$search_params = [
+		return [
 			'author_name'    => $search,
 			'review_title'   => $search,
 			'review_content' => $search,
 		];
-
-		$creation_ids = $this->find_creation_ids_by_title( $search );
-		if ( ! empty( $creation_ids ) ) {
-			$search_params['creation'] = $creation_ids;
-		}
-
-		return $search_params;
-	}
-
-	/**
-	 * Return creation IDs whose title matches the search term.
-	 *
-	 * @param string $search Raw search term.
-	 * @return int[]
-	 */
-	private function find_creation_ids_by_title( $search ) {
-		global $wpdb;
-		$creations_table = $wpdb->prefix . 'mv_creations';
-
-		// SECURITY CHECKED: This query is properly prepared.
-		$ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT id FROM `$creations_table` WHERE title LIKE %s",
-				'%' . $wpdb->esc_like( $search ) . '%'
-			)
-		);
-
-		return array_map( 'intval', (array) $ids );
 	}
 
 	/**
