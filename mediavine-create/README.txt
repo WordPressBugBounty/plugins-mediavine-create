@@ -143,6 +143,11 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.5.2 =
+
+* FIX: Images imported by Create (list-item and product thumbnails) now generate proper metadata in the Media Library, so image optimizers like Imagify and WordPress thumbnail sizes work correctly.
+
+
 = 2.5.1 =
 
 * FIX: In the User Reviews page, the "Search for a card" dropdown now appears under the search box so you can actually pick a card to filter by

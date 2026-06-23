@@ -198,6 +198,57 @@ class Images {
 	}
 
 	/**
+	 * Generate and persist base WordPress attachment metadata for an image.
+	 *
+	 * Used after sideloading an image (see {@see self::download_image_from_url()})
+	 * and to backfill images that were imported without metadata. Only the
+	 * standard WordPress sub-sizes are generated here — the Create-specific
+	 * `mv_create_*` sizes are stripped by the global
+	 * `disable_intermediate_image_sizes` filter and generated lazily on render
+	 * (see {@see self::check_image_size()}) — keeping this light enough to run
+	 * inline during REST requests without timing out on bulk operations.
+	 *
+	 * Generation is wrapped defensively so a single unreadable or oversized image
+	 * cannot abort a larger request (such as a bulk list scrape downloading many
+	 * images at once).
+	 *
+	 * @param int         $attach_id Attachment ID.
+	 * @param string|null $file      Optional absolute path to the file. Looked up when omitted.
+	 *
+	 * @return array|false Generated attachment metadata, or false on failure.
+	 */
+	public static function generate_base_attachment_metadata( $attach_id, $file = null ) {
+		$attach_id = (int) $attach_id;
+		if ( ! $attach_id ) {
+			return false;
+		}
+
+		self::load_missing_wp_functions();
+
+		if ( empty( $file ) ) {
+			$file = get_attached_file( $attach_id );
+		}
+
+		if ( empty( $file ) || ! file_exists( $file ) ) {
+			return false;
+		}
+
+		try {
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+
+		if ( empty( $attach_data ) ) {
+			return false;
+		}
+
+		wp_update_attachment_metadata( $attach_id, $attach_data );
+
+		return $attach_data;
+	}
+
+	/**
 	 * Get the Create image sizes
 	 *
 	 * @param array $img_sizes
@@ -603,16 +654,14 @@ class Images {
 
 		update_post_meta( $attach_id, 'origin_uri', $origin );
 
-		// Skip synchronous image processing during REST API requests to prevent timeouts
-		if ( ! defined('REST_REQUEST') || ! REST_REQUEST ) {
-			// Define attachment metadata
-			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
-
-			wp_update_attachment_metadata( $attach_id, $attach_data );
-		} else {
-			// Defer image processing to background task during REST requests
-			self::generate_intermediate_sizes_deferred( $attach_id, [] );
-		}
+		// Generate base attachment metadata so the media library, srcset, and
+		// image optimizers have valid data. This must run even during REST
+		// requests (list scraping, product/import downloads); deferring it left
+		// sideloaded attachments with no `_wp_attachment_metadata` at all. The
+		// global `disable_intermediate_image_sizes` filter limits this to the
+		// standard WordPress sub-sizes — the heavier mv_create_* sizes are built
+		// lazily on render (see check_image_size) — so it stays lightweight.
+		self::generate_base_attachment_metadata( $attach_id, $file );
 
 		return $attach_id;
 	}
