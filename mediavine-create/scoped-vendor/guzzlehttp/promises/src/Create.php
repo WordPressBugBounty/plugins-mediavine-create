@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 namespace Mediavine\Create\GuzzleHttp\Promise;
 
 final class Create
@@ -8,10 +9,8 @@ final class Create
      * Creates a promise for a value if the value is not a promise.
      *
      * @param mixed $value Promise or value.
-     *
-     * @return PromiseInterface
      */
-    public static function promiseFor($value)
+    public static function promiseFor($value) : PromiseInterface
     {
         if ($value instanceof PromiseInterface) {
             return $value;
@@ -31,10 +30,8 @@ final class Create
      * If the provided reason is a promise, then it is returned as-is.
      *
      * @param mixed $reason Promise or reason.
-     *
-     * @return PromiseInterface
      */
-    public static function rejectionFor($reason)
+    public static function rejectionFor($reason) : PromiseInterface
     {
         if ($reason instanceof PromiseInterface) {
             return $reason;
@@ -45,12 +42,10 @@ final class Create
      * Create an exception for a rejected promise value.
      *
      * @param mixed $reason
-     *
-     * @return \Exception|\Throwable
      */
-    public static function exceptionFor($reason)
+    public static function exceptionFor($reason) : \Throwable
     {
-        if ($reason instanceof \Exception || $reason instanceof \Throwable) {
+        if ($reason instanceof \Throwable) {
             return $reason;
         }
         return new RejectionException($reason);
@@ -59,16 +54,17 @@ final class Create
      * Returns an iterator for the given value.
      *
      * @param mixed $value
-     *
-     * @return \Iterator
      */
-    public static function iterFor($value)
+    public static function iterFor($value) : \Iterator
     {
         if ($value instanceof \Iterator) {
             return $value;
         }
         if (\is_array($value)) {
             return new \ArrayIterator($value);
+        }
+        if (!\is_iterable($value)) {
+            \Mediavine\Create\trigger_deprecation('guzzlehttp/promises', '2.5', 'Passing a non-iterable to %s::%s() is deprecated; guzzlehttp/promises 3.0 will require an iterable.', __CLASS__, __FUNCTION__);
         }
         return new \ArrayIterator([$value]);
     }

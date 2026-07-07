@@ -167,6 +167,7 @@ class JSON_LD_Runtime extends Plugin {
 	 */
 	public function build_list_json_ld_schema( $list_data, $post_id = null ) {
 		$combined_list_items = [];
+		$first_list_id       = null;
 		foreach ( $list_data as $list ) {
 			// If there's no JSON-LD, for any reason, we want to skip this list
 			if ( empty( $list['json_ld'] ) ) {
@@ -176,6 +177,9 @@ class JSON_LD_Runtime extends Plugin {
 			// Get first list's JSON-LD for base info
 			if ( empty( $json_ld ) ) {
 				$json_ld = $list['json_ld'];
+				if ( ! empty( $list['id'] ) ) {
+					$first_list_id = $list['id'];
+				}
 			}
 
 			// Combine list data
@@ -191,10 +195,17 @@ class JSON_LD_Runtime extends Plugin {
 
 		$json_ld_array = json_decode( $json_ld, true );
 
+		// Drop the publish-time @id so it can't go stale against the freshly
+		// resolved url; the builder re-adds it from the current permalink
+		unset( $json_ld_array['@id'] );
+
 		// Build creation context for text item fragment URLs
 		$creation_context = [];
 		if ( ! empty( $post_id ) ) {
 			$creation_context['canonical_post_id'] = $post_id;
+		}
+		if ( ! empty( $first_list_id ) ) {
+			$creation_context['id'] = $first_list_id;
 		}
 
 		// Replace original list items with updated combined list

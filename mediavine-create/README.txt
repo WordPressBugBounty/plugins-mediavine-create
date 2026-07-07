@@ -143,6 +143,17 @@ Please report security bugs found in the source code of the Create plugin throug
 
 == Changelog ==
 
+= 2.5.3 =
+
+* FEATURE: Add images and GIFs by pasting a URL directly into image pickers (main card, Pinterest, and list-item images) and the Instructions/Notes editors
+* ENHANCEMENT: Settings now show a Save button and confirmation toasts so you can see when your changes are saved
+* ENHANCEMENT: Collapse the settings sidebar for more room while editing your cards
+* IMPROVEMENT: List cards now output cleaner, more complete ItemList structured data that better follows Google and schema.org guidance
+* FIX: Star ratings now use a valid accessibility role, resolving a PageSpeed Insights accessibility warning
+* FIX: A scraped description now appears right away when adding a list item by URL, instead of only after saving and reloading
+* FIX: Create no longer floods server error logs with debug messages on every card render (for Pro users with Unit Conversion enabled)
+
+
 = 2.5.2 =
 
 * FIX: Images imported by Create (list-item and product thumbnails) now generate proper metadata in the Media Library, so image optimizers like Imagify and WordPress thumbnail sizes work correctly.

@@ -553,7 +553,6 @@ class Products_API extends Products {
 			$result['remote_thumbnail_uri'] = $result['external_thumbnail_url'];
 			$result['title']                = $result['title'];
 		}
-		error_log('scrape_non_amazon result: ' . print_r($result, true));
 
 		$response = API_Services::set_response_data( $result, $response );
 		$response->set_status( 200 );

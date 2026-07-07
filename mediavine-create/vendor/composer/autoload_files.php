@@ -15,8 +15,6 @@ return array(
     '511c0391a168cd56ebccc0ba4faebc72' => $baseDir . '/lib/api/v1/creations-args.php',
     '4ab644e0d2d7132f0d5592187e249590' => $baseDir . '/lib/api/v1/creations-schema.php',
     '40f5d58e2e66a718303da8b6947ea9bf' => $baseDir . '/scoped-vendor/guzzlehttp/guzzle/src/functions_include.php',
-    '14229dd5eba734ea6b9768b3ef12af04' => $baseDir . '/scoped-vendor/guzzlehttp/psr7/src/functions_include.php',
-    'c2e2450397757b5e0eab55fb7f1eb40a' => $baseDir . '/scoped-vendor/guzzlehttp/promises/src/functions_include.php',
     '388fbed548413e4f8f517e9537d4c74d' => $baseDir . '/scoped-vendor/ralouphie/getallheaders/src/getallheaders.php',
     'd523777707f78239001d5d769cd1d36f' => $baseDir . '/lib/helpers/functions-helpers.php',
     '5c321742a9de6988bf8c509630c9de89' => $baseDir . '/lib/autoloader-pro.php',

@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.5.2';
+	const VERSION = '2.5.3';
 
 	const DB_VERSION = '2.4.1';
 
@@ -641,10 +641,40 @@ class Plugin {
 		$a = shortcode_atts(
 			[
 				'id'      => null,
+				'url'     => null,
+				'alt'     => null,
 				'options' => null,
 				'no-pin'  => null, // @todo check for option to turn pinning on or off
 			], $atts
 		);
+
+		// Externally-hosted image/GIF referenced by URL (pasted in the editor).
+		// Rendered as a direct <img> so animated GIFs keep animating and the file
+		// never has to be downloaded into the Media Library.
+		if ( ! isset( $a['id'] ) && ! empty( $a['url'] ) ) {
+			$url = esc_url( $a['url'] );
+			if ( empty( $url ) ) {
+				return '';
+			}
+
+			$attr = [
+				'src'     => $url,
+				'alt'     => ! empty( $a['alt'] ) ? esc_attr( $a['alt'] ) : '',
+				'loading' => 'lazy',
+				'class'   => 'mv-img-external',
+			];
+			if ( isset( $a['no-pin'] ) ) {
+				$attr['data-pin-nopin'] = esc_attr( $a['no-pin'] );
+			}
+
+			$html = '<img';
+			foreach ( $attr as $name => $value ) {
+				$html .= ' ' . $name . '="' . $value . '"';
+			}
+			$html .= ' />';
+
+			return $html;
+		}
 
 		if ( isset( $a['id'] ) ) {
 			$attr = [];
@@ -673,6 +703,65 @@ class Plugin {
 			return $img;
 		}
 		return '';
+	}
+
+	/**
+	 * File extensions that can be referenced by a bare URL in editor content and
+	 * "unfurled" into an inline image.
+	 *
+	 * @return string[]
+	 */
+	public static function unfurl_media_extensions() {
+		/**
+		 * Filter the media file extensions that are unfurled from a bare URL into
+		 * an inline image in instructions/notes.
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param string[] $extensions Lower-case extensions without the leading dot.
+		 */
+		return apply_filters(
+			'mv_create_unfurl_media_extensions',
+			[ 'gif', 'jpg', 'jpeg', 'png', 'webp', 'avif', 'svg' ]
+		);
+	}
+
+	/**
+	 * Convert bare image/GIF URLs in editor content into [mv_img url="…"] shortcodes
+	 * so they render as inline images (CRE-64 "unfurling").
+	 *
+	 * Only URLs that stand alone as text are unfurled: a URL that is part of an
+	 * attribute value (preceded by =, ', " or /) — e.g. an existing href/src or an
+	 * [mv_img url="…"] shortcode — is left untouched, so links and already-inserted
+	 * images are not double-wrapped.
+	 *
+	 * @param string $html Instruction/notes HTML.
+	 * @return string
+	 */
+	public static function unfurl_media_urls( $html ) {
+		if ( empty( $html ) || ! is_string( $html ) ) {
+			return $html;
+		}
+
+		$extensions = array_map( 'preg_quote', self::unfurl_media_extensions() );
+		$extensions = implode( '|', $extensions );
+
+		// Lazy body (`+?`) so adjacent bare URLs with no separating space (e.g.
+		// `a.com/1.gif,b.com/2.gif`) don't get merged into a single match.
+		$pattern = '#(?<![=\'"/])\bhttps?://[^\s<>"\']+?\.(?:' . $extensions . ')(?:[?\#][^\s<>"\']*)?#i';
+
+		return preg_replace_callback(
+			$pattern,
+			function ( $matches ) {
+				$matched = $matches[0];
+				$url     = esc_url_raw( $matched );
+				if ( empty( $url ) ) {
+					return $matched;
+				}
+				return '[mv_img url="' . $url . '"]';
+			},
+			$html
+		);
 	}
 
 	/**

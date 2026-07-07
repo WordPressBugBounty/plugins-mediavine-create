@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
+class ComposerStaticInitd04c9ea79a49c9ff3a091dfa4d0378a3
 {
     public static $files = array (
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
@@ -16,8 +16,6 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         '511c0391a168cd56ebccc0ba4faebc72' => __DIR__ . '/../..' . '/lib/api/v1/creations-args.php',
         '4ab644e0d2d7132f0d5592187e249590' => __DIR__ . '/../..' . '/lib/api/v1/creations-schema.php',
         '40f5d58e2e66a718303da8b6947ea9bf' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/functions_include.php',
-        '14229dd5eba734ea6b9768b3ef12af04' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/functions_include.php',
-        'c2e2450397757b5e0eab55fb7f1eb40a' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/promises/src/functions_include.php',
         '388fbed548413e4f8f517e9537d4c74d' => __DIR__ . '/../..' . '/scoped-vendor/ralouphie/getallheaders/src/getallheaders.php',
         'd523777707f78239001d5d769cd1d36f' => __DIR__ . '/../..' . '/lib/helpers/functions-helpers.php',
         '5c321742a9de6988bf8c509630c9de89' => __DIR__ . '/../..' . '/lib/autoloader-pro.php',
@@ -32,6 +30,7 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'M' =>
         array (
             'Mediavine\\Create\\Psr\\Http\\Message\\' => 34,
+            'Mediavine\\Create\\Psr\\Http\\Client\\' => 33,
             'Mediavine\\Create\\GuzzleHttp\\Psr7\\' => 33,
             'Mediavine\\Create\\GuzzleHttp\\Promise\\' => 36,
             'Mediavine\\Create\\GuzzleHttp\\' => 28,
@@ -51,6 +50,11 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src',
+            1 => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src',
+        ),
+        'Mediavine\\Create\\Psr\\Http\\Client\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/scoped-vendor/psr/http-client/src',
         ),
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\' =>
         array (
@@ -200,8 +204,11 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\Featured_Review_Block' => __DIR__ . '/../..' . '/lib/blocks/class-featured-review-block.php',
         'Mediavine\\Create\\Feedback_API' => __DIR__ . '/../..' . '/lib/settings/class-feedback-api.php',
         'Mediavine\\Create\\GateKeeper' => __DIR__ . '/../..' . '/lib/settings/class-gatekeeper.php',
+        'Mediavine\\Create\\GuzzleHttp\\BodySummarizer' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/BodySummarizer.php',
+        'Mediavine\\Create\\GuzzleHttp\\BodySummarizerInterface' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/BodySummarizerInterface.php',
         'Mediavine\\Create\\GuzzleHttp\\Client' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Client.php',
         'Mediavine\\Create\\GuzzleHttp\\ClientInterface' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/ClientInterface.php',
+        'Mediavine\\Create\\GuzzleHttp\\ClientTrait' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/ClientTrait.php',
         'Mediavine\\Create\\GuzzleHttp\\Cookie\\CookieJar' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Cookie/CookieJar.php',
         'Mediavine\\Create\\GuzzleHttp\\Cookie\\CookieJarInterface' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Cookie/CookieJarInterface.php',
         'Mediavine\\Create\\GuzzleHttp\\Cookie\\FileCookieJar' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Cookie/FileCookieJar.php',
@@ -213,7 +220,6 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\GuzzleHttp\\Exception\\GuzzleException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/GuzzleException.php',
         'Mediavine\\Create\\GuzzleHttp\\Exception\\InvalidArgumentException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/InvalidArgumentException.php',
         'Mediavine\\Create\\GuzzleHttp\\Exception\\RequestException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/RequestException.php',
-        'Mediavine\\Create\\GuzzleHttp\\Exception\\SeekException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/SeekException.php',
         'Mediavine\\Create\\GuzzleHttp\\Exception\\ServerException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/ServerException.php',
         'Mediavine\\Create\\GuzzleHttp\\Exception\\TooManyRedirectsException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/TooManyRedirectsException.php',
         'Mediavine\\Create\\GuzzleHttp\\Exception\\TransferException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Exception/TransferException.php',
@@ -222,11 +228,17 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\GuzzleHttp\\Handler\\CurlFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/CurlFactoryInterface.php',
         'Mediavine\\Create\\GuzzleHttp\\Handler\\CurlHandler' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/CurlHandler.php',
         'Mediavine\\Create\\GuzzleHttp\\Handler\\CurlMultiHandler' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php',
+        'Mediavine\\Create\\GuzzleHttp\\Handler\\CurlShareHandleState' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/CurlShareHandleState.php',
+        'Mediavine\\Create\\GuzzleHttp\\Handler\\CurlVersion' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/CurlVersion.php',
         'Mediavine\\Create\\GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
+        'Mediavine\\Create\\GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
         'Mediavine\\Create\\GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/MockHandler.php',
         'Mediavine\\Create\\GuzzleHttp\\Handler\\Proxy' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/Proxy.php',
+        'Mediavine\\Create\\GuzzleHttp\\Handler\\ProxyEnvironment' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/ProxyEnvironment.php',
         'Mediavine\\Create\\GuzzleHttp\\Handler\\StreamHandler' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/StreamHandler.php',
+        'Mediavine\\Create\\GuzzleHttp\\Handler\\TlsVersion' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Handler/TlsVersion.php',
         'Mediavine\\Create\\GuzzleHttp\\MessageFormatter' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/MessageFormatter.php',
+        'Mediavine\\Create\\GuzzleHttp\\MessageFormatterInterface' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/MessageFormatterInterface.php',
         'Mediavine\\Create\\GuzzleHttp\\Middleware' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Middleware.php',
         'Mediavine\\Create\\GuzzleHttp\\Pool' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Pool.php',
         'Mediavine\\Create\\GuzzleHttp\\PrepareBodyMiddleware' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/PrepareBodyMiddleware.php',
@@ -250,8 +262,10 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\BufferStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/BufferStream.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\CachingStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/CachingStream.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\DroppingStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/DroppingStream.php',
+        'Mediavine\\Create\\GuzzleHttp\\Psr7\\Exception\\MalformedUriException' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Exception/MalformedUriException.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\FnStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/FnStream.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Header' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Header.php',
+        'Mediavine\\Create\\GuzzleHttp\\Psr7\\HttpFactory' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/HttpFactory.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\InflateStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/InflateStream.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\LazyOpenStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/LazyOpenStream.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\LimitStream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/LimitStream.php',
@@ -264,6 +278,7 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Query' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Query.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Request' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Request.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Response' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Response.php',
+        'Mediavine\\Create\\GuzzleHttp\\Psr7\\Rfc3986' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Rfc3986.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Rfc7230' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Rfc7230.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\ServerRequest' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/ServerRequest.php',
         'Mediavine\\Create\\GuzzleHttp\\Psr7\\Stream' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/psr7/src/Stream.php',
@@ -279,7 +294,7 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\GuzzleHttp\\RequestOptions' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/RequestOptions.php',
         'Mediavine\\Create\\GuzzleHttp\\RetryMiddleware' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/RetryMiddleware.php',
         'Mediavine\\Create\\GuzzleHttp\\TransferStats' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/TransferStats.php',
-        'Mediavine\\Create\\GuzzleHttp\\UriTemplate' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/UriTemplate.php',
+        'Mediavine\\Create\\GuzzleHttp\\TransportSharing' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/TransportSharing.php',
         'Mediavine\\Create\\GuzzleHttp\\Utils' => __DIR__ . '/../..' . '/scoped-vendor/guzzlehttp/guzzle/src/Utils.php',
         'Mediavine\\Create\\Help' => __DIR__ . '/../..' . '/lib/helpers/class-help.php',
         'Mediavine\\Create\\Helpers\\Arr' => __DIR__ . '/../..' . '/lib/helpers/class-arr.php',
@@ -325,12 +340,22 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
         'Mediavine\\Create\\Products_API' => __DIR__ . '/../..' . '/lib/products/class-products-api.php',
         'Mediavine\\Create\\Products_Map' => __DIR__ . '/../..' . '/lib/product-maps/class-products-map.php',
         'Mediavine\\Create\\Products_Map_API' => __DIR__ . '/../..' . '/lib/product-maps/class-products-map-api.php',
+        'Mediavine\\Create\\Psr\\Http\\Client\\ClientExceptionInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-client/src/ClientExceptionInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Client\\ClientInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-client/src/ClientInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Client\\NetworkExceptionInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-client/src/NetworkExceptionInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Client\\RequestExceptionInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-client/src/RequestExceptionInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\MessageInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/MessageInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Message\\RequestFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src/RequestFactoryInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\RequestInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/RequestInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Message\\ResponseFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src/ResponseFactoryInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\ResponseInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/ResponseInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Message\\ServerRequestFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src/ServerRequestFactoryInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\ServerRequestInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/ServerRequestInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Message\\StreamFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src/StreamFactoryInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\StreamInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/StreamInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Message\\UploadedFileFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src/UploadedFileFactoryInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\UploadedFileInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/UploadedFileInterface.php',
+        'Mediavine\\Create\\Psr\\Http\\Message\\UriFactoryInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-factory/src/UriFactoryInterface.php',
         'Mediavine\\Create\\Psr\\Http\\Message\\UriInterface' => __DIR__ . '/../..' . '/scoped-vendor/psr/http-message/src/UriInterface.php',
         'Mediavine\\Create\\Publish' => __DIR__ . '/../..' . '/lib/class-publish.php',
         'Mediavine\\Create\\Queue' => __DIR__ . '/../..' . '/lib/helpers/class-queue.php',
@@ -392,9 +417,9 @@ class ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitc0ee6bb3abe3751abceb657d1dca9122::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitd04c9ea79a49c9ff3a091dfa4d0378a3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitd04c9ea79a49c9ff3a091dfa4d0378a3::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitd04c9ea79a49c9ff3a091dfa4d0378a3::$classMap;
 
         }, null, ClassLoader::class);
     }

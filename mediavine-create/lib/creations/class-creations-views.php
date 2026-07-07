@@ -81,7 +81,7 @@ class Creations_Views extends Creations {
 		$filled_svg = '<svg class="mv-stars-svg mv-stars-filled ' . $clip_class . '" width="150" height="25" aria-hidden="true" viewBox="0 0 68 11.4" preserveAspectRatio="none">' . $paths . '</svg>';
 
 		$stars = sprintf(
-			'<div class="mv-reviews-stars mv-stars mv-star-ratings " aria-label="%s">%s%s</div>',
+			'<div class="mv-reviews-stars mv-stars mv-star-ratings " role="img" aria-label="%s">%s%s</div>',
 			esc_attr( $display . ' out of 5 stars' ),
 			$empty_svg,
 			$filled_svg

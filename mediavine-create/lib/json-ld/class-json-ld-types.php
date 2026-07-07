@@ -918,8 +918,9 @@ class JSON_LD_Types {
 	public function add_json_ld_item_list( $json_ld, $item_list, $schema_prop, $creation = [] ) {
 		$item_list_element = [];
 		$current_host      = parse_url( home_url() );
-		$position          = 0;
-		$types             = [ 'external', 'card' ];
+		// Google requires ListItem position to be a 1-based number
+		$position = 1;
+		$types    = [ 'external', 'card' ];
 
 		// Get the canonical post URL for the list (used for text item fragments)
 		$list_canonical_url = null;
@@ -966,7 +967,7 @@ class JSON_LD_Types {
 				$permalink_host = parse_url( $permalink );
 				// If the link is a subdomain, we want to keep it in the JSON-LD
 				// If the link is neither a subdomain nor the primary domain, skip it
-				if ( ! Str::contains( $current_host['host'], $permalink_host['host'] ) && ! Str::is( $current_host['host'], $permalink_host['host'] ) ) {
+				if ( ! Str::is_same_host_or_subdomain( $permalink_host['host'] ?? '', $current_host['host'] ?? '' ) ) {
 					continue;
 				}
 			}
@@ -982,12 +983,45 @@ class JSON_LD_Types {
 				$list_item['name'] = $item->title;
 			}
 
+			// Add image if available; hydrated items carry a resolved thumbnail_uri
+			$image = null;
+			if ( ! empty( $item->thumbnail_uri ) ) {
+				$image = $item->thumbnail_uri;
+			} elseif ( ! empty( $item->thumbnail_id ) ) {
+				$image = wp_get_attachment_url( $item->thumbnail_id );
+			}
+			if ( ! empty( $image ) ) {
+				$list_item['image'] = $image;
+			}
+
+			// Add description if available; the column stores wpautop'd HTML, and
+			// scraped values can be entity-encoded, so decode before stripping
+			// so double-encoded markup materializes and is removed
+			if ( ! empty( $item->description ) ) {
+				$description = html_entity_decode( (string) $item->description, ENT_QUOTES, 'UTF-8' );
+				$description = $this->json_ld_helpers->remove_html( $description );
+				if ( ! empty( $description ) ) {
+					$list_item['description'] = $description;
+				}
+			}
+
 			$item_list_element[] = $list_item;
 			++$position;
 		}
 
 		$item_list_element          = $this->filter_json_ld_value( $item_list_element, 'item_list', $schema_prop, $json_ld, $creation );
 		$json_ld['itemListElement'] = $item_list_element;
+		// Count emitted elements, not raw list items, so the number matches
+		// the markup after external links and dividers are skipped
+		$json_ld['numberOfItems'] = count( $item_list_element );
+
+		if ( ! empty( $list_canonical_url ) ) {
+			$json_ld['url'] = $list_canonical_url;
+
+			if ( ! empty( $creation['id'] ) ) {
+				$json_ld['@id'] = $list_canonical_url . '#mv-create-list-' . $creation['id'];
+			}
+		}
 
 		return $json_ld;
 	}

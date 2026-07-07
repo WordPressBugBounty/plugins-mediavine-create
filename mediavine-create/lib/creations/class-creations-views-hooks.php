@@ -266,10 +266,16 @@ class Creations_Views_Hooks extends Creations_Views {
 		$list_items            = $args['creation']['list_items'];
 		$should_schema_display = array_filter(
 			$list_items,
-			function( $item ) {
-				// first check that the item type is valid for schema generation
-				if ( 'text' === $item['content_type'] ) {
+			function( $item ) use ( $args ) {
+				// Section dividers are never schema items
+				if ( self::is_list_item_divider( $item ) ) {
 					return false;
+				}
+
+				// Text items are schema-eligible when the JSON-LD builder can give
+				// them a fragment URL: the list's canonical post plus the item id
+				if ( 'text' === $item['content_type'] ) {
+					return ! empty( $args['creation']['canonical_post_id'] ) && ! empty( $item['id'] );
 				}
 
 				$link = null;
@@ -288,7 +294,7 @@ class Creations_Views_Hooks extends Creations_Views {
 				$current_host   = parse_url( home_url() );
 				// If the link is a subdomain, we want to keep it in the JSON-LD
 				// If the link is neither a subdomain nor the primary domain, skip it
-				if ( ! Str::contains( $current_host['host'], $permalink_host['host'] ) && ! Str::is( $current_host['host'], $permalink_host['host'] ) ) {
+				if ( ! Str::is_same_host_or_subdomain( $permalink_host['host'] ?? '', $current_host['host'] ?? '' ) ) {
 					return false;
 				}
 

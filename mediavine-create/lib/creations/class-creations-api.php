@@ -34,8 +34,50 @@ class Creations_API extends Creations {
 		return $response;
 	}
 
+	/**
+	 * Sideload externally-hosted thumbnail images into the Media Library.
+	 *
+	 * When a card's main image or Pinterest image is supplied as an external URL
+	 * (i.e. the user pasted an image/GIF link instead of choosing from the Media
+	 * Library) the inbound data has a `thumbnail_uri` / `pinterest_img_uri` but no
+	 * attachment id. We import the remote image once so it flows through the normal
+	 * image-size, schema, and responsive-image pipeline, mirroring how relations
+	 * (list items) and products already handle external images.
+	 *
+	 * `Images::get_attachment_id_from_url()` is a no-op for empty/invalid URLs and
+	 * returns an existing attachment when the URL already points at local media, so
+	 * this is safe to run on every save and only downloads genuinely remote images.
+	 *
+	 * @param array $data Inbound creation params.
+	 * @return array Params with `thumbnail_id` / `pinterest_img_id` populated when a remote image was sideloaded.
+	 */
+	private function sideload_external_thumbnails( array $data ) {
+		$image_fields = [
+			'thumbnail_id'     => 'thumbnail_uri',
+			'pinterest_img_id' => 'pinterest_img_uri',
+		];
+
+		foreach ( $image_fields as $id_key => $uri_key ) {
+			// Skip when an attachment is already selected.
+			if ( ! empty( $data[ $id_key ] ) ) {
+				continue;
+			}
+			if ( empty( $data[ $uri_key ] ) || ! is_string( $data[ $uri_key ] ) ) {
+				continue;
+			}
+
+			$attachment_id = Images::get_attachment_id_from_url( $data[ $uri_key ] );
+			if ( ! empty( $attachment_id ) ) {
+				$data[ $id_key ] = $attachment_id;
+			}
+		}
+
+		return $data;
+	}
+
 	public function create( \WP_REST_Request $request, \WP_REST_Response $response ) {
 		$params = $request->get_params();
+		$params = $this->sideload_external_thumbnails( $params );
 		do_action( 'mv_pre_create_card', $params );
 		if ( ! empty( $params['type'] ) ) {
 			do_action( 'mv_pre_create_' . $params['type'] . '_card', $params );
@@ -107,6 +149,11 @@ class Creations_API extends Creations {
 				}
 			}
 		}
+
+		// Import pasted external image/GIF URLs (main + Pinterest) into the Media
+		// Library. Runs after the list thumbnail derivation above so lists that
+		// already borrowed a relation thumbnail are left untouched.
+		$data = $this->sideload_external_thumbnails( $data );
 
 		do_action( 'mv_pre_update_card', $data );
 		if ( ! empty( $data['type'] ) ) {

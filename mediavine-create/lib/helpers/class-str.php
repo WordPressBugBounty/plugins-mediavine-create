@@ -164,6 +164,27 @@ class Str {
 	}
 
 	/**
+	 * Determines whether a host is the same as, or a subdomain of, a base host.
+	 *
+	 * A plain substring check is not safe here: for base host `example.com`,
+	 * hosts like `example.com.evil.net` or `notexample.com` contain the base
+	 * host but are unrelated domains.
+	 *
+	 * @param string $host Host to check (e.g. from a permalink)
+	 * @param string $base_host Base host (e.g. the site host)
+	 * @return boolean
+	 */
+	public static function is_same_host_or_subdomain( $host, $base_host ): bool {
+		if ( empty( $host ) || empty( $base_host ) || ! is_string( $host ) || ! is_string( $base_host ) ) {
+			return false;
+		}
+		$host      = strtolower( $host );
+		$base_host = strtolower( $base_host );
+
+		return $host === $base_host || static::endsWith( '.' . $base_host, $host );
+	}
+
+	/**
 	 * Determines whether string `$subject` begins with string `$search`.
 	 *
 	 * @param string|int $search

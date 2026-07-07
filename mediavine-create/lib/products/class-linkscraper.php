@@ -28,8 +28,8 @@ class LinkScraper {
 				// Ref: https://regex101.com/r/gM4jyh/1
 				'open-graph' => [
 					'title'                => '/(?:property="og:title"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:title")/',
-					'remote_thumbnail_uri' => '/p(?:property="og:image"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:image")/',
-					'description'          => '/(?:property="og:description"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:title")/',
+					'remote_thumbnail_uri' => '/(?:property="og:image"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:image")/',
+					'description'          => '/(?:property="og:description"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:description")/',
 				],
 				'amazon'     => [
 					'title'                => '/id="productTitle" class="a-size-large">\s*(.*?)\s*<\/span>/s',

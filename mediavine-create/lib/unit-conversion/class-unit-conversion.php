@@ -260,16 +260,6 @@ class Unit_Conversion extends Plugin {
 			$unit   = $supply->unit ?? '';
 			$amount = isset( $supply->amount ) ? $this->normalize_amount( (string) $supply->amount ) : '';
 
-			// DEBUG: Log raw supply fields for density conversion debugging
-			error_log( sprintf(
-				'[UnitConversion] Supply #%d — item: %s | amount: %s | unit: %s | original_text: %s',
-				$supply->id ?? 0,
-				var_export( $supply->item ?? null, true ),
-				var_export( $supply->amount ?? null, true ),
-				var_export( $supply->unit ?? null, true ),
-				substr( strip_tags( $supply->original_text ?? '' ), 0, 80 )
-			) );
-
 			// Fall back to parsing original_text when unit column is empty.
 			if ( empty( $unit ) && ! empty( $supply->original_text ) ) {
 				$parsed = $this->parse_amount_unit( strip_tags( $supply->original_text ) );

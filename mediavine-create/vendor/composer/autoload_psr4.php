@@ -8,7 +8,8 @@ $baseDir = dirname($vendorDir);
 return array(
     'Symfony\\Polyfill\\Intl\\Normalizer\\' => array($vendorDir . '/symfony/polyfill-intl-normalizer'),
     'Symfony\\Polyfill\\Intl\\Idn\\' => array($vendorDir . '/symfony/polyfill-intl-idn'),
-    'Mediavine\\Create\\Psr\\Http\\Message\\' => array($baseDir . '/scoped-vendor/psr/http-message/src'),
+    'Mediavine\\Create\\Psr\\Http\\Message\\' => array($baseDir . '/scoped-vendor/psr/http-message/src', $baseDir . '/scoped-vendor/psr/http-factory/src'),
+    'Mediavine\\Create\\Psr\\Http\\Client\\' => array($baseDir . '/scoped-vendor/psr/http-client/src'),
     'Mediavine\\Create\\GuzzleHttp\\Psr7\\' => array($baseDir . '/scoped-vendor/guzzlehttp/psr7/src'),
     'Mediavine\\Create\\GuzzleHttp\\Promise\\' => array($baseDir . '/scoped-vendor/guzzlehttp/promises/src'),
     'Mediavine\\Create\\GuzzleHttp\\' => array($baseDir . '/scoped-vendor/guzzlehttp/guzzle/src'),

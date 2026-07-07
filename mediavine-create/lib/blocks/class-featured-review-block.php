@@ -94,7 +94,7 @@ class Featured_Review_Block extends Plugin {
 		$rating = max( 0, min( 5, $rating ) ); // Clamp to 0-5
 
 		$output  = '<div class="create-featured-review-rating" data-rating="' . esc_attr( $rating ) . '">';
-		$output .= '<span class="create-featured-review-stars" aria-label="' . esc_attr( sprintf( __( '%s out of 5 stars', 'mediavine' ), $rating ) ) . '">';
+		$output .= '<span class="create-featured-review-stars" role="img" aria-label="' . esc_attr( sprintf( __( '%s out of 5 stars', 'mediavine' ), $rating ) ) . '">';
 
 		for ( $i = 1; $i <= 5; $i++ ) {
 			if ( $rating >= $i ) {

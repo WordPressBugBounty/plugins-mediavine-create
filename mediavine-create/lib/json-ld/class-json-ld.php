@@ -129,7 +129,9 @@ class JSON_LD {
 				}
 				break;
 			case 'item_list':
-				$json_ld = $this->json_ld_types->add_json_ld_item_list( $json_ld, $creation['list_items'], $schema_prop, $creation );
+				if ( ! empty( $creation['list_items'] ) && is_array( $creation['list_items'] ) ) {
+					$json_ld = $this->json_ld_types->add_json_ld_item_list( $json_ld, $creation['list_items'], $schema_prop, $creation );
+				}
 				break;
 			case 'reviews':
 				if ( isset( $creation[ $schema_map ] ) ) {
