@@ -66,7 +66,7 @@ class MV_DBI {
 		}
 		if ( is_wp_error( $error ) ) {
 			$data            = array_merge( $data, $error->get_error_data() );
-			$data['message'] = ! empty( $data['message'] ) ? $data['message'] : __( 'An error occurred with the request.', 'mediavine' );
+			$data['message'] = ! empty( $data['message'] ) ? $data['message'] : __( 'An error occurred with the request.', 'mediavine-create' );
 			$status          = '';
 			if ( is_int( $error->get_error_code() ) ) {
 				$status = $error->get_error_code();
@@ -232,9 +232,9 @@ class MV_DBI {
 		global $wpdb;
 
 		if ( $plugin_prefix ) {
-			// SECURITY CHECKED: This query is properly prepared.
 			$query     = $wpdb->prefix . $plugin_prefix . '%';
 			$statement = $wpdb->prepare( 'SHOW TABLES LIKE %s', $query );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 			$results   = $wpdb->get_results( $statement );
 
 			foreach ( $results as $index => $value ) {
@@ -306,7 +306,7 @@ class MV_DBI {
 	public function normalize_data( $data, $allow_null = false ) {
 		global $wpdb;
 
-		// SECURITY CHECKED: Everything in this query is already sanitized.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 		$table_columns   = $wpdb->get_col( 'DESC ' . $this->table_name, 0 );
 		$normalized_data = [];
 
@@ -347,7 +347,6 @@ class MV_DBI {
 
 	/**
 	 * Returns the sprintf type for preparing sql statements
-	 * @todo Refactor get_sprintf and get_wp_sprintf_type. Both methods are doing the same thing, but get_wp_sprintf is only used in one place
 	 *
 	 * @param mixed $var Variable to determine type
 	 * @return string|false sprintf type
@@ -357,37 +356,9 @@ class MV_DBI {
 
 		switch ( $type ) {
 			case 'string':
-				if ( is_numeric( $type ) ) {
-					return '%d';
-				} else {
-					return '%s';
-				}
-				// no break
-			case 'boolean':
-				return '%b';
-			case 'integer':
-				return '%d';
-			case 'double':
-				return '%f';
-			default:
-				return false;
-		}
-	}
-
-	/**
-	 * @todo Update get_sprintf by moving `case 'NULL'` to get_sprintf under `case 'string'`
-	 * @todo Find and update references to use get_sprintf
-	 * @todo Remove this method
-	 */
-	public function get_wp_sprintf_type( $var ) {
-		$type = gettype( $var );
-
-		switch ( $type ) {
-			case 'string':
 			case 'NULL':
-				if ( is_numeric( $type ) ) {
-					return '%d';
-				}
+				// Always %s for strings — do not promote numeric-looking strings to %d
+				// (wpdb would cast and truncate e.g. "4.5" / "007").
 				return '%s';
 			case 'boolean':
 			case 'integer':
@@ -397,7 +368,6 @@ class MV_DBI {
 			default:
 				return false;
 		}
-
 	}
 
 	/**
@@ -430,7 +400,6 @@ class MV_DBI {
 	 * @return object|WP_Error|null
 	 */
 	public function create( $data ) {
-		add_filter( 'query', [ $this, 'allow_null' ] );
 		return $this->insert( $data );
 	}
 
@@ -476,10 +445,10 @@ class MV_DBI {
 		if ( empty( $data ) || ! count( $data ) ) {
 			return null;
 		}
-		$date = date( 'Y-m-d H:i:s' );
+		$date = gmdate( 'Y-m-d H:i:s' );
 
 		// get the columns from the table
-		// SECURITY CHECKED: Everything in this query is already sanitized.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 		$table_columns = $wpdb->get_col( 'DESC ' . $this->table_name, 0 );
 
 		// Return with errors if found
@@ -488,10 +457,13 @@ class MV_DBI {
 			return $handle_error;
 		}
 
-		// default all values to null so we can add values where items are missing keys
-		$defaults = [];
+		// Sentinel for columns omitted from the row: emit SQL DEFAULT so NOT NULL
+		// columns with a schema default (and AUTO_INCREMENT) work under strict mode.
+		// Explicit null / 'NULL' still become a real SQL NULL literal.
+		$use_default = new \stdClass();
+		$defaults    = [];
 		foreach ( $table_columns as $column ) {
-			$defaults[ $column ] = 'NULL';
+			$defaults[ $column ] = $use_default;
 		}
 
 		// generate the "(columns...) part of the insert query
@@ -518,10 +490,18 @@ class MV_DBI {
 			// Remove any keys that aren't in the table columns list
 			$item = Arr::only( $item, $table_columns );
 
-			// get sprintf formats for item to prepare SQL
+			// Build formats with NULL/DEFAULT literals so we never need the allow_null query filter.
 			$formats = [];
 			foreach ( $item as $value ) {
-				$formats[] = $this->get_wp_sprintf_type( $value );
+				if ( $use_default === $value ) {
+					$formats[] = 'DEFAULT';
+					continue;
+				}
+				if ( null === $value || 'NULL' === $value ) {
+					$formats[] = 'NULL';
+					continue;
+				}
+				$formats[] = $this->get_sprintf( $value );
 				$values[]  = $value;
 			}
 
@@ -533,10 +513,10 @@ class MV_DBI {
 		$statement     = "INSERT INTO {$this->table_name} ($insert_fields) VALUES $insert_values";
 
 		// use the formats, Luke--escape SQL
-		// SECURITY CHECKED: This query is properly prepared.
-		$prepared = $wpdb->prepare( $statement, $values );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+		$prepared = empty( $values ) ? $statement : $wpdb->prepare( $statement, $values );
 
-		add_filter( 'query', [ $this, 'allow_null' ] );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 		$result = $wpdb->query( $prepared );
 		return self::handle_error( $result, true );
 	}
@@ -550,7 +530,7 @@ class MV_DBI {
 	public function insert( $data ) {
 		global $wpdb;
 
-		$date             = date( 'Y-m-d H:i:s' );
+		$date             = gmdate( 'Y-m-d H:i:s' );
 		$data['created']  = $date;
 		$data['modified'] = $date;
 
@@ -561,10 +541,13 @@ class MV_DBI {
 		}
 
 		$normalized_data = $this->normalize_data( $data );
-		add_filter( 'query', [ $this, 'allow_null' ] );
-		// SECURITY CHECKED: Everything in this query is already sanitized.
-		$insert = $wpdb->insert( $this->table_name, $normalized_data );
-		remove_filter( 'query', [ $this, 'allow_null' ] );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+		$insert = $this->with_allow_null(
+			function() use ( $wpdb, $normalized_data ) {
+				return $wpdb->insert( $this->table_name, $normalized_data );
+			}
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 
 		// Return with errors if found, before retrieving record data
 		$handle_error = self::handle_error( $insert );
@@ -736,7 +719,7 @@ class MV_DBI {
 		}
 
 		if ( $modify_date ) {
-			$date             = date( 'Y-m-d H:i:s' );
+			$date             = gmdate( 'Y-m-d H:i:s' );
 			$data['modified'] = $date;
 		}
 
@@ -781,17 +764,19 @@ class MV_DBI {
 
 		$normalized_data = self::normalize_data( $data, $allow_normalized_null );
 
-		add_filter( 'query', [ $this, 'allow_null' ] );
-		// SECURITY CHECKED: Everything in this query is already sanitized.
-		$update = $wpdb->update( $this->table_name, $normalized_data, [ $args['col'] => $key ], $args['format'], $args['where_format'] );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+		$update = $this->with_allow_null(
+			function() use ( $wpdb, $normalized_data, $args, $key ) {
+				return $wpdb->update( $this->table_name, $normalized_data, [ $args['col'] => $key ], $args['format'], $args['where_format'] );
+			}
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// Return with errors if found
 		$handle_error = self::handle_error( $update );
 		if ( $handle_error ) {
 			return $handle_error;
 		}
-
-		remove_filter( 'query', [ $this, 'allow_null' ] );
 
 		if ( $return_updated ) {
 
@@ -882,10 +867,11 @@ class MV_DBI {
 			$where_statement .= $key . ' = ' . $sprintf_identifier;
 		}
 
-		// SECURITY CHECKED: This query is properly prepared.
 		$build_sql          = "SELECT * FROM `$this->table_name` WHERE " . $where_statement;
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 		$prepared_statement = $wpdb->prepare( $build_sql, $prepare_array );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 		$select = $wpdb->get_results( $prepared_statement, $this->result_type );
 
 		// Return with errors if found
@@ -949,8 +935,155 @@ class MV_DBI {
 	public function find( $args = [], $search_params = null ) {
 		global $wpdb;
 
-		$results = [];
+		// Shared model singletons retain mutable builder state; always restore
+		// defaults after a query so one caller's limit/order cannot leak into the next.
+		try {
+			$results = [];
 
+			// We no longer allow preprepared statements due to security concerns.
+			if ( isset( $args['prepared_statement'] ) ) {
+				// There is an exception for specific tables used by our importers.
+				// Convert their prepared_statements to new SQL preparation.
+				$allowed_tables        = [
+					'posts', // Purr Recipe Cards, Simple Recipes Pro, WP Tasty
+					'amd_zlrecipe_recipes', // Zip Recipes, ZipList Recipes
+				];
+				$uses_importers_tables = in_array( $this->short_name, $allowed_tables );
+				if ( $uses_importers_tables ) {
+					$args['sql']    = $args['prepared_statement'];
+					$args['params'] = [];
+				}
+
+				if ( ! $uses_importers_tables ) {
+					$error = new WP_Error( 'preprepared-not-allowed', 'Preprepared SQL queries are no longer allowed.' );
+					return self::handle_error( $error );
+				}
+			}
+
+			if ( isset( $args['sql'] ) && isset( $args['params'] ) ) {
+				// Params must be an array.
+				if ( ! is_array( $args['params'] ) ) {
+					$error = new WP_Error( 'missing-prepared-params', 'SQL params for preparation are required.' );
+					return self::handle_error( $error );
+				}
+
+				// Error anything that doesn't start with SELECT.
+				$sql_command = strtoupper(trim($args['sql']));
+				if ( strpos( $sql_command, 'SELECT' ) !== 0 ) {
+					$error = new WP_Error( 'no-select-sql', 'SQL query must begin with SELECT.' );
+					return self::handle_error( $error );
+				}
+
+				// We don't want to give access to the options or users tables.
+				$has_safe_tables = true;
+				$excluded_tables = [
+					$wpdb->prefix . 'options',
+					$wpdb->prefix . 'users',
+					$wpdb->prefix . 'usermeta',
+				];
+				foreach ( $excluded_tables as $table ) {
+					// None of our prepared_statements contained `users` or `options` so this is safe.
+					if ( strpos( $args['sql'], $table ) !== false ) {
+						$has_safe_tables = false;
+					}
+				}
+
+				// Finally, let just be extra save and make sure the short_name exists within the query.
+				if ( strpos( $args['sql'], $this->short_name ) === false ) {
+					$has_safe_tables = false;
+				}
+
+				if ( ! $has_safe_tables ) {
+					$error = new WP_Error( 'disallowed-table', 'Access to specified table is not allowed.' );
+					return self::handle_error( $error );
+				}
+
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+				$prepared = $wpdb->prepare($args['sql'], $args['params']);
+				$results  = $wpdb->get_results( $prepared );
+				// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
+				return self::handle_error( $results, true );
+			}
+
+			$default_statement = "SELECT * FROM {$this->table_name} ORDER BY {$this->order_by} {$this->order} LIMIT {$this->limit} OFFSET {$this->offset}";
+
+			if ( empty( $args ) && ! $search_params ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+				$results = $wpdb->get_results( $default_statement );
+				return self::handle_error( $results, true );
+			}
+
+			if ( isset( $args['limit'] ) ) {
+				$this->set_limit( $args['limit'] );
+			}
+
+			if ( isset( $args['offset'] ) ) {
+				$this->set_offset( $args['offset'] );
+			}
+
+			if ( isset( $args['order_by'] ) ) {
+				// order_by_trusted is only ever set to a server-generated expression
+				// (never request input) — see Creations_API rating sort.
+				$this->set_order_by( $args['order_by'], ! empty( $args['order_by_trusted'] ) );
+			}
+
+			if ( isset( $args['order'] ) ) {
+				$this->set_order( $args['order'] );
+			}
+
+			if ( isset( $args['select'] ) ) {
+				$this->set_select( $args['select'] );
+			}
+
+			$build_sql = "SELECT $this->select FROM `$this->table_name`";
+			$order_sql = $this->paginate_and_order();
+
+			if ( $this->has_where_conditions( $args, $search_params ) ) {
+				list( $where_clause, $prepare_array ) = $this->build_where_clause( $args, $search_params );
+
+				$build_sql          = $build_sql . ' WHERE ' . $where_clause . $order_sql;
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+				$prepared_statement = $wpdb->prepare( $build_sql, $prepare_array );
+
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+				$results = $wpdb->get_results( $prepared_statement );
+			} else {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+				$results = $wpdb->get_results( $build_sql . $order_sql );
+			}
+
+			$results = $this->after_find( $results );
+
+			return self::handle_error( $results, true );
+		} finally {
+			$this->reset_query_state();
+		}
+	}
+
+	/**
+	 * Whether any of the given args/search_params would produce a WHERE clause.
+	 *
+	 * @param array      $args
+	 * @param array|null $search_params
+	 * @return bool
+	 */
+	private function has_where_conditions( $args, $search_params ) {
+		return $search_params || ! empty( $args['where'] ) && is_array( $args['where'] ) || ! empty( $args['conditions'] );
+	}
+
+	/**
+	 * Builds a WHERE clause and its bound parameters from where/conditions/search args.
+	 *
+	 * Shared by find() and get_count() so both scan identical rows for the same args.
+	 *
+	 * @param array      $args          May contain 'where' (assoc array of column => value,
+	 *                                  or column => ['IN'|'NOT IN'|comparison operator => value])
+	 *                                  and/or 'conditions' (array of [column, operator, value] triples).
+	 * @param array|null $search_params Column => term map searched with LIKE/IN, OR'd together.
+	 * @return array{0: string, 1: array} [ $where_clause, $prepare_array ]. $where_clause is ''
+	 *                                     when nothing in $args/$search_params produced a condition.
+	 */
+	private function build_where_clause( $args, $search_params ) {
 		// Array of params that should be handled with LIKE, not =
 		// This probably won't ever change, since would only be used by search, practically.
 		$like_params = [
@@ -960,235 +1093,126 @@ class MV_DBI {
 			'associated_posts',
 		];
 
-		// We no longer allow preprepared statements due to security concerns.
-		if ( isset( $args['prepared_statement'] ) ) {
-			// There is an exception for specific tables used by our importers.
-			// Convert their prepared_statements to new SQL preparation.
-			$allowed_tables        = [
-				'posts', // Purr Recipe Cards, Simple Recipes Pro, WP Tasty
-				'amd_zlrecipe_recipes', // Zip Recipes, ZipList Recipes
-			];
-			$uses_importers_tables = in_array( $this->short_name, $allowed_tables );
-			if ( $uses_importers_tables ) {
-				$args['sql']    = $args['prepared_statement'];
-				$args['params'] = [];
-			}
+		$where_statement  = '';
+		$search_statement = '';
+		$prepare_array    = [];
 
-			if ( ! $uses_importers_tables ) {
-				$error = new WP_Error( 'preprepared-not-allowed', 'Preprepared SQL queries are no longer allowed.' );
-				return self::handle_error( $error );
-			}
-		}
-
-		if ( isset( $args['sql'] ) && isset( $args['params'] ) ) {
-			// Params must be an array.
-			if ( ! is_array( $args['params'] ) ) {
-				$error = new WP_Error( 'missing-prepared-params', 'SQL params for preparation are required.' );
-				return self::handle_error( $error );
-			}
-
-			// Error anything that doesn't start with SELECT.
-			$sql_command = strtoupper(trim($args['sql']));
-			if ( strpos( $sql_command, 'SELECT' ) !== 0 ) {
-				$error = new WP_Error( 'no-select-sql', 'SQL query must begin with SELECT.' );
-				return self::handle_error( $error );
-			}
-
-			// We don't want to give access to the options or users tables.
-			$has_safe_tables = true;
-			$excluded_tables = [
-				$wpdb->prefix . 'options',
-				$wpdb->prefix . 'users',
-				$wpdb->prefix . 'usermeta',
-			];
-			foreach ( $excluded_tables as $table ) {
-				// None of our prepared_statements contained `users` or `options` so this is safe.
-				if ( strpos( $args['sql'], $table ) !== false ) {
-					$has_safe_tables = false;
+		if ( ! empty( $args['where'] ) ) {
+			foreach ( $args['where'] as $key => $value ) {
+				if ( ! empty( $where_statement ) ) {
+					$where_statement .= ' AND ';
 				}
-			}
 
-			// Finally, let just be extra save and make sure the short_name exists within the query.
-			if ( strpos( $args['sql'], $this->short_name ) === false ) {
-				$has_safe_tables = false;
-			}
+				if ( is_array( $value ) ) {
+					$statement = strtoupper( key( $value ) );
+					// Should be IN or NOT IN
+					if ( false !== strpos( $statement, 'IN' ) ) {
+						$values        = current( $value );
+						$prepare_array = $values;
+						$fill          = [];
 
-			if ( ! $has_safe_tables ) {
-				$error = new WP_Error( 'disallowed-table', 'Access to specified table is not allowed.' );
-				return self::handle_error( $error );
-			}
-
-			// SECURITY CHECKED: This query is properly prepared.
-			$prepared = $wpdb->prepare($args['sql'], $args['params']);
-			$results  = $wpdb->get_results( $prepared );
-			return self::handle_error( $results, true );
-		}
-
-		$default_statement = "SELECT * FROM {$this->table_name} ORDER BY {$this->order_by} {$this->order} LIMIT {$this->limit} OFFSET {$this->offset}";
-
-		if ( empty( $args ) && ! $search_params ) {
-			$results = $wpdb->get_results( $default_statement );
-			return self::handle_error( $results, true );
-		}
-
-		if ( isset( $args['limit'] ) ) {
-			$this->set_limit( $args['limit'] );
-		}
-
-		if ( isset( $args['offset'] ) ) {
-			$this->set_offset( $args['offset'] );
-		}
-
-		if ( isset( $args['order_by'] ) ) {
-			$this->set_order_by( $args['order_by'] );
-		}
-
-		if ( isset( $args['order'] ) ) {
-			$this->set_order( $args['order'] );
-		}
-
-		if ( isset( $args['select'] ) ) {
-			$this->set_select( $args['select'] );
-		}
-
-		$build_sql = "SELECT $this->select FROM `$this->table_name`";
-		$order_sql = $this->paginate_and_order();
-
-		if ( $search_params || ! empty( $args['where'] ) && is_array( $args['where'] ) || ! empty( $args['conditions'] ) ) {
-			$where_statement  = '';
-			$search_statement = '';
-			$prepare_array    = [];
-
-			if ( ! empty( $args['where'] ) ) {
-				foreach ( $args['where'] as $key => $value ) {
-					if ( ! empty( $where_statement ) ) {
-						$where_statement .= ' AND ';
-					}
-
-					if ( is_array( $value ) ) {
-						$statement = strtoupper( key( $value ) );
-						// Should be IN or NOT IN
-						if ( false !== strpos( $statement, 'IN' ) ) {
-							$values        = current( $value );
-							$prepare_array = $values;
-							$fill          = [];
-
-							foreach ( $prepare_array as $item ) {
-								$sprintf_identifier = $this->get_sprintf( $item );
-								if ( ! $sprintf_identifier ) {
-									$fill[] = "'%s'";
-									continue;
-								}
-
-								$fill[] = $sprintf_identifier;
-							}
-
-							$in               = implode( ', ', $fill );
-							$where_statement .= $key . ' ' . $statement . ' (' . $in . ')';
-						}
-
-						// Comparison operators: ['column' => ['>=' => 5]]
-						$allowed_operators = [ '>=', '<=', '>', '<', '!=' ];
-						$operator_key      = key( $value );
-						if ( in_array( $operator_key, $allowed_operators, true ) ) {
-							$comp_value         = current( $value );
-							$sprintf_identifier = $this->get_sprintf( $comp_value );
-							if ( $sprintf_identifier ) {
-								$prepare_array[]  = $comp_value;
-								$where_statement .= $key . ' ' . $operator_key . ' ' . $sprintf_identifier;
-							}
-						}
-
-						continue;
-					}
-
-					$sprintf_identifier = $this->get_sprintf( $value );
-					if ( ! $sprintf_identifier ) {
-						continue;
-					}
-					$prepare_array[] = $value;
-					if ( in_array( $key, $like_params, true ) ) {
-						$where_statement .= $key . " LIKE '%%%s%%'";
-					} else {
-						$where_statement .= $key . ' = ' . $sprintf_identifier;
-					}
-				}
-			}
-
-			// Additional conditions: [['column', '>=', value], ['column', '<=', value]]
-			// Allows multiple conditions on the same column (unlike the where array).
-			if ( ! empty( $args['conditions'] ) && is_array( $args['conditions'] ) ) {
-				$allowed_operators = [ '=', '!=', '>=', '<=', '>', '<' ];
-				foreach ( $args['conditions'] as $condition ) {
-					if ( ! is_array( $condition ) || count( $condition ) < 3 ) {
-						continue;
-					}
-					list( $col, $op, $val ) = $condition;
-					if ( ! in_array( $op, $allowed_operators, true ) ) {
-						continue;
-					}
-					$sprintf_identifier = $this->get_sprintf( $val );
-					if ( ! $sprintf_identifier ) {
-						continue;
-					}
-					if ( ! empty( $where_statement ) ) {
-						$where_statement .= ' AND ';
-					}
-					$prepare_array[]  = $val;
-					$where_statement .= $col . ' ' . $op . ' ' . $sprintf_identifier;
-				}
-			}
-
-			if ( $search_params ) {
-				foreach ( $search_params as $key => $value ) {
-					// Array value means "column IN (...)" — OR'd into the search group.
-					$is_in_clause = is_array( $value );
-					if ( $is_in_clause && empty( $value ) ) {
-						continue;
-					}
-
-					if ( strlen( $search_statement ) === 0 ) {
-						if ( strlen( $where_statement ) ) {
-							$search_statement .= ' AND ';
-						}
-						$search_statement .= '(';
-					} else {
-						$search_statement .= ' OR';
-					}
-
-					if ( $is_in_clause ) {
-						$fill = [];
-						foreach ( $value as $item ) {
+						foreach ( $prepare_array as $item ) {
 							$sprintf_identifier = $this->get_sprintf( $item );
-							$fill[]             = $sprintf_identifier ? $sprintf_identifier : "'%s'";
-							$prepare_array[]    = $item;
+							if ( ! $sprintf_identifier ) {
+								$fill[] = "'%s'";
+								continue;
+							}
+
+							$fill[] = $sprintf_identifier;
 						}
-						$search_statement .= " $key IN (" . implode( ', ', $fill ) . ') ';
-					} else {
-						$search_statement .= " $key LIKE '%%%s%%' ";
-						$prepare_array[]   = $value;
+
+						$in               = implode( ', ', $fill );
+						$where_statement .= $key . ' ' . $statement . ' (' . $in . ')';
 					}
+
+					// Comparison operators: ['column' => ['>=' => 5]]
+					$allowed_operators = [ '>=', '<=', '>', '<', '!=' ];
+					$operator_key      = key( $value );
+					if ( in_array( $operator_key, $allowed_operators, true ) ) {
+						$comp_value         = current( $value );
+						$sprintf_identifier = $this->get_sprintf( $comp_value );
+						if ( $sprintf_identifier ) {
+							$prepare_array[]  = $comp_value;
+							$where_statement .= $key . ' ' . $operator_key . ' ' . $sprintf_identifier;
+						}
+					}
+
+					continue;
 				}
-				if ( strlen( $search_statement ) > 0 ) {
-					$search_statement .= ')';
+
+				$sprintf_identifier = $this->get_sprintf( $value );
+				if ( ! $sprintf_identifier ) {
+					continue;
+				}
+				$prepare_array[] = $value;
+				if ( in_array( $key, $like_params, true ) ) {
+					$where_statement .= $key . " LIKE '%%%s%%'";
+				} else {
+					$where_statement .= $key . ' = ' . $sprintf_identifier;
 				}
 			}
-			$build_sql          = $build_sql . ' WHERE ' . $where_statement . $search_statement . $order_sql;
-			$prepared_statement = $wpdb->prepare( $build_sql, $prepare_array );
-
-			// SECURITY CHECKED: This query is properly prepared.
-			$results = $wpdb->get_results( $prepared_statement );
-		} else {
-			// SECURITY CHECKED: This query is properly prepared.
-			$results = $wpdb->get_results( $build_sql . $order_sql );
 		}
 
-		// Reset select to default to avoid polluting subsequent queries
-		$this->select = '*';
+		// Additional conditions: [['column', '>=', value], ['column', '<=', value]]
+		// Allows multiple conditions on the same column (unlike the where array).
+		if ( ! empty( $args['conditions'] ) && is_array( $args['conditions'] ) ) {
+			$allowed_operators = [ '=', '!=', '>=', '<=', '>', '<' ];
+			foreach ( $args['conditions'] as $condition ) {
+				if ( ! is_array( $condition ) || count( $condition ) < 3 ) {
+					continue;
+				}
+				list( $col, $op, $val ) = $condition;
+				if ( ! in_array( $op, $allowed_operators, true ) ) {
+					continue;
+				}
+				$sprintf_identifier = $this->get_sprintf( $val );
+				if ( ! $sprintf_identifier ) {
+					continue;
+				}
+				if ( ! empty( $where_statement ) ) {
+					$where_statement .= ' AND ';
+				}
+				$prepare_array[]  = $val;
+				$where_statement .= $col . ' ' . $op . ' ' . $sprintf_identifier;
+			}
+		}
 
-		$results = $this->after_find( $results );
+		if ( $search_params ) {
+			foreach ( $search_params as $key => $value ) {
+				// Array value means "column IN (...)" — OR'd into the search group.
+				$is_in_clause = is_array( $value );
+				if ( $is_in_clause && empty( $value ) ) {
+					continue;
+				}
 
-		return self::handle_error( $results, true );
+				if ( strlen( $search_statement ) === 0 ) {
+					if ( strlen( $where_statement ) ) {
+						$search_statement .= ' AND ';
+					}
+					$search_statement .= '(';
+				} else {
+					$search_statement .= ' OR';
+				}
+
+				if ( $is_in_clause ) {
+					$fill = [];
+					foreach ( $value as $item ) {
+						$sprintf_identifier = $this->get_sprintf( $item );
+						$fill[]             = $sprintf_identifier ? $sprintf_identifier : "'%s'";
+						$prepare_array[]    = $item;
+					}
+					$search_statement .= " $key IN (" . implode( ', ', $fill ) . ') ';
+				} else {
+					$search_statement .= " $key LIKE '%%%s%%' ";
+					$prepare_array[]   = $value;
+				}
+			}
+			if ( strlen( $search_statement ) > 0 ) {
+				$search_statement .= ')';
+			}
+		}
+
+		return [ $where_statement . $search_statement, $prepare_array ];
 	}
 
 	/**
@@ -1207,52 +1231,6 @@ class MV_DBI {
 	}
 
 	/**
-	 * Retrieve an entire SQL result set from the database
-	 * @deprecated Use $this->find() instead
-	 *
-	 * @param  array $args                Array containing basic SQL arguments
-	 * @param  array $prepared_statement Optional. Prepared SQL statement
-	 * @return object Database query results
-	 *
-	 * TODO: Make this function use $this->find
-	 */
-	public function select( $args = [], $prepared_statement = null ) {
-		global $wpdb;
-
-		$limit    = $this->limit; // 50
-		$offset   = $this->offset; // 0
-		$order_by = $this->order_by; // 'created'
-		$order    = $this->order; // 'DESC'
-
-		if ( isset( $args['limit'] ) ) {
-			$limit = (int) $args['limit'];
-		}
-
-		if ( isset( $args['offset'] ) ) {
-			$offset = (int) $args['offset'];
-		}
-
-		if ( isset( $args['order_by'] ) ) {
-			$order_by = preg_replace('/[^a-zA-Z0-9_]/', '', $args['order_by'] );
-		}
-
-		if ( isset( $args['order'] ) && ( 'ASC' === $args['order'] || 'asc' === $args['order'] ) ) {
-			$order = 'ASC';
-		}
-
-		// We no longer allow preprepared statements due to security concerns
-		if ( isset( $prepared_statement ) ) {
-			$error = new WP_Error( 'preprepared-not-allowed', 'Preprepared SQL queries are no longer allowed. Using default query instead.' );
-		}
-
-		// SECURITY CHECKED: This query is properly prepared.
-		$prepared = $wpdb->prepare( "SELECT * FROM `{$this->table_name}` ORDER BY {$order_by} {$order} LIMIT %d OFFSET %d", [ $limit, $offset ] );
-		$select   = $wpdb->get_results( $prepared );
-
-		return self::handle_error( $select, true );
-	}
-
-	/**
 	 * Add a basic where clause to the query.
 	 *
 	 * @param  string|array $column
@@ -1261,28 +1239,78 @@ class MV_DBI {
 	 * @param  string       $after any SQL to insert after (LIMIT, ORDER, etc.)
 	 * @return array|\WP_Error
 	 */
+	/**
+	 * Validates a SQL column identifier against a strict allowlist.
+	 *
+	 * Accepts a bare identifier or a single `table.column` qualifier, each part
+	 * optionally backtick-quoted. Returns the identifier on success or false if
+	 * it contains anything else. SQL identifiers cannot be bound via
+	 * $wpdb->prepare() on all supported versions, so they must be allowlisted.
+	 *
+	 * @param string $identifier
+	 * @return string|false
+	 */
+	public static function sanitize_sql_identifier( $identifier ) {
+		if ( ! is_string( $identifier ) ) {
+			return false;
+		}
+		$identifier = trim( $identifier );
+		if ( preg_match( '/^`?[a-zA-Z_][a-zA-Z0-9_]*`?(\.`?[a-zA-Z_][a-zA-Z0-9_]*`?)?$/', $identifier ) ) {
+			return $identifier;
+		}
+		return false;
+	}
+
+	/**
+	 * Validates a SQL comparison operator against a fixed allowlist.
+	 *
+	 * @param string $operator
+	 * @return string|false Uppercased operator, or false if not allowed.
+	 */
+	public static function sanitize_sql_operator( $operator ) {
+		$allowed  = [ '=', '!=', '<>', '<', '<=', '>', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS', 'IS NOT' ];
+		$operator = strtoupper( trim( (string) $operator ) );
+		return in_array( $operator, $allowed, true ) ? $operator : false;
+	}
+
 	public function where( $column, $operator = '=', $value = null, $after = '' ) {
 		// if $column is an array, we assume we're trying to pass in multiple qualifications at the same time
 		// and can defer to `where_many`
 		if ( is_array( $column ) ) {
 			return $this->where_many( $column );
 		}
-		// if $column contains a space, we can assume it's a full `where` clause
-		// and insert it into the statement.
-		if ( is_string( $column ) && Str::contains( ' ', $column ) ) {
-			$statement = "SELECT {$this->select} FROM {$this->table_name} WHERE {$column} ORDER BY {$this->order_by} {$this->order} LIMIT {$this->offset}, {$this->limit}";
+
+		try {
+			// if $column contains a space, we can assume it's a full `where` clause
+			// and insert it into the statement. This is a documented advanced feature
+			// for caller-built (trusted) clauses only; it is never fed request input
+			// (no such caller exists in the plugin).
+			if ( is_string( $column ) && Str::contains( $column, ' ' ) ) {
+				$statement = "SELECT {$this->select} FROM {$this->table_name} WHERE {$column} ORDER BY {$this->order_by} {$this->order} LIMIT {$this->offset}, {$this->limit}";
+				$statement = trim( $statement );
+				return $this->db()->get_results( $statement );
+			}
+
+			// Allowlist the identifier and operator (which cannot be bound), then
+			// bind the value through $wpdb->prepare().
+			$safe_column   = self::sanitize_sql_identifier( $column );
+			$safe_operator = self::sanitize_sql_operator( $operator );
+			$value_type    = $this->get_sprintf( $value );
+			if ( is_bool( $value ) ) {
+				$value = (int) $value;
+			}
+			if ( false === $safe_column || false === $safe_operator || false === $value_type ) {
+				return new WP_Error( 'mv-invalid-where', 'Invalid column, operator, or value supplied to where().', compact( 'column', 'operator', 'value' ) );
+			}
+
+			$where = $this->db()->prepare( "{$safe_column} {$safe_operator} {$value_type}", $value );
+
+			$statement = "SELECT * FROM {$this->table_name} WHERE {$where} {$after} ORDER BY {$this->order_by} {$this->order} LIMIT {$this->offset}, {$this->limit}";
 			$statement = trim( $statement );
 			return $this->db()->get_results( $statement );
+		} finally {
+			$this->reset_query_state();
 		}
-
-		// If the value is a string, we'll need to wrap it in quotes for the SQL to be valid
-		$value_type = $this->get_sprintf( $value );
-		$value      = '%s' === $value_type ? "'{$value}'" : $value;
-		$where      = sprintf( '%s %s ' . $value_type, $column, $operator, $value );
-
-		$statement = "SELECT * FROM {$this->table_name} WHERE {$where} {$after} ORDER BY {$this->order_by} {$this->order} LIMIT {$this->offset}, {$this->limit}";
-		$statement = trim( $statement );
-		return $this->db()->get_results( $statement );
 	}
 
 	/**
@@ -1322,88 +1350,105 @@ class MV_DBI {
 			list( $column, $operator, $value, $after ) = array_merge( $array, $default_where_values );
 			return $this->where( $column, $operator, $value, $after );
 		}
-		$wheres = [];
-		$after  = '';
-		foreach ( $array as $where_array ) {
-			// if one of the values is a string, we assume it's meant to be `$after` SQL
-			if ( ! is_array( $where_array ) ) {
-				$after = $where_array;
-				continue;
-			}
-			// if the array has two items, we assume an `AND column = value` situation
-			// where index 0 is the column and index 1 is the value
-			if ( 2 === count( $where_array ) ) {
-				list( $column, $value ) = $where_array;
-				$wheres[]               = [ $column, '=', $value, 'and' ];
-				continue;
-			}
-			// if the count is 3, we assume the user wants to change the operator
-			// `$column = $where_array[0]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// `$operator = $where_array[1]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// `$value = $where_array[2]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			if ( 3 === count( $where_array ) ) {
-				list( $column, $operator, $value ) = $where_array;
-				$wheres[]                          = [ $column, $operator, $value, 'and' ];
-				continue;
-			}
-			// if the count is 4, we assume the user wants to change the operator and boolean
-			// `$column = $where_array[0]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// `$operator = $where_array[1]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// `$value = $where_array[2]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// `$boolean = $where_array[3]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			if ( 4 === count( $where_array ) ) {
-				list( $column, $operator, $value, $boolean ) = $where_array;
-				$wheres[]                                    = [ $column, $operator, $value, $boolean ];
-				continue;
-			}
-		}
-		if ( empty( $wheres ) ) {
-			return new WP_Error( 'mv-something-went-wrong', 'The where array could not be built successfully', compact( 'array', 'wheres' ) );
-		}
 
-		$where   = '';
-		$boolean = 'AND';
-		// now that we have all the `$wheres`, we iterate over them and build a `WHERE` statement
-		foreach ( $wheres as $where_array ) {
-			$close_parentheses                           = 'OR' === $boolean ? ')' : '';
-			list( $column, $operator, $value, $boolean ) = $where_array;
-
-			$boolean          = strtoupper( $boolean ); // normalize `and` and `or` and to `AND` and `OR`
-			$open_parentheses = 'OR' === $boolean ? '(' : '';
-			// If the value is a string, we'll need to wrap it in quotes for the SQL to be valid
-			$value_type = $this->get_sprintf( $value );
-			$value      = '%s' === $value_type ? "'{$value}'" : $value;
-			if ( 'IN' === $operator ) {
-				if ( is_array( $value ) ) {
-					$value = "('" . implode( "','", $value ) . "')";
-				} else {
-					$value = "({$value})";
+		try {
+			$wheres = [];
+			$after  = '';
+			foreach ( $array as $where_array ) {
+				// if one of the values is a string, we assume it's meant to be `$after` SQL
+				if ( ! is_array( $where_array ) ) {
+					$after = $where_array;
+					continue;
+				}
+				// if the array has two items, we assume an `AND column = value` situation
+				// where index 0 is the column and index 1 is the value
+				if ( 2 === count( $where_array ) ) {
+					list( $column, $value ) = $where_array;
+					$wheres[]               = [ $column, '=', $value, 'and' ];
+					continue;
+				}
+				// if the count is 3, we assume the user wants to change the operator
+				// `$column = $where_array[0]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				// `$operator = $where_array[1]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				// `$value = $where_array[2]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				if ( 3 === count( $where_array ) ) {
+					list( $column, $operator, $value ) = $where_array;
+					$wheres[]                          = [ $column, $operator, $value, 'and' ];
+					continue;
+				}
+				// if the count is 4, we assume the user wants to change the operator and boolean
+				// `$column = $where_array[0]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				// `$operator = $where_array[1]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				// `$value = $where_array[2]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				// `$boolean = $where_array[3]` phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				if ( 4 === count( $where_array ) ) {
+					list( $column, $operator, $value, $boolean ) = $where_array;
+					$wheres[]                                    = [ $column, $operator, $value, $boolean ];
+					continue;
 				}
 			}
-			// do one final verification of input types and format the `WHERE` strings
-			$where .= sprintf(
-				"%s%s %s $value_type%s %s ",
-				$open_parentheses,
-				$column,
-				$operator,
-				$value,
-				$close_parentheses,
-				$boolean
-			);
-			// if the item is the last `where`, we don't want a boolean at the end
-			if ( end( $wheres ) === $where_array ) {
-				$where = trim( $where, " $boolean " );
+			if ( empty( $wheres ) ) {
+				return new WP_Error( 'mv-something-went-wrong', 'The where array could not be built successfully', compact( 'array', 'wheres' ) );
 			}
-		}
 
-		if ( empty( $where ) ) {
-			return new WP_Error( 'mv-something-went-wrong', 'Something went wrong while building the where statement', compact( 'array', 'wheres', 'where' ) );
-		}
+			$where   = '';
+			$boolean = 'AND';
+			// now that we have all the `$wheres`, we iterate over them and build a `WHERE` statement
+			foreach ( $wheres as $where_array ) {
+				$close_parentheses                           = 'OR' === $boolean ? ')' : '';
+				list( $column, $operator, $value, $boolean ) = $where_array;
 
-		$statement = "SELECT {$this->select} FROM {$this->table_name} WHERE $where $after ORDER BY {$this->order_by} {$this->order} LIMIT {$this->offset}, {$this->limit}";
-		$statement = trim( $statement );
-		add_filter( 'query', [ $this, 'allow_null' ] );
-		return $this->db()->get_results( $statement );
+				$boolean          = strtoupper( $boolean ); // normalize `and` and `or` and to `AND` and `OR`
+				$open_parentheses = 'OR' === $boolean ? '(' : '';
+
+				// Allowlist the identifier and operator (which cannot be bound), then
+				// bind the value(s) through $wpdb->prepare().
+				$safe_column   = self::sanitize_sql_identifier( $column );
+				$safe_operator = self::sanitize_sql_operator( $operator );
+				if ( false === $safe_column || false === $safe_operator ) {
+					return new WP_Error( 'mv-invalid-where', 'Invalid column or operator supplied to where_many().', compact( 'column', 'operator' ) );
+				}
+
+				if ( 'IN' === $safe_operator || 'NOT IN' === $safe_operator ) {
+					$values       = is_array( $value ) ? array_values( $value ) : [ $value ];
+					$placeholders = implode( ', ', array_map( [ $this, 'get_sprintf' ], $values ) );
+					$condition    = $this->db()->prepare( "{$safe_column} {$safe_operator} ({$placeholders})", $values );
+				} elseif ( null === $value || 'NULL' === $value ) {
+					// Emit a real SQL NULL literal — avoids the allow_null query-filter hack.
+					$condition = "{$safe_column} {$safe_operator} NULL";
+				} else {
+					$value_type = $this->get_sprintf( $value );
+					if ( is_bool( $value ) ) {
+						$value = (int) $value;
+					}
+					$condition = $this->db()->prepare( "{$safe_column} {$safe_operator} {$value_type}", $value );
+				}
+
+				// format the `WHERE` strings; identifiers/operators are allowlisted and
+				// values are bound via prepare() above.
+				$where .= sprintf(
+					'%s%s%s %s ',
+					$open_parentheses,
+					$condition,
+					$close_parentheses,
+					$boolean
+				);
+				// if the item is the last `where`, we don't want a boolean at the end
+				if ( end( $wheres ) === $where_array ) {
+					$where = trim( $where, " $boolean " );
+				}
+			}
+
+			if ( empty( $where ) ) {
+				return new WP_Error( 'mv-something-went-wrong', 'Something went wrong while building the where statement', compact( 'array', 'wheres', 'where' ) );
+			}
+
+			$statement = "SELECT {$this->select} FROM {$this->table_name} WHERE $where $after ORDER BY {$this->order_by} {$this->order} LIMIT {$this->offset}, {$this->limit}";
+			$statement = trim( $statement );
+			return $this->db()->get_results( $statement );
+		} finally {
+			$this->reset_query_state();
+		}
 	}
 
 	/**
@@ -1446,11 +1491,12 @@ class MV_DBI {
 	 *
 	 * @param mixed $args Arguments to determine what rows to delete
 	 *
-	 * @return false|WP_Error|null
+	 * @return array|object|true|false|WP_Error Deleted row(s) after lifecycle hooks, true when
+	 *                                          rows were deleted but no prefetched item is
+	 *                                          available, or false when nothing matched.
 	 */
 	public function delete( $args ) {
 		global $wpdb;
-		$item_to_delete = null;
 
 		$defaults = apply_filters(
 			"mv_db_select_one_defaults_{$this->table_name}", [
@@ -1459,34 +1505,80 @@ class MV_DBI {
 			]
 		);
 
-		// If $args not array, set key as id
+		$items_to_delete = [];
+
+		// Scalar id: pass the id itself to find_one_by_id (not a wrapping array —
+		// (int) of a non-empty array is 1, which fetched the wrong row for hooks).
 		if ( ! is_array( $args ) ) {
-			$args           = [ 'key' => $args ];
-			$item_to_delete = $this->find_one_by_id( $args );
+			$id   = $args;
+			$args = [ 'key' => $id ];
+			$item = $this->find_one_by_id( $id );
+			if ( $item ) {
+				$items_to_delete[] = $item;
+			}
 		}
 
 		$args = array_merge( $defaults, $args );
 
-		if ( $item_to_delete ) {
-			$this->before_delete( $item_to_delete );
-		}
-
-		$where_array                 = [];
-		$where_array[ $args['col'] ] = $args['key'];
-
+		$where_array = [];
 		if ( ! empty( $args['where'] ) && is_array( $args['where'] ) ) {
 			$where_array = $args['where'];
+			if ( empty( $items_to_delete ) ) {
+				$found = $this->find(
+					[
+						'where'  => $where_array,
+						'limit'  => 999999,
+						'offset' => 0,
+					]
+				);
+				if ( is_array( $found ) ) {
+					$items_to_delete = $found;
+				}
+			}
+		} else {
+			$where_array[ $args['col'] ] = $args['key'];
+			// Array-arg col/key path: also fetch the row so lifecycle hooks fire.
+			if ( empty( $items_to_delete ) && null !== $args['key'] ) {
+				$item = $this->find_one(
+					[
+						'col' => $args['col'],
+						'key' => $args['key'],
+					]
+				);
+				if ( $item ) {
+					$items_to_delete[] = $item;
+				}
+			}
 		}
 
-		// SECURITY CHECKED: This delete is properly prepared.
+		foreach ( $items_to_delete as $item ) {
+			$this->before_delete( $item );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
 		$deleted = $wpdb->delete( $this->table_name, $where_array );
 
-		if ( $deleted ) {
-			$data = $this->after_delete( $item_to_delete );
-			return self::handle_error( $data, true );
+		if ( ! $deleted ) {
+			return false;
 		}
 
-		return false;
+		$after = [];
+		foreach ( $items_to_delete as $item ) {
+			$after[] = $this->after_delete( $item );
+		}
+
+		// Preserve the historical single-row return shape used by REST destroy handlers.
+		if ( 1 === count( $after ) ) {
+			return self::handle_error( $after[0], true );
+		}
+
+		// Multi-row success must be truthy (unlike the previous null return, which
+		// was indistinguishable from failure under loose boolean checks).
+		if ( empty( $after ) ) {
+			return true;
+		}
+
+		return self::handle_error( $after, true );
 	}
 
 
@@ -1508,25 +1600,29 @@ class MV_DBI {
 	 * @return integer|\WP_Error Number of results
 	 */
 	public function get_count( $args, $search_params = null ) {
-		$no_limit_args = array_merge(
-			$args, [
-				'limit'  => 999999,
-				'offset' => 0,
-				'select' => [ 'id' ],
-			]
-		);
+		global $wpdb;
 
-		// There is no difference in performance time between using
-		// MySQL's count and getting the `count()` of returned results
-		$results = $this->find( $no_limit_args, $search_params );
+		if ( $this->has_where_conditions( $args, $search_params ) ) {
+			list( $where_clause, $prepare_array ) = $this->build_where_clause( $args, $search_params );
+
+			$build_sql          = "SELECT COUNT(*) FROM `$this->table_name` WHERE " . $where_clause;
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+			$prepared_statement = $wpdb->prepare( $build_sql, $prepare_array );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+			$count = $wpdb->get_var( $prepared_statement );
+		} else {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- ORM/importer false positive: table/identifiers sanitized or allowlisted; values bound via prepare()/wpdb helpers
+			$count = $wpdb->get_var( "SELECT COUNT(*) FROM `$this->table_name`" );
+		}
 
 		// Return with errors if found
-		$handle_error = self::handle_error( $results );
+		$handle_error = self::handle_error( $count );
 		if ( $handle_error ) {
 			return $handle_error;
 		}
 
-		return count( $results );
+		return (int) $count;
 	}
 
 	/**
@@ -1554,6 +1650,45 @@ class MV_DBI {
 	}
 
 	/**
+	 * Run a callback with the allow_null query filter attached, always removing it afterward.
+	 *
+	 * $wpdb->insert() / update() quote the string 'NULL'; this filter rewrites those
+	 * to SQL NULL. The filter must never outlive the guarded query — a leak rewrites
+	 * every subsequent query in the request and can silently corrupt content that
+	 * legitimately contains the quoted word 'NULL'.
+	 *
+	 * @param callable $callback
+	 * @return mixed
+	 */
+	private function with_allow_null( callable $callback ) {
+		add_filter( 'query', [ $this, 'allow_null' ] );
+		try {
+			return $callback();
+		} finally {
+			remove_filter( 'query', [ $this, 'allow_null' ] );
+		}
+	}
+
+	/**
+	 * Restores builder properties to their defaults.
+	 *
+	 * Shared model singletons mutate limit/offset/order_by/order/select across
+	 * calls; find()/where()/where_many() invoke this after each query so state
+	 * cannot leak between callers. Setters applied immediately before a query
+	 * still take effect for that call.
+	 *
+	 * @return MV_DBI
+	 */
+	public function reset_query_state() {
+		$this->limit    = 50;
+		$this->offset   = 0;
+		$this->order_by = 'created';
+		$this->order    = 'DESC';
+		$this->select   = '*';
+		return $this;
+	}
+
+	/**
 	 * Overrides the default limit of 50
 	 *
 	 * @param integer|null $limit
@@ -1576,13 +1711,71 @@ class MV_DBI {
 	}
 
 	/**
+	 * Allowlist a SQL ORDER direction.
+	 *
+	 * Only `ASC` and `DESC` are ever valid. Anything else — including injection
+	 * attempts such as `ASC LIMIT 1,1-- -` — collapses to the safe default
+	 * `DESC`. ORDER directions are SQL keywords, not values, so they cannot be
+	 * protected by `$wpdb->prepare()` and must be allowlisted here.
+	 *
+	 * @param string|null $order
+	 * @return string 'ASC' or 'DESC'
+	 */
+	public static function sanitize_sql_order( $order = null ) {
+		return ( is_string( $order ) && 'ASC' === strtoupper( trim( $order ) ) ) ? 'ASC' : 'DESC';
+	}
+
+	/**
+	 * Allowlist a SQL ORDER BY column expression.
+	 *
+	 * Accepts a comma-separated list of bare or backtick-quoted column
+	 * identifiers, each optionally table-qualified (`table.column`) and
+	 * optionally suffixed with `ASC`/`DESC`. Any part containing SQL
+	 * metacharacters — parentheses, quotes, comments, sub-selects, `SLEEP()`,
+	 * etc. — fails the allowlist and is dropped; if nothing validates the
+	 * `$fallback` column is returned. ORDER BY targets are identifiers, not
+	 * values, so `$wpdb->prepare()` cannot protect them and they must be
+	 * allowlisted here.
+	 *
+	 * @param string|null $order_by
+	 * @param string      $fallback Safe column name returned when nothing validates.
+	 * @return string
+	 */
+	public static function sanitize_sql_order_by( $order_by = null, $fallback = 'created' ) {
+		if ( ! is_string( $order_by ) || '' === trim( $order_by ) ) {
+			return $fallback;
+		}
+
+		$sanitized = [];
+		foreach ( explode( ',', $order_by ) as $part ) {
+			$part = trim( $part );
+			// Optional backtick-quoted identifier, optional `table.column`, optional ASC/DESC.
+			if ( preg_match( '/^`?[a-zA-Z_][a-zA-Z0-9_]*`?(\.`?[a-zA-Z_][a-zA-Z0-9_]*`?)?(\s+(ASC|DESC))?$/i', $part ) ) {
+				$sanitized[] = $part;
+			}
+		}
+
+		return empty( $sanitized ) ? $fallback : implode( ', ', $sanitized );
+	}
+
+	/**
 	 * Overrides the default ORDER BY column
 	 *
 	 * @param string|null $order_by Defaults to `created` column
+	 * @param bool        $trusted  When true, skip allowlisting. Reserved for
+	 *                              server-generated expressions (e.g. the rating
+	 *                              CASE sort) that are never derived from request
+	 *                              input. NEVER pass user input with $trusted=true.
 	 *
 	 * @return MV_DBI
 	 */
-	public function set_order_by( $order_by = null ) {
+	public function set_order_by( $order_by = null, $trusted = false ) {
+		if ( is_null( $order_by ) ) {
+			return $this;
+		}
+		if ( ! $trusted ) {
+			$order_by = self::sanitize_sql_order_by( $order_by, $this->order_by );
+		}
 		$this->order_by = $order_by ?: $this->order_by;
 		return $this;
 	}
@@ -1595,7 +1788,10 @@ class MV_DBI {
 	 * @return MV_DBI
 	 */
 	public function set_order( $order = null ) {
-		$this->order = strtoupper( $order ) ?: $this->order;
+		if ( null === $order || '' === $order ) {
+			return $this;
+		}
+		$this->order = self::sanitize_sql_order( $order );
 		return $this;
 	}
 

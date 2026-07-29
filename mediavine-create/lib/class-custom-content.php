@@ -126,11 +126,11 @@ final class Custom_Content {
 				[
 					[
 						'slug'  => $this->namespace . '-blocks',
-						'title' => $this->label . ' ' . __( 'Content Blocks', 'mediavine' ),
+						'title' => $this->label . ' ' . __( 'Content Blocks', 'mediavine-create' ),
 					],
 					[
 						'slug'  => $this->namespace . '-meta',
-						'title' => $this->label . ' ' . __( 'Meta Boxes', 'mediavine' ),
+						'title' => $this->label . ' ' . __( 'Meta Boxes', 'mediavine-create' ),
 					],
 				]
 			);

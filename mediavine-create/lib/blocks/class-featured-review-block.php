@@ -94,7 +94,8 @@ class Featured_Review_Block extends Plugin {
 		$rating = max( 0, min( 5, $rating ) ); // Clamp to 0-5
 
 		$output  = '<div class="create-featured-review-rating" data-rating="' . esc_attr( $rating ) . '">';
-		$output .= '<span class="create-featured-review-stars" role="img" aria-label="' . esc_attr( sprintf( __( '%s out of 5 stars', 'mediavine' ), $rating ) ) . '">';
+		/* translators: %s: star rating value out of 5 */
+		$output .= '<span class="create-featured-review-stars" role="img" aria-label="' . esc_attr( sprintf( __( '%s out of 5 stars', 'mediavine-create' ), $rating ) ) . '">';
 
 		for ( $i = 1; $i <= 5; $i++ ) {
 			if ( $rating >= $i ) {
@@ -150,16 +151,16 @@ class Featured_Review_Block extends Plugin {
 
 		// For editor, we show warnings for edge cases
 		if ( ! $card_id ) {
-			return self::render_editor_warning( __( 'Please select a Create card.', 'mediavine' ) );
+			return self::render_editor_warning( __( 'Please select a Create card.', 'mediavine-create' ) );
 		}
 
 		if ( ! Featured_Review::card_exists( $card_id ) ) {
-			return self::render_editor_warning( __( 'Card no longer exists.', 'mediavine' ) );
+			return self::render_editor_warning( __( 'Card no longer exists.', 'mediavine-create' ) );
 		}
 
 		$review = Featured_Review::get_featured_for_card( $card_id );
 		if ( ! $review ) {
-			return self::render_editor_warning( __( 'No featured review selected for this card.', 'mediavine' ) );
+			return self::render_editor_warning( __( 'No featured review selected for this card.', 'mediavine-create' ) );
 		}
 
 		return self::render( $attributes );

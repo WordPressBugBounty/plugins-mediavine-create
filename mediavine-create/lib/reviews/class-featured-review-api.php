@@ -61,9 +61,7 @@ class Featured_Review_API extends Plugin {
 							},
 						],
 					],
-					'permission_callback' => function() {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -84,7 +82,8 @@ class Featured_Review_API extends Plugin {
 							},
 						],
 					],
-					'permission_callback' => '__return_true',
+					// Public read of the featured review for a card.
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -104,7 +103,7 @@ class Featured_Review_API extends Plugin {
 		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_FEATURED ) ) {
 			return new \WP_Error(
 				'feature_gated',
-				__( 'Featured reviews require a Pro subscription', 'mediavine' ),
+				__( 'Featured reviews require a Pro subscription', 'mediavine-create' ),
 				[
 					'status'      => 403,
 					'upgrade_url' => GateKeeper::get_upgrade_url(),
@@ -116,7 +115,7 @@ class Featured_Review_API extends Plugin {
 		if ( ! Featured_Review::review_exists( $review_id ) ) {
 			return new \WP_Error(
 				'rest_review_not_found',
-				__( 'Review not found.', 'mediavine' ),
+				__( 'Review not found.', 'mediavine-create' ),
 				[ 'status' => 404 ]
 			);
 		}
@@ -144,7 +143,7 @@ class Featured_Review_API extends Plugin {
 		if ( ! $result ) {
 			return new \WP_Error(
 				'rest_update_failed',
-				__( 'Failed to update featured status.', 'mediavine' ),
+				__( 'Failed to update featured status.', 'mediavine-create' ),
 				[ 'status' => 500 ]
 			);
 		}
@@ -173,6 +172,14 @@ class Featured_Review_API extends Plugin {
 	 */
 	public function get_featured_review( \WP_REST_Request $request ) {
 		$card_id = absint( $request->get_param( 'id' ) );
+
+		// CVE-2026-16992: a featured review is only public once its parent card is.
+		// An empty body is the same shape as "this card has no featured
+		// review", so an anonymous caller learns nothing about the draft.
+		$creation = self::$models_v2->mv_creations->find_one( $card_id );
+		if ( empty( $creation ) || ( empty( $creation->published ) && ! \Mediavine\Permissions::is_user_authorized() ) ) {
+			return new \WP_REST_Response( null, 200 );
+		}
 
 		// Get featured review
 		$review = Featured_Review::get_featured_for_card( $card_id );

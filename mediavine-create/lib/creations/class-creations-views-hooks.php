@@ -25,6 +25,20 @@ class Creations_Views_Hooks extends Creations_Views {
 	private static $products_hook_priority = null;
 
 	/**
+	 * Card/list style currently registered via register_style_hooks().
+	 *
+	 * @var string|null
+	 */
+	private static $registered_style = null;
+
+	/**
+	 * Card type ('card' or 'list') for the currently registered style hooks.
+	 *
+	 * @var string|null
+	 */
+	private static $registered_type = null;
+
+	/**
 	 * Remove video and products hooks at their currently tracked priorities.
 	 *
 	 * Theme hook functions call add_action which is additive. If a previous
@@ -33,8 +47,8 @@ class Creations_Views_Hooks extends Creations_Views {
 	 * theme function re-registers at default priorities.
 	 */
 	private static function cleanup_adjustable_hooks() {
-		$callback_video    = [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ];
-		$callback_products = [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ];
+		$callback_video    = [ self::class, 'mv_create_video' ];
+		$callback_products = [ self::class, 'mv_create_products' ];
 
 		if ( null !== self::$video_hook_priority ) {
 			remove_action( 'mv_create_card_content', $callback_video, self::$video_hook_priority );
@@ -47,164 +61,210 @@ class Creations_Views_Hooks extends Creations_Views {
 		}
 	}
 
-	public static function card_style_square_hooks() {
-		self::cleanup_adjustable_hooks();
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image_container' ], 30 );
-		add_action( 'mv_create_card_image_container', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
-		add_action( 'mv_create_card_image_container', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 20 );
-		add_action( 'mv_create_card_image_container', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 30 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 40 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 10 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 20 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 40 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 50 );
-		self::$video_hook_priority = 60;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], self::$video_hook_priority );
-		self::$products_hook_priority = 70;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], self::$products_hook_priority );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 80 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 90 );
-		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
-		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
+	/**
+	 * Hook wiring for each card/list style.
+	 *
+	 * Each entry is [ $hook, $callback_method, $priority ] or
+	 * [ $hook, $callback_method, $priority, $accepted_args ].
+	 *
+	 * @return array<string, array<string, array<int, array<int, mixed>>>>
+	 */
+	private static function get_style_hooks_registry() {
+		// Shared layout used by centered, editorial, and modern (social @ 80).
+		$centered_layout = [
+			[ 'mv_create_card_before', 'mv_create_schema', 10 ],
+			[ 'mv_create_card_header', 'mv_create_image', 10 ],
+			[ 'mv_create_card_header', 'mv_create_pin_button', 20 ],
+			[ 'mv_create_card_header', 'mv_create_title', 30 ],
+			[ 'mv_create_card_header', 'mv_create_times', 40 ],
+			[ 'mv_create_card_header', 'mv_create_description', 50 ],
+			[ 'mv_create_card_header', 'mv_create_rating', 60 ],
+			[ 'mv_create_card_header', 'mv_create_print_button', 70 ],
+			[ 'mv_create_card_content', 'mv_create_ad_div', 10 ],
+			[ 'mv_create_card_content', 'mv_create_supplies', 20 ],
+			[ 'mv_create_card_content', 'mv_create_instructions', 30 ],
+			[ 'mv_create_card_content', 'mv_create_notes', 40 ],
+			[ 'mv_create_card_content', 'mv_create_video', 50 ],
+			[ 'mv_create_card_video_script', 'mv_create_video_script', 10 ],
+			[ 'mv_create_card_content', 'mv_create_products', 60 ],
+			[ 'mv_create_card_content', 'mv_create_nutrition', 70 ],
+			[ 'mv_create_card_content', 'mv_create_social', 80 ],
+			[ 'mv_create_card_social_icon', 'mv_create_social_icon', 10 ],
+			[ 'mv_create_card_footer', 'mv_create_footer', 10 ],
+		];
+
+		// centered-dark matches centered except social priority 90.
+		$centered_dark_layout = [];
+		foreach ( $centered_layout as $entry ) {
+			if ( 'mv_create_social' === $entry[1] ) {
+				$centered_dark_layout[] = [ 'mv_create_card_content', 'mv_create_social', 90 ];
+				continue;
+			}
+			$centered_dark_layout[] = $entry;
+		}
+
+		return [
+			'card' => [
+				'square'        => [
+					[ 'mv_create_card_before', 'mv_create_schema', 10 ],
+					[ 'mv_create_card_header', 'mv_create_title', 10 ],
+					[ 'mv_create_card_header', 'mv_create_pin_button', 20 ],
+					[ 'mv_create_card_header', 'mv_create_image_container', 30 ],
+					[ 'mv_create_card_image_container', 'mv_create_image', 10 ],
+					[ 'mv_create_card_image_container', 'mv_create_rating', 20 ],
+					[ 'mv_create_card_image_container', 'mv_create_print_button', 30 ],
+					[ 'mv_create_card_header', 'mv_create_description', 40 ],
+					[ 'mv_create_card_content', 'mv_create_times', 10 ],
+					[ 'mv_create_card_content', 'mv_create_ad_div', 20 ],
+					[ 'mv_create_card_content', 'mv_create_supplies', 30 ],
+					[ 'mv_create_card_content', 'mv_create_instructions', 40 ],
+					[ 'mv_create_card_content', 'mv_create_notes', 50 ],
+					[ 'mv_create_card_content', 'mv_create_video', 60 ],
+					[ 'mv_create_card_content', 'mv_create_products', 70 ],
+					[ 'mv_create_card_content', 'mv_create_nutrition', 80 ],
+					[ 'mv_create_card_content', 'mv_create_social', 90 ],
+					[ 'mv_create_card_social_icon', 'mv_create_social_icon', 10 ],
+					[ 'mv_create_card_footer', 'mv_create_footer', 10 ],
+				],
+				'centered'      => $centered_layout,
+				'centered-dark' => $centered_dark_layout,
+				// mv_create_rating is included in the print button template for big-image.
+				'big-image'     => [
+					[ 'mv_create_card_before', 'mv_create_schema', 10 ],
+					[ 'mv_create_card_header', 'mv_create_image', 10 ],
+					[ 'mv_create_card_header', 'mv_create_pin_button', 20 ],
+					[ 'mv_create_card_header', 'mv_create_title', 30 ],
+					[ 'mv_create_card_content', 'mv_create_times', 10 ],
+					[ 'mv_create_card_content', 'mv_create_description', 20 ],
+					[ 'mv_create_card_content', 'mv_create_print_button', 30 ],
+					[ 'mv_create_card_content', 'mv_create_ad_div', 40 ],
+					[ 'mv_create_card_content', 'mv_create_supplies', 50 ],
+					[ 'mv_create_card_content', 'mv_create_instructions', 60 ],
+					[ 'mv_create_card_content', 'mv_create_notes', 70 ],
+					[ 'mv_create_card_content', 'mv_create_video', 80 ],
+					[ 'mv_create_card_video_script', 'mv_create_video_script', 10 ],
+					[ 'mv_create_card_content', 'mv_create_products', 90 ],
+					[ 'mv_create_card_content', 'mv_create_nutrition', 100 ],
+					[ 'mv_create_card_content', 'mv_create_social', 110 ],
+					[ 'mv_create_card_social_icon', 'mv_create_social_icon', 10 ],
+					[ 'mv_create_card_footer', 'mv_create_footer', 10 ],
+				],
+				'editorial'     => $centered_layout,
+				'modern'        => $centered_layout,
+			],
+			'list' => [
+				'square' => [
+					[ 'mv_create_card_before', 'mv_create_schema', 10 ],
+					[ 'mv_create_card_header', 'mv_create_title', 10 ],
+					[ 'mv_create_card_header', 'mv_create_description', 20 ],
+					[ 'mv_create_card_header', 'mv_create_list_affiliate_message', 30 ],
+					[ 'mv_create_card_content', 'mv_create_list', 10 ],
+					[ 'mv_create_list_after_single', 'mv_create_list_ads', 10, 3 ],
+					[ 'mv_create_list_after_row', 'mv_create_list_ads_grid', 10, 3 ],
+				],
+			],
+		];
 	}
 
-	public static function card_style_centered_hooks() {
-		self::cleanup_adjustable_hooks();
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 40 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 20 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 40 );
-		self::$video_hook_priority = 50;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], self::$video_hook_priority );
-		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
-		self::$products_hook_priority = 60;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], self::$products_hook_priority );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 80 );
-		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
-		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
+	/**
+	 * Resolve a requested style to one present in the registry.
+	 *
+	 * Unknown card styles (e.g. "dark") and unknown list styles fall back to square.
+	 *
+	 * @param string $style Card style slug.
+	 * @param string $type  'card' or 'list'.
+	 * @return string Resolved style slug.
+	 */
+	public static function resolve_style_hooks( $style, $type = 'card' ) {
+		$registry = self::get_style_hooks_registry();
+		$type     = ( 'list' === $type ) ? 'list' : 'card';
+
+		if ( isset( $registry[ $type ][ $style ] ) ) {
+			return $style;
+		}
+
+		return 'square';
 	}
 
-	public static function card_style_centered_dark_hooks() {
-		self::cleanup_adjustable_hooks();
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 40 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 20 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 40 );
-		self::$video_hook_priority = 50;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], self::$video_hook_priority );
-		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
-		self::$products_hook_priority = 60;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], self::$products_hook_priority );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 90 );
-		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
-		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
+	/**
+	 * Register WordPress actions for a card/list style from the registry.
+	 *
+	 * @param string $style Card style slug.
+	 * @param string $type  'card' or 'list'.
+	 * @return string The resolved style that was registered.
+	 */
+	public static function register_style_hooks( $style, $type = 'card' ) {
+		$type  = ( 'list' === $type ) ? 'list' : 'card';
+		$style = self::resolve_style_hooks( $style, $type );
+		$hooks = self::get_style_hooks_registry()[ $type ][ $style ];
+
+		if ( 'card' === $type ) {
+			self::cleanup_adjustable_hooks();
+		}
+
+		foreach ( $hooks as $entry ) {
+			$hook          = $entry[0];
+			$callback      = [ self::class, $entry[1] ];
+			$priority      = $entry[2];
+			$accepted_args = isset( $entry[3] ) ? (int) $entry[3] : 1;
+
+			if ( 'mv_create_video' === $entry[1] ) {
+				self::$video_hook_priority = $priority;
+			}
+			if ( 'mv_create_products' === $entry[1] ) {
+				self::$products_hook_priority = $priority;
+			}
+
+			add_action( $hook, $callback, $priority, $accepted_args );
+		}
+
+		self::$registered_style = $style;
+		self::$registered_type  = $type;
+
+		return $style;
 	}
 
-	public static function card_style_big_image_hooks() {
-		self::cleanup_adjustable_hooks();
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 10 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 20 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 30 );
-		// 'mv_create_rating' is included in print button template
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 40 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 50 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 60 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 70 );
-		self::$video_hook_priority = 80;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], self::$video_hook_priority );
-		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
-		self::$products_hook_priority = 90;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], self::$products_hook_priority );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 100 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 110 );
-		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
-		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
-	}
+	/**
+	 * Unregister WordPress actions previously registered for a card/list style.
+	 *
+	 * Video and products use tracked priorities so adjusted positions are cleared.
+	 *
+	 * @param string|null $style Card style slug, or null to use the last registered style.
+	 * @param string|null $type  'card' or 'list', or null to use the last registered type.
+	 * @return void
+	 */
+	public static function unregister_style_hooks( $style = null, $type = null ) {
+		$type  = null !== $type ? ( ( 'list' === $type ) ? 'list' : 'card' ) : self::$registered_type;
+		$style = null !== $style ? self::resolve_style_hooks( $style, $type ? $type : 'card' ) : self::$registered_style;
 
-	public static function card_style_editorial_hooks() {
-		self::cleanup_adjustable_hooks();
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 40 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 20 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 40 );
-		self::$video_hook_priority = 50;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], self::$video_hook_priority );
-		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
-		self::$products_hook_priority = 60;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], self::$products_hook_priority );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 80 );
-		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
-		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
-	}
+		if ( null === $style || null === $type ) {
+			self::cleanup_adjustable_hooks();
+			return;
+		}
 
-	public static function card_style_modern_hooks() {
-		self::cleanup_adjustable_hooks();
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_times' ], 40 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_supplies' ], 20 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_instructions' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_notes' ], 40 );
-		self::$video_hook_priority = 50;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video' ], self::$video_hook_priority );
-		add_action( 'mv_create_card_video_script', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_video_script' ], 10 );
-		self::$products_hook_priority = 60;
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_products' ], self::$products_hook_priority );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_nutrition' ], 70 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social' ], 80 );
-		add_action( 'mv_create_card_social_icon', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_social_icon' ], 10 );
-		add_action( 'mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10 );
-	}
+		$hooks = self::get_style_hooks_registry()[ $type ][ $style ];
 
-	public static function list_style_square_hooks() {
-		add_action( 'mv_create_card_before', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_schema' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 10 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 20 );
-		add_action( 'mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_list_affiliate_message' ], 30 );
-		add_action( 'mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_list' ], 10 );
-		add_action( 'mv_create_list_after_single', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_list_ads' ], 10, 3 );
-		add_action( 'mv_create_list_after_row', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_list_ads_grid' ], 10, 3 );
+		foreach ( $hooks as $entry ) {
+			$hook     = $entry[0];
+			$method   = $entry[1];
+			$callback = [ self::class, $method ];
+			$priority = $entry[2];
+
+			// Prefer tracked priorities when video/products were moved mid-render.
+			if ( 'mv_create_video' === $method && null !== self::$video_hook_priority ) {
+				$priority                  = self::$video_hook_priority;
+				self::$video_hook_priority = null;
+			}
+			if ( 'mv_create_products' === $method && null !== self::$products_hook_priority ) {
+				$priority                     = self::$products_hook_priority;
+				self::$products_hook_priority = null;
+			}
+
+			remove_action( $hook, $callback, $priority );
+		}
+
+		self::$registered_style = null;
+		self::$registered_type  = null;
 	}
 
 	public static function mv_create_schema( $args ) {
@@ -290,8 +350,8 @@ class Creations_Views_Hooks extends Creations_Views {
 				}
 
 				// Don't add external URLs to JSON-LD
-				$permalink_host = parse_url( $link );
-				$current_host   = parse_url( home_url() );
+				$permalink_host = wp_parse_url(  $link );
+				$current_host   = wp_parse_url(  home_url() );
 				// If the link is a subdomain, we want to keep it in the JSON-LD
 				// If the link is neither a subdomain nor the primary domain, skip it
 				if ( ! Str::is_same_host_or_subdomain( $permalink_host['host'] ?? '', $current_host['host'] ?? '' ) ) {
@@ -318,7 +378,7 @@ class Creations_Views_Hooks extends Creations_Views {
 			$args['pinterest'] = [
 				'img'         => $args['creation']['pinterest_img'],
 				'url'         => $args['creation']['pinterest_url'],
-				'description' => Str::truncate( strip_tags( $args['creation']['pinterest_description'] ), 500 ),
+				'description' => Str::truncate( wp_strip_all_tags(  $args['creation']['pinterest_description'] ), 500 ),
 			];
 
 			self::$views->the_view( 'shortcode-mv-create-pin-button', $args );
@@ -404,32 +464,42 @@ class Creations_Views_Hooks extends Creations_Views {
 	}
 
 	public static function mv_create_social_icon( $args ) {
-		if ( ! empty( $args['creation']['social_icon'] ) ) {
-			$allowed_tags    = [
-				'a' => [
-					'class'  => true,
-					'href'   => true,
-					'title'  => true,
-					'target' => true,
-					'rel'    => true,
-				],
-			];
-			$social_link_tag = Creations_Views::get_social_link_tag( $args['creation']['social_icon'] );
-			if ( ! empty( $social_link_tag ) ) {
-				echo wp_kses( $social_link_tag, $allowed_tags );
-			}
-			self::$views->the_view( 'shortcode-mv-create-social-icon-' . $args['creation']['social_icon'], $args );
-			if ( ! empty( $social_link_tag ) ) {
-				echo '</a>';
-			}
+		// Allowlist before concatenating into an include path (CRE-212).
+		$social_icon = Creations_Views::sanitize_social_icon(
+			isset( $args['creation']['social_icon'] ) ? $args['creation']['social_icon'] : ''
+		);
+		if ( empty( $social_icon ) ) {
+			return;
+		}
+
+		$allowed_tags    = [
+			'a' => [
+				'class'  => true,
+				'href'   => true,
+				'title'  => true,
+				'target' => true,
+				'rel'    => true,
+			],
+		];
+		$social_link_tag = Creations_Views::get_social_link_tag( $social_icon );
+		if ( ! empty( $social_link_tag ) ) {
+			echo wp_kses( $social_link_tag, $allowed_tags );
+		}
+		self::$views->the_view( 'shortcode-mv-create-social-icon-' . $social_icon, $args );
+		if ( ! empty( $social_link_tag ) ) {
+			echo '</a>';
 		}
 	}
 
 	public static function mv_create_list( $args ) {
-		if ( empty( $args['creation']['layout'] ) ) {
+		// Allowlist before concatenating into an include path (CRE-212).
+		$layout = Creations_Views::sanitize_list_layout(
+			isset( $args['creation']['layout'] ) ? $args['creation']['layout'] : ''
+		);
+		if ( empty( $layout ) ) {
 			return;
 		}
-		self::$views->the_view( 'shortcode-mv-create-list-' . $args['creation']['layout'], $args );
+		self::$views->the_view( 'shortcode-mv-create-list-' . $layout, $args );
 	}
 
 	/**
@@ -464,6 +534,7 @@ class Creations_Views_Hooks extends Creations_Views {
 			$should_insert = apply_filters( 'mv_create_should_insert_list_ad', true, $args, $row, $count );
 
 			if ( $should_insert ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_list_ad_html returns fixed MV markup or admin HTML sanitized via sanitize_custom_list_ad_html().
 				echo self::get_list_ad_html( $args, $row, $count );
 			}
 		}
@@ -493,6 +564,7 @@ class Creations_Views_Hooks extends Creations_Views {
 			$should_insert = apply_filters( 'mv_create_should_insert_list_ad', true, $args, $i, $count );
 
 			if ( $should_insert ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_list_ad_html returns fixed MV markup or admin HTML sanitized via sanitize_custom_list_ad_html().
 				echo self::get_list_ad_html( $args, $i, $count );
 			}
 		}

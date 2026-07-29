@@ -34,6 +34,12 @@ class Admin_Init extends Plugin {
 	public static function localization() {
 		global $wpdb;
 		$settings = apply_filters( 'mv_create_localized_admin_settings', self::get_translated_settings() );
+
+		// Never ship credential-class values to the browser. The site JWT is
+		// reduced to a presence flag for everyone; other credentials (e.g. the
+		// Amazon Creators secret) are only kept for users who can manage them.
+		$settings = Sensitive_Settings::redact( $settings, current_user_can( 'manage_options' ) );
+
 		$shapes   = self::get_translated_shapes();
 
 		self::$mcp_data = self::get_mcp_data();
@@ -58,8 +64,8 @@ class Admin_Init extends Plugin {
 			}
 		}
 
-		// SECURITY CHECKED: Nothing in this query can be sanitized.
 		$key_match_statement = "SELECT id, original_object_id from {$wpdb->prefix}mv_creations WHERE original_object_id IS NOT NULL AND original_object_id != 0";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$results             = $wpdb->get_results( $key_match_statement );
 		$keys                = [];
 		foreach ( $results as $result ) {
@@ -68,7 +74,7 @@ class Admin_Init extends Plugin {
 
 		$current_user = wp_get_current_user();
 
-		$amazon_provision_lock = (bool) Amazon::get_transient_timeout( 'mv_create_amazon_provision' );
+		$amazon_provision_lock = (bool) Amazon_Creators::get_transient_timeout( 'mv_create_amazon_provision' );
 
 		return [
 			'__VERSION__'            => Plugin::VERSION,
@@ -181,6 +187,9 @@ class Admin_Init extends Plugin {
 	 */
 	public static function is_create_admin_url() {
 		$current_url = static::get_current_url();
+		if ( ! is_string( $current_url ) || '' === $current_url ) {
+			return false;
+		}
 
 		/**
 		 * Filters the Create admin URL strings checked against
@@ -231,8 +240,7 @@ class Admin_Init extends Plugin {
 	public function add_slate_chrome_fix() {
 		// If no user agent, spoof it as chrome and add CSS anyway, because this info should always
 		// be available.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- just a quick user agent check
-		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'Chrome';
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : 'Chrome';
 
 		// If no Chrome, abort.
 		if ( ! preg_match( '/Chrome/i', $user_agent ) ) {
@@ -266,15 +274,6 @@ class Admin_Init extends Plugin {
 	 * Enqueues the admin scripts on the page.
 	 */
 	function admin_enqueue_scripts() {
-		wp_register_style( 'mv-font/open-sans', 'https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' );
-
-		// Pull Proxima Nova from CDN using correct protocol
-		$proxima_nova_cdn = 'http://cdn.mediavine.com/fonts/ProximaNova/stylesheet.css';
-		if ( is_ssl() ) {
-			$proxima_nova_cdn = 'https://cdn.mediavine.com/fonts/ProximaNova/stylesheet.css';
-		}
-		wp_enqueue_style( 'mv-font/proxima-nova', $proxima_nova_cdn );
-
 		$script_url = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
 
 		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
@@ -284,6 +283,23 @@ class Admin_Init extends Plugin {
 
 		if ( $this::is_create_admin_url() ) {
 			wp_enqueue_media();
+
+			// Self-hosted fonts (both SIL OFL 1.1), served from the plugin over the
+			// site's own scheme. Only loaded on Create's own admin screens.
+			// Nunito is the primary UI typeface; Fraunces is the display face used
+			// for the dashboard headings.
+			wp_enqueue_style(
+				'mv-font/nunito',
+				Plugin::assets_url() . 'assets/fonts/nunito/nunito.css',
+				[],
+				self::VERSION
+			);
+			wp_enqueue_style(
+				'mv-font/fraunces',
+				Plugin::assets_url() . 'assets/fonts/fraunces/fraunces.css',
+				[],
+				self::VERSION
+			);
 
 			// Core dependencies that should always be loaded
 			$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-api-fetch', 'wp-data' ];
@@ -313,7 +329,7 @@ class Admin_Init extends Plugin {
 			wp_localize_script( Plugin::PLUGIN_DOMAIN . '-script', 'MV_CREATE', self::localization() );
 
 			if ( ! wp_script_is( 'mv-blocks' ) ) {
-				wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine', plugin_dir_path( __DIR__ ) . 'languages/' );
+				wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine-create', plugin_dir_path( __DIR__ ) . 'languages/' );
 				wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
 			}
 
@@ -348,8 +364,8 @@ class Admin_Init extends Plugin {
 		// preferred default page via maybe_redirect_default_admin_page().
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
-			__( 'Create', 'mediavine' ),
-			__( 'Create', 'mediavine' ),
+			__( 'Create', 'mediavine-create' ),
+			__( 'Create', 'mediavine-create' ),
 			'edit_posts',
 			'create_home',
 			'__return_null'
@@ -358,17 +374,17 @@ class Admin_Init extends Plugin {
 		// Dashboard page
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
-			__( 'Dashboard', 'mediavine' ),
-			__( 'Dashboard', 'mediavine' ),
+			__( 'Dashboard', 'mediavine-create' ),
+			__( 'Dashboard', 'mediavine-create' ),
 			'manage_options',
 			'create_dashboard',
 			[ $this, 'dashboard_page' ]
 		);
 
 		$menu_keys = [
-			'recipe' => __( 'Recipes', 'mediavine' ),
-			'diy'    => __( 'How-Tos', 'mediavine' ),
-			'list'   => __( 'Lists', 'medivine' ),
+			'recipe' => __( 'Recipes', 'mediavine-create' ),
+			'diy'    => __( 'How-Tos', 'mediavine-create' ),
+			'list'   => __( 'Lists', 'mediavine-create' ),
 		];
 
 		// normalize shapes list for backwards compatibility.
@@ -393,8 +409,8 @@ class Admin_Init extends Plugin {
 		}
 
 		$static_pages = [];
-		$static_pages[ __( 'Recommended Products', 'mediavine' ) ] = 'products';
-		$static_pages[ __( 'User Reviews', 'mediavine' ) ]         = 'reviews';
+		$static_pages[ __( 'Recommended Products', 'mediavine-create' ) ] = 'products';
+		$static_pages[ __( 'User Reviews', 'mediavine-create' ) ]         = 'reviews';
 
 		foreach ( $static_pages as $label => $value ) {
 			add_submenu_page(
@@ -409,16 +425,16 @@ class Admin_Init extends Plugin {
 
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
-			__( 'Create Plugin Settings', 'mediavine' ),
-			__( 'Settings', 'mediavine' ),
+			__( 'Create Plugin Settings', 'mediavine-create' ),
+			__( 'Settings', 'mediavine-create' ),
 			'manage_options',
 			'settings',
 			[ $this, 'menu_page' ]
 		);
 
 		add_options_page(
-			__( 'Create Plugin Settings', 'mediavine' ),
-			__( 'Create', 'mediavine' ),
+			__( 'Create Plugin Settings', 'mediavine-create' ),
+			__( 'Create', 'mediavine-create' ),
 			'manage_options',
 			'mv_settings',
 			[ $this, 'menu_page' ]
@@ -429,8 +445,8 @@ class Admin_Init extends Plugin {
 		// The menu item is hidden via CSS in editor_hide_menu_item().
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
-			__( 'Edit Create Card', 'mediavine' ),
-			__( 'Edit Card', 'mediavine' ),
+			__( 'Edit Create Card', 'mediavine-create' ),
+			__( 'Edit Card', 'mediavine-create' ),
 			'edit_posts',
 			'create_editor',
 			[ $this, 'editor_page' ]
@@ -439,8 +455,8 @@ class Admin_Init extends Plugin {
 		// Hidden welcome page (no menu item)
 		add_submenu_page(
 			'',
-			__( 'Welcome to Create 2.0', 'mediavine' ),
-			__( 'Welcome', 'mediavine' ),
+			__( 'Welcome to Create 2.0', 'mediavine-create' ),
+			__( 'Welcome', 'mediavine-create' ),
 			'manage_options',
 			'mv_create_welcome',
 			[ $this, 'welcome_page' ]
@@ -450,8 +466,8 @@ class Admin_Init extends Plugin {
 		if ( Plugin::is_dev_mode() ) {
 			add_submenu_page(
 				'edit.php?post_type=mv_create',
-				__( 'Theme Elements', 'mediavine' ),
-				__( 'Theme Elements', 'mediavine' ),
+				__( 'Theme Elements', 'mediavine-create' ),
+				__( 'Theme Elements', 'mediavine-create' ),
 				'manage_options',
 				'theme_elements',
 				[ $this, 'theme_elements_page' ]
@@ -589,7 +605,7 @@ class Admin_Init extends Plugin {
 				[
 					[
 						'slug'  => 'mediavine-create',
-						'title' => __( 'Create', 'mediavine' ),
+						'title' => __( 'Create', 'mediavine-create' ),
 						'icon'  => 'mediavine',
 					],
 				]
@@ -722,7 +738,7 @@ class Admin_Init extends Plugin {
 			);
 
 			wp_localize_script( Plugin::PLUGIN_DOMAIN . '-script', 'MV_CREATE', self::localization() );
-			wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine', plugin_dir_path( __DIR__ ) . 'languages/' );
+			wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine-create', plugin_dir_path( __DIR__ ) . 'languages/' );
 		}
 
 		wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );

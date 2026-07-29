@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 $show_affiliate_message = \Mediavine\Create\Creations_Views::get_custom_field(
 	$args['creation'],
 	'mv_create_show_list_affiliate_message',

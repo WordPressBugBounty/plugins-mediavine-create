@@ -22,9 +22,7 @@ class Feedback_API {
 			[
 				'methods'             => 'POST',
 				'callback'            => [ __CLASS__, 'submit_feedback' ],
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'viewer' ],
 			]
 		);
 	}
@@ -33,7 +31,7 @@ class Feedback_API {
 		if ( ! Create_Studio_Client::is_site_connected() ) {
 			return new \WP_Error(
 				'not_connected',
-				__( 'Site is not connected to Create Studio', 'mediavine' ),
+				__( 'Site is not connected to Create Studio', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -59,7 +57,7 @@ class Feedback_API {
 		if ( empty( $body['error_message'] ) ) {
 			return new \WP_Error(
 				'missing_error_message',
-				__( 'Error message is required', 'mediavine' ),
+				__( 'Error message is required', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -73,7 +71,7 @@ class Feedback_API {
 		if ( empty( $response['success'] ) ) {
 			return new \WP_Error(
 				'studio_error',
-				__( 'Failed to submit feedback to Create Studio', 'mediavine' ),
+				__( 'Failed to submit feedback to Create Studio', 'mediavine-create' ),
 				[ 'status' => $response['status_code'] ?? 500 ]
 			);
 		}

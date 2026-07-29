@@ -89,7 +89,7 @@ class Create_Studio_Client {
 		if ( empty( $token ) ) {
 			return new \WP_Error(
 				'no_token',
-				__( 'Site is not connected to Create Studio', 'mediavine' ),
+				__( 'Site is not connected to Create Studio', 'mediavine-create' ),
 				[ 'status' => 401 ]
 			);
 		}
@@ -146,7 +146,7 @@ class Create_Studio_Client {
 		if ( empty( $site_id ) ) {
 			return new \WP_Error(
 				'no_site_id',
-				__( 'Could not determine site ID from token', 'mediavine' ),
+				__( 'Could not determine site ID from token', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -170,7 +170,7 @@ class Create_Studio_Client {
 		if ( empty( $site_id ) ) {
 			return new \WP_Error(
 				'no_site_id',
-				__( 'Could not determine site ID from token', 'mediavine' ),
+				__( 'Could not determine site ID from token', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -200,7 +200,7 @@ class Create_Studio_Client {
 		if ( empty( $site_id ) ) {
 			return new \WP_Error(
 				'no_site_id',
-				__( 'Could not determine site ID from token', 'mediavine' ),
+				__( 'Could not determine site ID from token', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}

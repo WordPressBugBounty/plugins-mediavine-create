@@ -51,7 +51,7 @@ class Cache_Manager {
 		$id = (int) $id;
 
 		// Cachify
-		if ( function_exists( 'remove_page_cache_by_post_id' ) ) {
+		if ( class_exists( '\Cachify' ) && method_exists( '\Cachify', 'remove_page_cache_by_post_id' ) ) {
 			\Cachify::remove_page_cache_by_post_id( $id );
 		}
 
@@ -90,10 +90,9 @@ class Cache_Manager {
 			rocket_clean_post( $id );
 		}
 
-		// Litespeed Cache
-		if ( method_exists( 'LiteSpeed_Cache_API', 'purge' ) ) {
-			\LiteSpeed_Cache_API::purge( \LiteSpeed_Cache_API::TYPE_POST . $id );
-		}
+		// LiteSpeed Cache (modern action API; no-op when the plugin is absent).
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party LiteSpeed public purge API
+		do_action( 'litespeed_purge_post', $id );
 	}
 
 	/**
@@ -113,5 +112,37 @@ class Cache_Manager {
 			return;
 		}
 		self::clear_single_by_id( $post_id_or_ids );
+	}
+
+	/**
+	 * Purge full-site page caches (and derived artifacts such as UCSS / RUCSS).
+	 *
+	 * Shared by upgrade-time sweeps that need a domain-wide invalidation rather
+	 * than a single-post purge.
+	 *
+	 * @param string $litespeed_reason Optional reason string for LiteSpeed purge_all.
+	 * @return void
+	 */
+	public static function purge_full_page_caches( $litespeed_reason = 'Mediavine Create cache purge' ) {
+		// WP Rocket — clears page caches and the Used CSS table along with them.
+		if ( function_exists( 'rocket_clean_domain' ) ) {
+			rocket_clean_domain();
+		}
+
+		// LiteSpeed Cache — public purge_all() also wipes the UCSS folder.
+		if ( class_exists( '\LiteSpeed\Purge' ) && method_exists( '\LiteSpeed\Purge', 'purge_all' ) ) {
+			\LiteSpeed\Purge::purge_all( $litespeed_reason );
+		}
+
+		// Perfmatters — clears locally generated Used CSS (documented API).
+		if ( class_exists( '\Perfmatters\CSS' ) && method_exists( '\Perfmatters\CSS', 'clear_used_css' ) ) {
+			\Perfmatters\CSS::clear_used_css();
+		}
+
+		// FlyingPress — wipe cache folder (includes used-CSS JSON artifacts).
+		// Documented at https://docs.flyingpress.com/en/articles/11406092-programmatically-purge-and-preload-cache
+		if ( class_exists( '\FlyingPress\Purge' ) && method_exists( '\FlyingPress\Purge', 'purge_everything' ) ) {
+			\FlyingPress\Purge::purge_everything();
+		}
 	}
 }

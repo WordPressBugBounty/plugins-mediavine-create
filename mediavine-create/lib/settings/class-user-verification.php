@@ -45,7 +45,7 @@ class User_Verification {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'initiate_verification' ],
-				'permission_callback' => [ $this, 'check_admin_permission' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -56,7 +56,7 @@ class User_Verification {
 			[
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'check_status' ],
-				'permission_callback' => [ $this, 'check_admin_permission' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -67,7 +67,7 @@ class User_Verification {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'complete_verification' ],
-				'permission_callback' => [ $this, 'check_admin_permission' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -78,7 +78,7 @@ class User_Verification {
 			[
 				'methods'             => \WP_REST_Server::DELETABLE,
 				'callback'            => [ $this, 'disconnect' ],
-				'permission_callback' => [ $this, 'check_admin_permission' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -89,7 +89,7 @@ class User_Verification {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'resend_email_verification' ],
-				'permission_callback' => [ $this, 'check_admin_permission' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -100,7 +100,7 @@ class User_Verification {
 			[
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_sso_url' ],
-				'permission_callback' => [ $this, 'check_admin_permission' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				'args'                => [
 					'return_url' => [
 						'type'              => 'string',
@@ -110,22 +110,6 @@ class User_Verification {
 				],
 			]
 		);
-	}
-
-	/**
-	 * Check if user has admin permission.
-	 *
-	 * @return bool|\WP_Error True if user can manage options, WP_Error otherwise.
-	 */
-	public function check_admin_permission() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error(
-				'forbidden',
-				__( 'Administrator access required', 'mediavine' ),
-				[ 'status' => 403 ]
-			);
-		}
-		return true;
 	}
 
 	/**
@@ -142,7 +126,7 @@ class User_Verification {
 		if ( ! Create_Studio_Client::is_site_connected() ) {
 			return new \WP_Error(
 				'site_not_connected',
-				__( 'Site must be connected to Create Studio before user verification', 'mediavine' ),
+				__( 'Site must be connected to Create Studio before user verification', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -174,7 +158,7 @@ class User_Verification {
 		$data = $response['data'] ?? [];
 
 		if ( ! $response['success'] ) {
-			$error_msg = $data['message'] ?? $data['error'] ?? __( 'Failed to create link session', 'mediavine' );
+			$error_msg = $data['message'] ?? $data['error'] ?? __( 'Failed to create link session', 'mediavine-create' );
 			return new \WP_Error(
 				$data['error'] ?? 'api_error',
 				$error_msg,
@@ -210,7 +194,7 @@ class User_Verification {
 		if ( ! Create_Studio_Client::is_site_connected() ) {
 			return new \WP_Error(
 				'site_not_connected',
-				__( 'Site must be connected to Create Studio', 'mediavine' ),
+				__( 'Site must be connected to Create Studio', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -292,7 +276,7 @@ class User_Verification {
 		if ( ! Create_Studio_Client::is_site_connected() ) {
 			return new \WP_Error(
 				'site_not_connected',
-				__( 'Site must be connected to Create Studio', 'mediavine' ),
+				__( 'Site must be connected to Create Studio', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -303,7 +287,7 @@ class User_Verification {
 		if ( empty( $session_id ) ) {
 			return new \WP_Error(
 				'missing_session_id',
-				__( 'Session ID is required', 'mediavine' ),
+				__( 'Session ID is required', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -317,7 +301,7 @@ class User_Verification {
 
 		if ( ! $response['success'] ) {
 			$data      = $response['data'] ?? [];
-			$error_msg = $data['message'] ?? $data['error'] ?? __( 'Failed to complete verification', 'mediavine' );
+			$error_msg = $data['message'] ?? $data['error'] ?? __( 'Failed to complete verification', 'mediavine-create' );
 			return new \WP_Error(
 				$data['error'] ?? 'api_error',
 				$error_msg,
@@ -335,7 +319,7 @@ class User_Verification {
 		if ( empty( $token ) ) {
 			return new \WP_Error(
 				'missing_token',
-				__( 'Verification token missing from response', 'mediavine' ),
+				__( 'Verification token missing from response', 'mediavine-create' ),
 				[ 'status' => 500 ]
 			);
 		}
@@ -376,7 +360,7 @@ class User_Verification {
 			return new \WP_REST_Response(
 				[
 					'success' => true,
-					'message' => __( 'User was not verified', 'mediavine' ),
+					'message' => __( 'User was not verified', 'mediavine-create' ),
 				],
 				200
 			);
@@ -387,11 +371,9 @@ class User_Verification {
 
 		// Log any API errors but don't block the disconnect
 		if ( is_wp_error( $response ) ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( 'Create Studio user disconnect API error: ' . $response->get_error_message() );
+			Help::log( 'Create Studio user disconnect API error: ' . $response->get_error_message() );
 		} elseif ( ! $response['success'] ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( 'Create Studio user disconnect API error: ' . wp_json_encode( $response['data'] ) );
+			Help::log( 'Create Studio user disconnect API error: ' . wp_json_encode( $response['data'] ) );
 		}
 
 		// Clear all user verification data regardless of API response
@@ -420,7 +402,7 @@ class User_Verification {
 		if ( empty( $user_token ) ) {
 			return new \WP_Error(
 				'not_verified',
-				__( 'User is not linked with Create Studio', 'mediavine' ),
+				__( 'User is not linked with Create Studio', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -436,7 +418,7 @@ class User_Verification {
 
 			return new \WP_Error(
 				$data['error'] ?? 'api_error',
-				$data['message'] ?? $data['error'] ?? __( 'Failed to resend verification email', 'mediavine' ),
+				$data['message'] ?? $data['error'] ?? __( 'Failed to resend verification email', 'mediavine-create' ),
 				[ 'status' => $response['status_code'] ]
 			);
 		}
@@ -464,7 +446,7 @@ class User_Verification {
 		if ( empty( $user_token ) ) {
 			return new \WP_Error(
 				'not_verified',
-				__( 'User is not verified with Create Studio', 'mediavine' ),
+				__( 'User is not verified with Create Studio', 'mediavine-create' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -488,14 +470,14 @@ class User_Verification {
 
 				return new \WP_Error(
 					'token_invalid',
-					__( 'Your verification has expired. Please verify again.', 'mediavine' ),
+					__( 'Your verification has expired. Please verify again.', 'mediavine-create' ),
 					[ 'status' => 401 ]
 				);
 			}
 
 			return new \WP_Error(
 				$data['error'] ?? 'api_error',
-				$data['message'] ?? __( 'Failed to generate SSO URL', 'mediavine' ),
+				$data['message'] ?? __( 'Failed to generate SSO URL', 'mediavine-create' ),
 				[ 'status' => $response['status_code'] ]
 			);
 		}

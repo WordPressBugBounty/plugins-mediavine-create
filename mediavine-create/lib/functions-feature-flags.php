@@ -1,6 +1,11 @@
 <?php
 namespace Mediavine\Create;
 
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Whether a feature flag is enabled.
  *

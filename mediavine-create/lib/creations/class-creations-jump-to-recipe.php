@@ -365,9 +365,9 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 			return;
 		}
 
-		$link_text = \Mediavine\Settings::get_setting( self::$settings_group . '_jump_to_recipe_text', __( 'Jump to Recipe', 'mediavine' ) );
+		$link_text = \Mediavine\Settings::get_setting( self::$settings_group . '_jump_to_recipe_text', __( 'Jump to Recipe', 'mediavine-create' ) );
 		if ( isset( $atts['type'] ) && 'diy' === $atts['type'] ) {
-			$link_text = \Mediavine\Settings::get_setting( self::$settings_group . '_jump_to_howto_text', __( 'Jump to How-To', 'mediavine' ) );
+			$link_text = \Mediavine\Settings::get_setting( self::$settings_group . '_jump_to_howto_text', __( 'Jump to How-To', 'mediavine-create' ) );
 		}
 
 		$btn_style = \Mediavine\Settings::get_setting( self::$settings_group . '_jump_to_btn_style' );

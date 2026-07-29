@@ -93,36 +93,40 @@ class Products_API extends Products {
 
 		if ( ! empty( $found_product ) ) {
 			// Allow normalized null to potentially reset thumbnails ids
-			add_filter( 'mv_create_allow_normalized_null', '__return_true' );
-			$result = self::$models_v2->mv_products->update(
-				$product
+			$result = with_filter(
+				'mv_create_allow_normalized_null',
+				'__return_true',
+				function() use ( $product ) {
+					return self::$models_v2->mv_products->update(
+						$product
+					);
+				}
 			);
-			remove_filter( 'mv_create_allow_normalized_null', '__return_false' );
 		}
 
 		// Sanitize title - remove excessive whitespace and newlines from scraped content
 		if ( ! empty( $product['title'] ) ) {
-			$product['title'] = preg_replace( '/\s+/', ' ', trim( $product['title'] ) );
+			$product['title'] = Scraped_Content_Normalizer::sanitize_title( $product['title'] );
 		}
 
 		// Make sure title and link before Create
 		if ( empty( $product['title'] ) ) {
 			return new \WP_Error(
 				'missing_required_title',
-				__( 'Title Not Found', 'mediavine' ),
+				__( 'Title Not Found', 'mediavine-create' ),
 				[
 					'status'  => 400,
-					'message' => __( 'The product is missing a title', 'mediavine' ),
+					'message' => __( 'The product is missing a title', 'mediavine-create' ),
 				]
 			);
 		}
 		if ( empty( $product['id'] ) && empty( $product['link'] ) ) {
 			return new \WP_Error(
 				'missing_required_link',
-				__( 'URL Not Found', 'mediavine' ),
+				__( 'URL Not Found', 'mediavine-create' ),
 				[
 					'status'  => 400,
-					'message' => __( 'The product is missing a link', 'mediavine' ),
+					'message' => __( 'The product is missing a link', 'mediavine-create' ),
 				]
 			);
 		}
@@ -135,9 +139,9 @@ class Products_API extends Products {
 		if ( empty( $result ) ) {
 			return new \WP_Error(
 				404,
-				__( 'Entry Not Found', 'mediavine' ),
+				__( 'Entry Not Found', 'mediavine-create' ),
 				[
-					'message'    => __( 'The Product could not be found', 'mediavine' ),
+					'message'    => __( 'The Product could not be found', 'mediavine-create' ),
 					'error_code' => 'product_not_found',
 				]
 			);
@@ -168,16 +172,6 @@ class Products_API extends Products {
 		}
 
 		$query_args['where'] = [];
-
-		// Default ordering: newest first. Must be set explicitly because the shared model
-		// instance can have its order contaminated by other hooks (e.g. refresh_product_images
-		// sets order_by='expires' and order='ASC' on the same instance).
-		if ( ! isset( $query_args['order_by'] ) ) {
-			$query_args['order_by'] = 'created';
-		}
-		if ( ! isset( $query_args['order'] ) ) {
-			$query_args['order'] = 'DESC';
-		}
 
 		$creation_id = false;
 		if ( ! empty( $params['creation'] ) ) {
@@ -247,6 +241,7 @@ class Products_API extends Products {
 		$total_count = 0;
 		if ( ! empty( $count_query_args['sql'] ) ) {
 			global $wpdb;
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			$count_result = $wpdb->get_var( $wpdb->prepare( $count_query_args['sql'], $count_query_args['params'] ) );
 			$total_count = (int) $count_result;
 		} else {
@@ -291,9 +286,9 @@ class Products_API extends Products {
 		if ( empty( $product ) ) {
 			return new \WP_Error(
 				404,
-				__( 'Entry Not Found', 'mediavine' ),
+				__( 'Entry Not Found', 'mediavine-create' ),
 				[
-					'message'    => __( 'The Product could not be found', 'mediavine' ),
+					'message'    => __( 'The Product could not be found', 'mediavine-create' ),
 					'error_code' => 'product_not_found',
 				]
 			);
@@ -362,25 +357,26 @@ class Products_API extends Products {
 			]
 		);
 
+		$existing = [];
 		if ( ! empty( $result ) ) {
 			$existing = (array) $result;
 		}
 
 		// If the result doesn't exist or doesn't have a thumbnail, we make a fresh attempt.
 		if ( ! $result || ! empty( $result->thumbnail_id ) || empty( $result->external_thumbnail_url ) ) {
-			$amazon_scraper = Amazon_Adapter::get_instance();
-			$asin           = ! empty( $result->asin ) ? $result->asin : $amazon_scraper->get_asin_from_link( $link );
-			if ( ! empty( $asin ) && Str::length( $asin ) === 10 ) {
-				$scraped = $amazon_scraper->get_products_by_asin( $asin );
-				if ( is_wp_error( $scraped ) ) {
-					return $scraped;
-				}
-				if ( ! empty( $scraped[ $asin ] ) ) {
-					$result = $scraped[ $asin ];
-					if ( ! empty( $existing ) ) {
-						$result['rescraped'] = true;
-						$result['existing']  = $existing;
-					}
+			$scraper = new Scraper_Service();
+			$asin    = ! empty( $result->asin ) ? $result->asin : null;
+			$scraped = $scraper->scrape_amazon( $link, $asin );
+
+			if ( ! empty( $scraped['wp_error'] ) ) {
+				return $scraped['wp_error'];
+			}
+
+			if ( ! empty( $scraped['status'] ) && 'success' === $scraped['status'] ) {
+				$result = $scraped['data'];
+				if ( ! empty( $existing ) ) {
+					$result['rescraped'] = true;
+					$result['existing']  = $existing;
 				}
 			}
 		}
@@ -388,9 +384,9 @@ class Products_API extends Products {
 		if ( ! $result ) {
 			return new \WP_Error(
 				404,
-				__( 'No Data Found', 'mediavine' ),
+				__( 'No Data Found', 'mediavine-create' ),
 				[
-					'message'    => __( 'The Product link scrape did not turn up any results', 'mediavine' ),
+					'message'    => __( 'The Product link scrape did not turn up any results', 'mediavine-create' ),
 					'error_code' => 'scrape_empty',
 				]
 			);
@@ -401,19 +397,7 @@ class Products_API extends Products {
 			$result->thumbnail_uri = wp_get_attachment_url( $result->thumbnail_id );
 		}
 
-		// If is an object and has a thumbnail URL (re-processed product)
-		if ( ! empty( $result->external_thumbnail_url ) ) {
-			$result->thumbnail_id         = null;
-			$result->thumbnail_uri        = $result->external_thumbnail_url;
-			$result->remote_thumbnail_uri = $result->external_thumbnail_url;
-		}
-
-		// If has external thumbnail url and is array (product doesn't already exist)
-		if ( ! empty( is_array( $result ) && $result['external_thumbnail_url'] ) ) {
-			$result['thumbnail_id']         = null;
-			$result['thumbnail_uri']        = $result['external_thumbnail_url'];
-			$result['remote_thumbnail_uri'] = $result['external_thumbnail_url'];
-		}
+		$result = Scraped_Content_Normalizer::apply_external_thumbnail( $result );
 
 		$response = API_Services::set_response_data( $result, $response );
 		$response->set_status( 200 );
@@ -424,8 +408,11 @@ class Products_API extends Products {
 	/**
 	 * Scrape NON-AMAZON product url for data
 	 *
-	 * @param Request  $request
-	 * @param Response $response
+	 * Uses Scraper_Service primitives: PAAPI when an ASIN is present (errors returned
+	 * to the client); otherwise scrape_external() (Studio → local LinkScraper).
+	 *
+	 * @param Request  $request  WordPress request.
+	 * @param Response $response WordPress response.
 	 *
 	 * @return array|\WP_Error|Response
 	 */
@@ -446,64 +433,28 @@ class Products_API extends Products {
 			]
 		);
 
+		$existing = [];
 		if ( ! empty( $result ) ) {
 			$existing = (array) $result;
 		}
 
 		// If the result doesn't exist or doesn't have a thumbnail, we make a fresh attempt.
 		if ( ! $result || ! empty( $result->thumbnail_id ) || empty( $result->external_thumbnail_url ) ) {
-			$amazon_scraper = Amazon_Adapter::get_instance();
-			$asin           = ! empty( $result->asin ) ? $result->asin : $amazon_scraper->get_asin_from_link( $link );
-			// If an ASIN was found, use PAAPI instead of the external scraper
-			if ( ! empty( $asin ) && Str::length( $asin ) === 10 ) {
-				$scraped = $amazon_scraper->get_products_by_asin( $asin );
-				if ( is_wp_error( $scraped ) ) {
-					return $scraped;
-				}
-				if ( ! empty( $scraped[ $asin ] ) ) {
-					$result = $scraped[ $asin ];
-					if ( ! empty( $existing ) ) {
-						$result['rescraped'] = true;
-						$result['existing']  = $existing;
-					}
-				}
+			$scraper = new Scraper_Service();
+			$asin    = ! empty( $result->asin ) ? $result->asin : null;
+			$scraped = $scraper->scrape_amazon( $link, $asin );
+
+			if ( ! empty( $scraped['wp_error'] ) ) {
+				return $scraped['wp_error'];
 			}
-			//do external scrape
-			if ( empty( $asin ) ) {
-				$api_token_setting = \Mediavine\Settings::get_settings( 'mv_create_api_token' );
-				if ( empty( $api_token_setting ) || empty( $api_token_setting->value ) ) {
-					return new \WP_Error(
-						401,
-						__( 'Site is not connected to Create Studio', 'mediavine' ),
-						[
-							'message'    => __( 'Connect this site to Create Studio to scrape external URLs.', 'mediavine' ),
-							'error_code' => 'not_connected',
-						]
-					);
-				}
-				$services_api_url = self::$services_api_url;
-				$scrape_url = $services_api_url . '/scraper/scrape';
-				$scraped           = wp_remote_post(
-					$scrape_url, [
-						'headers' => [
-							'Content-Type'  => 'application/json; charset=utf-8',
-							'Authorization' => 'bearer ' . $api_token_setting->value,
-						],
-						'body'    => wp_json_encode( [
-							'url' => $link,
-						] ),
-					]
-				);
-				if ( is_wp_error( $scraped ) ) {
-					return $scraped;
-				}
-				$decoded = ! empty( $scraped['body'] ) ? json_decode( $scraped['body'], true ) : null;
-				if ( ! empty( $decoded['data'] ) ) {
-					$result = $decoded['data'];
-					if ( ! empty( $existing ) ) {
-						$result['rescraped'] = true;
-						$result['existing']  = $existing;
-					}
+
+			if ( ! empty( $scraped['status'] ) && 'success' === $scraped['status'] ) {
+				$result = $scraped['data'];
+			} elseif ( ! empty( $scraped['status'] ) && 'skipped' === $scraped['status'] && 'no_asin' === $scraped['reason'] ) {
+				// No ASIN: Create Studio services API, then local LinkScraper.
+				$external = $scraper->scrape_external( $link );
+				if ( ! empty( $external['status'] ) && 'success' === $external['status'] ) {
+					$result = $external['data'];
 				} else {
 					// Match the pre-existing behavior: a response without a usable data
 					// payload should fall through to the 404 "No Data Found" branch
@@ -511,27 +462,27 @@ class Products_API extends Products {
 					$result = null;
 				}
 			}
+			// ASIN present but PAAPI empty/skipped-not-setup: keep existing $result (DB row or null).
 		}
 
 		if ( ! $result ) {
 			return new \WP_Error(
 				404,
-				__( 'No Data Found', 'mediavine' ),
+				__( 'No Data Found', 'mediavine-create' ),
 				[
-					'message'    => __( 'The Product link scrape did not turn up any results', 'mediavine' ),
+					'message'    => __( 'The Product link scrape did not turn up any results', 'mediavine-create' ),
 					'error_code' => 'scrape_empty',
 				]
 			);
 		}
 
 		if ( ! empty( $existing ) ) {
-				$result['rescraped'] = true;
-				// If thumbnail ID and isn't external and hasn't been previously generated
-				if ( isset( $existing['thumbnail_id'] ) && empty( $existing['thumbnail_uri'] ) ) {
-					$existing['thumbnail_uri'] = wp_get_attachment_url( $existing['thumbnail_id'] );
-				}
-				$result['existing']  = $existing;
-				
+			$result['rescraped'] = true;
+			// If thumbnail ID and isn't external and hasn't been previously generated
+			if ( isset( $existing['thumbnail_id'] ) && empty( $existing['thumbnail_uri'] ) ) {
+				$existing['thumbnail_uri'] = wp_get_attachment_url( $existing['thumbnail_id'] );
+			}
+			$result['existing'] = $existing;
 		}
 
 		// If thumbnail ID and isn't external and hasn't been previously generated
@@ -539,20 +490,7 @@ class Products_API extends Products {
 			$result->thumbnail_uri = wp_get_attachment_url( $result->thumbnail_id );
 		}
 
-		// If is an object and has a thumbnail URL (re-processed product)
-		if ( ! empty( $result->external_thumbnail_url ) ) {
-			$result->thumbnail_id         = null;
-			$result->thumbnail_uri        = $result->external_thumbnail_url;
-			$result->remote_thumbnail_uri = $result->external_thumbnail_url;
-		}
-
-		// If has external thumbnail url and is array (product doesn't already exist)
-		if ( ! empty( is_array( $result ) && $result['external_thumbnail_url'] ) ) {
-			$result['thumbnail_id']         = null;
-			$result['thumbnail_uri']        = $result['external_thumbnail_url'];
-			$result['remote_thumbnail_uri'] = $result['external_thumbnail_url'];
-			$result['title']                = $result['title'];
-		}
+		$result = Scraped_Content_Normalizer::apply_external_thumbnail( $result );
 
 		$response = API_Services::set_response_data( $result, $response );
 		$response->set_status( 200 );
@@ -600,10 +538,10 @@ class Products_API extends Products {
 				// Remove last ", " from $values
 				$values = substr( $values, 0, -2 );
 
-				// SECURITY CHECKED: This query is properly sanitized.
 				$query = "INSERT INTO $table (id, thumbnail_id) $values ON DUPLICATE KEY UPDATE thumbnail_id=VALUES(thumbnail_id)";
 
 				add_filter( 'query', [ self::$models_v2->mv_products, 'allow_null' ] );
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 				$result = $wpdb->query( $query );
 				remove_filter( 'query', [ self::$models_v2->mv_products, 'allow_null' ] );
 			}
@@ -683,8 +621,15 @@ class Products_API extends Products {
 	 * - unknown_operation
 	 * - amazon_plugin_conflict
 	 * - create_not_registered
-	 * - paapi_not_setup
-	 * - paapi_provisioning
+	 * - creators_api_not_setup
+	 * - creators_provisioning
+	 * - creators_unauthorized
+	 * - creators_access_denied
+	 * - creators_rate_limited
+	 * - creators_validation_error
+	 * - creators_not_found
+	 * - creators_oauth_error
+	 * - creators_api_error
 	 *
 	 * @param Request  $request WordPress Request object
 	 * @param Response $response WordPress Response object
@@ -697,10 +642,10 @@ class Products_API extends Products {
 		if ( empty( $error_code ) ) {
 			return new \WP_Error(
 				'missing_error_code',
-				__( 'Missing error_code parameter', 'mediavine' ),
+				__( 'Missing error_code parameter', 'mediavine-create' ),
 				[
 					'status'  => 400,
-					'message' => __( 'Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, paapi_not_setup, paapi_provisioning, creators_api_not_setup, creators_unauthorized, creators_access_denied, creators_rate_limited, creators_validation_error, creators_not_found, creators_oauth_error, creators_api_error', 'mediavine' ),
+					'message' => __( 'Please provide an error_code parameter. Available codes: access_denied, associate_not_eligible, invalid_partner, invalid_associate, invalid_signature, incomplete_signature, too_many_requests, request_expired, unrecognized_client, invalid_or_missing_parameter, unknown_operation, amazon_plugin_conflict, create_not_registered, creators_api_not_setup, creators_provisioning, creators_unauthorized, creators_access_denied, creators_rate_limited, creators_validation_error, creators_not_found, creators_oauth_error, creators_api_error', 'mediavine-create' ),
 				]
 			);
 		}
@@ -708,229 +653,217 @@ class Products_API extends Products {
 		$errors = [
 			'access_denied'              => new \WP_Error(
 				'access_denied',
-				__( 'Amazon: API Access Not Enabled', 'mediavine' ),
+				__( 'Amazon: API Access Not Enabled', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( "Amazon reports your Access Key doesn't have Product Advertising API access. If you're using AWS credentials, Amazon requires you to migrate them through Associates Central.", 'mediavine' ),
+					'message'   => __( "Amazon reports your Access Key doesn't have Product Advertising API access. If you're using AWS credentials, Amazon requires you to migrate them through Associates Central.", 'mediavine-create' ),
 					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( 'Manage Credentials in Amazon Associates Central', 'mediavine' ),
+					'link_text' => __( 'Manage Credentials in Amazon Associates Central', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=AccessDeniedException',
 				]
 			),
 			'associate_not_eligible'     => new \WP_Error(
 				'associate_not_eligible',
-				__( 'Amazon: API Access Paused', 'mediavine' ),
+				__( 'Amazon: API Access Paused', 'mediavine-create' ),
 				[
 					'status'    => 403,
-					'message'   => __( "Amazon requires 10 qualified sales in the trailing 30 days to access their Product Advertising API. Once you meet this threshold, API access restores automatically. You can still add products manually.", 'mediavine' ),
+					'message'   => __( "Amazon requires 10 qualified sales in the trailing 30 days to access their Product Advertising API. Once you meet this threshold, API access restores automatically. You can still add products manually.", 'mediavine-create' ),
 					'link_url'  => 'https://affiliate-program.amazon.com/home/reports/summary',
-					'link_text' => __( 'View Your Amazon Associates Dashboard', 'mediavine' ),
+					'link_text' => __( 'View Your Amazon Associates Dashboard', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=AssociateEligibilityException',
 				]
 			),
 			'invalid_partner'            => new \WP_Error(
 				'invalid_partner',
-				__( 'Amazon: Invalid Store ID', 'mediavine' ),
+				__( 'Amazon: Invalid Store ID', 'mediavine-create' ),
 				[
 					'status'    => 400,
-					'message'   => __( "Amazon reports your Store ID (Partner Tag) doesn't match your API credentials. Your Store ID looks like \"yoursite-20\" - make sure it's from the same Amazon account as your API keys. Common mistake: using your Access Key ID instead of your Store ID.", 'mediavine' ),
+					'message'   => __( "Amazon reports your Store ID (Partner Tag) doesn't match your API credentials. Your Store ID looks like \"yoursite-20\" - make sure it's from the same Amazon account as your API keys. Common mistake: using your Access Key ID instead of your Store ID.", 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Check Your Store ID in Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Store ID in Settings', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=InvalidPartnerTagException',
 				]
 			),
 			'invalid_associate'          => new \WP_Error(
 				'invalid_associate',
-				__( 'Amazon: Account Not Approved', 'mediavine' ),
+				__( 'Amazon: Account Not Approved', 'mediavine-create' ),
 				[
 					'status'    => 403,
-					'message'   => __( "Amazon reports your credentials aren't linked to an approved Associates account. This usually means your Associates application is still pending, or you're using credentials from a different Amazon account than your approved store.", 'mediavine' ),
+					'message'   => __( "Amazon reports your credentials aren't linked to an approved Associates account. This usually means your Associates application is still pending, or you're using credentials from a different Amazon account than your approved store.", 'mediavine-create' ),
 					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine' ),
+					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=AssociateValidationException',
 				]
 			),
 			'invalid_signature'          => new \WP_Error(
 				'invalid_signature',
-				__( 'Amazon: Invalid Credentials', 'mediavine' ),
+				__( 'Amazon: Invalid Credentials', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( "Amazon couldn't validate your credentials. Check that your Secret Key is correct - it's a 40-character string, not your Store ID. If you just created new credentials, Amazon takes up to 48 hours to activate them.", 'mediavine' ),
+					'message'   => __( "Amazon couldn't validate your credentials. Check that your Secret Key is correct - it's a 40-character string, not your Store ID. If you just created new credentials, Amazon takes up to 48 hours to activate them.", 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Review Your Credentials in Settings', 'mediavine' ),
+					'link_text' => __( 'Review Your Credentials in Settings', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=InvalidSignatureException',
 				]
 			),
 			'incomplete_signature'       => new \WP_Error(
 				'incomplete_signature',
-				__( 'Amazon: Missing Secret Key', 'mediavine' ),
+				__( 'Amazon: Missing Secret Key', 'mediavine-create' ),
 				[
 					'status'    => 400,
-					'message'   => __( "Amazon reports your Secret Key is missing or incomplete. Your Secret Key is a 40-character string that looks like \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\". Make sure you copied the entire key without extra spaces.", 'mediavine' ),
+					'message'   => __( "Amazon reports your Secret Key is missing or incomplete. Your Secret Key is a 40-character string that looks like \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\". Make sure you copied the entire key without extra spaces.", 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Re-enter Your Secret Key in Settings', 'mediavine' ),
+					'link_text' => __( 'Re-enter Your Secret Key in Settings', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=IncompleteSignatureException',
 				]
 			),
 			'too_many_requests'          => new \WP_Error(
 				'too_many_requests',
-				__( 'Amazon: Rate Limit Exceeded', 'mediavine' ),
+				__( 'Amazon: Rate Limit Exceeded', 'mediavine-create' ),
 				[
 					'status'    => 429,
-					'message'   => __( "Amazon is rate-limiting your requests because you've exceeded their API limits. Wait a few minutes before trying again.", 'mediavine' ),
+					'message'   => __( "Amazon is rate-limiting your requests because you've exceeded their API limits. Wait a few minutes before trying again.", 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=TooManyRequestsException',
 				]
 			),
 			'request_expired'            => new \WP_Error(
 				'request_expired',
-				__( 'Amazon: Request Expired', 'mediavine' ),
+				__( 'Amazon: Request Expired', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( "Amazon rejected the request because your server's clock is out of sync. Amazon requires requests to be within 15 minutes of the actual time. Contact your hosting provider to sync your server's clock.", 'mediavine' ),
+					'message'   => __( "Amazon rejected the request because your server's clock is out of sync. Amazon requires requests to be within 15 minutes of the actual time. Contact your hosting provider to sync your server's clock.", 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=RequestExpiredException',
 				]
 			),
 			'unrecognized_client'        => new \WP_Error(
 				'unrecognized_client',
-				__( 'Amazon: Unknown Access Key', 'mediavine' ),
+				__( 'Amazon: Unknown Access Key', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( "Amazon doesn't recognize your Access Key ID. Your Access Key is a 20-character string starting with \"AKIA\". Common mistakes: using your Store ID instead, extra spaces, or using old/deleted credentials. Generate new credentials in Amazon Associates if needed.", 'mediavine' ),
+					'message'   => __( "Amazon doesn't recognize your Access Key ID. Your Access Key is a 20-character string starting with \"AKIA\". Common mistakes: using your Store ID instead, extra spaces, or using old/deleted credentials. Generate new credentials in Amazon Associates if needed.", 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Check Your Access Key in Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Access Key in Settings', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=UnrecognizedClientException',
 				]
 			),
 			'invalid_or_missing_parameter' => new \WP_Error(
 				'invalid_or_missing_parameter',
-				__( 'Amazon: Invalid Request', 'mediavine' ),
+				__( 'Amazon: Invalid Request', 'mediavine-create' ),
 				[
 					'status'    => 400,
-					'message'   => __( 'Amazon reports an invalid or missing parameter in the request. This is usually a temporary issue - please try again.', 'mediavine' ),
+					'message'   => __( 'Amazon reports an invalid or missing parameter in the request. This is usually a temporary issue - please try again.', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=ValidationException',
 				]
 			),
 			'unknown_operation'          => new \WP_Error(
 				'unknown_operation',
-				__( 'Amazon: Unknown Operation', 'mediavine' ),
+				__( 'Amazon: Unknown Operation', 'mediavine-create' ),
 				[
 					'status'    => 404,
-					'message'   => __( 'Amazon received an unknown API operation. This is likely a plugin issue - please contact support.', 'mediavine' ),
+					'message'   => __( 'Amazon received an unknown API operation. This is likely a plugin issue - please contact support.', 'mediavine-create' ),
 					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/troubleshooting/error-messages.html#:~:text=UnknownOperationException',
 				]
 			),
 			'amazon_plugin_conflict'     => new \WP_Error(
 				'amazon_plugin_conflict',
-				__( 'Plugin Conflict Detected', 'mediavine' ),
+				__( 'Plugin Conflict Detected', 'mediavine-create' ),
 				[
 					'status'    => 501,
-					'message'   => __( "Another plugin is conflicting with Create's Amazon integration. This is a known issue with some Amazon affiliate plugins. Try deactivating other Amazon-related plugins, or add products manually.", 'mediavine' ),
+					'message'   => __( "Another plugin is conflicting with Create's Amazon integration. This is a known issue with some Amazon affiliate plugins. Try deactivating other Amazon-related plugins, or add products manually.", 'mediavine-create' ),
 					'link_url'  => 'mailto:support@create.studio',
-					'link_text' => __( 'Contact Create Support', 'mediavine' ),
+					'link_text' => __( 'Contact Create Support', 'mediavine-create' ),
 				]
 			),
 			'create_not_registered'      => new \WP_Error(
 				'create_not_registered',
-				__( 'Create Registration Required', 'mediavine' ),
+				__( 'Create Registration Required', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( 'Amazon product scraping requires Create to be registered. Register your site to enable this feature, or add products manually.', 'mediavine' ),
+					'message'   => __( 'Amazon product scraping requires Create to be registered. Register your site to enable this feature, or add products manually.', 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_api' ),
-					'link_text' => __( 'Register Create', 'mediavine' ),
+					'link_text' => __( 'Register Create', 'mediavine-create' ),
 				]
 			),
-			'paapi_not_setup'            => new \WP_Error(
-				'paapi_not_setup',
-				__( 'Amazon Integration Not Configured', 'mediavine' ),
-				[
-					'status'    => 401,
-					'message'   => __( 'Amazon Affiliates needs to be enabled and configured in Create settings before you can scrape Amazon products.', 'mediavine' ),
-					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Configure Amazon Affiliates', 'mediavine' ),
-				]
-			),
-			'paapi_provisioning'         => new \WP_Error(
-				'paapi_provisioning',
-				__( 'Amazon: Credentials Still Activating', 'mediavine' ),
-				[
-					'status'    => 403,
-					'message'   => __( "Amazon takes up to 48 hours to activate new API credentials. You can add products manually while waiting, or try again later.", 'mediavine' ),
-					'docs_url'  => 'https://webservices.amazon.com/paapi5/documentation/register-for-pa-api.html#:~:text=credentials%20take%20up%20to%2072%20hours',
-				]
-			),
-			// Creators API errors
 			'creators_api_not_setup'     => new \WP_Error(
 				'creators_api_not_setup',
-				__( 'Amazon Creators API Not Setup', 'mediavine' ),
+				__( 'Amazon Creators API Not Setup', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( 'Amazon Creators API is not enabled or fully configured. Please enter your Creators API credentials from Associates Central, or manually add an image and title.', 'mediavine' ),
+					'message'   => __( 'Amazon Creators API is not enabled or fully configured. Please enter your Creators API credentials from Associates Central, or manually add an image and title.', 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Configure Amazon Affiliates', 'mediavine' ),
+					'link_text' => __( 'Configure Amazon Affiliates', 'mediavine-create' ),
+				]
+			),
+			'creators_provisioning'      => new \WP_Error(
+				'creators_provisioning',
+				__( 'Amazon: Credentials Still Activating', 'mediavine-create' ),
+				[
+					'status'  => 403,
+					'message' => __( 'Amazon takes time to activate new Creators API credentials. You can add products manually while waiting, or try again later.', 'mediavine-create' ),
 				]
 			),
 			'creators_unauthorized'      => new \WP_Error(
 				'creators_unauthorized',
-				__( 'Amazon: Authentication Failed', 'mediavine' ),
+				__( 'Amazon: Authentication Failed', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( 'Amazon rejected your Creators API credentials. Please verify your Credential ID and Secret in Associates Central.', 'mediavine' ),
+					'message'   => __( 'Amazon rejected your Creators API credentials. Please verify your Credential ID and Secret in Associates Central.', 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine-create' ),
 				]
 			),
 			'creators_access_denied'     => new \WP_Error(
 				'creators_access_denied',
-				__( 'Amazon: Access Denied', 'mediavine' ),
+				__( 'Amazon: Access Denied', 'mediavine-create' ),
 				[
 					'status'    => 403,
-					'message'   => __( "Amazon denied access to the Creators API. This may mean your credentials don't have the required permissions, or your Associates account isn't eligible.", 'mediavine' ),
+					'message'   => __( "Amazon denied access to the Creators API. This may mean your credentials don't have the required permissions, or your Associates account isn't eligible.", 'mediavine-create' ),
 					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine' ),
+					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine-create' ),
 				]
 			),
 			'creators_rate_limited'      => new \WP_Error(
 				'creators_rate_limited',
-				__( 'Amazon: Rate Limit Exceeded', 'mediavine' ),
+				__( 'Amazon: Rate Limit Exceeded', 'mediavine-create' ),
 				[
 					'status'  => 429,
-					'message' => __( "Amazon is rate-limiting your requests. Wait a few minutes before trying again.", 'mediavine' ),
+					'message' => __( "Amazon is rate-limiting your requests. Wait a few minutes before trying again.", 'mediavine-create' ),
 				]
 			),
 			'creators_validation_error'  => new \WP_Error(
 				'creators_validation_error',
-				__( 'Amazon: Invalid Request', 'mediavine' ),
+				__( 'Amazon: Invalid Request', 'mediavine-create' ),
 				[
 					'status'  => 400,
-					'message' => __( 'Amazon reports an invalid request to the Creators API. This is usually a temporary issue - please try again.', 'mediavine' ),
+					'message' => __( 'Amazon reports an invalid request to the Creators API. This is usually a temporary issue - please try again.', 'mediavine-create' ),
 				]
 			),
 			'creators_not_found'         => new \WP_Error(
 				'creators_not_found',
-				__( 'Amazon: Resource Not Found', 'mediavine' ),
+				__( 'Amazon: Resource Not Found', 'mediavine-create' ),
 				[
 					'status'    => 404,
-					'message'   => __( 'The requested Amazon resource was not found. Please verify your Partner Tag and region settings.', 'mediavine' ),
+					'message'   => __( 'The requested Amazon resource was not found. Please verify your Partner Tag and region settings.', 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Check Your Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Settings', 'mediavine-create' ),
 				]
 			),
 			'creators_oauth_error'       => new \WP_Error(
 				'creators_oauth_error',
-				__( 'Amazon: OAuth Authentication Failed', 'mediavine' ),
+				__( 'Amazon: OAuth Authentication Failed', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( 'Amazon rejected your Creators API credentials during OAuth authentication. Please verify your Credential ID and Secret in Associates Central.', 'mediavine' ),
+					'message'   => __( 'Amazon rejected your Creators API credentials during OAuth authentication. Please verify your Credential ID and Secret in Associates Central.', 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine-create' ),
 				]
 			),
 			'creators_api_error'         => new \WP_Error(
 				'creators_api_error',
-				__( 'Amazon: Creators API Error', 'mediavine' ),
+				__( 'Amazon: Creators API Error', 'mediavine-create' ),
 				[
 					'status'  => 500,
-					'message' => __( 'An unexpected error occurred with the Amazon Creators API. Please try again later.', 'mediavine' ),
+					'message' => __( 'An unexpected error occurred with the Amazon Creators API. Please try again later.', 'mediavine-create' ),
 				]
 			),
 		];
@@ -938,11 +871,12 @@ class Products_API extends Products {
 		if ( ! isset( $errors[ $error_code ] ) ) {
 			return new \WP_Error(
 				'unknown_error_code',
-				__( 'Unknown error code', 'mediavine' ),
+				__( 'Unknown error code', 'mediavine-create' ),
 				[
 					'status'  => 400,
 					'message' => sprintf(
-						__( 'The error code "%s" is not recognized. Available codes: %s', 'mediavine' ),
+						/* translators: 1: unrecognized error code, 2: list of available codes */
+						__( 'The error code "%1$s" is not recognized. Available codes: %2$s', 'mediavine-create' ),
 						$error_code,
 						implode( ', ', array_keys( $errors ) )
 					),
@@ -984,9 +918,9 @@ class Products_API extends Products {
 		if ( ! $deleted ) {
 			return new \WP_Error(
 				409,
-				__( 'Entry Could Not Be Deleted', 'mediavine' ),
+				__( 'Entry Could Not Be Deleted', 'mediavine-create' ),
 				[
-					'message'    => __( 'A conflict occurred and the product could not be deleted', 'mediavine' ),
+					'message'    => __( 'A conflict occurred and the product could not be deleted', 'mediavine-create' ),
 					'error_code' => 'product_not_deleted',
 				]
 			);

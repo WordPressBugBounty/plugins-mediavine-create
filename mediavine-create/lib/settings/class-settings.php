@@ -44,11 +44,30 @@ class Settings {
 		'`order`' => 'tinyint(10)',
 	];
 
+	/**
+	 * Max rows loaded into the request-level settings cache.
+	 *
+	 * Must stay above the number of registered Create settings; crossing this
+	 * silently forces every uncached get_setting() into a fallback DB query.
+	 *
+	 * @var int
+	 */
+	const LOAD_LIMIT = 1000;
+
 	public static $all_settings = [];
 
 	public static $slugged_settings = [];
 
 	public static $grouped_settings = [];
+
+	/**
+	 * Whether the request-level settings cache has been built.
+	 *
+	 * Distinguishes "not loaded yet" from "loaded but empty / with null misses".
+	 *
+	 * @var bool
+	 */
+	private static $cache_built = false;
 
 	public static function create_settings_filter( $settings = [] ) {
 		$gathered_settings = apply_filters( 'mv_create_settings', $settings );
@@ -139,66 +158,194 @@ class Settings {
 		return $settings;
 	}
 
+	/**
+	 * Sanitize a setting payload before upsert.
+	 *
+	 * Shared by create and update write paths so REST and PHP callers agree.
+	 *
+	 * Most values use sanitize_text_field. Exceptions:
+	 * - custom CSS: tags stripped
+	 * - list ad HTML: div/span markup with class/id/data-* preserved (render re-sanitizes)
+	 * - known textareas: sanitize_textarea_field so newlines survive
+	 *
+	 * @param array $setting Setting fields.
+	 * @return array Sanitized setting.
+	 */
+	public static function sanitize_setting( array $setting ) {
+		if ( isset( $setting['slug'] ) ) {
+			$setting['slug'] = sanitize_text_field( $setting['slug'] );
+		}
+
+		if ( isset( $setting['value'] ) && isset( $setting['slug'] ) ) {
+			$setting['value'] = apply_filters( $setting['slug'] . '_settings_value', $setting['value'] );
+			$setting['value'] = self::sanitize_setting_value( $setting['slug'], $setting['value'] );
+		}
+
+		if ( isset( $setting['data'] ) ) {
+			$setting['data'] = wp_json_encode( $setting['data'] );
+		}
+
+		if ( isset( $setting['group'] ) ) {
+			$setting['group'] = sanitize_text_field( $setting['group'] );
+		}
+
+		return $setting;
+	}
+
+	/**
+	 * Sanitize a setting value according to its slug.
+	 *
+	 * @param string $slug  Setting slug.
+	 * @param mixed  $value Raw value.
+	 * @return mixed Sanitized value.
+	 */
+	public static function sanitize_setting_value( $slug, $value ) {
+		if ( 'mv_create_custom_css' === $slug ) {
+			return wp_strip_all_tags( $value );
+		}
+
+		if ( 'mv_create_list_ad_custom_html' === $slug ) {
+			return self::sanitize_list_ad_html( $value );
+		}
+
+		// Textareas and multiline button labels must keep newlines (sanitize_text_field collapses them).
+		$textarea_slugs = [
+			'mv_create_nutrition_disclaimer',
+			'mv_create_affiliate_message',
+			'mv_create_custom_buttons',
+		];
+		if ( in_array( $slug, $textarea_slugs, true ) ) {
+			return sanitize_textarea_field( $value );
+		}
+
+		return sanitize_text_field( $value );
+	}
+
+	/**
+	 * Allowlist sanitizer for list ad slot HTML.
+	 *
+	 * Permits div/span with class, id, and data-* attributes. Scripts, event
+	 * handlers, and other tags/attrs are stripped. Matches the render-time
+	 * allowlist described in the setting instructions.
+	 *
+	 * @param mixed $html Raw HTML.
+	 * @return string Sanitized HTML.
+	 */
+	public static function sanitize_list_ad_html( $html ) {
+		if ( ! is_string( $html ) ) {
+			return '';
+		}
+
+		$html = trim( $html );
+		if ( '' === $html ) {
+			return '';
+		}
+
+		$dom = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			return '';
+		}
+
+		self::sanitize_list_ad_dom_node( $dom, $body );
+
+		$result = '';
+		foreach ( $body->childNodes as $child ) {
+			$result .= $dom->saveHTML( $child );
+		}
+
+		return trim( $result );
+	}
+
+	/**
+	 * Recursively sanitize list-ad DOM children in place.
+	 *
+	 * @param \DOMDocument $dom    Owner document.
+	 * @param \DOMNode     $parent Parent whose children are sanitized.
+	 * @return void
+	 */
+	private static function sanitize_list_ad_dom_node( \DOMDocument $dom, \DOMNode $parent ) {
+		$allowed_tags   = [ 'div', 'span' ];
+		$strip_entirely = [ 'script', 'style', 'iframe', 'form', 'object', 'embed' ];
+		$children       = iterator_to_array( $parent->childNodes );
+
+		foreach ( $children as $child ) {
+			if ( ! ( $child instanceof \DOMElement ) ) {
+				if ( ! ( $child instanceof \DOMText ) ) {
+					$parent->removeChild( $child );
+				}
+				continue;
+			}
+
+			$tag = strtolower( $child->tagName );
+
+			if ( in_array( $tag, $strip_entirely, true ) ) {
+				$parent->removeChild( $child );
+				continue;
+			}
+
+			if ( ! in_array( $tag, $allowed_tags, true ) ) {
+				self::sanitize_list_ad_dom_node( $dom, $child );
+				$grandchildren = iterator_to_array( $child->childNodes );
+				foreach ( $grandchildren as $gc ) {
+					$parent->insertBefore( $gc, $child );
+				}
+				$parent->removeChild( $child );
+				continue;
+			}
+
+			$remove_attrs = [];
+			foreach ( $child->attributes as $attr ) {
+				$name    = strtolower( $attr->nodeName );
+				$allowed = ( 'class' === $name )
+					|| ( 'id' === $name )
+					|| ( 1 === preg_match( '/^data-[a-z0-9-]+$/', $name ) );
+				if ( ! $allowed ) {
+					$remove_attrs[] = $attr->nodeName;
+				}
+			}
+			foreach ( $remove_attrs as $attr_name ) {
+				$child->removeAttribute( $attr_name );
+			}
+
+			self::sanitize_list_ad_dom_node( $dom, $child );
+		}
+	}
+
+	/**
+	 * Upsert one or more settings after sanitizing, then invalidate the static cache.
+	 *
+	 * @param array $settings Single setting associative array, or list of settings.
+	 * @return array|object|false Upserted row(s), or false when slug is missing.
+	 */
 	public static function create_settings( $settings ) {
 		$Settings_Models = new MV_DBI( 'mv_settings' );
 
 		$collection = [];
 		if ( wp_is_numeric_array( $settings ) ) {
 			foreach ( $settings as $setting ) {
-
-				if ( isset( $setting['slug'] ) ) {
-					$setting['slug'] = sanitize_text_field( $setting['slug'] );
-				}
-
-				if ( isset( $setting['value'] ) ) {
-					$allowed_html     = [
-						'a'      => [
-							'class'  => true,
-							'href'   => true,
-							'target' => true,
-						],
-						'strong' => [
-							'class' => true,
-						],
-						'em'     => [
-							'class' => true,
-						],
-					];
-					$setting['value'] = wp_kses( $setting['value'], $allowed_html );
-				}
-
-				if ( isset( $setting['value'] ) && isset( $setting['slug'] ) ) {
-					$setting['value'] = apply_filters( $setting['slug'] . '_settings_value', $setting['value'] );
-					if ( 'mv_create_custom_css' === $setting['slug'] ) {
-						$setting['value'] = wp_strip_all_tags( $setting['value'] );
-					} else {
-						$setting['value'] = sanitize_text_field( $setting['value'] );
-					}
-				}
-
-				if ( isset( $setting['data'] ) ) {
-					$setting['data'] = wp_json_encode( $setting['data'] );
-				}
-
-				if ( isset( $setting['group'] ) ) {
-					$setting['group'] = sanitize_text_field( $setting['group'] );
-				}
+				$setting = self::sanitize_setting( $setting );
 
 				// Only add setting if it has slug
 				if ( ! empty( $setting['slug'] ) ) {
 					$collection[] = $Settings_Models->upsert( $setting );
 				}
 			}
+			self::reset_settings();
 			return $collection;
 		}
 
-		if ( isset( $settings['data'] ) ) {
-			$settings['data'] = wp_json_encode( $settings['data'] );
-		}
+		$settings = self::sanitize_setting( $settings );
 
 		// Only add setting if it has slug
 		if ( ! empty( $settings['slug'] ) ) {
-			return $Settings_Models->upsert( $settings );
+			$result = $Settings_Models->upsert( $settings );
+			self::reset_settings();
+			return $result;
 		}
 
 		return false;
@@ -232,7 +379,7 @@ class Settings {
 	 */
 	public static function get_settings( $setting_slug = null, $setting_group = null, $force_reset = false ) {
 		// Build settings if they haven't yet stored, or if we are forcing a reset
-		if ( empty( self::$all_settings ) || $force_reset ) {
+		if ( ! self::$cache_built || $force_reset ) {
 			// Make sure our table exists before we build our settings
 			if ( ! mv_create_table_exists( 'mv_settings' ) ) {
 				return [];
@@ -240,12 +387,17 @@ class Settings {
 
 			$Settings = new MV_DBI( 'mv_settings' );
 
-			self::$all_settings = $Settings->find( [ 'limit' => 200 ] );
+			self::$all_settings     = [];
+			self::$slugged_settings = [];
+			self::$grouped_settings = [];
 
-			if ( ! empty( self::$all_settings ) ) {
-				foreach ( self::$all_settings as &$setting ) {
+			$loaded = $Settings->find( [ 'limit' => self::LOAD_LIMIT ] );
+
+			if ( ! empty( $loaded ) ) {
+				foreach ( $loaded as &$setting ) {
 					$setting = self::extract( $setting );
 
+					self::$all_settings[]                     = $setting;
 					self::$slugged_settings[ $setting->slug ] = $setting;
 
 					if ( ! empty( $setting->group ) ) {
@@ -253,10 +405,13 @@ class Settings {
 					}
 				}
 			}
+
+			self::$cache_built = true;
 		}
 
 		if ( $setting_slug ) {
-			if ( ! empty( self::$slugged_settings ) && isset( self::$slugged_settings[ $setting_slug ] ) ) {
+			// array_key_exists so negative-cached null misses are not re-queried
+			if ( array_key_exists( $setting_slug, self::$slugged_settings ) ) {
 				return self::$slugged_settings[ $setting_slug ];
 			}
 
@@ -271,13 +426,18 @@ class Settings {
 			);
 
 			if ( $setting ) {
-				return self::extract( $setting );
+				$setting                                  = self::extract( $setting );
+				self::$slugged_settings[ $setting_slug ] = $setting;
+				return $setting;
 			}
+
+			// Negative cache: remember the miss so permission lookups etc. don't re-hit the DB
+			self::$slugged_settings[ $setting_slug ] = null;
 			return null;
 		}
 
 		if ( $setting_group ) {
-			if ( ! empty( self::$grouped_settings ) && isset( self::$grouped_settings[ $setting_group ] ) ) {
+			if ( array_key_exists( $setting_group, self::$grouped_settings ) ) {
 				return self::$grouped_settings[ $setting_group ];
 			}
 
@@ -291,6 +451,7 @@ class Settings {
 					],
 					'order_by' => '`order`',
 					'order'    => 'ASC',
+					'limit'    => self::LOAD_LIMIT,
 				]
 			);
 
@@ -298,9 +459,11 @@ class Settings {
 				foreach ( $settings as &$setting ) {
 					$setting = self::extract( $setting );
 				}
+				self::$grouped_settings[ $setting_group ] = $settings;
 				return $settings;
 			}
 
+			self::$grouped_settings[ $setting_group ] = null;
 			return null;
 		}
 
@@ -327,13 +490,22 @@ class Settings {
 		return null;
 	}
 
-	static function update_setting( $slug, $new_value ) {
+	/**
+	 * Update a single setting value (sanitizes and invalidates the static cache).
+	 *
+	 * @param string $slug      Setting slug.
+	 * @param mixed  $new_value New value.
+	 * @return array|object|false Upserted row, or false on failure.
+	 */
+	public static function update_setting( $slug, $new_value ) {
 		// Get the current setting so we have data for update
 		$setting = (array) self::get_settings( $slug );
 
-		// Update setting with new value
+		// Ensure slug is set even when the setting did not previously exist
+		$setting['slug']  = $slug;
 		$setting['value'] = $new_value;
-		self::$models->mv_settings->upsert( $setting );
+
+		return self::create_settings( $setting );
 	}
 
 	/**
@@ -358,7 +530,9 @@ class Settings {
 			];
 		}
 
-		return $Settings_Models->delete( $args );
+		$deleted = $Settings_Models->delete( $args );
+		self::reset_settings();
+		return $deleted;
 	}
 
 	/**
@@ -371,12 +545,15 @@ class Settings {
 	}
 
 	/**
-	 * Resets stored settings so a new query can be run. Mainly used in tests
+	 * Resets stored settings so a new query can be run.
+	 *
+	 * Called automatically after writes; also used in tests for isolation.
 	 */
 	public static function reset_settings() {
 		self::$all_settings     = [];
 		self::$slugged_settings = [];
 		self::$grouped_settings = [];
+		self::$cache_built      = false;
 	}
 
 	/**
@@ -389,6 +566,7 @@ class Settings {
 		add_action( 'activated_plugin', [ $this, 'mcp_refresh' ] );
 		add_action( 'after_switch_theme', [ $this, 'update_comments_selector_on_theme_change' ], 15 );
 		add_action( 'mv_create_plugin_updated', [ $this, 'update_comments_selector_on_plugin_update' ], 100);
+		add_action( 'mv_create_plugin_updated', [ $this, 'remove_retired_paapi_credentials' ], 101 );
 
 		self::$models       = MV_DBI::get_models(
 			[
@@ -427,6 +605,42 @@ class Settings {
 		// we only want to update the comments selector on plugin update if Trellis is active
 		if ( Theme_Checker::is_trellis() ) {
 			self::update_setting( 'mv_create_public_reviews_el', '#mv-trellis-comments' );
+		}
+	}
+
+	/**
+	 * Slugs of the retired PA-API 5.0 credential settings.
+	 *
+	 * Amazon shut PA-API down entirely, so these hold nothing usable. The
+	 * Creators API replaced them and reads `_creators_credential_id` /
+	 * `_creators_credential_secret` instead.
+	 *
+	 * Deliberately does NOT include `_paapi_marketplace` or `_paapi_tag`: those
+	 * keep the legacy slug names but are still live inputs to the Creators API
+	 * (region and Associate Tag). @see \Mediavine\Create\Amazon_Creators::init()
+	 *
+	 * @var string[]
+	 */
+	const RETIRED_PAAPI_SETTINGS = [
+		'mv_create_paapi_access_key',
+		'mv_create_paapi_secret_key',
+	];
+
+	/**
+	 * Deletes the retired PA-API credential settings on plugin update.
+	 *
+	 * These stopped being registered when PA-API support was removed, but rows
+	 * written by earlier versions survive in `mv_settings`. Because the settings
+	 * API serves whatever is in the table, upgraded sites kept rendering both
+	 * fields in the Amazon settings UI — storing a secret that can never be used
+	 * — while fresh installs showed nothing. Dropping the rows makes the two
+	 * cases agree.
+	 *
+	 * @return void
+	 */
+	public function remove_retired_paapi_credentials() {
+		foreach ( self::RETIRED_PAAPI_SETTINGS as $slug ) {
+			self::delete_setting( $slug );
 		}
 	}
 
@@ -470,16 +684,12 @@ class Settings {
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => [ $this->settings_api, 'create' ],
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this->settings_api, 'read' ],
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -490,25 +700,19 @@ class Settings {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this->settings_api, 'read_single' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => [ $this->settings_api, 'update_single' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => [ $this->settings_api, 'delete' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -519,9 +723,7 @@ class Settings {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this->settings_api, 'read_single_by_slug' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\sanitize_slug(),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -532,9 +734,7 @@ class Settings {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this->settings_api, 'read_by_group' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\sanitize_slug(),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -543,9 +743,7 @@ class Settings {
 			$route_namespace, '/refresh-settings', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'refresh_settings' ],
-				'permission_callback' => function ( \WP_REST_Request $request ) {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -553,9 +751,7 @@ class Settings {
 			$route_namespace, '/reset-settings', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'reset_db_settings' ],
-				'permission_callback' => function ( \WP_REST_Request $request ) {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -563,9 +759,7 @@ class Settings {
 			$route_namespace, '/request-password-reset', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'request_password_reset' ],
-				'permission_callback' => function ( \WP_REST_Request $request ) {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				'args'                => [
 					'email' => [
 						'type'     => 'string',
@@ -582,9 +776,7 @@ class Settings {
 			$route_namespace, '/reset-db-versions', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'reset_db_versions' ],
-				'permission_callback' => function ( \WP_REST_Request $request ) {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -592,9 +784,7 @@ class Settings {
 			$route_namespace, '/reset-subscription-tier', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'reset_subscription_tier' ],
-				'permission_callback' => function ( \WP_REST_Request $request ) {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 	}

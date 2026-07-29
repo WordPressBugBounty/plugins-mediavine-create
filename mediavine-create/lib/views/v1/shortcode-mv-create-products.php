@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 if ( ! $args['print'] ) {
 	// Determine display mode - check card override first, then global setting
 	$display_mode = ! empty( $args['creation']['products_display_mode'] )
@@ -20,7 +21,7 @@ if ( ! $args['print'] ) {
 	// Get section title - check card override first, then global setting
 	$section_title = ! empty( $args['creation']['products_section_title'] )
 		? $args['creation']['products_section_title']
-		: \Mediavine\Settings::get_setting( 'mv_create_products_section_title', __( 'Recommended Products', 'mediavine' ) );
+		: \Mediavine\Settings::get_setting( 'mv_create_products_section_title', __( 'Recommended Products', 'mediavine-create' ) );
 
 	$has_products = false;
 	// Default the affiliate message to the text stored in the global settings. Then check for the existence of a

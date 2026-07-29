@@ -34,7 +34,7 @@ class JSON_LD_Runtime extends Plugin {
 	public function init() {
 		$this->json_ld_types = JSON_LD_Types::get_instance();
 
-		add_filter( 'wp_head', [ $this, 'output_json_ld' ] );
+		add_action( 'wp_head', [ $this, 'output_json_ld' ] );
 	}
 
 	/**
@@ -66,6 +66,9 @@ class JSON_LD_Runtime extends Plugin {
 			foreach ( $handles as $i => $handle ) {
 				// Check for Create shortcode
 				if ( 'mv_create' === $handle || 'mv_recipe' === $handle ) {
+					// Reset each iteration so a key-less shortcode cannot inherit
+					// the previous card's ID.
+					$create_id      = null;
 					$shortcode_atts = shortcode_parse_atts( $full_shortcodes[ $i ] );
 
 					// Pull key from shortcode with key
@@ -97,7 +100,7 @@ class JSON_LD_Runtime extends Plugin {
 	public function get_multiple_cards_published_data( $card_ids ) {
 		// Return early if for some reason we don't have a good array
 		if ( empty( $card_ids ) || ! is_array( $card_ids ) ) {
-			return '';
+			return [];
 		}
 
 		global $wpdb;

@@ -42,7 +42,7 @@ class Site_Verification {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'verify_site_code' ],
-				'permission_callback' => '__return_true', // Public endpoint - security via code verification
+				'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ], // Public endpoint - security via code verification
 				'args'                => [
 					'code'  => [
 						'type'              => 'string',
@@ -69,9 +69,7 @@ class Site_Verification {
 			[
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_site_status' ],
-				'permission_callback' => function () {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -82,9 +80,7 @@ class Site_Verification {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'initiate_site_connect' ],
-				'permission_callback' => function () {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
 
@@ -95,7 +91,7 @@ class Site_Verification {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'site_connect_callback' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				'args'                => [
 					'connect_token' => [
 						'type'              => 'string',
@@ -419,8 +415,7 @@ class Site_Verification {
 
 			// Log any errors but don't block the disconnect
 			if ( is_wp_error( $response ) ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( 'Create Studio disconnect API error: ' . $response->get_error_message() );
+				Help::log( 'Create Studio disconnect API error: ' . $response->get_error_message() );
 			}
 		}
 
@@ -433,8 +428,8 @@ class Site_Verification {
 				'order' => 105,
 				'data'  => [
 					'type'         => 'api_authentication',
-					'label'        => __( 'Product Registration', 'mediavine' ),
-					'instructions' => __( 'In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs.', 'mediavine' ),
+					'label'        => __( 'Product Registration', 'mediavine-create' ),
+					'instructions' => __( 'In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs.', 'mediavine-create' ),
 				],
 			]
 		);

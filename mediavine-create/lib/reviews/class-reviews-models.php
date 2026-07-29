@@ -7,9 +7,10 @@ class Reviews_Models extends Reviews {
 		global $wpdb;
 		$review_table = $wpdb->prefix . 'mv_reviews';
 
-		// SECURITY CHECKED: This query is properly prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$reviews_avg_statement = $wpdb->prepare( "SELECT AVG(rating) FROM `$review_table` WHERE creation = %d", $creation_id );
 		$avg                   = $wpdb->get_var( $reviews_avg_statement ) ?: 0;
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Round to the nearest decimal
 		$rounded_avg = round( $avg, 1 );
@@ -21,9 +22,10 @@ class Reviews_Models extends Reviews {
 		global $wpdb;
 		$review_table = $wpdb->prefix . 'mv_reviews';
 
-		// SECURITY CHECKED: This query is properly prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$reviews_count_statement = $wpdb->prepare( "SELECT COUNT(*) FROM `$review_table` WHERE creation = %d", $creation_id );
 		$count                   = $wpdb->get_var( $reviews_count_statement ) ?: 0;
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return $count;
 	}
@@ -108,7 +110,7 @@ class Reviews_Models extends Reviews {
 		// Set title if missing
 		if ( empty( $review['review_title'] ) ) {
 			/* translators: %s: reviewer's name */
-			$review['review_title'] = sprintf( __( 'Review from %s', 'mediavine' ), $review['author_name'] );
+			$review['review_title'] = sprintf( __( 'Review from %s', 'mediavine-create' ), $review['author_name'] );
 		}
 
 		$inserted = self::$models->reviews->insert( $review );

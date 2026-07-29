@@ -5,10 +5,42 @@ namespace Mediavine\Create\Importers\Sources;
 use Mediavine\Create\Helpers\Arr;
 use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
+use Mediavine\Create\Importers\Helpers\Safe_Unserialize;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Meal_Planner {
+class Import_Meal_Planner extends Abstract_Source_Importer {
 
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'meal_planner';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return static::find_ratings( $stored_recipe['id'], $stored_recipe['original_post_id'] );
+	}
 
 	public static $table_name = 'mpprecipe_recipes';
 
@@ -57,6 +89,7 @@ class Import_Meal_Planner {
 		// Check if table exists
 		// TODO: Add something like this to ORM
 		$table_query = $wpdb->prepare( 'SELECT table_name FROM information_schema.tables WHERE TABLE_NAME = %s', $wpdb->prefix . $table_name );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		if ( $wpdb->get_var( $table_query ) !== $wpdb->prefix . $table_name ) {
 			return [];
 		}
@@ -75,9 +108,10 @@ class Import_Meal_Planner {
 					return $data;
 				}
 
-				$recipe_id = $matches[1];
+				$recipe_id = absint( $matches[1] );
 
 				$statement = "SELECT recipe_title as title FROM {$mpp_model->table_name} where recipe_id = $recipe_id";
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 				$results   = $wpdb->get_results( $statement );
 				if ( empty( $results ) ) {
 					return $data;
@@ -114,6 +148,7 @@ class Import_Meal_Planner {
 			LIMIT 1), FALSE) as canonical_post_id
 		FROM {$mpp_model->table_name} mpp";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $statement, ARRAY_A );
 	}
 
@@ -135,13 +170,17 @@ class Import_Meal_Planner {
 			JOIN {$wpdb->comments} AS c ON (c.comment_ID = r.comment_id)
 			WHERE c.comment_approved = 1 AND c.comment_post_ID = %s";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$prepared_statement = $wpdb->prepare( $statement, [ $creation_id, $post_id ] );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $prepared_statement, 'ARRAY_A' );
 	}
 
 	public static function serializer( $api_data ) {
-		$recipe_id = $api_data['original_id'];
+		// original_id is always a numeric recipe ID; coerce to int so it cannot
+		// be used to inject SQL when interpolated into the tag lookup below.
+		$recipe_id = absint( $api_data['original_id'] );
 		$mpp_model = new \Mediavine\MV_DBI( self::$table_name );
 
 		$recipe = $mpp_model->find_one(
@@ -201,7 +240,7 @@ class Import_Meal_Planner {
 			$formatted[ $key ] = html_entity_decode( $recipe->{$value} );
 		}
 
-		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		$ingredients_sections = [];
 
@@ -254,14 +293,16 @@ class Import_Meal_Planner {
 
 		$table_name  = 'mpprecipe_tags';
 		$table_query = $wpdb->prepare( 'SELECT table_name FROM information_schema.tables WHERE TABLE_NAME = %s', $wpdb->prefix . $table_name );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		if ( $wpdb->get_var( $table_query ) !== $wpdb->prefix . $table_name ) {
 			return $recipe;
 		}
 
 		$sql     = "SELECT tagged FROM {$wpdb->prefix}{$table_name} WHERE recipe_id={$recipe_id}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$results = $wpdb->get_row( $sql );
 		if ( $results ) {
-			$tagged = maybe_unserialize( $results->tagged );
+			$tagged = Safe_Unserialize::maybe( $results->tagged );
 			if ( empty( $tagged['text'] ) ) {
 				return $recipe;
 			}
@@ -282,7 +323,7 @@ class Import_Meal_Planner {
 
 	public static function replace( $api_data, $post_shortcodes = [] ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 		$success           = true;
 		$models            = \Mediavine\MV_DBI::get_models(
 			[

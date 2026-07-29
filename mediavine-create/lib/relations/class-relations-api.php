@@ -32,7 +32,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			$sanitized = $request->sanitize_params();
 
 			if ( is_wp_error( $sanitized ) ) {
-				return new \WP_Error( 'Missing Required Field', __( 'Unsafe Data', 'mediavine' ) );
+				return new \WP_Error( 'Missing Required Field', __( 'Unsafe Data', 'mediavine-create' ) );
 			}
 
 			$params = $request->get_params();
@@ -119,9 +119,10 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 						$query_params = array_merge( [ $search_term ], $allowed_post_types );
 					}
 
-					// SECURITY CHECKED: This query is properly prepared.
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 					$prepared = $wpdb->prepare( $statement, $query_params );
 					$results  = $wpdb->get_results( $prepared );
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 					foreach ( $results as &$post ) {
 						$post->thumbnail_id  = get_post_thumbnail_id( $post->id );
@@ -136,7 +137,6 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			if ( $include_products && \Mediavine\Create\Plugin::is_pro() ) {
 				$products_table = self::$models_v2->mv_products->table_name;
 
-				// SECURITY CHECKED: This query is properly prepared.
 				$statement = "SELECT
 					id,
 					id as relation_id,
@@ -151,8 +151,10 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				ORDER BY title ASC
 				LIMIT 50";
 
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 				$prepared = $wpdb->prepare( $statement, $search_term );
 				$products = $wpdb->get_results( $prepared );
+				// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 				// Format product results
 				foreach ( $products as &$product ) {
@@ -201,7 +203,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			}
 
 			if ( ! wp_is_numeric_array( $data ) ) {
-				return new \WP_Error( 404, __( 'No Entries Found', 'mediavine' ), [ 'message' => __( 'No relations were found for the given create card', 'mediavine' ) ] );
+				return new \WP_Error( 404, __( 'No Entries Found', 'mediavine-create' ), [ 'message' => __( 'No relations were found for the given create card', 'mediavine-create' ) ] );
 			}
 			foreach ( $data as &$relation ) {
 				$relation = self::$api_services->prepare_item_for_response( $relation, $request );
@@ -256,6 +258,12 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			foreach ( $data as $relation ) {
 				$relation['creation'] = $creation_id;
 				$relation['type']     = $type;
+
+				// Sanitize any user-supplied URL so dangerous protocols (e.g. javascript:)
+				// are stripped before the value is ever stored or emitted.
+				if ( isset( $relation['url'] ) ) {
+					$relation['url'] = esc_url_raw( $relation['url'] );
+				}
 
 				// Make sure empty ID strings are set as NULL or 0
 				$relation['id']                = empty( $relation['id'] ) ? 'NULL' : $relation['id'];
@@ -423,7 +431,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 
 			// If not an ASIN or ASIN is malformed
 			$asin = $amazon_scraper->get_asin_from_link( $relation['url'] );
-			if ( empty( $asin ) && Str::length( $asin ) !== 10 ) {
+			if ( empty( $asin ) || Str::length( $asin ) !== 10 ) {
 				return false;
 			}
 
@@ -518,7 +526,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		 *
 		 * @param string                  $asin ASIN to be scraped
 		 * @param array                   $existing_asins Array of existing ASINs to check against
-		 * @param Amazon|Amazon_Creators  $amazon_scraper Scraper instance returned by Amazon_Adapter (legacy or Creators)
+		 * @param Amazon_Creators $amazon_scraper Scraper instance returned by Amazon_Adapter
 		 * @param array                   $original_relations Original relations to pull meta from if the key does exist
 		 *
 		 * @return array|\WP_Error JSON decoded Amazon metadata or WP_Error if the link can't be scraped
@@ -570,7 +578,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			if ( ! \Mediavine\Create\Plugin::is_pro() ) {
 				return new \WP_Error(
 					'pro_required',
-					__( 'Product list items require Mediavine Create Pro', 'mediavine' ),
+					__( 'Product list items require Mediavine Create Pro', 'mediavine-create' ),
 					[ 'status' => 403 ]
 				);
 			}
@@ -579,7 +587,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			if ( empty( $relation['relation_id'] ) || '0' === $relation['relation_id'] ) {
 				return new \WP_Error(
 					'invalid_product',
-					__( 'Product ID is required for product list items', 'mediavine' ),
+					__( 'Product ID is required for product list items', 'mediavine-create' ),
 					[ 'status' => 400 ]
 				);
 			}
@@ -591,7 +599,8 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				return new \WP_Error(
 					'product_not_found',
 					sprintf(
-						__( 'Product with ID %d not found', 'mediavine' ),
+						/* translators: %d: product ID */
+						__( 'Product with ID %d not found', 'mediavine-create' ),
 						$product_id
 					),
 					[ 'status' => 404 ]
@@ -604,8 +613,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			// Preserve list-specific overrides if they exist
 			// Otherwise, denormalize product data into relation for backwards compatibility
 			if ( empty( $relation['title'] ) ) {
-				// Clean up title - remove newlines and excessive whitespace from scraped content
-				$relation['title'] = preg_replace( '/\s+/', ' ', trim( $product->title ) );
+				$relation['title'] = Scraped_Content_Normalizer::sanitize_title( $product->title );
 			}
 
 			if ( empty( $relation['url'] ) ) {

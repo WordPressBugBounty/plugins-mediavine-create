@@ -58,11 +58,71 @@ class Nutrition_API extends Nutrition {
 		);
 
 		if ( empty( $nutrition ) ) {
-			return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine' ), [ 'message' => __( 'The Nutrition could not be found', 'mediavine' ) ] );
+			return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine-create' ), [ 'message' => __( 'The Nutrition could not be found', 'mediavine-create' ) ] );
 		}
 		$data     = self::$api_services->prepare_item_for_response( $nutrition, $request );
 		$response = API_Services::set_response_data( $data, $response );
 		$response->set_status( 201 );
+
+		return $response;
+	}
+
+	/**
+	 * Proxy a nutrition calculation to Create Studio server-side.
+	 *
+	 * The admin UI used to call Studio's /nutrition/recipe endpoint directly
+	 * with the site JWT in the browser. This forwards the same payload through
+	 * the server so the JWT never leaves it, mirroring how link scraping is
+	 * proxied via the Products API.
+	 *
+	 * @param \WP_REST_Request  $request
+	 * @param \WP_REST_Response $response
+	 *
+	 * @return \WP_Error|\WP_REST_Response
+	 */
+	public function proxy( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		$body = $request->get_json_params();
+		if ( empty( $body ) ) {
+			$body = $request->get_params();
+		}
+
+		$studio_response = Create_Studio_Client::request( 'POST', '/nutrition/recipe', $body );
+
+		if ( is_wp_error( $studio_response ) ) {
+			return $studio_response;
+		}
+
+		if ( empty( $studio_response['success'] ) ) {
+			$status = ! empty( $studio_response['status_code'] ) ? (int) $studio_response['status_code'] : 502;
+
+			// Forward Studio's own error message so the editor's ingredient/servings-specific
+			// notices (matched on error.response.data.message) keep working.
+			$studio_message = '';
+			if ( is_array( $studio_response['data'] ) && ! empty( $studio_response['data']['message'] ) ) {
+				$studio_message = $studio_response['data']['message'];
+			}
+
+			return new \WP_Error(
+				'nutrition_proxy_error',
+				$studio_message ? $studio_message : __( 'Nutrition calculation failed', 'mediavine-create' ),
+				[
+					'status'     => $status,
+					'message'    => __( 'The nutrition service could not calculate values for this recipe.', 'mediavine-create' ),
+					'error_code' => 'nutrition_unavailable',
+				]
+			);
+		}
+
+		// Studio wraps its result in its own `data` envelope. Unwrap it so the
+		// plugin envelope doesn't double-nest — the frontend reads
+		// `res.data.data.nutrition`.
+		$payload = $studio_response['data'];
+		if ( is_array( $payload ) && array_key_exists( 'data', $payload ) ) {
+			$payload = $payload['data'];
+		}
+
+		$response = API_Services::set_response_data( $payload, $response );
+		$response->set_status( 200 );
 
 		return $response;
 	}
@@ -92,7 +152,7 @@ class Nutrition_API extends Nutrition {
 		$nutrition = Nutrition::get_creation_nutrition( $creation->id );
 
 		if ( empty( $nutrition ) ) {
-			return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine' ), [ 'message' => __( 'The Nutrition could not be found', 'mediavine' ) ] );
+			return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine-create' ), [ 'message' => __( 'The Nutrition could not be found', 'mediavine-create' ) ] );
 		}
 		$data     = $nutrition;
 		$response = API_Services::set_response_data( $data, $response );

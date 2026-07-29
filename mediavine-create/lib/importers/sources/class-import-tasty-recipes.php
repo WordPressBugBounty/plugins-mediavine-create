@@ -4,10 +4,71 @@ namespace Mediavine\Create\Importers\Sources;
 
 use Mediavine\Create\Helpers\Arr;
 use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Importers\Helpers\Safe_Unserialize;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 use Mediavine\Create\Plugin;
 
-class Import_Tasty_Recipes {
+class Import_Tasty_Recipes extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'tasty';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return static::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
+	}
+
+	/**
+	 * Whether this importer supports the reimport endpoint.
+	 *
+	 * @return bool
+	 */
+	public static function supports_reimport() {
+		return true;
+	}
+
+	/**
+	 * When true, reimport never publishes even if publish=true was requested.
+	 *
+	 * @return bool
+	 */
+	public static function reimport_forces_unpublished() {
+		return true;
+	}
+
+	/**
+	 * Run reimport serialization for this source.
+	 *
+	 * @param array $api_data creation_id / original_id payload.
+	 * @return array|false
+	 */
+	public static function reimport( $api_data ) {
+		return static::import_missed_reviews( $api_data );
+	}
 
 	private static $table_name = 'posts';
 	private static $pairs      = [
@@ -38,10 +99,14 @@ class Import_Tasty_Recipes {
 
 		global $wpdb;
 
+		// Tasty recipe IDs are always numeric; coerce to int so the value cannot
+		// break out of the LIKE literals below and inject SQL.
+		$tasty_recipe_id  = absint( $tasty_recipe_id );
 		$tasty_shortcode  = '[tasty-recipe id="' . $tasty_recipe_id . '"]';
 		$tasty_block_code = 'wp:wp-tasty/tasty-recipe {"id":' . $tasty_recipe_id;
 
 		$statement = "SELECT ID as id FROM {$wpdb->posts} WHERE post_content LIKE '%{$tasty_shortcode}%' OR post_content LIKE '%{$tasty_block_code}%' AND post_type NOT IN ('revision', 'attachment', 'nav_menu_item')";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$posts     = $wpdb->get_results( $statement, ARRAY_A );
 
 		if ( empty( $posts ) ) {
@@ -65,7 +130,9 @@ class Import_Tasty_Recipes {
 					return $data;
 				}
 				foreach ( $matches[1] as $index => $recipe_id ) {
+					$recipe_id = absint( $recipe_id );
 					$statement = "SELECT post_title as title FROM {$wpdb->posts} where ID = $recipe_id and post_type = 'tasty_recipe'";
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 					$results   = $wpdb->get_results( $statement );
 					if ( empty( $results ) ) {
 						continue;
@@ -81,6 +148,7 @@ class Import_Tasty_Recipes {
 		}
 
 		$statement = "SELECT id AS original_id, post_title AS title, IFNULL((SELECT ID FROM {$wpdb->posts} WHERE post_type ='post' AND post_status IN ('publish', 'draft') AND (post_content LIKE CONCAT('%[tasty-recipe id=\"', original_id, '\"%') OR post_content LIKE CONCAT('%wp:wp-tasty/tasty-recipe {\"id\":',original_id,'%')) LIMIT 1), FALSE) as canonical_post_id FROM {$wpdb->posts} WHERE post_type = 'tasty_recipe'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $statement, ARRAY_A );
 	}
 
@@ -99,7 +167,7 @@ class Import_Tasty_Recipes {
 		$formatted = [
 			'original_id'       => $api_data['original_id'],
 			'title'             => $post->post_title,
-			'active_time_label' => __( 'Cook Time', 'mediavine' ),
+			'active_time_label' => __( 'Cook Time', 'mediavine-create' ),
 			'total_time'        => 0,
 			'author'            => $author,
 		];
@@ -185,18 +253,21 @@ class Import_Tasty_Recipes {
 					WHERE creations.id=%d AND reviews.review_title IS NULL AND comment_meta.meta_key='ERRating'
 					GROUP BY comments.comment_ID, comment_meta.meta_value ORDER BY creations.id";
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$prepared_sql = $wpdb->prepare(
 			$sql, [
 				$creation_id,
 			]
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$reviews_to_import = $wpdb->get_results( $prepared_sql );
 
 		if ( empty( $reviews_to_import ) ) {
 			return [
 				'creation' => $creation_id,
-				'message'  => __( 'No reviews to import', 'mediavine' ),
+				'message'  => __( 'No reviews to import', 'mediavine-create' ),
 			];
 		}
 
@@ -216,6 +287,7 @@ class Import_Tasty_Recipes {
 				'modified'       => esc_sql( $review->comment_date ),
 			];
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 			$is_inserted        = $wpdb->insert( $wpdb->prefix . 'mv_reviews', $review_data );
 			$reviews_inserted[] = [
 				'success'     => (bool) $is_inserted,
@@ -251,14 +323,14 @@ class Import_Tasty_Recipes {
 			'display'      => true,
 		];
 		if ( ! empty( $source_video ) ) {
-			$tasty_video = maybe_unserialize( $source_video );
+			$tasty_video = Safe_Unserialize::maybe( $source_video );
 			if ( ! is_object( $tasty_video ) ) {
 				$tasty_video = new \stdClass();
 			}
 			$tasty_video->video_url = $video_url;
 			$video                  = [];
 			$source                 = '';
-			if ( Str::contains( 'mediavine', $video_url ) ) {
+			if ( Str::contains( $video_url, 'mediavine' ) ) {
 				$source = MV_Recipe_Importer::extract_video_source_from_video_url( $video_url );
 			}
 			if ( 'MEDIAVINE' === $source ) {
@@ -292,7 +364,7 @@ class Import_Tasty_Recipes {
 		}
 		$video['imported'] = [
 			'importer'         => 'tasty',
-			'imported_on'      => date( 'Y-m-d H:i:s' ),
+			'imported_on'      => gmdate( 'Y-m-d H:i:s' ),
 			'importer_version' => Plugin::VERSION,
 		];
 		return wp_json_encode( $video );
@@ -376,7 +448,7 @@ class Import_Tasty_Recipes {
 	public static function replace( $api_data ) {
 		global $wpdb;
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$models       = \Mediavine\MV_DBI::get_models( [ 'posts', 'mv_creations' ] );
 		$post_model   = $models->posts;
@@ -389,10 +461,13 @@ class Import_Tasty_Recipes {
 
 		$recipe = $recipe_model->find_one( $api_data['id'] );
 
-		$tasty_shortcode  = '[tasty-recipe id="' . $api_data['original_id'] . '"]';
-		$tasty_block_code = '<!-- wp:wp-tasty/tasty-recipe {"id":' . $api_data['original_id'];
+		// original_id is always a numeric recipe ID; coerce to int so it cannot
+		// break out of the LIKE literals below and inject SQL.
+		$tasty_original_id = absint( $api_data['original_id'] );
+		$tasty_shortcode   = '[tasty-recipe id="' . $tasty_original_id . '"]';
+		$tasty_block_code  = '<!-- wp:wp-tasty/tasty-recipe {"id":' . $tasty_original_id;
 		// https://regex101.com/r/XwAjkk/2/
-		$tasty_gutenberg_regex = '/<!-- wp:wp-tasty\/tasty-recipe.*?"id":(' . $api_data['original_id'] . ').*?\/-->/m';
+		$tasty_gutenberg_regex = '/<!-- wp:wp-tasty\/tasty-recipe.*?"id":(' . $tasty_original_id . ').*?\/-->/m';
 
 		$thumbnail    = wp_get_attachment_url( $recipe->thumbnail_id );
 		$mv_shortcode = '[mv_create key="' . $recipe->id . '" title="' . $recipe->title . '" thumbnail="' . $thumbnail . '" type="recipe"]';
@@ -428,7 +503,7 @@ class Import_Tasty_Recipes {
 
 			$post->updated_content = str_replace( $tasty_shortcode, $mv_shortcode, $post->original_content );
 			$post->updated_content = preg_replace( $tasty_gutenberg_regex, $mv_shortcode, $post->updated_content );
-			if ( ! Str::contains( $mv_shortcode, $post->updated_content ) ) {
+			if ( ! Str::contains( $post->updated_content, $mv_shortcode ) ) {
 				$api_data['error'] = $error_message;
 				continue;
 			}

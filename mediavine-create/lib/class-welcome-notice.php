@@ -157,10 +157,10 @@ class Welcome_Notice {
 			return;
 		}
 
-		// Only redirect from Create admin pages
+		// Only redirect from Create card/settings pages (welcome handled above).
 		$is_create_page = (
-			strpos( $current_url, 'post_type=mv_create' ) !== false ||
-			strpos( $current_url, 'page=mv_settings' ) !== false
+			false !== strpos( $current_url, 'post_type=mv_create' ) ||
+			false !== strpos( $current_url, 'page=mv_settings' )
 		);
 
 		if ( ! $is_create_page ) {
@@ -176,18 +176,19 @@ class Welcome_Notice {
 	 * Handle banner dismiss action
 	 */
 	public function handle_banner_dismiss() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple dismiss action
-		if ( isset( $_GET['mv_create_dismiss_welcome_banner'] ) && $_GET['mv_create_dismiss_welcome_banner'] === '1' ) {
-			$user_id = get_current_user_id();
-			if ( $user_id ) {
-				update_user_meta( $user_id, self::USER_META_BANNER_DISMISSED, '1' );
-			}
+		$action = 'mv_create_dismiss_welcome_banner';
+		$value  = Admin_Notice_Helper::get_verified_dismiss_value( $action );
 
-			// Redirect back to remove the query param
-			$redirect_url = remove_query_arg( 'mv_create_dismiss_welcome_banner' );
-			wp_safe_redirect( $redirect_url );
-			exit;
+		if ( null === $value ) {
+			return;
 		}
+
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			update_user_meta( $user_id, self::USER_META_BANNER_DISMISSED, '1' );
+		}
+
+		Admin_Notice_Helper::redirect_after_dismiss( [ $action ] );
 	}
 
 	/**
@@ -209,27 +210,19 @@ class Welcome_Notice {
 			return;
 		}
 
-		// Don't show on Create admin pages (React UI takes over)
+		// Don't show on Create admin pages (React UI takes over).
 		$screen = get_current_screen();
 		if ( ! $screen || ! isset( $screen->base ) ) {
 			return;
 		}
 
-		// Check if we're on a Create page
-		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-		$is_create_page = (
-			strpos( $current_url, 'post_type=mv_create' ) !== false ||
-			strpos( $current_url, 'page=mv_settings' ) !== false ||
-			strpos( $current_url, 'page=mv_create_welcome' ) !== false
-		);
-
-		if ( $is_create_page ) {
+		if ( Admin_Notice_Helper::is_create_page() ) {
 			return;
 		}
 
 		// Build the banner
 		$welcome_url = admin_url( 'admin.php?page=mv_create_welcome' );
-		$dismiss_url = add_query_arg( 'mv_create_dismiss_welcome_banner', '1' );
+		$dismiss_url = Admin_Notice_Helper::get_dismiss_url( 'mv_create_dismiss_welcome_banner' );
 
 		$message = sprintf(
 			'<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
@@ -242,12 +235,12 @@ class Welcome_Notice {
 					<a href="%s" style="color: #666; text-decoration: none; font-size: 13px;">%s</a>
 				</div>
 			</div>',
-			esc_html__( 'Create 2.0 is here!', 'mediavine' ),
-			esc_html__( 'Discover new themes, interactive mode, and more.', 'mediavine' ),
+			esc_html__( 'Create 2.0 is here!', 'mediavine-create' ),
+			esc_html__( 'Discover new themes, interactive mode, and more.', 'mediavine-create' ),
 			esc_url( $welcome_url ),
-			esc_html__( 'See What\'s New', 'mediavine' ),
+			esc_html__( 'See What\'s New', 'mediavine-create' ),
 			esc_url( $dismiss_url ),
-			esc_html__( 'Dismiss', 'mediavine' )
+			esc_html__( 'Dismiss', 'mediavine-create' )
 		);
 
 		printf(

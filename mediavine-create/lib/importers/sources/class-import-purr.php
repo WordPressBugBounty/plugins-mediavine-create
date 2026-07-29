@@ -5,7 +5,58 @@ namespace Mediavine\Create\Importers\Sources;
 use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Purr {
+class Import_Purr extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'purr';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return static::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
+	}
+
+	/**
+	 * Post ID used for the SRP ratings double-check.
+	 *
+	 * @param array $stored_recipe Stored Create recipe.
+	 * @return int|string|null
+	 */
+	public static function get_srp_ratings_post_id( $stored_recipe ) {
+		return isset( $stored_recipe['original_id'] ) ? $stored_recipe['original_id'] : null;
+	}
+
+	/**
+	 * Whether this importer supports the reimport endpoint.
+	 *
+	 * @return bool
+	 */
+	public static function supports_reimport() {
+		return true;
+	}
 
 	private static $table_name = 'posts';
 	private static $pairs      = [
@@ -69,6 +120,7 @@ class Import_Purr {
 						)
 						AND pm.meta_key = 'recipe_title'
 						AND p.post_type = 'post'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $statement, ARRAY_A );
 	}
 
@@ -103,9 +155,9 @@ class Import_Purr {
 			'original_post_id'      => $recipe_id,
 			'canonical_post_id'     => $recipe_id,
 			'title'                 => $title,
-			'active_time_label'     => __( 'Cook Time', 'mediavine' ),
-			'prep_time_label'       => __( 'Prep Time', 'mediavine' ),
-			'additional_time_label' => __( 'Additional Time', 'mediavine' ),
+			'active_time_label'     => __( 'Cook Time', 'mediavine-create' ),
+			'prep_time_label'       => __( 'Prep Time', 'mediavine-create' ),
+			'additional_time_label' => __( 'Additional Time', 'mediavine-create' ),
 			'time_display'          => 'prep_time,active_time,additional_time,',
 			'active_time'           => 0,
 			'prep_time'             => 0,
@@ -194,7 +246,7 @@ class Import_Purr {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$models       = \Mediavine\MV_DBI::get_models( [ 'posts', 'mv_creations' ] );
 		$post_model   = $models->posts;
@@ -205,6 +257,10 @@ class Import_Purr {
 			return false;
 		}
 
+		// original_id is always a WordPress post ID; coerce to int so it cannot be
+		// used to inject SQL when interpolated into the statement below.
+		$original_id = absint( $api_data['original_id'] );
+
 		$recipe = $recipe_model->find_one( $api_data['id'] );
 
 		$purr_shortcode        = '[recipe]';
@@ -212,7 +268,7 @@ class Import_Purr {
 		$thumbnail             = wp_get_attachment_url( $recipe->thumbnail_id );
 		$mv_shortcode          = '[mv_create key="' . $recipe->id . '" title="' . $recipe->title . '" thumbnail="' . $thumbnail . '" type="recipe"]';
 
-		$statement = "SELECT ID as post_id, post_content as original_content FROM {$models->posts->table_name} WHERE ID = {$api_data['original_id']}";
+		$statement = "SELECT ID as post_id, post_content as original_content FROM {$models->posts->table_name} WHERE ID = {$original_id}";
 
 		$posts = $post_model->find(
 			[
@@ -234,7 +290,7 @@ class Import_Purr {
 
 			$post->updated_content = str_replace( $purr_shortcode, $mv_shortcode, $post->original_content );
 			$post->updated_content = str_replace( $purr_legacy_shortcode, $mv_shortcode, $post->updated_content );
-			if ( ! Str::contains( $mv_shortcode, $post->updated_content ) ) {
+			if ( ! Str::contains( $post->updated_content, $mv_shortcode ) ) {
 				continue;
 			}
 

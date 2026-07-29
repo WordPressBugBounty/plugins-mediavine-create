@@ -1,6 +1,8 @@
 <?php
 namespace Mediavine\Create\Helpers;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * PHP 8.0+ function polyfills for backward compatibility
  */
@@ -73,16 +75,19 @@ class Str {
 	/**
 	 * Determine if a given string contains a given substring.
 	 *
-	 * @param  string|array $searches
-	 * @param  string       $subject
+	 * Signature matches PHP's str_contains( $haystack, $needle ) and Laravel's
+	 * Str::contains( $haystack, $needles ): haystack first, needle(s) second.
+	 *
+	 * @param  string       $haystack The string to search in.
+	 * @param  string|array $needles  The substring(s) to search for.
 	 * @return bool
 	 */
-	public static function contains( $searches, $subject ): bool {
-		if ( is_null( $subject ) ) {
+	public static function contains( $haystack, $needles ): bool {
+		if ( is_null( $haystack ) ) {
 			return false;
 		}
-		foreach ( Arr::wrap( $searches ) as $search ) {
-			if ( '' !== $search && false !== strpos( $subject, $search ) ) {
+		foreach ( Arr::wrap( $needles ) as $needle ) {
+			if ( '' !== $needle && false !== strpos( $haystack, $needle ) ) {
 				return true;
 			}
 		}
@@ -145,6 +150,23 @@ class Str {
 			$subject = str_replace( $search, $replace, $subject );
 		}
 		return $subject;
+	}
+
+	/**
+	 * Encode a UTF-8 string as HTML numeric entities for DOMDocument::loadHTML().
+	 *
+	 * Replaces the PHP 8.2-deprecated `mb_convert_encoding( ..., 'HTML-ENTITIES', 'UTF-8' )`
+	 * so high-bit characters survive libxml's ISO-8859-1 default.
+	 *
+	 * @param string $value
+	 * @return string
+	 */
+	public static function to_html_entities( $value ): string {
+		$value = (string) $value;
+		if ( function_exists( 'mb_encode_numericentity' ) ) {
+			return mb_encode_numericentity( $value, [ 0x80, 0x10FFFF, 0, 0x1FFFFF ], 'UTF-8' );
+		}
+		return $value;
 	}
 
 	/**
@@ -261,7 +283,7 @@ class Str {
 	}
 
 	public static function truncate( $value, $maximum_length = 255, $end_with = '...' ): string {
-		$value = strip_tags( $value );
+		$value = wp_strip_all_tags(  $value );
 		if ( self::length( $value ) <= $maximum_length ) {
 			return $value;
 		}

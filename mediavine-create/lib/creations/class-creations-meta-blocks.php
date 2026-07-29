@@ -55,7 +55,7 @@ class Creations_Meta_Blocks extends Creations {
 			$blocks[] = [
 				'slug'  => 'disable-jtr',
 				'type'  => 'boolean',
-				'title' => __( 'Disable Jump-to-Recipe', 'mediavine' ),
+				'title' => __( 'Disable Jump-to-Recipe', 'mediavine-create' ),
 			];
 		}
 

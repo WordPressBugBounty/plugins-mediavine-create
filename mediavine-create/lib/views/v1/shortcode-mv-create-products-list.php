@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Products List Display Template
  * Renders products as a simple text list (like supplies/equipment)
@@ -7,7 +8,7 @@
 // Get section title - check card override first, then global setting
 $section_title = ! empty( $args['creation']['products_section_title'] )
 	? $args['creation']['products_section_title']
-	: \Mediavine\Settings::get_setting( 'mv_create_products_section_title', __( 'Recommended Products', 'mediavine' ) );
+	: \Mediavine\Settings::get_setting( 'mv_create_products_section_title', __( 'Recommended Products', 'mediavine-create' ) );
 
 $has_products = false;
 

@@ -44,7 +44,7 @@ class Webhook_Handler {
 			[
 				'methods'             => 'POST',
 				'callback'            => [ __CLASS__, 'handle_webhook' ],
-				'permission_callback' => '__return_true',
+				'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 			]
 		);
 	}
@@ -255,7 +255,7 @@ class Webhook_Handler {
 			'multisite'          => is_multisite(),
 			'site_url'           => get_site_url(),
 			'home_url'           => get_home_url(),
-			'server_software'    => isset( $_SERVER['SERVER_SOFTWARE'] ) ? $_SERVER['SERVER_SOFTWARE'] : 'unknown',
+			'server_software'    => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : 'unknown',
 			'is_ssl'             => is_ssl(),
 			'timezone'           => wp_timezone_string(),
 		];
@@ -448,9 +448,9 @@ class Webhook_Handler {
 		$remaining = $send_size;
 		$chunk     = 8192;
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
 		while ( $remaining > 0 && ! feof( $handle ) ) {
 			$read_size = min( $chunk, $remaining );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- chunked streaming of the local debug.log to output; WP_Filesystem has no streaming read API.
 			$data      = fread( $handle, $read_size );
 			if ( false === $data ) {
 				break;
@@ -465,6 +465,7 @@ class Webhook_Handler {
 			flush();
 		}
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the debug.log handle opened for streaming above.
 		fclose( $handle );
 		exit;
 	}
@@ -564,7 +565,7 @@ class Webhook_Handler {
 		if ( function_exists( 'rocket_clean_post' ) ) {
 			$detected[] = 'WP Rocket';
 		}
-		if ( method_exists( 'LiteSpeed_Cache_API', 'purge' ) ) {
+		if ( class_exists( '\LiteSpeed\Purge' ) || class_exists( 'LiteSpeed_Cache_API' ) ) {
 			$detected[] = 'LiteSpeed Cache';
 		}
 		if ( class_exists( 'Autoptimize' ) ) {
@@ -652,7 +653,7 @@ class Webhook_Handler {
 
 		foreach ( $recipe_post_types as $post_type => $name ) {
 			if ( post_type_exists( $post_type ) ) {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 				$count = $wpdb->get_var(
 					$wpdb->prepare(
 						"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish'",
@@ -676,13 +677,13 @@ class Webhook_Handler {
 
 		foreach ( $recipe_tables as $table => $name ) {
 			$full_table = $wpdb->prefix . $table;
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			$exists = $wpdb->get_var(
 				$wpdb->prepare( 'SHOW TABLES LIKE %s', $full_table )
 			);
 			if ( $exists ) {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-				$count = $wpdb->get_var( "SELECT COUNT(*) FROM `{$full_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table is $wpdb->prefix . allowlisted literal; COUNT(*) has no user input
+				$count = $wpdb->get_var( "SELECT COUNT(*) FROM `{$full_table}`" );
 				$detected[] = [
 					'name'   => $name,
 					'method' => 'database_table',
@@ -754,23 +755,23 @@ class Webhook_Handler {
 	}
 
 	/**
-	 * Get Amazon PA-API integration status.
+	 * Get Amazon Creators API integration status.
 	 *
 	 * @return array
 	 */
 	private static function get_amazon_status() {
-		$prefix  = Plugin::$settings_group;
-		$enabled = Settings::get_setting( $prefix . '_enable_amazon' );
-		$has_key = ! empty( Settings::get_setting( $prefix . '_paapi_access_key' ) );
-		$has_sec = ! empty( Settings::get_setting( $prefix . '_paapi_secret_key' ) );
-		$has_tag = ! empty( Settings::get_setting( $prefix . '_paapi_tag' ) );
+		$prefix     = Plugin::$settings_group;
+		$enabled    = Settings::get_setting( $prefix . '_enable_amazon' );
+		$has_id     = ! empty( Settings::get_setting( $prefix . '_creators_credential_id' ) );
+		$has_secret = ! empty( Settings::get_setting( $prefix . '_creators_credential_secret' ) );
+		$has_tag    = ! empty( Settings::get_setting( $prefix . '_paapi_tag' ) );
 
 		return [
-			'enabled'            => ! empty( $enabled ),
-			'credentials_set'    => $has_key && $has_sec && $has_tag,
-			'has_access_key'     => $has_key,
-			'has_secret_key'     => $has_sec,
-			'has_store_tag'      => $has_tag,
+			'enabled'         => ! empty( $enabled ),
+			'credentials_set' => $has_id && $has_secret && $has_tag,
+			'has_credential_id'     => $has_id,
+			'has_credential_secret' => $has_secret,
+			'has_store_tag'         => $has_tag,
 		];
 	}
 
@@ -784,7 +785,7 @@ class Webhook_Handler {
 
 		$table = $wpdb->prefix . 'mv_creations';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
 		);
@@ -793,11 +794,12 @@ class Webhook_Handler {
 			return [ 'total' => 0 ];
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table is $wpdb->prefix . literal; no user input in SQL
 		$counts = $wpdb->get_results(
 			"SELECT type, COUNT(*) as count FROM `{$table}` GROUP BY type",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$stats = [ 'total' => 0 ];
 		if ( $counts ) {
@@ -823,7 +825,7 @@ class Webhook_Handler {
 
 		$table = $wpdb->prefix . 'mv_creations';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
 		);
@@ -833,7 +835,7 @@ class Webhook_Handler {
 		}
 
 		// Find a published post with a Create card.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table is $wpdb->prefix . literal; joins core $wpdb->posts; no user input
 		$post_id = $wpdb->get_var(
 			"SELECT c.canonical_post_id
 			 FROM `{$table}` c
@@ -844,6 +846,7 @@ class Webhook_Handler {
 			 ORDER BY c.id DESC
 			 LIMIT 1"
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( ! $post_id ) {
 			return [ 'error' => 'No published post with a Create card found' ];

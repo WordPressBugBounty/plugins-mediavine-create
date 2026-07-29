@@ -1,3 +1,4 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
 <?php if ( ! $args['print'] && $args['allow_reviews'] ) { ?>
 	<div id="mv-create-<?php echo esc_attr( $args['creation']['id'] ); ?>"
 		class="mv-create-reviews"

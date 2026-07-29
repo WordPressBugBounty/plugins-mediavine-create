@@ -6,7 +6,7 @@ namespace Mediavine\Create;
  */
 class Admin_Notices {
 
-	/** @var Admin_Notices  */
+	/** @var Admin_Notices */
 	private static $instance = null;
 
 	/** @var string[] Names of notices that can be dismissed per user */
@@ -25,39 +25,157 @@ class Admin_Notices {
 	}
 
 	/**
-	 *
+	 * Hook notice rendering, dismissal, assets, and REST routes.
 	 */
 	public function init() {
-		// setup per-user dismissals
 		add_action( 'admin_init', [ $this, 'plugin_notice_dismiss' ] );
-
-		// Create notices
 		add_action( 'admin_notices', [ $this, 'password_reset_notice' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_password_reset_script' ] );
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
 	/**
+	 * Register REST routes used by the password-reset notice.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			'mv-create/v1',
+			'/password-status',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'check_password_status' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
+			]
+		);
+	}
+
+	/**
+	 * Proxy password-status check to Create Studio so the JWT never reaches the browser.
 	 *
-	 * Builds and displays our admin notices
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function check_password_status( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$user_id = \Mediavine\Settings::get_setting( 'mv_create_api_user_id' );
+		if ( empty( $user_id ) ) {
+			return new \WP_Error(
+				'no_user_id',
+				__( 'Create Studio user id is not configured.', 'mediavine-create' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$response = Create_Studio_Client::request( 'GET', '/users/' . rawurlencode( (string) $user_id ) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( ! empty( $response['success'] ) ) {
+			delete_transient( 'mv_create_needs_password_reset' );
+			delete_transient( 'mv_create_password_reset_pending_' . get_current_user_id() );
+
+			return rest_ensure_response(
+				[
+					'password_set' => true,
+				]
+			);
+		}
+
+		$status_code = isset( $response['status_code'] ) ? (int) $response['status_code'] : 500;
+
+		if ( in_array( $status_code, [ 401, 403 ], true ) ) {
+			return rest_ensure_response(
+				[
+					'password_set' => false,
+				]
+			);
+		}
+
+		return new \WP_Error(
+			'password_status_check_failed',
+			__( 'Unable to verify password status. Please try again.', 'mediavine-create' ),
+			[ 'status' => $status_code ]
+		);
+	}
+
+	/**
+	 * Enqueue password-reset notice script on dashboard/plugins when the notice may show.
 	 *
-	 * @param string  $name the name of the notice being built
-	 * @param string  $message the message content for the notice being built
-	 * @param string  $level the notice level
-	 * @param boolean $dismissible if we want this notice to be dismissible on a per-user basis
+	 * @param string $hook_suffix Current admin page hook.
+	 */
+	public function enqueue_password_reset_script( $hook_suffix ) {
+		// Match REST permission_callback / request-password-reset (manage_options).
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! in_array( $hook_suffix, [ 'index.php', 'plugins.php' ], true ) ) {
+			return;
+		}
+
+		if ( ! get_transient( 'mv_create_needs_password_reset' ) ) {
+			return;
+		}
+
+		if ( empty( \Mediavine\Settings::get_setting( 'mv_create_api_token' ) ) ) {
+			return;
+		}
+
+		$handle = 'mv-create-password-reset-notice';
+
+		wp_enqueue_script(
+			$handle,
+			Plugin::assets_url() . 'admin/ui/static/password-reset-notice.js',
+			[ 'jquery' ],
+			Plugin::VERSION,
+			true
+		);
+
+		wp_localize_script(
+			$handle,
+			'mvCreatePasswordResetNotice',
+			[
+				'nonce'                   => wp_create_nonce( 'wp_rest' ),
+				'passwordStatusUrl'       => esc_url_raw( rest_url( 'mv-create/v1/password-status' ) ),
+				'requestPasswordResetUrl' => esc_url_raw( rest_url( 'mv-settings/v1/request-password-reset' ) ),
+				'i18n'                    => [
+					'sending'           => __( 'Sending...', 'mediavine-create' ),
+					'success'           => __( 'Success!', 'mediavine-create' ),
+					'emailSentReload'   => __( 'Check your email for instructions. Reloading...', 'mediavine-create' ),
+					'emailResentReload' => __( 'Email resent! Check your inbox. Reloading...', 'mediavine-create' ),
+					'sendFailed'        => __( 'Failed to send email. Please try again.', 'mediavine-create' ),
+					'sendEmail'         => __( 'Send Password Reset Email', 'mediavine-create' ),
+					'resend'            => __( 'Didn\'t get an email? Resend', 'mediavine-create' ),
+					'checking'          => __( 'Checking...', 'mediavine-create' ),
+					'passwordSetReload' => __( 'Your password is set. Reloading...', 'mediavine-create' ),
+					'passwordNotSet'    => __( 'Password not yet set. Please check your email and follow the instructions.', 'mediavine-create' ),
+					'verifyFailed'      => __( 'Unable to verify password status. Please try again.', 'mediavine-create' ),
+					'resendAvailableIn' => __( 'Resend available in:', 'mediavine-create' ),
+				],
+			]
+		);
+	}
+
+	/**
+	 * Builds and displays our admin notices.
+	 *
+	 * @param string $name    The name of the notice being built.
+	 * @param string $message The message content for the notice being built.
+	 * @param string $level   The notice level.
 	 */
 	private function admin_error_notice( $name, $message, $level = 'error' ) {
-		global $current_user;
+		$user_id = get_current_user_id();
 
-		$user_id = $current_user->ID;
-
-		// early return if the notice has already been dismissed
-		$val = (int) get_user_meta($user_id, $name, true);
+		// Early return if the notice has already been dismissed.
+		$val = (int) get_user_meta( $user_id, $name, true );
 		if ( $val ) {
 			return;
 		}
 
-		// print the notice
 		printf(
-			'<div class="notice notice-' . esc_attr($level) . '"><p>%1$s</p></div>',
+			'<div class="notice notice-%1$s"><p>%2$s</p></div>',
+			esc_attr( $level ),
 			wp_kses(
 				$message,
 				[
@@ -80,10 +198,10 @@ class Admin_Notices {
 					],
 					'p'      => [],
 					'button' => [
-						'type'      => true,
-						'class'     => true,
+						'type'       => true,
+						'class'      => true,
 						'data-email' => true,
-						'style'     => true,
+						'style'      => true,
 					],
 				]
 			)
@@ -91,26 +209,34 @@ class Admin_Notices {
 	}
 
 	/**
+	 * Checks for a nonce-protected dismiss request and persists per-user meta.
 	 *
-	 * Checks for URL param from clicked link
-	 * Adds user meta telling us if this user has dismissed the given notice
-	 *
-	 * @param string $name the name of the notice
+	 * @param string $name The name of the notice.
 	 */
 	private function plugin_notice_dismiss_per_user( $name ) {
-
-		global $current_user;
-
-		$user_id = $current_user->ID;
-
-		$filtered_name = filter_input(INPUT_GET, $name . '-dismiss-notice');
-
-		if ( ! empty( $name ) && in_array($name, self::PER_USER_NOTICES) && isset( $filtered_name ) ) {
-
-			add_user_meta( $user_id, $name, 1, true );
-
+		if ( empty( $name ) || ! in_array( $name, self::PER_USER_NOTICES, true ) ) {
+			return;
 		}
 
+		// Password-reset notice is admin-only; keep dismiss gated the same way.
+		if ( 'password_reset_required' === $name && ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$action = $name . '-dismiss-notice';
+		$value  = Admin_Notice_Helper::get_verified_dismiss_value( $action );
+
+		if ( null === $value ) {
+			return;
+		}
+
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+
+		add_user_meta( $user_id, $name, 1, true );
+		Admin_Notice_Helper::redirect_after_dismiss( [ $action ] );
 	}
 
 	/**
@@ -121,242 +247,77 @@ class Admin_Notices {
 	}
 
 	/**
-	 * Display password reset notice for v1 JWT users who need to migrate to v2
+	 * Display password reset notice for v1 JWT users who need to migrate to v2.
 	 */
 	public function password_reset_notice() {
-		// Check if password reset is needed first (transient set by plugin update check)
+		// Studio password migration is an admin action; REST endpoints require manage_options.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		$needs_password = get_transient( 'mv_create_needs_password_reset' );
 
 		if ( ! $needs_password ) {
 			return;
 		}
 
-		// Show on dashboard and plugins page (not on Create pages since React UI takes over)
 		$screen = get_current_screen();
 
-		// Only show on dashboard or plugins page, not on Create admin pages
+		// Only show on dashboard or plugins page, not on Create admin pages.
 		if ( ! $screen || ! isset( $screen->base ) || ( 'dashboard' !== $screen->base && 'plugins' !== $screen->base ) ) {
 			return;
 		}
 
-		// Check if password reset email was already sent (suppress for 5 minutes)
 		$pending_transient = get_transient( 'mv_create_password_reset_pending_' . get_current_user_id() );
 
-		// Get email from API token (same way admin UI does it)
 		$api_token = \Mediavine\Settings::get_setting( 'mv_create_api_token' );
 		if ( empty( $api_token ) ) {
 			return;
 		}
 
-		// Decode JWT to get email
 		$token_parts = explode( '.', $api_token );
 		if ( count( $token_parts ) !== 3 ) {
 			return;
 		}
 
-		// Decode the payload (second part)
 		$payload = json_decode( base64_decode( strtr( $token_parts[1], '-_', '+/' ) ), true );
 		if ( ! isset( $payload['email'] ) || ! is_email( $payload['email'] ) ) {
 			return;
 		}
 
-		$api_email = $payload['email'];
-
-		// Build the notice HTML with inline JavaScript
-		$notice_name    = 'password_reset_required';
-		$services_url   = esc_js( \Mediavine\Create\Plugin::$services_api_url );
-		$api_token      = esc_js( \Mediavine\Settings::get_setting( 'mv_create_api_token' ) );
-		$user_id        = esc_js( \Mediavine\Settings::get_setting( 'mv_create_api_user_id' ) );
+		$api_email   = $payload['email'];
+		$notice_name = 'password_reset_required';
 
 		if ( $pending_transient ) {
-			// Show "waiting for password" message with resend button after 5 minutes
 			$resend_button = sprintf(
 				'<button type="button" class="button button-secondary mv-create-resend-password-reset" data-email="%s" style="margin-top: 12px; display: none;">%s</button>',
 				esc_attr( $api_email ),
-				__( 'Didn\'t get an email? Resend', 'mediavine' )
+				esc_html__( 'Didn\'t get an email? Resend', 'mediavine-create' )
 			);
-			$message = sprintf(
-				'<div style="margin: 8px 0;"><strong>%s</strong></div><div style="margin: 12px 0; line-height: 1.6;">%s</div><div style="margin: 12px 0; padding: 10px; background-color: #f5f5f5; border-left: 3px solid #ffc107; font-size: 13px; color: #666;">%s</div><div style="margin: 16px 0;"><a href="#" class="mv-create-check-password" style="text-decoration: none;">%s</a></div>%s<div class="mv-resend-timer" style="font-size: 13px; color: #999; margin-top: 12px; min-height: 20px;"></div>',
-				__( 'Password Reset Email Sent', 'mediavine' ),
-				__( 'We\'ve sent you an email with instructions to set your password for Create Studio. Once you\'ve set your password, click below to continue.', 'mediavine' ),
-				__( '📧 Check your spam folder if you don\'t see it in your inbox.', 'mediavine' ),
-				__( 'I\'ve set my password, check again', 'mediavine' ),
+			$message       = sprintf(
+				'<div style="margin: 8px 0;"><strong>%1$s</strong></div><div style="margin: 12px 0; line-height: 1.6;">%2$s</div><div style="margin: 12px 0; padding: 10px; background-color: #f5f5f5; border-left: 3px solid #ffc107; font-size: 13px; color: #666;">%3$s</div><div style="margin: 16px 0;"><a href="#" class="mv-create-check-password" style="text-decoration: none;">%4$s</a></div>%5$s<div class="mv-resend-timer" style="font-size: 13px; color: #999; margin-top: 12px; min-height: 20px;"></div>',
+				esc_html__( 'Password Reset Email Sent', 'mediavine-create' ),
+				esc_html__( 'We\'ve sent you an email with instructions to set your password for Create Studio. Once you\'ve set your password, click below to continue.', 'mediavine-create' ),
+				esc_html__( '📧 Check your spam folder if you don\'t see it in your inbox.', 'mediavine-create' ),
+				esc_html__( 'I\'ve set my password, check again', 'mediavine-create' ),
 				$resend_button
 			);
-			$this->admin_error_notice( $notice_name, $message, 'info', false );
+			$this->admin_error_notice( $notice_name, $message, 'info' );
 		} else {
-			// Show initial password reset request message
 			$dismiss_link = sprintf(
-				'<a href="?%s-dismiss-notice" style="margin-left: 16px; text-decoration: none; color: #666; font-size: 13px; align-self: center;">%s</a>',
-				$notice_name,
-				__( 'Dismiss', 'mediavine' )
+				'<a href="%1$s" style="margin-left: 16px; text-decoration: none; color: #666; font-size: 13px; align-self: center;">%2$s</a>',
+				esc_url( Admin_Notice_Helper::get_dismiss_url( $notice_name . '-dismiss-notice' ) ),
+				esc_html__( 'Dismiss', 'mediavine-create' )
 			);
-			$message = sprintf(
-				'<div style="margin: 8px 0;"><strong>%s</strong></div><div style="margin: 12px 0; line-height: 1.6;">%s</div><div style="margin: 16px 0; display: flex; align-items: center;"><button type="button" class="button button-primary mv-create-request-password-reset" data-email="%s">%s</button>%s</div>',
-				__( 'Action Required: Set a Password for Create Studio', 'mediavine' ),
-				__( 'To continue using Create\'s external services like Nutrition Calculation and Web Scraping, you need to create a password. Click below to receive an email with instructions.', 'mediavine' ),
+			$message      = sprintf(
+				'<div style="margin: 8px 0;"><strong>%1$s</strong></div><div style="margin: 12px 0; line-height: 1.6;">%2$s</div><div style="margin: 16px 0; display: flex; align-items: center;"><button type="button" class="button button-primary mv-create-request-password-reset" data-email="%3$s">%4$s</button>%5$s</div>',
+				esc_html__( 'Action Required: Set a Password for Create Studio', 'mediavine-create' ),
+				esc_html__( 'To continue using Create\'s external services like Nutrition Calculation and Web Scraping, you need to create a password. Click below to receive an email with instructions.', 'mediavine-create' ),
 				esc_attr( $api_email ),
-				__( 'Send Password Reset Email', 'mediavine' ),
+				esc_html__( 'Send Password Reset Email', 'mediavine-create' ),
 				$dismiss_link
 			);
-			$this->admin_error_notice( $notice_name, $message, 'warning', false );
+			$this->admin_error_notice( $notice_name, $message, 'warning' );
 		}
-
-		// Add inline JavaScript for calling Services API directly
-		// Get nonce from WordPress
-		$nonce = wp_create_nonce( 'wp_rest' );
-		?>
-		<script type="text/javascript">
-		jQuery(document).ready(function($) {
-			var servicesUrl = '<?php echo $services_url; ?>';
-			var apiToken = '<?php echo $api_token; ?>';
-			var userId = '<?php echo $user_id; ?>';
-			var nonce = '<?php echo esc_js( $nonce ); ?>';
-
-			// Handle password reset request via WordPress REST API
-			$('.mv-create-request-password-reset').on('click', function(e) {
-				e.preventDefault();
-				var $btn = $(this);
-				var email = $btn.data('email');
-
-				$btn.prop('disabled', true).text('<?php echo esc_js( __( 'Sending...', 'mediavine' ) ); ?>');
-
-				// Call WordPress REST endpoint instead of external API
-				$.ajax({
-					url: '<?php echo esc_js( rest_url( 'mv-settings/v1/request-password-reset' ) ); ?>',
-					method: 'POST',
-					contentType: 'application/json',
-					headers: {
-						'X-WP-Nonce': nonce
-					},
-					data: JSON.stringify({ email: email }),
-					success: function(response) {
-						// Set the pending transient via WordPress REST API
-						$.post('<?php echo esc_js( rest_url( 'mv-settings/v1/settings' ) ); ?>',
-							JSON.stringify([{slug: 'mv_create_password_reset_pending_transient', value: 'set'}]),
-							function() {
-								$btn.closest('.notice').html('<p><strong><?php echo esc_js( __( 'Success!', 'mediavine' ) ); ?></strong><br><?php echo esc_js( __( 'Check your email for instructions. Reloading...', 'mediavine' ) ); ?></p>');
-								setTimeout(function() {
-									location.reload();
-								}, 2000);
-							}
-						).fail(function() {
-							// Even if setting the transient fails, show success and reload
-							$btn.closest('.notice').html('<p><strong><?php echo esc_js( __( 'Success!', 'mediavine' ) ); ?></strong><br><?php echo esc_js( __( 'Check your email for instructions. Reloading...', 'mediavine' ) ); ?></p>');
-							setTimeout(function() {
-								location.reload();
-							}, 2000);
-						});
-					},
-					error: function(xhr) {
-						var errorMsg = xhr.responseJSON && xhr.responseJSON.message
-							? xhr.responseJSON.message
-							: '<?php echo esc_js( __( 'Failed to send email. Please try again.', 'mediavine' ) ); ?>';
-						alert(errorMsg);
-						$btn.prop('disabled', false).text('<?php echo esc_js( __( 'Send Password Reset Email', 'mediavine' ) ); ?>');
-					}
-				});
-			});
-
-			// Handle password status check
-			$('.mv-create-check-password').on('click', function(e) {
-				e.preventDefault();
-				var $link = $(this);
-				var originalText = $link.text();
-
-				$link.text('<?php echo esc_js( __( 'Checking...', 'mediavine' ) ); ?>');
-
-				// Call Services API to check if password is set
-				$.ajax({
-					url: servicesUrl + '/users/' + userId,
-					method: 'GET',
-					headers: {
-						'Authorization': 'Bearer ' + apiToken
-					},
-					success: function(response) {
-						// Password is set, reload to clear notice
-						$link.closest('.notice').html('<p><strong><?php echo esc_js( __( 'Success!', 'mediavine' ) ); ?></strong><br><?php echo esc_js( __( 'Your password is set. Reloading...', 'mediavine' ) ); ?></p>');
-						setTimeout(function() {
-							location.reload();
-						}, 1000);
-					},
-					error: function(xhr) {
-						if (xhr.status === 401 || xhr.status === 403) {
-							alert('<?php echo esc_js( __( 'Password not yet set. Please check your email and follow the instructions.', 'mediavine' ) ); ?>');
-						} else {
-							alert('<?php echo esc_js( __( 'Unable to verify password status. Please try again.', 'mediavine' ) ); ?>');
-						}
-						$link.text(originalText);
-					}
-				});
-			});
-
-			// Handle resend password reset email button via WordPress REST API
-			$('.mv-create-resend-password-reset').on('click', function(e) {
-				e.preventDefault();
-				var $btn = $(this);
-				var email = $btn.data('email');
-
-				$btn.prop('disabled', true).text('<?php echo esc_js( __( 'Sending...', 'mediavine' ) ); ?>');
-
-				// Call WordPress REST endpoint instead of external API
-				$.ajax({
-					url: '<?php echo esc_js( rest_url( 'mv-settings/v1/request-password-reset' ) ); ?>',
-					method: 'POST',
-					contentType: 'application/json',
-					headers: {
-						'X-WP-Nonce': nonce
-					},
-					data: JSON.stringify({ email: email }),
-					success: function(response) {
-						// Reset the pending transient via WordPress REST API
-						$.post('<?php echo esc_js( rest_url( 'mv-settings/v1/settings' ) ); ?>',
-							JSON.stringify([{slug: 'mv_create_password_reset_pending_transient', value: 'set'}]),
-							function() {
-								$btn.closest('.notice').html('<p><strong><?php echo esc_js( __( 'Success!', 'mediavine' ) ); ?></strong><br><?php echo esc_js( __( 'Email resent! Check your inbox. Reloading...', 'mediavine' ) ); ?></p>');
-								setTimeout(function() {
-									location.reload();
-								}, 2000);
-							}
-						).fail(function() {
-							$btn.closest('.notice').html('<p><strong><?php echo esc_js( __( 'Success!', 'mediavine' ) ); ?></strong><br><?php echo esc_js( __( 'Email resent! Check your inbox. Reloading...', 'mediavine' ) ); ?></p>');
-							setTimeout(function() {
-								location.reload();
-							}, 2000);
-						});
-					},
-					error: function(xhr) {
-						var errorMsg = xhr.responseJSON && xhr.responseJSON.message
-							? xhr.responseJSON.message
-							: '<?php echo esc_js( __( 'Failed to send email. Please try again.', 'mediavine' ) ); ?>';
-						alert(errorMsg);
-						$btn.prop('disabled', false).text('<?php echo esc_js( __( 'Didn\'t get an email? Resend', 'mediavine' ) ); ?>');
-					}
-				});
-			});
-
-			// Timer countdown for resend button (show after 5 minutes)
-			var $resendBtn = $('.mv-create-resend-password-reset');
-			var $timer = $('.mv-resend-timer');
-			if ($resendBtn.length) {
-				var timeRemaining = 300; // 5 minutes in seconds
-				var timerInterval = setInterval(function() {
-					timeRemaining--;
-
-					if (timeRemaining <= 0) {
-						clearInterval(timerInterval);
-						$resendBtn.show();
-						$timer.html('');
-					} else {
-						var minutes = Math.floor(timeRemaining / 60);
-						var seconds = timeRemaining % 60;
-						seconds = seconds < 10 ? '0' + seconds : seconds;
-						$timer.html('<?php echo esc_js( __( 'Resend available in:', 'mediavine' ) ); ?> ' + minutes + ':' + seconds);
-					}
-				}, 1000);
-			}
-		});
-		</script>
-		<?php
 	}
 }

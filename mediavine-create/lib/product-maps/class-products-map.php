@@ -70,15 +70,16 @@ class Products_Map extends Plugin {
 			return [];
 		}
 
-		// SECURITY CHECKED: This query is properly prepared.
-		$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d ORDER BY %s ASC", [ $creation_id, 'position' ] );
+		// ORDER BY identifiers cannot use prepare() %s — they become quoted string
+		// literals and sorting silently no-ops. Interpolate only allowlisted columns.
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+		$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d ORDER BY position ASC", [ $creation_id ] );
 		$products           = $wpdb->get_results( $prepared_statement );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		foreach ( $products as &$product ) {
 			$product->thumbnail_uri = self::get_correct_thumbnail_src( $product );
 		}
-
-		usort( $products, [ '\Mediavine\Create\Products_Map', 'sort_product_map' ] );
 
 		return $products;
 	}
@@ -206,7 +207,7 @@ class Products_Map extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::DELETABLE,
@@ -218,7 +219,7 @@ class Products_Map extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -231,7 +232,7 @@ class Products_Map extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

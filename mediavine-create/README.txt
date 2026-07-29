@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: trunk
+Stable tag: 2.5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,7 +141,49 @@ Please report security bugs found in the source code of the Create plugin throug
 12. A published Recipe card in the New Editorial style.
 13. A published List card in the Hero Image style.
 
+== External services ==
+
+Create connects to the following third-party services. No data is sent unless you use the feature that requires it.
+
+**[Create Studio](https://create.studio)**
+Create Studio powers nutrition calculation, URL scraping, Interactive Mode/Unit Conversion/Servings Adjustment widgets, dashboard tips and broadcasts, and Premium subscription management. Requests are made when you connect your site or use those features, and may include your site URL, connection token, plugin version, card data, ingredient text, scraped URLs, and account email.
+[Terms of Use](https://create.studio/legal/terms) — [Privacy Policy](https://create.studio/legal/privacy)
+
+**[API Ninjas Nutrition](https://api-ninjas.com)**
+When you calculate nutrition for a recipe, only raw ingredient text is relayed to API Ninjas through Create Studio.
+[Terms of Use](https://api-ninjas.com/tos) — [Privacy Policy](https://api-ninjas.com/privacy)
+
+**[Amazon Creators API](https://creatorsapi.amazon.com)**
+When you add or refresh an Amazon product, Create contacts Amazon using the Associate credentials you enter in settings. Data sent includes the product ASIN or URL and your Associate tag and Creators API credentials.
+[Amazon Associates Program Operating Agreement](https://affiliate-program.amazon.com/help/operating/agreement) — [Privacy Policy](https://www.amazon.com/gp/help/customer/display.html?nodeId=468496)
+
+**[Mediavine video](https://mediavine.com)**
+If a card references a Mediavine-hosted video, Create requests that video's metadata (by slug) for JSON-LD, embeds, and imports.
+[Privacy Policy](https://www.mediavine.com/privacy-policy/)
+
 == Changelog ==
+
+= 2.5.4 =
+
+This release is the result of a full security and code-quality audit of the plugin.
+
+* SECURITY: Fixed two reported SQL injection vulnerabilities (CVE-2026-13200, CVE-2026-13191)
+* SECURITY: Fixed reported REST API authorization issues that let an anonymous visitor read an unpublished card or duplicate a card (CVE-2026-16992). Thanks to Pedro Pinho for the report
+* SECURITY: Unpublished cards are no longer served by the print, structured data, or featured review endpoints, and requesting a card can no longer cause it to be published
+* SECURITY: Hardened the plugin throughout following a full internal security audit. REST API permission checks, input sanitization and output escaping, credential handling, scraper/importer safety, removed PHP dependencies, and updated JavaScript dependencies
+* FIX: Reviews pagination and product/supplies ordering work correctly again (long-standing bugs)
+* FIX: Image imports now process reliably in the background via WP-Cron
+* FIX: Instruction images show in editor preview when switching between cards with identical number of images in instructions
+* FIX: Editorial theme spacing corrected for ingredient group headings and double-digit step numbers, and list item description spacing is no longer easily overridden by themes
+* FIX: Interactive checklist group headers stay in sync when collapsing and expanding ingredient and instruction groups
+* FIX: Emoji, accented, and non-Latin characters in recipe steps are preserved in structured data, and incomplete video data is no longer added to schema
+* FIX: Recipes imported with times written like 0:25 now import as hours and minutes instead of days and hours
+* FIX: Deleting a list fully removes its item relationships, and saving a list with no items no longer causes an error on PHP 8
+* FIX: Numbers reappear on numbered lists when a page has no main heading
+* ENHANCEMENT: Admin fonts are now bundled with the plugin, Settings screen no longer embeds a create.studio iframe; meaning fewer third-party requests, with all remaining external services disclosed in this readme
+* ENHANCEMENT: Amazon product scraping now uses only the Creators API; legacy PA-API settings, the PA-API SDK, and unused external dependencies have been removed
+* ENHANCEMENT: Removed large amounts of legacy and unused code (old analytics tracker, expired migrations, redundant logging), and the plugin package no longer ships source maps, reducing the install size
+
 
 = 2.5.3 =
 
@@ -318,33 +360,7 @@ Please report security bugs found in the source code of the Create plugin throug
 * FIX: Apply Photo Ratio setting to list layouts
 * FIX: Resolve WP 6.7 _load_textdomain_just_in_time notice
 
-= 1.10.5 =
-* FIX: Resolve PHP 8.x fatal error when saving list relations with empty or array-type meta fields
+== Upgrade Notice ==
 
-= 1.10.4 =
-* FIX: Restore soft returns (Shift+Enter line breaks) in WYSIWYG instructions editor
-
-= 1.10.3 =
-* FIX: Restore Slate editor CSS fix for Chrome 105+ to prevent cursor jumping in WYSIWYG editors
-
-= 1.10.2 =
-* FEATURE: Add "Rating" sort option to card collections that uses weighted rating (Bayesian average)
-* ENHANCEMENT: Display star ratings and review counts in card grid and list views
-* FIX: Restrict admin script enqueuing to Create-specific pages to prevent variable conflicts with other plugins and resolve Gutenberg block registration issues
-* FIX: Classic editor toolbar buttons display correctly in Code tab editor
-* FIX: Build output wrapped with IIFE wrapper to prevent strict mode variable leakage
-
-= 1.10.1 =
-* FEATURE: Add "Posts" dropdown navigation to card editor to easily navigate to a card's parent posts
-* ENHANCEMENT: Include descriptions from external links and posts when building Lists
-* FIX: Automatically republish cards with missing `<ol>` and `<ul>` tags in instructions
-* FIX: Retain `href`/link in Instructions when editing a card
-* FIX: Improve WordPress 6.5+ compatibility by using traditional script enqueuing
-* FIX: Skip synchronous image processing during REST API requests to prevent timeouts on list card saves
-* FIX: Adds checks in color mixing functions to prevent PHP 8+ fatal errors (thanks Peter/Deep Roots Hosting!)
-* FIX: Resolve "spastic" editing and unusability in detail ingredient editor
-
-= 1.9.16 =
-* FEATURE: Change to new ownership!
-* ENHANCEMENT: Upgrade to PHP 7.4, Node 18 & 22 for modern features
-* ENHANCEMENT: Upgrade to WordPress 6.5 for modern features
+= 2.5.4 =
+This version of Create patches a security related bug. Please update immediately.

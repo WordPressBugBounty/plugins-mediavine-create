@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 $video          = (array) json_decode( $args['creation']['video'] ?: '{}' );
 $external_video = (array) json_decode( $args['creation']['external_video'] ?: '{}' );
 

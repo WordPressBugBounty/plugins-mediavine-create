@@ -38,7 +38,7 @@ class Importers_Admin {
 
 		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
 			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = '//localhost:' . $dev_port . '/importers.build.' . $version . '.js';
+			$script_url = 'http://localhost:' . $dev_port . '/importers.build.' . $version . '.js';
 			wp_dequeue_style( 'mv_create/importers.css' );
 		}
 
@@ -51,8 +51,8 @@ class Importers_Admin {
 				'__URL__'       => esc_url_raw( rest_url() ),
 				'__NONCE__'     => wp_create_nonce( 'wp_rest' ),
 				'__ADMIN_URL__' => esc_url_raw( admin_url() ),
-				'imported'      => json_decode( MV_Recipe_Importer::get_imported_recipes() ),
-				'replaced'      => json_decode( MV_Recipe_Importer::get_replaced_recipes() ),
+				'imported'      => json_decode( MV_Recipe_Importer::get_imported_recipes() ?: '[]' ),
+				'replaced'      => json_decode( MV_Recipe_Importer::get_replaced_recipes() ?: '[]' ),
 			]
 		);
 		wp_enqueue_script( 'mv_create/importers.js' );
@@ -87,8 +87,8 @@ class Importers_Admin {
 	public function update_admin_menu() {
 		add_submenu_page(
 			'edit.php?post_type=mv_create',
-			__( 'Import Recipes', 'mediavine' ),
-			__( 'Import Recipes', 'mediavine' ),
+			__( 'Import Recipes', 'mediavine-create' ),
+			__( 'Import Recipes', 'mediavine-create' ),
 			'manage_options',
 			'import',
 			[ $this, 'submenu_page' ]
@@ -108,7 +108,7 @@ class Importers_Admin {
 
 		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
 			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = '//localhost:' . $dev_port . '/importers.build.' . $version . '.js';
+			$script_url = 'http://localhost:' . $dev_port . '/importers.build.' . $version . '.js';
 		}
 
 		// Depend on Create's admin script to ensure MV_SHARED_COMPONENTS is available
@@ -128,8 +128,8 @@ class Importers_Admin {
 				'__URL__'       => esc_url_raw( rest_url() ),
 				'__NONCE__'     => wp_create_nonce( 'wp_rest' ),
 				'__ADMIN_URL__' => esc_url_raw( admin_url() ),
-				'imported'      => json_decode( MV_Recipe_Importer::get_imported_recipes() ),
-				'replaced'      => json_decode( MV_Recipe_Importer::get_replaced_recipes() ),
+				'imported'      => json_decode( MV_Recipe_Importer::get_imported_recipes() ?: '[]' ),
+				'replaced'      => json_decode( MV_Recipe_Importer::get_replaced_recipes() ?: '[]' ),
 			]
 		);
 	}

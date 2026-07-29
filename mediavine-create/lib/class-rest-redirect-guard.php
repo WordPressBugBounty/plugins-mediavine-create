@@ -68,6 +68,7 @@ class REST_Redirect_Guard {
 		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Path used only for substring matching; sanitize_text_field strips %XX and breaks the encoded rest_route check below.
 		$uri = wp_unslash( $_SERVER['REQUEST_URI'] );
 
 		// Pretty-permalink form: /wp-json/<namespace>/...

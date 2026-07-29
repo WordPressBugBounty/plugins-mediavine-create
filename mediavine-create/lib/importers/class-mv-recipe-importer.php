@@ -99,67 +99,67 @@ class MV_Recipe_Importer extends Plugin {
 			'cookbook'                 => [
 				'importer'    => Import_Cookbook::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Cookbook', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Cookbook', 'mediavine-create' ) ],
 			],
 			'ez_recipes'               => [
 				'importer'    => Import_Easy_Recipe::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'EasyRecipe/EasyRecipe Pro', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'EasyRecipe/EasyRecipe Pro', 'mediavine-create' ) ],
 			],
 			'meal_planner'             => [
 				'importer'    => Import_Meal_Planner::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Meal Planner Pro Recipes', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Meal Planner Pro Recipes', 'mediavine-create' ) ],
 			],
 			'purr'                     => [
 				'importer'    => Import_Purr::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Purr Recipe Cards', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Purr Recipe Cards', 'mediavine-create' ) ],
 			],
 			'recipe_maker'             => [
 				'importer'    => Import_Recipe_Maker::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'WP Recipe Maker', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'WP Recipe Maker', 'mediavine-create' ) ],
 			],
 			'simple_recipe_pro'        => [
 				'importer'    => Import_Simple_Recipes_Pro::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Simple Recipes Pro', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Simple Recipes Pro', 'mediavine-create' ) ],
 			],
 			'simple_recipe_pro_latest' => [
 				'importer'    => Import_Simple_Recipes_Pro_Latest::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Simple Recipe Pro (Newer Versions)', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Simple Recipe Pro (Newer Versions)', 'mediavine-create' ) ],
 			],
 			'simple_recipe_pro_legacy' => [
 				'importer'    => Import_Simple_Recipes_Pro_Legacy::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Simple Recipe Pro (Older Versions)', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Simple Recipe Pro (Older Versions)', 'mediavine-create' ) ],
 			],
 			'tasty'                    => [
 				'importer'    => Import_Tasty_Recipes::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'WP Tasty', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'WP Tasty', 'mediavine-create' ) ],
 			],
 			'wp_ultimate'              => [
 				'importer'    => Import_WP_Ultimate_Recipe::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'WP Ultimate Recipe', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'WP Ultimate Recipe', 'mediavine-create' ) ],
 			],
 			'yummly'                   => [
 				'importer'    => Import_Yummly::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Yummly', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Yummly', 'mediavine-create' ) ],
 			],
 			'ziplist'                  => [
 				'importer'    => Import_Ziplist::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'ZipList Recipes', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'ZipList Recipes', 'mediavine-create' ) ],
 			],
 			'zip_recipes'              => [
 				'importer'    => Import_Zip_Recipes::class,
 				'recipes'     => [],
-				'plugin_meta' => [ 'name' => __( 'Zip Recipes', 'mediavine' ) ],
+				'plugin_meta' => [ 'name' => __( 'Zip Recipes', 'mediavine-create' ) ],
 			],
 		];
 
@@ -265,8 +265,11 @@ class MV_Recipe_Importer extends Plugin {
 
 	/**
 	 * Get seconds from a string of human readable time, https://regex101.com/r/KpT7kV/2/
-	 * FIXME: This doesn't handle things formatted like 0:25
-	 * @param string $time_string, time string witho hours or minutes.
+	 *
+	 * Colon notation is H:MM:SS (optional leading hours). Two-part times are MM:SS, except
+	 * leading-zero forms like `0:25` which mean 0 hours and 25 minutes (common in recipes).
+	 *
+	 * @param string $time_string Time string with hours or minutes.
 	 * @return integer of seconds
 	 */
 	public static function time_to_seconds( $time_string ) {
@@ -275,11 +278,22 @@ class MV_Recipe_Importer extends Plugin {
 		$colon_notation_pattern = '/(?:(\d{1,2}):)?(\d{1,2}):(\d{2})/';
 		preg_match( $colon_notation_pattern, $time_string, $colon_matches );
 		if ( $colon_matches ) {
-			$days    = isset( $colon_matches[1] ) ? $colon_matches[1] : 0;
-			$hours   = isset( $colon_matches[2] ) ? $colon_matches[2] : 0;
-			$minutes = isset( $colon_matches[3] ) ? $colon_matches[3] : 0;
-			$result  = ( $days * DAY_IN_SECONDS ) + ( $hours * HOUR_IN_SECONDS ) + ( $minutes * MINUTE_IN_SECONDS );
-			return $result;
+			$has_hours = isset( $colon_matches[1] ) && '' !== $colon_matches[1];
+			// Two-part `0:MM` is recipe shorthand for zero hours + MM minutes, not 0:MM as MM:SS.
+			if ( ! $has_hours && '0' === $colon_matches[2] ) {
+				$hours   = 0;
+				$minutes = (int) $colon_matches[3];
+				$seconds = 0;
+			} elseif ( $has_hours ) {
+				$hours   = (int) $colon_matches[1];
+				$minutes = (int) $colon_matches[2];
+				$seconds = (int) $colon_matches[3];
+			} else {
+				$hours   = 0;
+				$minutes = (int) $colon_matches[2];
+				$seconds = (int) $colon_matches[3];
+			}
+			return ( $hours * HOUR_IN_SECONDS ) + ( $minutes * MINUTE_IN_SECONDS ) + $seconds;
 		}
 
 		$re = '/(\d+)\s?(d|h|m|s)/i';
@@ -414,14 +428,12 @@ class MV_Recipe_Importer extends Plugin {
 
 		$heading = '';
 		$section = [];
-		// ensure that the content coming in is indeed HTML
-		$html = mb_convert_encoding( '<section>' . $content . '</section>', 'HTML-ENTITIES', 'UTF-8' );
 
 		// determine whether there is HTML to parse or not
 		// this strips HTML tags and compares the result to see if there is any
 		if ( strip_tags( $content, '<div><section>' ) === $content ) {
 			// because the content is not iterable HTML, we need to strip it of any possible divs or sections before parsing
-			$stripped = strip_tags( $content );
+			$stripped = wp_strip_all_tags(  $content );
 			// split the content by new line so we can iterate
 			$lines = explode( PHP_EOL, $stripped );
 			foreach ( $lines as $line ) {
@@ -478,7 +490,7 @@ class MV_Recipe_Importer extends Plugin {
 			$html = Str::replace( '</p>', '</li>', $html ) . '</ul>';
 			// we know that this is valid HTML, so we can load it into DOMDocument
 			$document = new \DOMDocument();
-			@$document->loadHTML( mb_convert_encoding( $html, 'HTML-ENTITIES', 'UTF-8' ), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+			@$document->loadHTML( Str::to_html_entities( $html ), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 
 			foreach ( $document->getElementsByTagName( '*' ) as $node ) {
 				$parsed = [];
@@ -495,7 +507,7 @@ class MV_Recipe_Importer extends Plugin {
 					$previous            = count( $section['ingredients'] ) - 1;
 					$previous_ingredient = $section['ingredients'][ $previous ];
 					// <li>I am an ingredient and <a href="google.com">I have a link</a></li>
-					if ( Str::contains( $node->nodeValue, $previous_ingredient['original_text'] ) ) {
+					if ( Str::contains( $previous_ingredient['original_text'], $node->nodeValue ) ) {
 						// here we replace the text that matches the link text with a markdown link (`I have a link` in the example above)
 						$new_text = Str::replace( $node->nodeValue, "[{$node->nodeValue}]", $parent->nodeValue );
 						// now we set the previous element's ingredient original text to the modified text
@@ -527,7 +539,7 @@ class MV_Recipe_Importer extends Plugin {
 					Str::endsWith( '!', $text ) ||
 					Str::beginsWith( '!', $text ) ||
 					Str::is( [ 'strong', 'b', 'h3', 'h4', 'em' ], $tag ) ||
-					( Str::contains( '<li>', $html ) && Str::is( [ 'div', 'p' ], $tag ) )
+					( Str::contains( $html, '<li>' ) && Str::is( [ 'div', 'p' ], $tag ) )
 				) {
 					// In the event that a heading is denoted as `! I'm a heading`,
 					// we want to remove the `!` and trim the extra whitespace
@@ -637,8 +649,10 @@ class MV_Recipe_Importer extends Plugin {
 			AND cm.meta_value != 0
 			AND c.comment_post_ID = %d";
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$prepared = $wpdb->prepare( $statement, [ $recipe_id, $rating_key, $post_id ] );
 		$comments = $wpdb->get_results( $prepared, 'ARRAY_A' );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		if ( $comments ) {
 			self::$comment_ratings_retrieved[] = $post_id;
 		}
@@ -728,8 +742,11 @@ class MV_Recipe_Importer extends Plugin {
 		global $wpdb;
 		$hash_identity = md5( $recipe['importer'] . $recipe['title'] );
 		$statement     = "SELECT id, title, original_post_id FROM {$wpdb->prefix}mv_creations WHERE metadata LIKE '%%%s%%'";
-		$prepared      = $wpdb->prepare( $statement, $hash_identity );
-		return $wpdb->get_row( $prepared, ARRAY_A );
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
+		$prepared = $wpdb->prepare( $statement, $hash_identity );
+		$row      = $wpdb->get_row( $prepared, ARRAY_A );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		return $row;
 	}
 
 	public static function extract_mcp_video_slug_from_embed_code( $video_code ) {
@@ -910,7 +927,7 @@ class MV_Recipe_Importer extends Plugin {
 		}
 
 		if ( empty( $found_recipe['author'] ) ) {
-			$author = get_the_author( $found_recipe['canonical_post_id'] );
+			$author = get_the_author_meta( 'display_name', (int) get_post_field( 'post_author', $found_recipe['canonical_post_id'] ) );
 			if ( empty( $author ) ) {
 				$author = '';
 			}
@@ -927,7 +944,7 @@ class MV_Recipe_Importer extends Plugin {
 		unset( $new_recipe['nutrition'] );
 
 		if ( empty( $new_recipe['additional_time_label'] ) && ! empty( $new_recipe['additional_time'] ) ) {
-			$new_recipe['additional_time_label'] = __( 'Additional Time', 'mediavine' );
+			$new_recipe['additional_time_label'] = __( 'Additional Time', 'mediavine-create' );
 		}
 
 		if ( ! $creation_id ) {
@@ -943,8 +960,8 @@ class MV_Recipe_Importer extends Plugin {
 			if ( is_wp_error( $object_id ) ) {
 				$errors = self::$api_services->normalize_errors(
 					$errors, 500, [
-						'title'   => __( 'Recipe Not Generated', 'mediavine' ),
-						'details' => __( 'WordPress failed to create new recipe.', 'mediavine' ),
+						'title'   => __( 'Recipe Not Generated', 'mediavine-create' ),
+						'details' => __( 'WordPress failed to create new recipe.', 'mediavine-create' ),
 					], 'error'
 				);
 				return $errors;
@@ -984,7 +1001,7 @@ class MV_Recipe_Importer extends Plugin {
 		}
 
 		if ( empty( $new_recipe['additional_time_label'] ) ) {
-			$new_recipe['additional_time_label'] = __( 'Inactive Time', 'mediavine' );
+			$new_recipe['additional_time_label'] = __( 'Inactive Time', 'mediavine-create' );
 		}
 
 		$new_recipe['type'] = 'recipe';
@@ -1024,8 +1041,8 @@ class MV_Recipe_Importer extends Plugin {
 
 		$errors = self::$api_services->normalize_errors(
 			$errors, 500, [
-				'title'   => __( 'Recipe Not Generated', 'mediavine' ),
-				'details' => __( 'WordPress failed to create new recipe.', 'mediavine' ),
+				'title'   => __( 'Recipe Not Generated', 'mediavine-create' ),
+				'details' => __( 'WordPress failed to create new recipe.', 'mediavine-create' ),
 			], 'error'
 		);
 
@@ -1036,7 +1053,7 @@ class MV_Recipe_Importer extends Plugin {
 		global $wpdb;
 		foreach ( $ratings as $data ) {
 
-			$date             = date( 'Y-m-d H:i:s' );
+			$date             = gmdate( 'Y-m-d H:i:s' );
 			$data['created']  = isset( $data['created'] ) ? $data['created'] : $date;
 			$data['modified'] = isset( $data['modified'] ) ? $data['modified'] : $date;
 
@@ -1047,6 +1064,7 @@ class MV_Recipe_Importer extends Plugin {
 			$dbi             = new MV_DBI( 'mv_reviews' );
 			$normalized_data = $dbi->normalize_data( $data );
 			add_filter( 'query', [ $dbi, 'allow_null' ] );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 			$wpdb->insert( $dbi->table_name, $normalized_data );
 			remove_filter( 'query', [ $dbi, 'allow_null' ] );
 		}
@@ -1059,8 +1077,10 @@ class MV_Recipe_Importer extends Plugin {
 
 		$table_name = $wpdb->prefix . 'posts';
 		$statement  = "SELECT id, post_content FROM $table_name WHERE post_content LIKE '%%%s%%' AND post_type LIKE 'post'";
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$prepared   = $wpdb->prepare( $statement, $shortcode );
 		$posts      = $wpdb->get_results( $prepared, 'ARRAY_A' );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$recipes    = [];
 
 		if ( ! empty( $posts ) ) {
@@ -1091,8 +1111,8 @@ class MV_Recipe_Importer extends Plugin {
 		if ( is_wp_error( $sanitized ) ) {
 			$response['errors'] = self::$api_services->normalize_errors(
 				$response['errors'], 403, [
-					'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-					'details' => __( 'You\'re submission includes unsafe characters', 'mediavine' ),
+					'title'   => __( 'Unsafe Content Submission', 'mediavine-create' ),
+					'details' => __( 'You\'re submission includes unsafe characters', 'mediavine-create' ),
 				], 'error'
 			);
 
@@ -1469,6 +1489,7 @@ class MV_Recipe_Importer extends Plugin {
 		$statement = "SELECT id, original_post_id as post_id
 			FROM {$wpdb->prefix}mv_creations
 			WHERE metadata LIKE '%meal_planner%'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$creations = $wpdb->get_results( $statement );
 		if ( $creations && ! is_wp_error( $creations ) ) {
 			foreach ( $creations as $creation ) {
@@ -1514,6 +1535,7 @@ class MV_Recipe_Importer extends Plugin {
 				WHERE comment_meta.meta_key='ERRating'
 					GROUP BY comments.comment_ID, creations.id, comment_meta.meta_value ORDER BY creations.id";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$results = $wpdb->get_results( $sql );
 
 		if ( empty( $results ) ) {
@@ -1567,6 +1589,7 @@ class MV_Recipe_Importer extends Plugin {
 		AND (metadata IS NULL OR metadata NOT LIKE '%importer%')
 		AND created < '{$date}'";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$creations = $wpdb->get_results( $statement, ARRAY_A );
 
 		// if there are no creations missing importer data, don't do any more logic--we're done.
@@ -1626,7 +1649,7 @@ class MV_Recipe_Importer extends Plugin {
 									'title'              => $recipe['title'],
 									'original_recipe_id' => ! empty( $recipe['original_id'] ) ? $recipe['original_id'] : null,
 									'original_post_id'   => $recipe['original_post_id'],
-									'imported_on'        => date( 'Y-m-d H:i:s' ),
+									'imported_on'        => gmdate( 'Y-m-d H:i:s' ),
 								],
 							];
 							$update   = [
@@ -1662,7 +1685,6 @@ class MV_Recipe_Importer extends Plugin {
 		 * 4. return data
 		 */
 
-		// TODO: Implement real error.
 		$response = [
 			'data'  => [],
 			'error' => false,
@@ -1679,10 +1701,9 @@ class MV_Recipe_Importer extends Plugin {
 		$original_creation = self::$models_v2->mv_creations->find_one( $creation_id );
 		$metadata          = json_decode( $original_creation->metadata, true );
 
-		// Currently only Purr importer supports re-importing (and only ingredients)
 		if ( empty( $metadata['import'] ) ) {
-			$response['error'] = true;
-			return $response;
+			$response['error'] = 'missing_import_metadata';
+			return new \WP_REST_Response( $response );
 		}
 
 		$original_post_id = $original_creation->original_post_id;
@@ -1693,38 +1714,35 @@ class MV_Recipe_Importer extends Plugin {
 		$import_data = $metadata['import'];
 		$importer    = $import_data['importer'];
 
+		$importers = $this->get_importers();
+		if ( empty( $importers[ $importer ] ) ) {
+			$response['error'] = 'unsupported';
+			return new \WP_REST_Response( $response );
+		}
+
+		$importer_class = $importers[ $importer ]['importer'];
+		if ( ! $importer_class::supports_reimport() ) {
+			$response['error'] = 'unsupported';
+			return new \WP_REST_Response( $response );
+		}
+
 		$api_data = [
 			'creation_id' => $creation_id,
 			'original_id' => $original_post_id,
 		];
 
-		$response_data = [];
-		// TODO: Add tasty, recipe_maker, and meal_planner next
+		$api_data = $importer_class::prepare_reimport_data( $api_data );
+		if ( false === $api_data ) {
+			$response['error'] = 'reimport_failed';
+			return new \WP_REST_Response( $response );
+		}
+
+		$response_data             = $importer_class::reimport( $api_data );
+		$response_data             = is_array( $response_data ) ? $response_data : [];
 		$response_data['importer'] = $importer;
-		switch ( $importer ) {
-			case 'purr':
-				$response_data             = Import_Purr::serializer( $api_data );
-				$response_data['importer'] = $importer;
-				break;
-			case 'cookbook':
-				$response_data             = Import_Cookbook::serializer( $api_data );
-				$response_data['importer'] = $importer;
-				break;
-			case 'recipe_maker':
-				$api_data['original_id'] = Import_Recipe_Maker::find_recipe_id_from_parent_post( $api_data['original_id'] );
-				if ( ! $api_data['original_id'] ) {
-					break;
-				}
-				$response_data = Import_Recipe_Maker::serializer( $api_data );
-				break;
-			case 'tasty':
-				$response_data             = Import_Tasty_Recipes::import_missed_reviews( $api_data );
-				$response_data['importer'] = $importer;
-				$params['publish']         = false;
-				break;
-			default:
-				unset( $response_data['importer'] );
-				break;
+
+		if ( $importer_class::reimport_forces_unpublished() ) {
+			$params['publish'] = false;
 		}
 
 		if ( $part ) {
@@ -1735,7 +1753,7 @@ class MV_Recipe_Importer extends Plugin {
 			$response_data = $this->store_found_recipe( $response_data, $creation_id );
 			\Mediavine\Create\Creations::publish_creation( $creation_id );
 			$response['data'] = $response_data;
-			return $response;
+			return new \WP_REST_Response( $response );
 		}
 		$response_data = $this->parse_recipe( $response_data );
 
@@ -1777,415 +1795,16 @@ class MV_Recipe_Importer extends Plugin {
 	 */
 	function bulk_import( \WP_REST_Request $request ) {
 		$plugins = $request->get_param( 'data' );
-		$results = [];
 
-		if ( ! empty( $plugins['cookbook']['recipes'] ) ) {
-			$stored_cookbook_recipes = [];
-			foreach ( $plugins['cookbook']['recipes'] as $found_recipe ) {
-				try {
-					$recipe                       = Import_Cookbook::serializer( $found_recipe );
-					$recipe['importer']           = 'cookbook';
-					$stored_recipe                = $recipe;
-					$stored_recipe                = $this->store_found_recipe( $recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					$ratings                      = Import_Cookbook::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-					$stored_cookbook_recipes[] = self::verify_required_fields( $stored_recipe, $recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (cookbook): ' . $e->getMessage() );
-					$found_recipe['error'] = $e->getMessage();
-					$found_recipe['id']    = null;
-					$stored_cookbook_recipes[] = $found_recipe;
-				}
+		foreach ( $this->get_importers() as $slug => $config ) {
+			if ( empty( $plugins[ $slug ]['recipes'] ) ) {
+				continue;
 			}
-			$plugins['cookbook']['recipes'] = $stored_cookbook_recipes;
-		}
-
-		if ( ! empty( $plugins['ez_recipes']['recipes'] ) ) {
-			$ez_recipes        = $plugins['ez_recipes']['recipes'];
-			$stored_ez_recipes = [];
-			$Import_EZ_Recipe  = new Import_Easy_Recipe();
-			$final_recipes     = [];
-			foreach ( $ez_recipes as $recipe ) {
-				try {
-					$processed_ez_recipes = $Import_EZ_Recipe->serializer( $recipe['original_id'] );
-					if ( ! $processed_ez_recipes ) {
-						continue;
-					}
-					foreach ( $processed_ez_recipes as $ez_recipe ) {
-						$ez_recipe['original_post_id']  = $recipe['original_id'];
-						$ez_recipe['canonical_post_id'] = $recipe['original_id'];
-						$ez_recipe['importer']          = 'ez_recipes';
-						$stored_recipe                  = $this->store_found_recipe( $ez_recipe );
-						$stored_recipe['original_id']   = $recipe['original_id'];
-						$ratings                        = $this->get_ratings_from_comments( $recipe['original_id'], 'ERRating', $stored_recipe['id'] );
-						if ( $ratings ) {
-							$this->store_found_ratings( $ratings );
-							$recipe['ratings'] = $ratings;
-						}
-						// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-						$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-						if ( $maybe_srp_ratings ) {
-							$this->store_found_ratings( $maybe_srp_ratings );
-							$stored_recipe['ratings'] = $maybe_srp_ratings;
-						}
-						$recipe['id']    = $stored_recipe['id'];
-						$final_recipes[] = self::verify_required_fields( $recipe, $ez_recipe );
-					}
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (ez_recipes): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$final_recipes[] = $recipe;
-				}
-			}
-			$plugins['ez_recipes']['recipes'] = $final_recipes;
-		}
-
-		if ( ! empty( $plugins['meal_planner']['recipes'] ) ) {
-			$meal_planner_recipes = $plugins['meal_planner']['recipes'];
-			$stored_recipes       = [];
-			foreach ( $meal_planner_recipes as $recipe ) {
-				try {
-					$found_recipe                 = Import_Meal_Planner::serializer( $recipe );
-					$found_recipe['importer']     = 'meal_planner';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-
-					$ratings = Import_Meal_Planner::find_ratings( $stored_recipe['id'], $stored_recipe['original_post_id'] );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (meal_planner): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['meal_planner']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['purr']['recipes'] ) ) {
-			$stored_recipes = [];
-			foreach ( $plugins['purr']['recipes'] as $recipe ) {
-				try {
-					$found_recipe                 = Import_Purr::serializer( $recipe );
-					$found_recipe['importer']     = 'purr';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					$found_recipe['ratings']      = Import_Purr::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-
-					if ( $found_recipe['ratings'] ) {
-						$this->store_found_ratings( $found_recipe['ratings'] );
-						$stored_recipe['ratings'] = $found_recipe['ratings'];
-					}
-					// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (purr): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['purr']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['recipe_maker']['recipes'] ) ) {
-			$recipes        = $plugins['recipe_maker']['recipes'];
-			$stored_recipes = [];
-			foreach ( $recipes as $recipe ) {
-				try {
-					$found_recipe                 = Import_Recipe_Maker::serializer( $recipe );
-					$found_recipe['importer']     = 'recipe_maker';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					$full_recipe                  = $found_recipe;
-					$full_recipe['id']            = $stored_recipe['id'];
-					$ratings                      = Import_Recipe_Maker::get_ratings( $full_recipe );
-
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-
-					// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (recipe_maker): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-
-			$plugins['recipe_maker']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['simple_recipe_pro']['recipes'] ) ) {
-			$srps           = $plugins['simple_recipe_pro']['recipes'];
-			$stored_recipes = [];
-			foreach ( $srps as $recipe ) {
-				try {
-					$found_recipe                 = Import_Simple_Recipes_Pro::serializer( $recipe );
-					$found_recipe['importer']     = 'simple_recipe_pro';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-
-					$ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (simple_recipe_pro): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['simple_recipe_pro']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['simple_recipe_pro_legacy']['recipes'] ) ) {
-			$srps           = $plugins['simple_recipe_pro_legacy']['recipes'];
-			$stored_recipes = [];
-			foreach ( $srps as $recipe ) {
-				try {
-					$found_recipe                 = Import_Simple_Recipes_Pro_Legacy::serializer( $recipe );
-					$found_recipe['importer']     = 'simple_recipe_pro_legacy';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-
-					$ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (simple_recipe_pro_legacy): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['simple_recipe_pro_legacy']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['simple_recipe_pro_latest']['recipes'] ) ) {
-			$srps           = $plugins['simple_recipe_pro_latest']['recipes'];
-			$stored_recipes = [];
-			foreach ( $srps as $recipe ) {
-				try {
-					$found_recipe                 = Import_Simple_Recipes_Pro_Latest::serializer( $recipe );
-					$found_recipe['importer']     = 'simple_recipe_pro_latest';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-
-					$ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (simple_recipe_pro_latest): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['simple_recipe_pro_latest']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['tasty']['recipes'] ) ) {
-			$stored_tasty_recipes = [];
-			foreach ( $plugins['tasty']['recipes'] as $found_recipe ) {
-				try {
-					$recipe                       = Import_Tasty_Recipes::serializer( $found_recipe );
-					$recipe['importer']           = 'tasty';
-					$stored_recipe                = $recipe;
-					$stored_recipe                = $this->store_found_recipe( $recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					$ratings                      = Import_Tasty_Recipes::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-					$stored_tasty_recipes[] = self::verify_required_fields( $stored_recipe, $recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (tasty): ' . $e->getMessage() );
-					$found_recipe['error'] = $e->getMessage();
-					$found_recipe['id']    = null;
-					$stored_tasty_recipes[] = $found_recipe;
-				}
-			}
-			$plugins['tasty']['recipes'] = $stored_tasty_recipes;
-		}
-
-		if ( ! empty( $plugins['ziplist']['recipes'] ) ) {
-			$ziplist_recipes = $plugins['ziplist']['recipes'];
-			$stored_recipes  = [];
-			foreach ( $ziplist_recipes as $recipe ) {
-				try {
-					$found_recipe                 = Import_Ziplist::serializer( $recipe['original_id'] );
-					$found_recipe['importer']     = 'ziplist';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					// ZipList does not have ratings/reviews, but...
-					// just in case SRP is ninja-hijacking the recipe, we'll run their ratings function
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-
-					$stored_recipes[] = $stored_recipe;
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (ziplist): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['ziplist']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['zip_recipes']['recipes'] ) ) {
-			$ziplist_recipes = $plugins['zip_recipes']['recipes'];
-			$stored_recipes  = [];
-			foreach ( $ziplist_recipes as $recipe ) {
-				try {
-					$found_recipe                 = Import_Zip_Recipes::serializer( $recipe['original_id'] );
-					$found_recipe['importer']     = 'zip_recipes';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					$ratings                      = Import_Zip_Recipes::get_ratings( $stored_recipe );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$recipe['ratings'] = $ratings;
-					}
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-					$stored_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (zip_recipes): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_recipes[] = $recipe;
-				}
-			}
-			$plugins['zip_recipes']['recipes'] = $stored_recipes;
-		}
-
-		if ( ! empty( $plugins['wp_ultimate']['recipes'] ) ) {
-			$stored_ultimate_recipes = [];
-			foreach ( $plugins['wp_ultimate']['recipes'] as $found_recipe ) {
-				try {
-					$recipe                       = Import_WP_Ultimate_Recipe::serializer( $found_recipe );
-					$recipe['importer']           = 'wp_ultimate';
-					$stored_recipe                = $this->store_found_recipe( $recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-					$ratings                      = Import_WP_Ultimate_Recipe::get_ratings( $stored_recipe );
-					if ( $ratings ) {
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-					$stored_ultimate_recipes[] = self::verify_required_fields( $stored_recipe, $recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (wp_ultimate): ' . $e->getMessage() );
-					$found_recipe['error'] = $e->getMessage();
-					$found_recipe['id']    = null;
-					$stored_ultimate_recipes[] = $found_recipe;
-				}
-			}
-			$plugins['wp_ultimate']['recipes'] = $stored_ultimate_recipes;
-		}
-
-		if ( ! empty( $plugins['yummly']['recipes'] ) ) {
-			$stored_yummly_recipes = [];
-			foreach ( $plugins['yummly']['recipes'] as $recipe ) {
-				try {
-					$found_recipe                 = Import_Yummly::serializer( $recipe['original_id'] );
-					$found_recipe['importer']     = 'yummly';
-					$stored_recipe                = $this->store_found_recipe( $found_recipe );
-					$stored_recipe['original_id'] = $recipe['original_id'];
-
-					$rating = $found_recipe['rating'];
-
-					if ( ! empty( $rating ) ) {
-						$ratings = [];
-						for ( $i = 0; $i < 3; $i++ ) {
-							$ratings[] = [
-								'creation' => $stored_recipe['id'],
-								'rating'   => $rating,
-							];
-						}
-						$this->store_found_ratings( $ratings );
-						$stored_recipe['ratings'] = $ratings;
-					}
-					$maybe_srp_ratings = Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_post_id'], $stored_recipe['id'] );
-					if ( $maybe_srp_ratings ) {
-						$this->store_found_ratings( $maybe_srp_ratings );
-						$stored_recipe['ratings'] = $maybe_srp_ratings;
-					}
-
-					$stored_yummly_recipes[] = self::verify_required_fields( $stored_recipe, $found_recipe );
-				} catch ( \Throwable $e ) {
-					error_log( 'Create importer error (yummly): ' . $e->getMessage() );
-					$recipe['error'] = $e->getMessage();
-					$recipe['id']    = null;
-					$stored_yummly_recipes[] = $recipe;
-				}
-			}
-			$plugins['yummly']['recipes'] = $stored_yummly_recipes;
+			$importer_class              = $config['importer'];
+			$plugins[ $slug ]['recipes'] = $importer_class::bulk_import_recipes(
+				$plugins[ $slug ]['recipes'],
+				$this
+			);
 		}
 
 		$imported = [];
@@ -2225,12 +1844,13 @@ class MV_Recipe_Importer extends Plugin {
 	public static function get_imported_recipes() {
 		global $wpdb;
 		$recipes_dbi = new \Mediavine\MV_DBI( 'mv_creations' );
-		$imported    = Settings::get_setting( 'mv_recipe_imported_recipes' );
+		$imported    = Settings::get_setting( 'mv_recipe_imported_recipes', '[]' );
 		$imported    = json_decode( $imported );
 		if ( ! $imported ) {
-			return null;
+			return '[]';
 		}
 		$has_recipe_id_column_statement = "SHOW COLUMNS FROM {$wpdb->prefix}mv_reviews LIKE 'recipe_id'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$has_recipe_id_column           = $wpdb->get_row( $has_recipe_id_column_statement );
 		$final_imported                 = [];
 		foreach ( $imported as &$imported_recipe ) {
@@ -2245,8 +1865,10 @@ class MV_Recipe_Importer extends Plugin {
 				$prepare[]  = $imported_recipe->id;
 			}
 
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 			$prepared = $wpdb->prepare( $statement, $prepare );
 			$ratings  = $wpdb->get_results( $prepared, ARRAY_A );
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			if ( ! empty( $ratings ) ) {
 				$imported_recipe->ratings = $ratings;
 			}
@@ -2278,11 +1900,11 @@ class MV_Recipe_Importer extends Plugin {
 	}
 
 	public static function get_replaced_recipes() {
-		return Settings::get_setting( 'mv_recipe_replaced_recipes' );
+		return Settings::get_setting( 'mv_recipe_replaced_recipes', '[]' );
 	}
 
 	public static function save_imported_recipes( $newly_imported = [] ) {
-		$imported = json_decode( self::get_imported_recipes(), true );
+		$imported = json_decode( self::get_imported_recipes() ?: '[]', true );
 		if ( ! $imported ) {
 			$imported = [];
 		}
@@ -2303,7 +1925,7 @@ class MV_Recipe_Importer extends Plugin {
 	}
 
 	public static function save_replaced_recipes( $newly_replaced ) {
-		$replaced = json_decode( self::get_replaced_recipes() );
+		$replaced = json_decode( self::get_replaced_recipes() ?: '[]' );
 		if ( ! $replaced ) {
 			$replaced = [];
 		}
@@ -2372,7 +1994,7 @@ class MV_Recipe_Importer extends Plugin {
 		}
 
 		if ( 0 === $updated_post ) {
-			$error = new \WP_Error( 404, __( 'Post not found', 'mediavine' ), [ 'post' => esc_attr( $data['post'] ) ] );
+			$error = new \WP_Error( 404, __( 'Post not found', 'mediavine-create' ), [ 'post' => esc_attr( $data['post'] ) ] );
 
 			return $error;
 		}
@@ -2412,11 +2034,7 @@ class MV_Recipe_Importer extends Plugin {
 					'layout'        => null,
 				]
 			);
-			$block            = <<<EOT
-<!-- wp:mv/recipe $block_attributes -->
-	<div class="wp-block-mv-recipe">[mv_create key="{$attributes['key']}" type="{$attributes['type']}" title="{$attributes['title']}" thumbnail="{$attributes['thumbnail']}"]</div>
-<!-- /wp:mv/recipe -->
-EOT;
+			$block            = "<!-- wp:mv/recipe {$block_attributes} -->\n\t<div class=\"wp-block-mv-recipe\">[mv_create key=\"{$attributes['key']}\" type=\"{$attributes['type']}\" title=\"{$attributes['title']}\" thumbnail=\"{$attributes['thumbnail']}\"]</div>\n<!-- /wp:mv/recipe -->";
 		}
 
 		return trim( $block );
@@ -2484,9 +2102,7 @@ EOT;
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'find_recipes' ],
-					'permission_callback' => function() {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -2496,9 +2112,7 @@ EOT;
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'bulk_import' ],
-					'permission_callback' => function() {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -2508,9 +2122,7 @@ EOT;
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'bulk_replace' ],
-					'permission_callback' => function() {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -2520,9 +2132,7 @@ EOT;
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'reimport' ],
-					'permission_callback' => function() {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);
@@ -2532,9 +2142,7 @@ EOT;
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'replace_blocks' ],
-					'permission_callback' => function() {
-						return current_user_can( 'manage_options' );
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				],
 			]
 		);

@@ -35,7 +35,7 @@ class Revisions extends Plugin {
 		/**
 		 * Modify the maximum number of Create card revisions for a given Create card.
 		 *
-		 * @param int $max maximum number of revisions
+		 * @param int $max Maximum number of revisions. Default 15.
 		 */
 		$this->max_revisions = (int) apply_filters( 'mv_create_maximum_number_of_revisions', 15 );
 
@@ -66,6 +66,15 @@ class Revisions extends Plugin {
 		return $revision;
 	}
 
+	/**
+	 * Prune oldest revisions when a card exceeds the configured maximum.
+	 *
+	 * Deletes by ascending primary key so the oldest rows are removed and the
+	 * newest `$this->max_revisions` rows are kept.
+	 *
+	 * @param int $creation_id Creation ID whose revisions should be pruned.
+	 * @return void
+	 */
 	public function delete_old_revisions( $creation_id ) {
 		$count = (int) self::$models_v2->mv_revisions->get_count( [], [ 'creation' => $creation_id ] );
 
@@ -74,31 +83,36 @@ class Revisions extends Plugin {
 			global $wpdb;
 			$limit = $count - $this->max_revisions;
 
-			// Delete all matches except those within the limit
-			// SECURITY CHECKED: This query is properly prepared.
-			$deletion_statement = "DELETE FROM {$wpdb->prefix}mv_revisions WHERE creation = %d ORDER BY creation ASC LIMIT %d";
+			// Delete oldest rows first (ORDER BY id ASC), not the constant `creation` column.
+			$deletion_statement = "DELETE FROM {$wpdb->prefix}mv_revisions WHERE creation = %d ORDER BY id ASC LIMIT %d";
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			$prepared_statement = $wpdb->prepare( $deletion_statement, [ $creation_id, $limit ] );
 			$wpdb->query( $prepared_statement );
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		}
 	}
 
 	/**
 	 * Adds a creation revision.
 	 *
-	 * Uses data passed in by `mv_create_card_post_publish` action.
+	 * Uses data passed in by `mv_create_card_pre_publish` action.
 	 *
 	 * @param object $creation
 	 * @param string $published
 	 * @return void
 	 */
 	public function add_creation_revision( $creation, $published ) {
-		$current_creation     = self::$models_v2->mv_creations->find_one_by_id( $creation->id );
-		$current_published    = ! empty( $current_creation->published ) ? explode( '"object_id"', $current_creation->published )[1] : '';
-		$unmodified_published = explode( '"object_id"', $published )[1];
-		// if the published strings are equal, we don't need a revision
-		if ( $current_published === $unmodified_published ) {
+		$current_creation = self::$models_v2->mv_creations->find_one_by_id( $creation->id );
+		$current_published = ! empty( $current_creation->published )
+			? json_decode( $current_creation->published )
+			: null;
+		$incoming_published = json_decode( $published );
+
+		// Skip when the published payload is unchanged.
+		if ( $current_published == $incoming_published ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- intentional object property comparison
 			return;
 		}
+
 		$this->create( $creation->id, $published );
 	}
 
@@ -117,18 +131,24 @@ class Revisions extends Plugin {
 	/**
 	 * API callback to return revisions for a Create card.
 	 *
-	 * @param \WP_REST_Request $request
-	 * @return array revisions for a given Create card
+	 * Not yet registered on a REST route — admin UI access is tracked separately.
+	 *
+	 * @param \WP_REST_Request  $request
+	 * @param \WP_REST_Response $response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_revisions( \WP_REST_Request $request, \WP_REST_Response $response ) {
-		$creation_id = $request->get_param( 'id' );
-		$authed      = $request->get_param( 'auth' );
-
-		if ( ! $authed ) {
-			return new \WP_REST_Response( [], 403 );
+		if ( ! \Mediavine\Permissions::is_user_authorized() ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to view Create card revisions.', 'mediavine-create' ),
+				[ 'status' => 403 ]
+			);
 		}
+
+		$creation_id = $request->get_param( 'id' );
 		if ( empty( $creation_id ) ) {
-			return [];
+			return API_Services::set_response_data( [], $response );
 		}
 
 		$revisions = $this->find( $creation_id );

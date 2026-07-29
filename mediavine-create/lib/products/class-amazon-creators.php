@@ -150,11 +150,39 @@ class Amazon_Creators {
 	}
 
 	/**
-	 * ASIN parsing — delegated to the legacy Amazon class so amzn.to shortlinks
-	 * and any future improvements are handled in a single place.
+	 * Parses an Amazon link to retrieve the ASIN id.
+	 *
+	 * @param string $link Product URL.
+	 * @return string|null
 	 */
 	public function get_asin_from_link( $link ) {
-		return Amazon::get_instance()->get_asin_from_link( $link );
+		// Resolve amzn.to shortlinks to the full URL before parsing ASIN.
+		// Match the real host (not a bare substring, which allows SSRF via URLs
+		// like http://169.254.169.254/?x=amzn.to) and fetch through the SSRF-guarded
+		// helper, which validates the URL and every redirect hop (blocking
+		// link-local/CGNAT that WP's own redirect check misses).
+		$host = strtolower( (string) wp_parse_url( $link, PHP_URL_HOST ) );
+		if ( 'amzn.to' === $host || 'www.amzn.to' === $host ) {
+			$response = mv_create_safe_remote_get( $link, [ 'redirection' => 5, 'timeout' => 10 ] );
+			if ( ! is_wp_error( $response ) ) {
+				$http_response = $response['http_response'];
+				if ( $http_response instanceof \WP_HTTP_Requests_Response ) {
+					$requests_response = $http_response->get_response_object();
+					if ( ! empty( $requests_response->url ) ) {
+						$link = $requests_response->url;
+					}
+				}
+			}
+		}
+
+		// https://regex101.com/r/PLxDdM/3
+		$re = '/http[s]?:\/\/.+(?<code>\/gp|\/dp).+(?<asin>[a-zA-Z0-9]{10})/U';
+
+		preg_match_all( $re, $link, $matches, PREG_SET_ORDER, 0 );
+		if ( ! empty( $matches[0]['asin'] ) ) {
+			return $matches[0]['asin'];
+		}
+		return null;
 	}
 
 	public function amazon_affiliates_setup() {
@@ -179,30 +207,142 @@ class Amazon_Creators {
 		) {
 			return new \WP_Error(
 				'create_not_registered',
-				__( 'Register to Access PRO Features', 'mediavine' ),
+				__( 'Register to Access PRO Features', 'mediavine-create' ),
 				[
 					'status'    => 401,
-					'message'   => __( 'Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title.', 'mediavine' ),
+					'message'   => __( 'Create must be registered to access pro features like Amazon product scraping. Please register and then activate Amazon Affiliates or manually add an image and title.', 'mediavine-create' ),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_api' ),
-					'link_text' => __( 'Register Create', 'mediavine' ),
+					'link_text' => __( 'Register Create', 'mediavine-create' ),
 				]
 			);
 		}
 
 		return new \WP_Error(
 			'creators_api_not_setup',
-			__( 'Amazon Creators API Not Setup', 'mediavine' ),
+			__( 'Amazon Creators API Not Setup', 'mediavine-create' ),
 			[
 				'status'    => 401,
-				'message'   => __( 'Amazon Creators API is not enabled or fully configured. Please enter your Creators API credentials from Associates Central, or manually add an image and title.', 'mediavine' ),
+				'message'   => __( 'Amazon Creators API is not enabled or fully configured. Please enter your Creators API credentials from Associates Central, or manually add an image and title.', 'mediavine-create' ),
 				'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-				'link_text' => __( 'Configure Amazon Affiliates', 'mediavine' ),
+				'link_text' => __( 'Configure Amazon Affiliates', 'mediavine-create' ),
 			]
 		);
 	}
 
+	/**
+	 * Retrieves the Amazon credential provisioning timeout status.
+	 *
+	 * @return false|mixed|\WP_Error
+	 */
 	public function get_amazon_provision_lockout() {
-		return Amazon::get_instance()->get_amazon_provision_lockout();
+		$timeout = self::get_transient_timeout( 'mv_create_amazon_provision' );
+		if ( $timeout ) {
+			$time = $timeout - time();
+			if ( $time > 0 ) {
+				return new \WP_Error(
+					'creators_provisioning',
+					__( 'Waiting for Amazon Affiliates Credential Provision', 'mediavine-create' ),
+					[
+						'status'  => 403,
+						'message' => sprintf(
+							// Translators: Remaining time
+							__( 'Amazon Affiliates may still be provisioning. Expected time remaining: %s. Please manually add an image and title.', 'mediavine-create' ),
+							$this->seconds_to_time( $time )
+						),
+					]
+				);
+			}
+		}
+
+		return $timeout;
+	}
+
+	/**
+	 * Retrieve transient timeout.
+	 *
+	 * @param string $transient Transient name.
+	 * @return false|mixed
+	 */
+	public static function get_transient_timeout( $transient ) {
+		global $wpdb;
+
+		$complete = Settings::get_setting( $transient . '_complete', false );
+		if ( $complete ) {
+			// Looking for a timeout's existence — if complete, existence is false.
+			return false;
+		}
+
+		$sanitized_transient = preg_replace( '/[^a-zA-Z0-9_]/', '', $transient );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+		$transient_timeout   = $wpdb->get_col(
+			"
+		  SELECT option_value
+		  FROM $wpdb->options
+		  WHERE option_name
+		  LIKE '%_transient_timeout_$sanitized_transient%'
+		"
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+		if ( ! empty( $transient_timeout[0] ) ) {
+			return $transient_timeout[0];
+		}
+
+		Settings::create_settings(
+			[
+				'slug'  => $transient . '_complete',
+				'value' => true,
+			]
+		);
+
+		return false;
+	}
+
+	/**
+	 * Converts seconds to readable time.
+	 *
+	 * @param int     $input_seconds    Seconds.
+	 * @param boolean $display_seconds  Whether seconds should be displayed.
+	 * @return string Human readable time.
+	 */
+	public function seconds_to_time( $input_seconds, $display_seconds = false ) {
+		$hours = $input_seconds / HOUR_IN_SECONDS;
+
+		$minute_seconds = $input_seconds % HOUR_IN_SECONDS;
+		$minutes        = floor( $minute_seconds / MINUTE_IN_SECONDS );
+
+		$time_parts = [];
+		$sections   = [
+			[
+				'time'     => (int) $hours,
+				'singular' => __( 'hour', 'mediavine-create' ),
+				'plural'   => __( 'hours', 'mediavine-create' ),
+			],
+			[
+				'time'     => (int) $minutes,
+				'singular' => __( 'minute', 'mediavine-create' ),
+				'plural'   => __( 'minutes', 'mediavine-create' ),
+			],
+		];
+
+		if ( $display_seconds ) {
+			$remaining_seconds = $input_seconds % MINUTE_IN_SECONDS;
+			$seconds           = ceil( $remaining_seconds );
+
+			$sections[] = [
+				'time'     => (int) $seconds,
+				'singular' => __( 'second', 'mediavine-create' ),
+				'plural'   => __( 'seconds', 'mediavine-create' ),
+			];
+		}
+
+		foreach ( $sections as $section ) {
+			if ( $section['time'] > 0 ) {
+				$time_parts[] = $section['time'] . ' ' . ( 1 === $section['time'] ? $section['singular'] : $section['plural'] );
+			}
+		}
+
+		return implode( ', ', $time_parts );
 	}
 
 	private function get_oauth_token() {
@@ -248,12 +388,12 @@ class Amazon_Creators {
 			$this->log_oauth_failure( $token_endpoint, 'wp_error', $response->get_error_message() );
 			return new \WP_Error(
 				'creators_oauth_error',
-				__( 'Amazon: OAuth Token Request Failed', 'mediavine' ),
+				__( 'Amazon: OAuth Token Request Failed', 'mediavine-create' ),
 				[
 					'status'  => 500,
 					'message' => sprintf(
 						/* translators: %s: the transport-level error message */
-						__( 'Could not obtain an OAuth token from Amazon. Error: %s', 'mediavine' ),
+						__( 'Could not obtain an OAuth token from Amazon. Error: %s', 'mediavine-create' ),
 						$response->get_error_message()
 					),
 				]
@@ -286,24 +426,24 @@ class Amazon_Creators {
 			}
 			$detail = ! empty( $detail_parts )
 				? implode( ': ', $detail_parts )
-				: __( 'Unknown error', 'mediavine' );
+				: __( 'Unknown error', 'mediavine-create' );
 
 			$guidance = $this->get_oauth_error_guidance( $error_code );
 
 			return new \WP_Error(
 				'creators_oauth_error',
-				__( 'Amazon: OAuth Authentication Failed', 'mediavine' ),
+				__( 'Amazon: OAuth Authentication Failed', 'mediavine-create' ),
 				[
 					'status'  => $status_code,
 					'message' => sprintf(
 						/* translators: 1: HTTP status code, 2: Amazon's error detail, 3: guidance */
-						__( 'Amazon rejected your Creators API credentials (HTTP %1$d): %2$s %3$s', 'mediavine' ),
+						__( 'Amazon rejected your Creators API credentials (HTTP %1$d): %2$s %3$s', 'mediavine-create' ),
 						$status_code,
 						$detail,
 						$guidance
 					),
 					'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine' ),
+					'link_text' => __( 'Check Your Credentials in Settings', 'mediavine-create' ),
 				]
 			);
 		}
@@ -324,18 +464,21 @@ class Amazon_Creators {
 	 */
 	private function get_oauth_error_guidance( $error_code ) {
 		$guidance = [
-			'invalid_client'      => __( 'This usually means the Credential ID or Credential Secret is incorrect, or your credentials are still provisioning (allow up to 48 hours after creation).', 'mediavine' ),
-			'invalid_scope'       => __( 'Your credentials do not have access to the Creators API scope. Verify the credentials were created in Associates Central under Tools > Creators API.', 'mediavine' ),
-			'unauthorized_client' => __( 'Your Associates account may not be approved for the Creators API yet, or it was disabled. Check your account status in Associates Central.', 'mediavine' ),
-			'invalid_grant'       => __( 'The client_credentials grant was rejected. Double-check your Credential ID and Secret for copy/paste errors (including trailing spaces).', 'mediavine' ),
-			'invalid_request'     => __( 'The request was rejected as malformed. Please report this to support.', 'mediavine' ),
+			'invalid_client'      => __( 'This usually means the Credential ID or Credential Secret is incorrect, or your credentials are still provisioning (allow up to 48 hours after creation).', 'mediavine-create' ),
+			'invalid_scope'       => __( 'Your credentials do not have access to the Creators API scope. Verify the credentials were created in Associates Central under Tools > Creators API.', 'mediavine-create' ),
+			'unauthorized_client' => __( 'Your Associates account may not be approved for the Creators API yet, or it was disabled. Check your account status in Associates Central.', 'mediavine-create' ),
+			'invalid_grant'       => __( 'The client_credentials grant was rejected. Double-check your Credential ID and Secret for copy/paste errors (including trailing spaces).', 'mediavine-create' ),
+			'invalid_request'     => __( 'The request was rejected as malformed. Please report this to support.', 'mediavine-create' ),
 		];
-		return $guidance[ $error_code ] ?? __( 'Please verify your Credential ID and Secret in Associates Central.', 'mediavine' );
+		return $guidance[ $error_code ] ?? __( 'Please verify your Credential ID and Secret in Associates Central.', 'mediavine-create' );
 	}
 
 	// The credential secret is never logged; the credential ID is masked to its prefix.
 	private function log_oauth_failure( $endpoint, $status_code, $body_or_msg ) {
-		error_log(
+		if ( ( defined( 'PHPUNIT_MV_TESTING' ) && PHPUNIT_MV_TESTING ) || ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+		Help::log(
 			sprintf(
 				'[mv_create Amazon Creators] OAuth failure | version=%s | endpoint=%s | status=%s | credential_id_prefix=%s | response=%s',
 				$this->credential_version,
@@ -355,6 +498,10 @@ class Amazon_Creators {
 	}
 
 	private function log_api_failure( $status_code, $body_or_msg, $request = [] ) {
+		if ( ( defined( 'PHPUNIT_MV_TESTING' ) && PHPUNIT_MV_TESTING ) || ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+
 		$context = [
 			'marketplace' => $this->marketplace,
 			'region'      => $this->region,
@@ -362,7 +509,7 @@ class Amazon_Creators {
 			'asins'       => $request['itemIds'] ?? [],
 		];
 
-		error_log(
+		Help::log(
 			sprintf(
 				'[mv_create Amazon Creators] API failure | status=%s | context=%s | response=%s',
 				$status_code,
@@ -435,12 +582,12 @@ class Amazon_Creators {
 			$this->log_api_failure( 'wp_error', $response->get_error_message(), $request_body );
 			return new \WP_Error(
 				'creators_api_request_error',
-				__( 'Amazon: Creators API Request Failed', 'mediavine' ),
+				__( 'Amazon: Creators API Request Failed', 'mediavine-create' ),
 				[
 					'status'  => 500,
 					'message' => sprintf(
 						/* translators: %s: the transport-level error message */
-						__( 'Could not reach the Amazon Creators API. Error: %s', 'mediavine' ),
+						__( 'Could not reach the Amazon Creators API. Error: %s', 'mediavine-create' ),
 						$response->get_error_message()
 					),
 				]
@@ -473,7 +620,7 @@ class Amazon_Creators {
 					'title'                  => $title,
 					'description'            => $title,
 					'external_thumbnail_url' => $image_url,
-					'expires'                => date( 'Y-m-d H:i:s', strtotime( '+24 hours' ) ),
+					'expires'                => gmdate( 'Y-m-d H:i:s', strtotime( '+24 hours' ) ),
 				];
 			}
 		}
@@ -505,25 +652,25 @@ class Amazon_Creators {
 	private function get_reason_guidance( $reason ) {
 		$guidance = [
 			// ValidationException reasons
-			'UnknownOperation'       => __( 'The requested API operation was not recognized by Amazon. This is likely a bug in the plugin — please report it.', 'mediavine' ),
-			'CannotParse'            => __( 'Amazon could not parse the request. This is likely a bug in the plugin — please report it.', 'mediavine' ),
-			'FieldValidationFailed'  => __( 'One or more request fields failed validation. See the field list for details.', 'mediavine' ),
-			'InvalidAssociate'       => __( 'Your Creators API credentials are not linked to the Associate Tag for this marketplace. Verify the tag and marketplace selection in settings.', 'mediavine' ),
-			'InvalidPartnerTag'      => __( 'The Associate Tag is invalid or is not mapped to the store associated with your credentials. Double-check the tag in your settings.', 'mediavine' ),
+			'UnknownOperation'       => __( 'The requested API operation was not recognized by Amazon. This is likely a bug in the plugin — please report it.', 'mediavine-create' ),
+			'CannotParse'            => __( 'Amazon could not parse the request. This is likely a bug in the plugin — please report it.', 'mediavine-create' ),
+			'FieldValidationFailed'  => __( 'One or more request fields failed validation. See the field list for details.', 'mediavine-create' ),
+			'InvalidAssociate'       => __( 'Your Creators API credentials are not linked to the Associate Tag for this marketplace. Verify the tag and marketplace selection in settings.', 'mediavine-create' ),
+			'InvalidPartnerTag'      => __( 'The Associate Tag is invalid or is not mapped to the store associated with your credentials. Double-check the tag in your settings.', 'mediavine-create' ),
 
 			// AccessDeniedException reasons
-			'AssociateNotEligible'   => __( 'Your Associates account does not currently meet the eligibility requirements (10 qualified sales in the trailing 30 days). Access is restored within 2 days of new qualified sales.', 'mediavine' ),
-			'AuthorizationFailed'    => __( 'Amazon rejected the authorization check. Verify your credentials and Associate Tag are for the same account/marketplace.', 'mediavine' ),
+			'AssociateNotEligible'   => __( 'Your Associates account does not currently meet the eligibility requirements (10 qualified sales in the trailing 30 days). Access is restored within 2 days of new qualified sales.', 'mediavine-create' ),
+			'AuthorizationFailed'    => __( 'Amazon rejected the authorization check. Verify your credentials and Associate Tag are for the same account/marketplace.', 'mediavine-create' ),
 
 			// UnauthorizedException reasons
-			'TokenExpired'           => __( 'The access token expired. The plugin will automatically refresh it on the next request.', 'mediavine' ),
-			'InvalidToken'           => __( 'The access token is invalid or malformed. The plugin will regenerate it on the next request.', 'mediavine' ),
-			'InvalidIssuer'          => __( 'The token issuer does not match the expected issuer for this marketplace. Verify that the selected marketplace matches the region where your credentials were created.', 'mediavine' ),
-			'MissingClaim'           => __( 'The access token is missing required claims. This is likely an issue with how the plugin obtained the token — please report it.', 'mediavine' ),
-			'MissingKeyId'           => __( 'The access token is missing its key identifier. This is likely an issue with how the plugin obtained the token — please report it.', 'mediavine' ),
-			'UnsupportedClient'      => __( 'Your client credentials are not registered for the Creators API. Verify you generated them from Associates Central > Tools > Creators API.', 'mediavine' ),
-			'InvalidClient'          => __( 'The client identifier does not match the expected value. Double-check your Credential ID for typos or extra whitespace.', 'mediavine' ),
-			'MissingCredential'      => __( 'The request was missing authentication credentials. This is likely a plugin bug — please report it.', 'mediavine' ),
+			'TokenExpired'           => __( 'The access token expired. The plugin will automatically refresh it on the next request.', 'mediavine-create' ),
+			'InvalidToken'           => __( 'The access token is invalid or malformed. The plugin will regenerate it on the next request.', 'mediavine-create' ),
+			'InvalidIssuer'          => __( 'The token issuer does not match the expected issuer for this marketplace. Verify that the selected marketplace matches the region where your credentials were created.', 'mediavine-create' ),
+			'MissingClaim'           => __( 'The access token is missing required claims. This is likely an issue with how the plugin obtained the token — please report it.', 'mediavine-create' ),
+			'MissingKeyId'           => __( 'The access token is missing its key identifier. This is likely an issue with how the plugin obtained the token — please report it.', 'mediavine-create' ),
+			'UnsupportedClient'      => __( 'Your client credentials are not registered for the Creators API. Verify you generated them from Associates Central > Tools > Creators API.', 'mediavine-create' ),
+			'InvalidClient'          => __( 'The client identifier does not match the expected value. Double-check your Credential ID for typos or extra whitespace.', 'mediavine-create' ),
+			'MissingCredential'      => __( 'The request was missing authentication credentials. This is likely a plugin bug — please report it.', 'mediavine-create' ),
 		];
 
 		return $guidance[ $reason ] ?? '';
@@ -539,13 +686,14 @@ class Amazon_Creators {
 		}
 
 		if ( ! empty( $reason ) ) {
-			$parts[] = sprintf( __( '[Reason: %s]', 'mediavine' ), $reason );
+			/* translators: %s: reason text */
+			$parts[] = sprintf( __( '[Reason: %s]', 'mediavine-create' ), $reason );
 		}
 
 		if ( ! empty( $body['fieldList'] ) && is_array( $body['fieldList'] ) ) {
 			$parts[] = sprintf(
 				/* translators: %s: comma-separated list of invalid field names */
-				__( 'Invalid fields: %s', 'mediavine' ),
+				__( 'Invalid fields: %s', 'mediavine-create' ),
 				implode( ', ', $body['fieldList'] )
 			);
 		}
@@ -553,7 +701,7 @@ class Amazon_Creators {
 		if ( ! empty( $body['resourceType'] ) || ! empty( $body['resourceId'] ) ) {
 			$parts[] = sprintf(
 				/* translators: 1: resource type (e.g. "Item"), 2: resource ID (e.g. ASIN) */
-				__( 'Resource: %1$s "%2$s"', 'mediavine' ),
+				__( 'Resource: %1$s "%2$s"', 'mediavine-create' ),
 				$body['resourceType'] ?? '?',
 				$body['resourceId']   ?? '?'
 			);
@@ -563,7 +711,7 @@ class Amazon_Creators {
 		if ( isset( $body['retryAfterSeconds'] ) ) {
 			$parts[] = sprintf(
 				/* translators: %d: number of seconds */
-				__( 'Retry after %d seconds.', 'mediavine' ),
+				__( 'Retry after %d seconds.', 'mediavine-create' ),
 				(int) $body['retryAfterSeconds']
 			);
 		}
@@ -595,7 +743,7 @@ class Amazon_Creators {
 
 		$affiliates_link = [
 			'link_url'  => admin_url( 'options-general.php?page=mv_settings#tab=mv_create_affiliates' ),
-			'link_text' => __( 'Check Your Settings', 'mediavine' ),
+			'link_text' => __( 'Check Your Settings', 'mediavine-create' ),
 		];
 
 		// Table of known exception shapes: [status, exception_type] → WP_Error spec.
@@ -604,44 +752,44 @@ class Amazon_Creators {
 				'status'     => 401,
 				'type'       => 'UnauthorizedException',
 				'code'       => 'creators_unauthorized',
-				'title'      => __( 'Amazon: Authentication Failed', 'mediavine' ),
-				'base'       => __( 'Amazon rejected your Creators API credentials.', 'mediavine' ),
-				'extra'      => array_merge( $affiliates_link, [ 'link_text' => __( 'Check Your Credentials in Settings', 'mediavine' ) ] ),
+				'title'      => __( 'Amazon: Authentication Failed', 'mediavine-create' ),
+				'base'       => __( 'Amazon rejected your Creators API credentials.', 'mediavine-create' ),
+				'extra'      => array_merge( $affiliates_link, [ 'link_text' => __( 'Check Your Credentials in Settings', 'mediavine-create' ) ] ),
 				'on_match'   => function () { delete_transient( 'mv_create_creators_oauth_token' ); },
 			],
 			[
 				'status'     => 403,
 				'type'       => 'AccessDeniedException',
 				'code'       => 'creators_access_denied',
-				'title'      => __( 'Amazon: Access Denied', 'mediavine' ),
-				'base'       => __( 'Amazon denied access to the Creators API.', 'mediavine' ),
+				'title'      => __( 'Amazon: Access Denied', 'mediavine-create' ),
+				'base'       => __( 'Amazon denied access to the Creators API.', 'mediavine-create' ),
 				'extra'      => [
 					'link_url'  => 'https://affiliate-program.amazon.com/assoc_credentials/home',
-					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine' ),
+					'link_text' => __( 'Check Your Account in Amazon Associates Central', 'mediavine-create' ),
 				],
 			],
 			[
 				'status'     => 429,
 				'type'       => 'ThrottleException',
 				'code'       => 'creators_rate_limited',
-				'title'      => __( 'Amazon: Rate Limit Exceeded', 'mediavine' ),
-				'base'       => __( 'Amazon is rate-limiting your requests. Wait a few minutes before trying again.', 'mediavine' ),
+				'title'      => __( 'Amazon: Rate Limit Exceeded', 'mediavine-create' ),
+				'base'       => __( 'Amazon is rate-limiting your requests. Wait a few minutes before trying again.', 'mediavine-create' ),
 				'extra'      => [ 'retry_after' => isset( $body['retryAfterSeconds'] ) ? (int) $body['retryAfterSeconds'] : null ],
 			],
 			[
 				'status'     => 400,
 				'type'       => 'ValidationException',
 				'code'       => 'creators_validation_error',
-				'title'      => __( 'Amazon: Invalid Request', 'mediavine' ),
-				'base'       => __( 'Amazon reports an invalid request.', 'mediavine' ),
+				'title'      => __( 'Amazon: Invalid Request', 'mediavine-create' ),
+				'base'       => __( 'Amazon reports an invalid request.', 'mediavine-create' ),
 				'extra'      => [ 'field_list' => $body['fieldList'] ?? [] ],
 			],
 			[
 				'status'     => 404,
 				'type'       => 'ResourceNotFoundException',
 				'code'       => 'creators_not_found',
-				'title'      => __( 'Amazon: Resource Not Found', 'mediavine' ),
-				'base'       => __( 'The requested Amazon resource was not found.', 'mediavine' ),
+				'title'      => __( 'Amazon: Resource Not Found', 'mediavine-create' ),
+				'base'       => __( 'The requested Amazon resource was not found.', 'mediavine-create' ),
 				'extra'      => array_merge( $affiliates_link, [
 					'resource_type' => $body['resourceType'] ?? '',
 					'resource_id'   => $body['resourceId']   ?? '',
@@ -651,8 +799,8 @@ class Amazon_Creators {
 				'status'     => 500,
 				'type'       => 'InternalServerException',
 				'code'       => 'creators_server_error',
-				'title'      => __( 'Amazon: Server Error', 'mediavine' ),
-				'base'       => __( 'Amazon reported an unexpected server error. Please try again in a few minutes.', 'mediavine' ),
+				'title'      => __( 'Amazon: Server Error', 'mediavine-create' ),
+				'base'       => __( 'Amazon reported an unexpected server error. Please try again in a few minutes.', 'mediavine-create' ),
 				'extra'      => [],
 			],
 		];
@@ -675,11 +823,11 @@ class Amazon_Creators {
 
 		return new \WP_Error(
 			'creators_api_error',
-			__( 'Amazon: Creators API Error', 'mediavine' ),
+			__( 'Amazon: Creators API Error', 'mediavine-create' ),
 			array_merge( $base_data, [
 				'message' => $this->compose_message(
 					/* translators: %d: HTTP status code */
-					sprintf( __( 'An error occurred with the Amazon Creators API (HTTP %d).', 'mediavine' ), $status_code ),
+					sprintf( __( 'An error occurred with the Amazon Creators API (HTTP %d).', 'mediavine-create' ), $status_code ),
 					$detail
 				),
 			] )

@@ -42,8 +42,8 @@ class Review_Responses_API extends Review_Responses {
 			$error  = true;
 			$errors = $this::$api_services->normalize_errors(
 				$errors, 422, [
-					'title'   => __( 'Review ID Required', 'mediavine' ),
-					'details' => __( 'A valid review ID is required', 'mediavine' ),
+					'title'   => __( 'Review ID Required', 'mediavine-create' ),
+					'details' => __( 'A valid review ID is required', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -52,8 +52,8 @@ class Review_Responses_API extends Review_Responses {
 			$error  = true;
 			$errors = $this::$api_services->normalize_errors(
 				$errors, 422, [
-					'title'   => __( 'Content Required', 'mediavine' ),
-					'details' => __( 'Response content is required', 'mediavine' ),
+					'title'   => __( 'Content Required', 'mediavine-create' ),
+					'details' => __( 'Response content is required', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -62,8 +62,8 @@ class Review_Responses_API extends Review_Responses {
 			$error  = true;
 			$errors = $this::$api_services->normalize_errors(
 				$errors, 422, [
-					'title'   => __( 'Author Required', 'mediavine' ),
-					'details' => __( 'Author name or user ID is required', 'mediavine' ),
+					'title'   => __( 'Author Required', 'mediavine-create' ),
+					'details' => __( 'Author name or user ID is required', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -72,8 +72,8 @@ class Review_Responses_API extends Review_Responses {
 			$error  = true;
 			$errors = $this::$api_services->normalize_errors(
 				$errors, 422, [
-					'title'   => __( 'Invalid Email', 'mediavine' ),
-					'details' => __( 'Email address provided is invalid', 'mediavine' ),
+					'title'   => __( 'Invalid Email', 'mediavine-create' ),
+					'details' => __( 'Email address provided is invalid', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -113,7 +113,7 @@ class Review_Responses_API extends Review_Responses {
 			if ( ! $review ) {
 				return new \WP_Error(
 					'review_not_found',
-					__( 'Review not found.', 'mediavine' ),
+					__( 'Review not found.', 'mediavine-create' ),
 					[ 'status' => 404 ]
 				);
 			}
@@ -122,7 +122,7 @@ class Review_Responses_API extends Review_Responses {
 			if ( ! $this->has_public_associated_post( $creation ) ) {
 				return new \WP_Error(
 					'review_not_public',
-					__( 'This review is not associated with a public post.', 'mediavine' ),
+					__( 'This review is not associated with a public post.', 'mediavine-create' ),
 					[ 'status' => 401 ]
 				);
 			}
@@ -193,7 +193,7 @@ class Review_Responses_API extends Review_Responses {
 		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_RESPOND ) ) {
 			return new \WP_Error(
 				'feature_gated',
-				__( 'Responding to reviews requires a Pro subscription', 'mediavine' ),
+				__( 'Responding to reviews requires a Pro subscription', 'mediavine-create' ),
 				[
 					'status'      => 403,
 					'upgrade_url' => GateKeeper::get_upgrade_url(),
@@ -206,8 +206,8 @@ class Review_Responses_API extends Review_Responses {
 			$status_code        = 403;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				$response['errors'], $status_code, [
-					'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-					'details' => __( 'Your submission includes unsafe characters', 'mediavine' ),
+					'title'   => __( 'Unsafe Content Submission', 'mediavine-create' ),
+					'details' => __( 'Your submission includes unsafe characters', 'mediavine-create' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
@@ -234,8 +234,8 @@ class Review_Responses_API extends Review_Responses {
 			$status_code        = 429;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				[], $status_code, [
-					'title'   => __( 'Rate Limit Exceeded', 'mediavine' ),
-					'details' => __( 'You are submitting responses too quickly. Please wait before trying again.', 'mediavine' ),
+					'title'   => __( 'Rate Limit Exceeded', 'mediavine-create' ),
+					'details' => __( 'You are submitting responses too quickly. Please wait before trying again.', 'mediavine-create' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
@@ -250,8 +250,8 @@ class Review_Responses_API extends Review_Responses {
 			$status_code        = 500;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				[], $status_code, [
-					'title'   => __( 'Response Creation Failed', 'mediavine' ),
-					'details' => __( 'Unable to create response', 'mediavine' ),
+					'title'   => __( 'Response Creation Failed', 'mediavine-create' ),
+					'details' => __( 'Unable to create response', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -269,7 +269,7 @@ class Review_Responses_API extends Review_Responses {
 		if ( ! $this->is_authorized_response_action( $params['id'] ) ) {
 			return new \WP_Error(
 				'rest_forbidden',
-				__( 'You are not authorized to edit this response.', 'mediavine' ),
+				__( 'You are not authorized to edit this response.', 'mediavine-create' ),
 				[ 'status' => 401 ]
 			);
 		}
@@ -291,8 +291,8 @@ class Review_Responses_API extends Review_Responses {
 			$status_code        = 500;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				[], $status_code, [
-					'title'   => __( 'Response Update Failed', 'mediavine' ),
-					'details' => __( 'Unable to update response', 'mediavine' ),
+					'title'   => __( 'Response Update Failed', 'mediavine-create' ),
+					'details' => __( 'Unable to update response', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -310,7 +310,7 @@ class Review_Responses_API extends Review_Responses {
 		if ( ! $this->is_authorized_response_action( $response_id ) ) {
 			return new \WP_Error(
 				'rest_forbidden',
-				__( 'You are not authorized to delete this response.', 'mediavine' ),
+				__( 'You are not authorized to delete this response.', 'mediavine-create' ),
 				[ 'status' => 401 ]
 			);
 		}
@@ -323,8 +323,8 @@ class Review_Responses_API extends Review_Responses {
 		} else {
 			return new \WP_Error( 
 				409, 
-				__( 'Response Could Not Be Deleted', 'mediavine' ), 
-				[ 'message' => __( 'A conflict occurred and the response could not be deleted', 'mediavine' ) ] 
+				__( 'Response Could Not Be Deleted', 'mediavine-create' ), 
+				[ 'message' => __( 'A conflict occurred and the response could not be deleted', 'mediavine-create' ) ] 
 			);
 		}
 
@@ -336,7 +336,8 @@ class Review_Responses_API extends Review_Responses {
 			return [ 'exceeded' => false ];
 		}
 
-		$transient_key = 'mv_response_rate_limit_' . md5( $_SERVER['REMOTE_ADDR'] ?? 'unknown' );
+		$remote_addr   = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+		$transient_key = 'mv_response_rate_limit_' . md5( $remote_addr );
 		$submissions = get_transient( $transient_key );
 
 		if ( ! $submissions ) {

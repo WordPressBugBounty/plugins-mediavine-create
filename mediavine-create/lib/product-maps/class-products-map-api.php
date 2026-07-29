@@ -135,12 +135,16 @@ class Products_Map_API extends Products {
 				 * Should we be doing this here with ALL products or only with new products,
 				 * ie: products that aren't listed on the Recommended Products page?
 				 */
-				add_filter( 'mv_create_allow_normalized_null', '__return_true' );
-				$product = self::$models_v2->mv_products->upsert(
-					$product_map,
-					$upsert_properties
+				$product = with_filter(
+					'mv_create_allow_normalized_null',
+					'__return_true',
+					function() use ( $product_map, $upsert_properties ) {
+						return self::$models_v2->mv_products->upsert(
+							$product_map,
+							$upsert_properties
+						);
+					}
 				);
-				remove_filter( 'mv_create_allow_normalized_null', '__return_true' );
 
 				/**
 				 * Product is empty, then it can't be found
@@ -148,7 +152,7 @@ class Products_Map_API extends Products {
 				 * WP_Error object is returned to be included in the $maps_to_create array
 				 */
 				if ( empty( $product ) ) {
-					return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine' ), [ 'message' => __( 'The Product could not be found', 'mediavine' ) ] );
+					return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine-create' ), [ 'message' => __( 'The Product could not be found', 'mediavine-create' ) ] );
 				}
 
 				if ( ! isset( $product_map['product_id'] ) && ! empty( $product->id ) ) {
@@ -282,7 +286,7 @@ class Products_Map_API extends Products {
 		$deleted = self::$models_v2->mv_products_map->delete( $params['id'] );
 
 		if ( ! $deleted ) {
-			return new \WP_Error( 409, __( 'Entry Could Not Be Deleted', 'mediavine' ), [ 'message' => __( 'A conflict occurred and the Product Maps could not be deleted', 'mediavine' ) ] );
+			return new \WP_Error( 409, __( 'Entry Could Not Be Deleted', 'mediavine-create' ), [ 'message' => __( 'A conflict occurred and the Product Maps could not be deleted', 'mediavine-create' ) ] );
 		}
 		$data     = self::$api_services->prepare_item_for_response( $deleted, $request );
 		$response = API_Services::set_response_data( $data, $response );

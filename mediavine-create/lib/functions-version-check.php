@@ -1,4 +1,8 @@
 <?php
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Checks for a minimum version
@@ -103,8 +107,8 @@ function mv_create_permalink_check() {
 	if ( ! get_option( 'permalink_structure' ) ) {
 		$notice = sprintf(
 		// translators: Link to learn about enabling permalinks
-			__( '<strong>Create by Mediavine</strong> uses the WordPress REST API to power its functionality. In order for this to work properly, pretty permalinks must be enabled.<br><br>%1$s', 'mediavine' ),
-			'<a href="https://wordpress.org/support/article/using-permalinks/" target="_blank">' . __( 'Learn about enabling permalinks', 'mediavine' ) . '</a>'
+			__( '<strong>Create by Mediavine</strong> uses the WordPress REST API to power its functionality. In order for this to work properly, pretty permalinks must be enabled.<br><br>%1$s', 'mediavine-create' ),
+			'<a href="https://wordpress.org/support/article/using-permalinks/" target="_blank">' . __( 'Learn about enabling permalinks', 'mediavine-create' ) . '</a>'
 		);
 		mv_create_admin_error_notice( $notice );
 	}
@@ -125,11 +129,11 @@ function mv_create_incompatible_notice() {
 		if ( isset( $compatible_errors['php'] ) ) {
 			$notice = sprintf(
 			// translators: Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
-				__( '<strong>Create by Mediavine</strong> requires PHP version %1$s or higher, but recommends %2$s or higher. This site is running PHP version %3$s.<br><br>%4$s.', 'mediavine' ),
+				__( '<strong>Create by Mediavine</strong> requires PHP version %1$s or higher, but recommends %2$s or higher. This site is running PHP version %3$s.<br><br>%4$s.', 'mediavine-create' ),
 				$compatible_errors['php'],
 				$compatible_errors['recommended_php'],
 				PHP_VERSION,
-				'<a href="https://wordpress.org/support/update-php/" target="_blank">' . __( 'Learn about updating PHP', 'mediavine' ) . '</a>'
+				'<a href="https://wordpress.org/support/update-php/" target="_blank">' . __( 'Learn about updating PHP', 'mediavine-create' ) . '</a>'
 			);
 			mv_create_admin_error_notice( $notice );
 			$deactivate_plugin = true;
@@ -140,10 +144,10 @@ function mv_create_incompatible_notice() {
 			global $wp_version;
 			$notice = sprintf(
 			// translators: Required WP version number; Current WP version number
-				__( '<strong>Create by Mediavine</strong> requires WordPress %1$s or higher. This site is running WordPress %2$s. Please update WordPress to activate <strong>Create by Mediavine</strong>.', 'mediavine' ),
+				__( '<strong>Create by Mediavine</strong> requires WordPress %1$s or higher. This site is running WordPress %2$s. Please update WordPress to activate <strong>Create by Mediavine</strong>.', 'mediavine-create' ),
 				$compatible_errors['wp'],
 				$wp_version,
-				'<a href="https://wordpress.org/support/article/updating-wordpress/" target="_blank">' . __( 'Learn about updating WordPress', 'mediavine' ) . '</a>'
+				'<a href="https://wordpress.org/support/article/updating-wordpress/" target="_blank">' . __( 'Learn about updating WordPress', 'mediavine-create' ) . '</a>'
 			);
 			mv_create_admin_error_notice( $notice );
 			$deactivate_plugin = true;
@@ -153,12 +157,12 @@ function mv_create_incompatible_notice() {
 		if ( isset( $compatible_errors['deprecated_php'] ) ) {
 			$notice = sprintf(
 			// translators: Date within styled tag; Required PHP version number; Recommended PHP version number; Current PHP version number; Link to learn about updating PHP
-				__( 'Starting %1$s, <strong>Create by Mediavine</strong> will require PHP version %2$s, but recommends %3$s or higher. This site is running PHP version %4$s. To maintain compatibility with <strong>Create by Mediavine</strong>, please upgrade your PHP version.<br><br>%5$s.', 'mediavine' ),
-				'<strong style="font-size: 1.2em;">' . __( 'January 2021', 'mediavine' ) . '</strong>',
+				__( 'Starting %1$s, <strong>Create by Mediavine</strong> will require PHP version %2$s, but recommends %3$s or higher. This site is running PHP version %4$s. To maintain compatibility with <strong>Create by Mediavine</strong>, please upgrade your PHP version.<br><br>%5$s.', 'mediavine-create' ),
+				'<strong style="font-size: 1.2em;">' . __( 'January 2021', 'mediavine-create' ) . '</strong>',
 				$compatible_errors['deprecated_php'],
 				$compatible_errors['recommended_php'],
 				PHP_VERSION,
-				'<a href="https://wordpress.org/support/update-php/" target="_blank">' . __( 'Learn about updating PHP', 'mediavine' ) . '</a>'
+				'<a href="https://wordpress.org/support/update-php/" target="_blank">' . __( 'Learn about updating PHP', 'mediavine-create' ) . '</a>'
 			);
 			mv_create_admin_error_notice( $notice );
 		}
@@ -168,17 +172,17 @@ function mv_create_incompatible_notice() {
 			global $wp_version;
 			$notice = sprintf(
 			// translators: Date within styled tag; Required WP version number
-				__( 'Starting %1$s, WordPress %2$s will be required for all functionality, however keeping WordPress up-to-date at the latest version is still recommended. To maintain future compatibility with <strong>Create by Mediavine</strong>, please update WordPress.', 'mediavine' ),
-				'<strong style="font-size: 1.2em;">' . __( 'January 2021', 'mediavine' ) . '</strong>',
+				__( 'Starting %1$s, WordPress %2$s will be required for all functionality, however keeping WordPress up-to-date at the latest version is still recommended. To maintain future compatibility with <strong>Create by Mediavine</strong>, please update WordPress.', 'mediavine-create' ),
+				'<strong style="font-size: 1.2em;">' . __( 'January 2021', 'mediavine-create' ) . '</strong>',
 				$compatible_errors['deprecated_wp']
 			);
-			$notice .= '<br><br><a href="https://wordpress.org/support/article/updating-wordpress/" target="_blank">' . __( 'Learn about updating WordPress', 'mediavine' ) . '</a>';
+			$notice .= '<br><br><a href="https://wordpress.org/support/article/updating-wordpress/" target="_blank">' . __( 'Learn about updating WordPress', 'mediavine-create' ) . '</a>';
 			mv_create_admin_error_notice( $notice );
 		}
 
 		// Should we deactivate the plugin?
 		if ( $deactivate_plugin ) {
-			mv_create_admin_error_notice( __( '<strong>Create by Mediavine</strong> has been deactivated.', 'mediavine' ) );
+			mv_create_admin_error_notice( __( '<strong>Create by Mediavine</strong> has been deactivated.', 'mediavine-create' ) );
 			deactivate_plugins( MV_CREATE_PLUGIN_FILE );
 			return;
 		}
@@ -204,7 +208,7 @@ function mv_create_throw_warnings() {
 
 	$notice = sprintf(
 	// translators: a list of disabled PHP extensions
-		__( '<strong>Create by Mediavine</strong> requires the following disabled PHP extensions in order to function properly: <code>%1$s</code>.<br/><br/>Your hosting environment does not currently have these enabled.<br/><br/>Please contact your hosting provider and ask them to ensure these extensions are enabled.', 'mediavine' ),
+		__( '<strong>Create by Mediavine</strong> requires the following disabled PHP extensions in order to function properly: <code>%1$s</code>.<br/><br/>Your hosting environment does not currently have these enabled.<br/><br/>Please contact your hosting provider and ask them to ensure these extensions are enabled.', 'mediavine-create' ),
 		$message
 	);
 

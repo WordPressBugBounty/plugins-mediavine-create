@@ -1,3 +1,4 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
 <?php if ( ! empty( $args['creation']['description'] ) ) {
 	if ( empty( $args['creation']['description_hide'] ) ) { ?>
 		<div class="mv-create-description">

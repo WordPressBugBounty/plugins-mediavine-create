@@ -7,7 +7,50 @@ use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Yummly {
+class Import_Yummly extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'yummly';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe['original_id'] );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		$rating = isset( $serialized['rating'] ) ? $serialized['rating'] : null;
+		if ( empty( $rating ) ) {
+			return false;
+		}
+		$ratings = [];
+		for ( $i = 0; $i < 3; $i++ ) {
+			$ratings[] = [
+				'creation' => $stored_recipe['id'],
+				'rating'   => $rating,
+			];
+		}
+		return $ratings;
+	}
 
 	public static $table_name = 'amd_yrecipe_recipes';
 
@@ -47,8 +90,10 @@ class Import_Yummly {
 
 					foreach ( $matches[1] as $index => $recipe_id ) {
 						$statement = "SELECT recipe_id as id, recipe_title as title FROM {$models->amd_yrecipe_recipes->table_name} where recipe_id = %s";
+						// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 						$prepared  = $wpdb->prepare( $statement, $recipe_id );
 						$results   = $wpdb->get_results( $prepared );
+						// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 						if ( empty( $results ) ) {
 							continue;
 						}
@@ -66,6 +111,7 @@ class Import_Yummly {
 
 			$statement = "SELECT recipe_title as title, recipe_id as original_id, IFNULL((SELECT ID FROM {$wpdb->posts} WHERE post_type='post' AND post_status IN ('publish', 'draft') AND post_content LIKE CONCAT('%[amd-yrecipe-recipe:', original_id, '%') LIMIT 1), FALSE) as canonical_post_id FROM {$models->amd_yrecipe_recipes->table_name}";
 
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 			return $wpdb->get_results( $statement, ARRAY_A );
 		}
 		return [];
@@ -120,7 +166,7 @@ class Import_Yummly {
 			$formatted[ $key ] = html_entity_decode( $recipe->{$value} );
 		}
 
-		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		$ingredients_sections = [];
 
@@ -161,7 +207,7 @@ class Import_Yummly {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$success  = true;
 		$y_model  = new \Mediavine\MV_DBI( self::$table_name );

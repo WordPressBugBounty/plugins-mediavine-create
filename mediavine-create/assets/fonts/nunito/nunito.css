@@ -1,0 +1,29 @@
+/**
+ * Self-hosted Nunito for the Create admin UI.
+ *
+ * Nunito is licensed under the SIL Open Font License 1.1 (see OFL.txt in this
+ * directory), so it can be bundled with and redistributed by the plugin. These
+ * are the variable fonts: a single file per style spans the full weight range
+ * (200-1000), so no per-weight files are needed. WOFF2 only, served from the
+ * plugin over the site's own scheme via Plugin::assets_url().
+ */
+
+@font-face {
+	font-family: 'Nunito';
+	src: url('Nunito-roman.woff2') format('woff2-variations'),
+	     url('Nunito-roman.woff2') format('woff2');
+	font-weight: 200 1000;
+	font-stretch: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Nunito';
+	src: url('Nunito-italic.woff2') format('woff2-variations'),
+	     url('Nunito-italic.woff2') format('woff2');
+	font-weight: 200 1000;
+	font-stretch: normal;
+	font-style: italic;
+	font-display: swap;
+}

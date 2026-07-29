@@ -29,19 +29,19 @@ class List_Ads implements Settings_Group {
 				'order' => 100,
 				'data'  => [
 					'type'         => 'select',
-					'label'        => __( 'Ad Provider', 'mediavine' ),
-					'instructions' => __( 'Choose your ad provider. "Auto-detect" checks for Mediavine Control Panel automatically.', 'mediavine' ),
+					'label'        => __( 'Ad Provider', 'mediavine-create' ),
+					'instructions' => __( 'Choose your ad provider. "Auto-detect" checks for Mediavine Control Panel automatically.', 'mediavine-create' ),
 					'options'      => [
 						[
-							'label' => __( 'Auto-detect', 'mediavine' ),
+							'label' => __( 'Auto-detect', 'mediavine-create' ),
 							'value' => 'auto',
 						],
 						[
-							'label' => __( 'Mediavine', 'mediavine' ),
+							'label' => __( 'Mediavine', 'mediavine-create' ),
 							'value' => 'mediavine',
 						],
 						[
-							'label' => __( 'Other / None', 'mediavine' ),
+							'label' => __( 'Other / None', 'mediavine-create' ),
 							'value' => 'none',
 						],
 					],
@@ -54,9 +54,9 @@ class List_Ads implements Settings_Group {
 				'order' => 105,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Enable Ads in Lists', 'mediavine' ),
-					'instructions' => __( 'Enable ad slot insertion between list items.', 'mediavine' ),
-					'default'      => $has_mcp ? __( 'Enabled', 'mediavine' ) : __( 'Disabled', 'mediavine' ),
+					'label'        => __( 'Enable Ads in Lists', 'mediavine-create' ),
+					'instructions' => __( 'Enable ad slot insertion between list items.', 'mediavine-create' ),
+					'default'      => $has_mcp ? __( 'Enabled', 'mediavine-create' ) : __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -66,27 +66,27 @@ class List_Ads implements Settings_Group {
 				'order' => 106,
 				'data'  => [
 					'type'         => 'select',
-					'label'        => __( 'List Items Between Ads', 'mediavine' ),
-					'instructions' => __( 'Choose the number of list items between each ad in the card.', 'mediavine' ),
+					'label'        => __( 'List Items Between Ads', 'mediavine-create' ),
+					'instructions' => __( 'Choose the number of list items between each ad in the card.', 'mediavine-create' ),
 					'options'      => [
 						[
-							'label' => __( 'Disable ads in lists', 'mediavine' ),
+							'label' => __( 'Disable ads in lists', 'mediavine-create' ),
 							'value' => 0,
 						],
 						[
-							'label' => __( '2', 'mediavine' ),
+							'label' => __( '2', 'mediavine-create' ),
 							'value' => '2',
 						],
 						[
-							'label' => __( '3', 'mediavine' ),
+							'label' => __( '3', 'mediavine-create' ),
 							'value' => '3',
 						],
 						[
-							'label' => __( '4', 'mediavine' ),
+							'label' => __( '4', 'mediavine-create' ),
 							'value' => '4',
 						],
 						[
-							'label' => __( '5', 'mediavine' ),
+							'label' => __( '5', 'mediavine-create' ),
 							'value' => '5',
 						],
 					],
@@ -102,8 +102,8 @@ class List_Ads implements Settings_Group {
 			'order' => 107,
 			'data'  => [
 				'type'         => 'textarea',
-				'label'        => __( 'Ad Slot HTML', 'mediavine' ),
-				'instructions' => __( 'Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped.', 'mediavine' ),
+				'label'        => __( 'Ad Slot HTML', 'mediavine-create' ),
+				'instructions' => __( 'Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped.', 'mediavine-create' ),
 				'default'      => '',
 			],
 		];

@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 if ( $args['creation'] ) {
 	$custom_class = \Mediavine\Create\Creations_Views::get_custom_field( $args['creation'], 'class' );
 
@@ -43,11 +44,9 @@ if ( $args['creation'] ) {
 		}
 	}
 
-	$cs_config_attr = '';
 	if ( ! empty( $cs_config ) ) {
 		$cs_config['widgetLayout'] = \Mediavine\Settings::get_setting( 'mv_create_widget_toolbar_layout', 'toolbar' );
 		$cs_config['showLabels']   = (bool) \Mediavine\Settings::get_setting( 'mv_create_show_widget_labels', false );
-		$cs_config_attr = ' data-cs-config="' . esc_attr( wp_json_encode( $cs_config ) ) . '"';
 	}
 
 	/**
@@ -59,7 +58,11 @@ if ( $args['creation'] ) {
 
 	$card_inline_style = trim( 'position: relative; ' . \Mediavine\Create\Creations_Views::get_card_inline_style() );
 	?>
-	<section id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>" class="<?php echo esc_attr( $args['creation']['classes'] ); ?> <?php echo esc_attr( $custom_class ); ?>"<?php echo $cs_config_attr; ?> style="<?php echo esc_attr( $card_inline_style ); ?>">
+	<section id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>" class="<?php echo esc_attr( $args['creation']['classes'] ); ?> <?php echo esc_attr( $custom_class ); ?>"<?php
+	if ( ! empty( $cs_config ) ) {
+		echo ' data-cs-config="' . esc_attr( wp_json_encode( $cs_config ) ) . '"';
+	}
+	?> style="<?php echo esc_attr( $card_inline_style ); ?>">
 		<?php
 		/**
 		 * mv_create_card_before_wrapper hook.

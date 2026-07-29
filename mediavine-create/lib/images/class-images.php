@@ -3,7 +3,6 @@ namespace Mediavine\Create;
 
 use Mediavine\Models;
 use Mediavine\MV_DBI;
-use Mediavine\Permissions;
 use Mediavine\Create\Helpers\Arr;
 use Mediavine\Create\Helpers\Str;
 use WP_REST_Server;
@@ -11,6 +10,11 @@ use WP_REST_Server;
 class Images {
 
 	const DB_VERSION = '0.1.0';
+
+	/**
+	 * WP-Cron hook that advances the deferred image size queue.
+	 */
+	const QUEUE_CRON_HOOK = 'mv_create_step_image_queue';
 
 	public $api_route = 'mv-images';
 
@@ -122,6 +126,26 @@ class Images {
 				'meta'  => $original_attach_data,
 			]
 		);
+
+		self::schedule_queue_step();
+	}
+
+	/**
+	 * Schedule a single WP-Cron event to process the image queue if none is pending.
+	 *
+	 * @param int|null $timestamp Unix timestamp to run the event. Defaults to now.
+	 * @return void
+	 */
+	public static function schedule_queue_step( $timestamp = null ) {
+		if ( wp_next_scheduled( self::QUEUE_CRON_HOOK ) ) {
+			return;
+		}
+
+		if ( null === $timestamp ) {
+			$timestamp = time();
+		}
+
+		wp_schedule_single_event( $timestamp, self::QUEUE_CRON_HOOK );
 	}
 
 	/**
@@ -415,6 +439,45 @@ class Images {
 	}
 
 	/**
+	 * Ordered list of Create image resolution suffixes (low → high).
+	 *
+	 * Filterable via `mv_create_image_resolutions` so card rendering, JSON-LD,
+	 * and internal size selection stay in sync when the list is customized.
+	 *
+	 * @return array
+	 */
+	public static function resolutions() {
+		return apply_filters(
+			'mv_create_image_resolutions',
+			[
+				'_medium_res',
+				'_medium_high_res',
+				'_high_res',
+			]
+		);
+	}
+
+	/**
+	 * Whether an image size name already includes a resolution suffix.
+	 *
+	 * Callers that pick the best size via get_highest_available_image_size()
+	 * should skip these variants so each base size is processed once.
+	 *
+	 * @param string $image_size Image size name (e.g. mv_create_1x1_high_res).
+	 * @return bool
+	 */
+	public static function size_has_resolution_suffix( $image_size ) {
+		foreach ( self::resolutions() as $resolution ) {
+			// Match the historic truthy-strpos check: suffixes never appear at
+			// offset 0 for Create size names (they always follow a base size).
+			if ( strpos( $image_size, $resolution ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Prepends base sizes for each ratio if they don't exist using the lowest available matching ratio
 	 *
 	 * @param array $current_sizes Current list of sizes with data
@@ -426,13 +489,7 @@ class Images {
 			'4x3',
 			'16x9',
 		];
-		$resolutions     = apply_filters(
-			'mv_create_image_resolutions', [
-				'_medium_res',
-				'_medium_high_res',
-				'_high_res',
-			]
-		);
+		$resolutions     = self::resolutions();
 		foreach ( $required_ratios as $required_ratio ) {
 			if ( ! array_key_exists( 'mv_create_' . $required_ratio, $current_sizes ) ) {
 				// Add first matching ratio
@@ -494,13 +551,7 @@ class Images {
 	public static function get_highest_available_image_size( $img_id, $img_size, $available_sizes = null ) {
 		$prefix      = $img_size;
 		$image_sizes = self::get_image_sizes();
-		$resolutions = apply_filters(
-			'mv_create_image_resolutions', [
-				'_medium_res',
-				'_medium_high_res',
-				'_high_res',
-			]
-		);
+		$resolutions = self::resolutions();
 
 		foreach ( $image_sizes as $size => $size_meta ) {
 			foreach ( $resolutions as $resolution ) {
@@ -524,17 +575,45 @@ class Images {
 	}
 
 	/**
-	 * Run queue on page-load
+	 * Advance the deferred image size queue by one item.
 	 *
-	 * @return mixed
+	 * Intended for WP-Cron (see process_image_queue). Keeps a cheap empty-queue
+	 * exit so accidental callers do not pay for lock/transient work.
+	 *
+	 * The queue lock transient already has a TTL (lock_timeout); do not unlock
+	 * before stepping — that defeated concurrency protection.
+	 *
+	 * @return mixed Result of Queue::step — null if empty, false if locked, else callback result.
 	 */
 	public function step_queue() {
-		self::$image_queue->unlock();
+		if ( empty( self::$image_queue->dump() ) ) {
+			return null;
+		}
+
 		return self::$image_queue->step(
 			function ( $item ) {
 				self::generate_intermediate_sizes( $item['id'], $item['sizes'], $item['meta'] );
 			}
 		);
+	}
+
+	/**
+	 * WP-Cron callback: step one queued image, then re-schedule while work remains.
+	 *
+	 * @return void
+	 */
+	public function process_image_queue() {
+		$result = $this->step_queue();
+
+		// Another request holds the lock — try again shortly.
+		if ( false === $result ) {
+			self::schedule_queue_step( time() + 30 );
+			return;
+		}
+
+		if ( ! empty( self::$image_queue->dump() ) ) {
+			self::schedule_queue_step();
+		}
 	}
 
 	/**
@@ -781,6 +860,7 @@ class Images {
 		self::$models             = new \stdClass();
 		self::$models->{'images'} = new MV_DBI( $this->images_table );
 
+		add_action( self::QUEUE_CRON_HOOK, [ $this, 'process_image_queue' ] );
 		add_action( 'edit_attachment', [ $this, 'updated_image' ] );
 		add_action( 'rest_api_init', [ $this, 'images_routes' ] );
 		add_filter( 'intermediate_image_sizes_advanced', [ $this, 'disable_intermediate_image_sizes' ], 555 );
@@ -832,16 +912,12 @@ class Images {
 				[
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => [ $this->images_api, 'create_image' ],
-					'permission_callback' => static function() {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this->images_api, 'read_images' ],
-					'permission_callback' => static function() {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -851,9 +927,7 @@ class Images {
 				[
 					'methods'             => WP_REST_server::READABLE,
 					'callback'            => [ $this->images_api, 'fetch_media_urls' ],
-					'permission_callback' => function () {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -864,25 +938,19 @@ class Images {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this->images_api, 'read_single_image' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => [ $this->images_api, 'update_single_image' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => [ $this->images_api, 'delete_single_image' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -892,9 +960,7 @@ class Images {
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this->images_api, 'verify_integrity' ],
-					'permission_callback' => function () {
-						return Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

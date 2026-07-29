@@ -75,13 +75,14 @@ class Featured_Review extends Plugin {
 
 		$table = $wpdb->prefix . 'mv_reviews';
 
-		// SECURITY CHECKED: This query is properly prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE `$table` SET is_featured = 0 WHERE creation = %d AND is_featured = 1",
 				$creation_id
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return $result !== false;
 	}
@@ -210,8 +211,8 @@ class Featured_Review extends Plugin {
 			'order' => 60,
 			'data'  => [
 				'type'         => 'checkbox',
-				'label'        => __( 'Featured Reviews: Show Rating', 'mediavine' ),
-				'instructions' => __( 'Display the star rating in featured review blocks.', 'mediavine' ),
+				'label'        => __( 'Featured Reviews: Show Rating', 'mediavine-create' ),
+				'instructions' => __( 'Display the star rating in featured review blocks.', 'mediavine-create' ),
 				'default'      => 'Enabled',
 			],
 		];
@@ -223,8 +224,8 @@ class Featured_Review extends Plugin {
 			'order' => 62,
 			'data'  => [
 				'type'         => 'checkbox',
-				'label'        => __( 'Featured Reviews: Show Review Text', 'mediavine' ),
-				'instructions' => __( 'Display the review content in featured review blocks.', 'mediavine' ),
+				'label'        => __( 'Featured Reviews: Show Review Text', 'mediavine-create' ),
+				'instructions' => __( 'Display the review content in featured review blocks.', 'mediavine-create' ),
 				'default'      => 'Enabled',
 			],
 		];
@@ -236,8 +237,8 @@ class Featured_Review extends Plugin {
 			'order' => 64,
 			'data'  => [
 				'type'         => 'checkbox',
-				'label'        => __( 'Featured Reviews: Show Reviewer Name', 'mediavine' ),
-				'instructions' => __( 'Display the reviewer\'s name in featured review blocks.', 'mediavine' ),
+				'label'        => __( 'Featured Reviews: Show Reviewer Name', 'mediavine-create' ),
+				'instructions' => __( 'Display the reviewer\'s name in featured review blocks.', 'mediavine-create' ),
 				'default'      => 'Enabled',
 			],
 		];

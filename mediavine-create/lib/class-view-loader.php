@@ -9,6 +9,19 @@ class View_Loader {
 
 	public static $plugin_path = null;
 
+	/**
+	 * Plugin-side style directory aliases.
+	 *
+	 * Styles listed here fall back to the aliased style's plugin view files when
+	 * they don't have their own. Only applies to the plugin lookup chain in
+	 * locate_view; theme overrides still use the original style directory.
+	 *
+	 * @var array
+	 */
+	private static $style_aliases = [
+		'centered-dark' => 'centered',
+	];
+
 	public static function get_instance( $plugin_path ) {
 		if ( null === self::$instance ) {
 			self::$plugin_path = $plugin_path;
@@ -42,20 +55,8 @@ class View_Loader {
 				$image      = (array) $image;
 				$image_size = $image['image_size'];
 
-				// Use best resolution possible
-				$resolutions = [
-					'_medium_res',
-					'_medium_high_res',
-					'_high_res',
-				];
-				foreach ( $resolutions as $resolution ) {
-					$continue = false;
-					if ( strpos( $image_size, $resolution ) ) {
-						$continue = true;
-						break;
-					}
-				}
-				if ( $continue ) {
+				// Skip resolution variants; pick the best size from the base name.
+				if ( Images::size_has_resolution_suffix( $image_size ) ) {
 					continue;
 				}
 
@@ -101,31 +102,20 @@ class View_Loader {
 	 * 8.  /themes/{$theme_name}/{$view_name}.php
 	 * 9.  /plugins/{$plugin_name}/lib/views/{$view_version}/{$view_style}/{$view_name}-{$view_type}.php
 	 * 10. /plugins/{$plugin_name}/lib/views/{$view_version}/{$view_style}/{$view_name}.php
-	 * 11. /plugins/{$plugin_name}/lib/views/{$view_version}/{$view_name}-{$view_type}.php
-	 * 12. /plugins/{$plugin_name}/lib/views/{$view_version}/{$view_name}.php
+	 * 11. /plugins/{$plugin_name}/lib/views/{$view_version}/{$aliased_style}/{$view_name}-{$view_type}.php (aliased styles only)
+	 * 12. /plugins/{$plugin_name}/lib/views/{$view_version}/{$aliased_style}/{$view_name}.php (aliased styles only)
+	 * 13. /plugins/{$plugin_name}/lib/views/{$view_version}/{$view_name}-{$view_type}.php
+	 * 14. /plugins/{$plugin_name}/lib/views/{$view_version}/{$view_name}.php
 	 *
 	 * @return  string  Path to the view file
 	 */
 	public function locate_view( $view_name, $args = [], $default_path = '' ) {
-		// Set null if missing args and force trailing slash
-		$args_array = [
-			'base',
-			'style',
-			'version',
-			'type',
-			'layout',
-		];
-		foreach ( $args_array as $arg ) {
-			${'view_' . $arg} = null;
-			if ( ! empty( $args[ $arg ] ) ) {
-				// Force trailing slash on all but type
-				if ( in_array( $arg, [ 'type', 'base' ], true ) ) {
-					${'view_' . $arg} = $args[ $arg ];
-					continue;
-				}
-				${'view_' . $arg} = trailingslashit( $args[ $arg ] );
-			}
-		}
+		// Initialize view path segments explicitly (avoids variable-variables that PHPStan cannot track).
+		// Force trailing slash on all but type/base.
+		$view_base    = ! empty( $args['base'] ) ? $args['base'] : null;
+		$view_type    = ! empty( $args['type'] ) ? $args['type'] : null;
+		$view_style   = ! empty( $args['style'] ) ? trailingslashit( $args['style'] ) : null;
+		$view_version = ! empty( $args['version'] ) ? trailingslashit( $args['version'] ) : null;
 
 		// Remove php from file name
 		if ( substr( $view_name, -4 ) === '.php' ) {
@@ -176,6 +166,12 @@ class View_Loader {
 
 		}
 
+		// Aliased style directory for the plugin-side lookup only
+		$view_style_alias = null;
+		if ( ! empty( $view_style ) && ! empty( self::$style_aliases[ untrailingslashit( $view_style ) ] ) ) {
+			$view_style_alias = trailingslashit( self::$style_aliases[ untrailingslashit( $view_style ) ] );
+		}
+
 		// Get view file from plugin style and type file
 		// 1. version/style/file-type.php
 		if ( empty( $view ) ) {
@@ -185,11 +181,19 @@ class View_Loader {
 		if ( ! file_exists( $view ) ) {
 			$view = $default_path . $view_version . $view_style . $view_name . '.php';
 		}
-		// 3. version/file-type.php
+		// 3. version/aliased-style/file-type.php
+		if ( ! empty( $view_style_alias ) && ! file_exists( $view ) ) {
+			$view = $default_path . $view_version . $view_style_alias . $view_name . '-' . $view_type . '.php';
+		}
+		// 4. version/aliased-style/file.php
+		if ( ! empty( $view_style_alias ) && ! file_exists( $view ) ) {
+			$view = $default_path . $view_version . $view_style_alias . $view_name . '.php';
+		}
+		// 5. version/file-type.php
 		if ( ! file_exists( $view ) ) {
 			$view = $default_path . $view_version . $view_name . '-' . $view_type . '.php';
 		}
-		// 4. version/file.php
+		// 6. version/file.php
 		if ( ! file_exists( $view ) ) {
 			$view = $default_path . $view_version . $view_name . '.php';
 		}

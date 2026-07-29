@@ -3,9 +3,52 @@
 namespace Mediavine\Create\Importers\Sources;
 
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
+use Mediavine\Create\Importers\Helpers\Safe_Unserialize;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
+use Mediavine\Create\Helpers\Str;
 
-class Import_Simple_Recipes_Pro_Latest {
+class Import_Simple_Recipes_Pro_Latest extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'simple_recipe_pro_latest';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
+	}
+
+	/**
+	 * Whether to also run the Simple Recipes Pro ratings double-check.
+	 *
+	 * @return bool
+	 */
+	public static function should_check_srp_ratings() {
+		return false;
+	}
 
 	public static $recipe_pairs = [
 		'title'           => 'recipename',
@@ -63,6 +106,7 @@ class Import_Simple_Recipes_Pro_Latest {
 							FROM {$wpdb->postmeta} AS pm
 							WHERE pm.post_id='{$recipe_id}'
 							AND pm.meta_key='_simple_recipe_pro_recipename'";
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 					$results   = $wpdb->get_results( $statement );
 					if ( empty( $results ) ) {
 						continue;
@@ -82,6 +126,7 @@ class Import_Simple_Recipes_Pro_Latest {
 			WHERE post_type='post'
 			AND post_status IN ('publish', 'draft')
 			AND post_content LIKE '%[simple-recipe id=%';";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$posts     = $wpdb->get_results( $statement, 'ARRAY_A' );
 		if ( ! empty( $posts ) ) {
 			foreach ( $posts as $result ) {
@@ -96,6 +141,7 @@ class Import_Simple_Recipes_Pro_Latest {
 							FROM {$wpdb->postmeta} AS pm
 							WHERE pm.post_id='{$match}'
 							AND pm.meta_key='_simple_recipe_pro_recipename'";
+						// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 						$recipe    = $wpdb->get_results( $statement, 'ARRAY_A' );
 						if ( $recipe ) {
 							$data[] = $recipe[0];
@@ -113,7 +159,8 @@ class Import_Simple_Recipes_Pro_Latest {
 	public static function serializer( $api_data ) {
 		global $wpdb;
 
-		$original_id = $api_data['original_id'];
+		// original_id is always a WordPress post ID; coerce to int to prevent SQLi.
+		$original_id = absint( $api_data['original_id'] );
 
 		$statement = "SELECT
 			meta_key,
@@ -122,6 +169,7 @@ class Import_Simple_Recipes_Pro_Latest {
 			WHERE meta_key LIKE '_simple_recipe_pro%'
 			AND post_id = {$original_id}";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$srp_primary = $wpdb->get_results( $statement, 'ARRAY_A' );
 
 		if ( $srp_primary ) {
@@ -167,10 +215,10 @@ class Import_Simple_Recipes_Pro_Latest {
 
 		$formatted['description'] = self::parse_description( $srp_data[ self::$prefix . 'description' ] );
 
-		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		if ( isset( $formatted['additional_time'] ) ) {
-			$formatted['additional_time_label'] = __( 'Wait Time', 'mediavine' );
+			$formatted['additional_time_label'] = __( 'Wait Time', 'mediavine-create' );
 		}
 
 		$formatted['ingredient_sections'] = self::parse_ingredients( $srp_data[ self::$prefix . 'ingredients' ] );
@@ -187,7 +235,7 @@ class Import_Simple_Recipes_Pro_Latest {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$models       = \Mediavine\MV_DBI::get_models( [ 'posts', 'mv_creations' ] );
 		$post_model   = $models->posts;
@@ -201,7 +249,9 @@ class Import_Simple_Recipes_Pro_Latest {
 
 		$recipe = $recipe_model->find_one( $api_data['id'] );
 
-		$api_data['post_id'] = $api_data['original_id'];
+		// original_id is always a WordPress post ID; coerce to int so it cannot
+		// inject SQL via the LIKE/ID interpolations below.
+		$api_data['post_id'] = absint( $api_data['original_id'] );
 
 		$re               = '/(\[simple-recipe id="' . $api_data['post_id'] . '".*?\])/i';
 		$simple_shortcode = '[simple-recipe id="' . $api_data['post_id'] . '"';
@@ -260,7 +310,7 @@ class Import_Simple_Recipes_Pro_Latest {
 	}
 
 	private static function parse_ingredients( $ingredients ) {
-		$srp_ingredients = maybe_unserialize( $ingredients );
+		$srp_ingredients = Safe_Unserialize::maybe( $ingredients );
 
 		$heading = '';
 		$section = [];
@@ -306,7 +356,7 @@ class Import_Simple_Recipes_Pro_Latest {
 			return $content;
 		}
 		$description = '';
-		$content     = mb_convert_encoding( $content, 'HTML-ENTITIES', 'UTF-8' );
+		$content     = Str::to_html_entities( $content );
 		$content     = wpautop( $content );
 		$doc         = new \DOMDocument();
 		@$doc->loadHTML( $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );

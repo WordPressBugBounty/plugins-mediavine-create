@@ -2,6 +2,8 @@
 
 namespace Mediavine;
 
+defined( 'ABSPATH' ) || exit;
+
 use Mediavine\Create\API_Services;
 use Mediavine\Create\GateKeeper;
 use Mediavine\Create\Plugin;
@@ -35,8 +37,8 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				$status_code        = 403;
 				$response['errors'] = $this->api_services->normalize_errors(
 					$response['errors'], $status_code, [
-						'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-						'details' => __( 'You\'re submission includes unsafe characters', 'mediavine' ),
+						'title'   => __( 'Unsafe Content Submission', 'mediavine-create' ),
+						'details' => __( 'You\'re submission includes unsafe characters', 'mediavine-create' ),
 					], 'error'
 				);
 				return new \WP_REST_Response( $response, $status_code );
@@ -92,19 +94,10 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			$response    = $this->api_services->default_response;
 			$status_code = $this->api_services->default_status;
 
-			$settings = self::$models->mv_settings->find( [ 'limit' => 200 ] );
+			$settings = self::$models->mv_settings->find( [ 'limit' => self::LOAD_LIMIT ] );
 
 			if ( $settings ) {
-				$collection = [];
-				foreach ( $settings as $setting ) {
-					$setting      = self::extract( $setting );
-					$collection[] = $this->api_services->prepare_item_for_response( $setting, $request );
-				}
-				$response          = [];
-				$response['links'] = $this->api_services->prepare_collection_links( $request );
-				$response          = $collection;
-				$status_code       = 200;
-				return new \WP_REST_Response( $response, $status_code );
+				return $this->respond_with_collection( $settings, $request );
 			}
 
 			return new \WP_REST_Response( $response, $status_code );
@@ -123,7 +116,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			$params      = $request->get_params();
 			$settings    = self::$models->mv_settings->find(
 				[
-					'limit' => 200,
+					'limit' => self::LOAD_LIMIT,
 					'where' => [
 						'`group`' => $params['slug'],
 					],
@@ -131,19 +124,31 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			);
 
 			if ( $settings ) {
-				$collection = [];
-				foreach ( $settings as $setting ) {
-					$setting      = self::extract( $setting );
-					$collection[] = $this->api_services->prepare_item_for_response( $setting, $request );
-				}
-				$response          = [];
-				$response['links'] = $this->api_services->prepare_collection_links( $request );
-				$response          = $collection;
-				$status_code       = 200;
-				return new \WP_REST_Response( $response, $status_code );
+				return $this->respond_with_collection( $settings, $request );
 			}
 
 			return new \WP_REST_Response( $response, $status_code );
+		}
+
+		/**
+		 * Build a redacted collection response for settings list routes.
+		 *
+		 * @param array            $settings Settings rows from the DB.
+		 * @param \WP_REST_Request $request  Incoming request.
+		 * @return \WP_REST_Response
+		 */
+		private function respond_with_collection( $settings, \WP_REST_Request $request ) {
+			$collection = [];
+			foreach ( $settings as $setting ) {
+				$setting      = self::extract( $setting );
+				$collection[] = $this->api_services->prepare_item_for_response( $setting, $request );
+			}
+
+			// These routes are manage_options-gated, so credential values are kept; the
+			// site JWT is still reduced to a presence flag (never needed browser-side).
+			$collection = \Mediavine\Create\Sensitive_Settings::redact( $collection, true );
+
+			return new \WP_REST_Response( $collection, 200 );
 		}
 
 		/**
@@ -169,6 +174,9 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				$setting     = self::extract( $setting );
 				$response    = [];
 				$response    = $this->api_services->prepare_item_for_response( $setting, $request );
+				// Manage_options-gated, but the site JWT is still reduced to a presence flag
+				// so it can't be lifted via the single-setting routes either.
+				$response    = \Mediavine\Create\Sensitive_Settings::redact( [ $response ], true )[0];
 				$status_code = 200;
 				return new \WP_REST_Response( $response, $status_code );
 			}
@@ -198,43 +206,10 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				$setting     = self::extract( $setting );
 				$response    = [];
 				$response    = $this->api_services->prepare_item_for_response( $setting, $request );
+				// Manage_options-gated, but the site JWT is still reduced to a presence flag
+				// so it can't be lifted via the single-setting routes either.
+				$response    = \Mediavine\Create\Sensitive_Settings::redact( [ $response ], true )[0];
 				$status_code = 200;
-				return new \WP_REST_Response( $response, $status_code );
-			}
-
-			return new \WP_REST_Response( $response, $status_code );
-		}
-
-		/**
-		 * API Function to read update Settings by setting using upsert methods
-		 *
-		 * @param  \WP_REST_Request object request object via API
-		 * @return \WP_REST_Response object for output as JSON data
-		 */
-		public function update( \WP_REST_Request $request ) {
-			$response    = $this->api_services->default_response;
-			$status_code = $this->api_services->default_status;
-
-			$sanitized = $request->sanitize_params();
-			$params    = $request->get_params();
-
-			if ( is_wp_error( $sanitized ) ) {
-				$status_code        = 403;
-				$response['errors'] = $this->api_services->normalize_errors(
-					$response['errors'], $status_code, [
-						'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-						'details' => __( 'You\'re submission includes unsafe characters', 'mediavine' ),
-					], 'error'
-				);
-				return new \WP_REST_Response( $response, $status_code );
-			}
-
-			$stored = $this->process_create( $params );
-
-			if ( $stored ) {
-				$response    = [];
-				$response    = $this->api_services->prepare_item_for_response( $stored, $request );
-				$status_code = 201;
 				return new \WP_REST_Response( $response, $status_code );
 			}
 
@@ -251,43 +226,57 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			$response    = $this->api_services->default_response;
 			$status_code = $this->api_services->default_status;
 
-			$params      = $request->get_params();
-			$old_setting = $this->read_single( $request );
-			if ( ! is_wp_error( $old_setting ) ) {
-				$old_setting = $old_setting->get_data();
-				if ( isset( $params['value'] ) && isset( $old_setting['slug'] ) ) {
-					$params['value'] = apply_filters( $old_setting['slug'] . '_settings_value', $params['value'] );
+			$params = $request->get_params();
+
+			// Partial updates may omit slug; hydrate from the existing row so
+			// sanitize_setting can apply slug-specific filters (and so we 404
+			// cleanly when the id does not exist).
+			if ( ! empty( $params['id'] ) && empty( $params['slug'] ) ) {
+				$existing = self::$models->mv_settings->find_one(
+					[
+						'col' => 'id',
+						'key' => $params['id'],
+					]
+				);
+				if ( ! $existing ) {
+					return new \WP_REST_Response( $response, $status_code );
+				}
+				$params['slug'] = $existing->slug;
+				if ( empty( $params['group'] ) && ! empty( $existing->group ) ) {
+					$params['group'] = $existing->group;
 				}
 			}
-			$setting = self::$models->mv_settings->upsert( $params );
+
+			// Funnel through create_settings so update sanitizes and invalidates like create
+			$setting = self::create_settings( $params );
+
+			if ( ! $setting || is_wp_error( $setting ) ) {
+				return new \WP_REST_Response( $response, $status_code );
+			}
 
 			if ( in_array( $setting->slug, \Mediavine\Create\Plugin::$create_settings_slugs, true ) ) {
 				\Mediavine\Create\Publish::add_all_to_publish_queue();
 			}
 
-			if ( $setting ) {
-				$setting = self::extract( $setting );
+			$setting = self::extract( $setting );
 
-				// if the card style was updated, and Trellis is active, purge the Critical CSS
-				if ( 'mv_create_card_style' === $setting->slug && Theme_Checker::is_trellis() && function_exists( 'mv_trellis_purge_all_critical_css' ) ) {
-					/**
-					 * Purge all critical CSS when the global card style is updated.
-					 *
-					 * @function mv_trellis_purge_all_critical_css
-					 *
-					 * @since 1.8.0
-					 */
-					mv_trellis_purge_all_critical_css();
-				}
-
-				do_action( 'mv_create_setting_updated_' . $setting->slug, $setting );
-
-				$response    = [];
-				$response    = $this->api_services->prepare_item_for_response( $setting, $request );
-				$status_code = 200;
-				return new \WP_REST_Response( $response, $status_code );
+			// if the card style was updated, and Trellis is active, purge the Critical CSS
+			if ( 'mv_create_card_style' === $setting->slug && Theme_Checker::is_trellis() && function_exists( 'mv_trellis_purge_all_critical_css' ) ) {
+				/**
+				 * Purge all critical CSS when the global card style is updated.
+				 *
+				 * @function mv_trellis_purge_all_critical_css
+				 *
+				 * @since 1.8.0
+				 */
+				mv_trellis_purge_all_critical_css();
 			}
 
+			do_action( 'mv_create_setting_updated_' . $setting->slug, $setting );
+
+			$response    = [];
+			$response    = $this->api_services->prepare_item_for_response( $setting, $request );
+			$status_code = 200;
 			return new \WP_REST_Response( $response, $status_code );
 		}
 
@@ -309,6 +298,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			$deleted = self::$models->mv_settings->delete( $setting_id );
 
 			if ( $deleted ) {
+				self::reset_settings();
 				$response    = [];
 				$status_code = 204;
 			}
@@ -393,7 +383,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,
-						'message' => __( 'Invalid email address', 'mediavine' ),
+						'message' => __( 'Invalid email address', 'mediavine-create' ),
 					],
 					400
 				);
@@ -417,7 +407,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,
-						'message' => __( 'Failed to send password reset email. Please try again.', 'mediavine' ),
+						'message' => __( 'Failed to send password reset email. Please try again.', 'mediavine-create' ),
 					],
 					500
 				);
@@ -433,14 +423,14 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			return new \WP_REST_Response(
 				[
 					'success' => true,
-					'message' => __( 'Password reset email sent. Please check your inbox.', 'mediavine' ),
+					'message' => __( 'Password reset email sent. Please check your inbox.', 'mediavine-create' ),
 				],
 				200
 			);
 		}
 
 			// Handle errors from Services API
-			$error_message = $data['message'] ?? __( 'Failed to send password reset email. Please try again.', 'mediavine' );
+			$error_message = $data['message'] ?? __( 'Failed to send password reset email. Please try again.', 'mediavine-create' );
 
 			return new \WP_REST_Response(
 				[
@@ -546,7 +536,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,
-						'message' => __( 'This action is only available when dev mode is enabled.', 'mediavine' ),
+						'message' => __( 'This action is only available when dev mode is enabled.', 'mediavine-create' ),
 					],
 					403
 				);
@@ -586,7 +576,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			return new \WP_REST_Response(
 				[
 					'success'         => true,
-					'message'         => __( 'Database version options have been reset. The plugin will re-run migrations on next page load.', 'mediavine' ),
+					'message'         => __( 'Database version options have been reset. The plugin will re-run migrations on next page load.', 'mediavine-create' ),
 					'deleted_options' => $deleted_options,
 				],
 				200
@@ -608,7 +598,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,
-						'message' => __( 'This action is only available when dev mode is enabled.', 'mediavine' ),
+						'message' => __( 'This action is only available when dev mode is enabled.', 'mediavine-create' ),
 					],
 					403
 				);
@@ -630,7 +620,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			return new \WP_REST_Response(
 				[
 					'success'         => true,
-					'message'         => __( 'Subscription tier options have been reset. The plugin will re-fetch subscription status on next check.', 'mediavine' ),
+					'message'         => __( 'Subscription tier options have been reset. The plugin will re-fetch subscription status on next check.', 'mediavine-create' ),
 					'deleted_options' => $deleted_options,
 				],
 				200

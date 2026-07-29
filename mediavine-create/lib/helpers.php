@@ -1,4 +1,8 @@
 <?php
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use Mediavine\Create\Helpers\Collection;
 use Mediavine\Create\Helpers\Arr;

@@ -9,7 +9,7 @@
  * Plugin Name:       Create
  * Plugin URI:        https://create.studio/plugin
  * Description:       Create custom recipe and how to cards to be displayed in posts.
- * Version:           2.5.3
+ * Version:           2.5.4
  * Requires at least: 6.5
  * Requires PHP:      7.4
  *
@@ -17,7 +17,7 @@
  * Author URI:        https://create.studio/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       mediavine
+ * Text Domain:       mediavine-create
  * Domain Path:       /languages
  */
 
@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit( 'This plugin requires WordPress' );
 }
 
-// Autoload via Composer.
-require_once __DIR__ . '/vendor/autoload.php';
+// First-party classmap autoloader (Composer is dev-only; not shipped).
+require_once __DIR__ . '/lib/autoload.php';
 
 // Environment.
 define( 'MV_CREATE_URL', plugin_dir_url( __FILE__ ) );

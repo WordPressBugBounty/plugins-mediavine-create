@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 // Default the author to the text stored in the global settings. Then check for the existence of a
 // custom field overriding the affiliate message. If it exists, use the custom field for this card.
 $copyright = null;
@@ -53,7 +54,7 @@ if ( ! empty( $args['creation']['create_settings'] ) ) {
 		<?php } ?>
 
 		<?php if ( ! empty( $args['creation']['category_name'] ) ) { ?>
-			<span class="mv-create-category"><strong class="mv-create-uppercase mv-create-strong"><?php esc_html_e( 'Category', 'mediavine' ); ?>:</strong> <?php echo esc_html( $args['creation']['category_name'] ); ?></span>
+			<span class="mv-create-category"><strong class="mv-create-uppercase mv-create-strong"><?php esc_html_e( 'Category', 'mediavine-create' ); ?>:</strong> <?php echo esc_html( $args['creation']['category_name'] ); ?></span>
 		<?php } ?>
 
 	</div>

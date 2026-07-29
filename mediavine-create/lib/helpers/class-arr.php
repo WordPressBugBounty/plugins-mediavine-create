@@ -154,7 +154,7 @@ class Arr {
 	 * @param  mixed         $default
 	 * @return mixed
 	 */
-	public static function first( $array, callable $callback = null, $default = null ) {
+	public static function first( $array, ?callable $callback = null, $default = null ) {
 		if ( is_null( $callback ) ) {
 			if ( empty( $array ) ) {
 				return mv_get_value( $default );
@@ -182,7 +182,7 @@ class Arr {
 	 * @param  mixed         $default
 	 * @return mixed
 	 */
-	public static function last( $array, callable $callback = null, $default = null ) {
+	public static function last( $array, ?callable $callback = null, $default = null ) {
 		if ( is_null( $callback ) ) {
 			return empty( $array ) ? mv_get_value( $default ) : end( $array );
 		}
@@ -477,7 +477,7 @@ class Arr {
 
 		if ( $requested > $count ) {
 			throw new InvalidArgumentException(
-				"You requested {$requested} items, but there are only {$count} items available."
+				esc_html( "You requested {$requested} items, but there are only {$count} items available." )
 			);
 		}
 
@@ -547,10 +547,12 @@ class Arr {
 		if ( is_null( $seed ) ) {
 			shuffle( $array );
 		} else {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.rand_seeding_srand -- deterministic seeded shuffle; wp_rand() cannot be seeded.
 			srand( $seed );
 
 			usort(
 				$array, function () {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.rand_rand -- paired with seeded srand() below for a reproducible, seed-stable shuffle; wp_rand() cannot be seeded.
 				return rand( -1, 1 );
 				}
 			);

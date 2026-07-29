@@ -14,7 +14,6 @@ namespace Mediavine\Create;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
-use Mediavine\Settings;
 
 /**
  * Bulk_Scrape_API class for handling bulk URL scraping.
@@ -64,7 +63,7 @@ class Bulk_Scrape_API {
 			[
 				'methods'             => 'POST',
 				'callback'            => [ $this, 'bulk_scrape' ],
-				'permission_callback' => [ $this, 'check_permissions' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				'args'                => [
 					'urls' => [
 						'required'          => true,
@@ -78,36 +77,6 @@ class Bulk_Scrape_API {
 				],
 			]
 		);
-	}
-
-	/**
-	 * Check if user has permission to access bulk scrape.
-	 *
-	 * @return bool|WP_Error True if user can access, WP_Error otherwise.
-	 */
-	public function check_permissions() {
-		// Check if user can edit posts (basic capability check).
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'You do not have permission to access this endpoint.', 'mediavine' ),
-				[ 'status' => 403 ]
-			);
-		}
-
-		// Check Pro feature access via GateKeeper.
-		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_LIST_BULK_IMPORT ) ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Bulk import is a Pro feature. Please upgrade to access this feature.', 'mediavine' ),
-				[
-					'status'      => 403,
-					'upgrade_url' => GateKeeper::get_upgrade_url(),
-				]
-			);
-		}
-
-		return true;
 	}
 
 	/**
@@ -145,6 +114,18 @@ class Bulk_Scrape_API {
 	 * @return WP_REST_Response The response with scraped data.
 	 */
 	public function bulk_scrape( WP_REST_Request $request ) {
+		// Pro feature gate (capability matches single scrape via Permissions::editor).
+		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_LIST_BULK_IMPORT ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Bulk import is a Pro feature. Please upgrade to access this feature.', 'mediavine-create' ),
+				[
+					'status'      => 403,
+					'upgrade_url' => GateKeeper::get_upgrade_url(),
+				]
+			);
+		}
+
 		$urls    = $request->get_param( 'urls' );
 		$results = [];
 
@@ -340,7 +321,7 @@ class Bulk_Scrape_API {
 				'url'    => $url,
 				'status' => 'error',
 				'type'   => $url_type['type'],
-				'error'  => __( 'Post not found or not published.', 'mediavine' ),
+				'error'  => __( 'Post not found or not published.', 'mediavine-create' ),
 			];
 		}
 
@@ -382,7 +363,7 @@ class Bulk_Scrape_API {
 				'url'    => $url,
 				'status' => 'error',
 				'type'   => 'card',
-				'error'  => __( 'Create card not found.', 'mediavine' ),
+				'error'  => __( 'Create card not found.', 'mediavine-create' ),
 			];
 		}
 
@@ -414,54 +395,36 @@ class Bulk_Scrape_API {
 	 * @return array Result array.
 	 */
 	private function scrape_amazon_url( $url ) {
-		$amazon_scraper = Amazon_Adapter::get_instance();
-		$asin           = $amazon_scraper->get_asin_from_link( $url );
+		$scraper = new Scraper_Service( self::$services_api_url );
+		$amazon  = Amazon_Adapter::get_instance();
 
-		// If we can't extract ASIN, fall back to external scraper.
-		if ( empty( $asin ) || strlen( $asin ) !== 10 ) {
+		// If Amazon API is not set up, fall back to external scraper.
+		if ( ! $amazon->amazon_affiliates_setup() ) {
 			return $this->scrape_external_url( $url );
 		}
 
-		// Check if Amazon API is set up.
-		if ( ! $amazon_scraper->amazon_affiliates_setup() ) {
-			// Fall back to external scraper if Amazon API not configured.
-			return $this->scrape_external_url( $url );
+		$result = $scraper->scrape_amazon( $url );
+
+		if ( ! empty( $result['rate_limited'] ) ) {
+			return $result;
 		}
 
-		// Try to get product data from Amazon API.
-		$products = $amazon_scraper->get_products_by_asin( $asin );
-
-		if ( is_wp_error( $products ) ) {
-			// Check for rate limiting from Amazon.
-			$error_data = $products->get_error_data();
-			if ( isset( $error_data['status'] ) && 429 === $error_data['status'] ) {
-				return [
-					'rate_limited' => true,
-					'retry_after'  => 60,
-				];
-			}
-
-			// Fall back to external scraper on error.
-			return $this->scrape_external_url( $url );
-		}
-
-		if ( ! empty( $products[ $asin ] ) ) {
-			$product = $products[ $asin ];
+		if ( ! empty( $result['status'] ) && 'success' === $result['status'] ) {
 			return [
 				'url'    => $url,
 				'status' => 'success',
 				'type'   => 'external',
 				'data'   => [
-					'title'         => $this->sanitize_title( $product['title'] ),
-					'description'   => isset( $product['description'] ) ? $product['description'] : $this->sanitize_title( $product['title'] ),
-					'thumbnail_uri' => isset( $product['external_thumbnail_url'] ) ? $product['external_thumbnail_url'] : null,
-					'asin'          => $asin,
+					'title'         => $result['title'],
+					'description'   => $result['description'],
+					'thumbnail_uri' => $result['external_thumbnail_url'],
+					'asin'          => $result['asin'],
 					'source'        => 'amazon',
 				],
 			];
 		}
 
-		// No product found, fall back to external scraper.
+		// No product found or PAAPI error — fall back to external scraper.
 		return $this->scrape_external_url( $url );
 	}
 
@@ -472,128 +435,30 @@ class Bulk_Scrape_API {
 	 * @return array Result array.
 	 */
 	private function scrape_external_url( $url ) {
-		// Get API token.
-		$api_token_setting = Settings::get_settings( 'mv_create_api_token' );
+		$scraper = new Scraper_Service( self::$services_api_url );
+		$result  = $scraper->scrape_external( $url );
 
-		if ( empty( $api_token_setting ) || empty( $api_token_setting->value ) ) {
-			// Fall back to local scraper if not authenticated.
-			return $this->scrape_with_local_scraper( $url );
+		if ( ! empty( $result['rate_limited'] ) ) {
+			return $result;
 		}
 
-		// Use the services API for scraping.
-		$scrape_url = self::$services_api_url . '/scraper/scrape';
-		$response   = wp_remote_post(
-			$scrape_url,
-			[
-				'headers' => [
-					'Content-Type'  => 'application/json; charset=utf-8',
-					'Authorization' => 'bearer ' . $api_token_setting->value,
-				],
-				'body'    => wp_json_encode( [ 'url' => $url ] ),
-				'timeout' => 15,
-			]
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return $this->create_error_result( $url, $response->get_error_message() );
+		if ( empty( $result['status'] ) || 'success' !== $result['status'] ) {
+			$error = isset( $result['error'] ) ? $result['error'] : __( 'Could not scrape URL. No title or image found.', 'mediavine-create' );
+			return $this->create_error_result( $url, $error );
 		}
 
-		$status_code = wp_remote_retrieve_response_code( $response );
-
-		// Handle rate limiting.
-		if ( 429 === $status_code ) {
-			$headers     = wp_remote_retrieve_headers( $response );
-			$retry_after = isset( $headers['retry-after'] ) ? (int) $headers['retry-after'] : 30;
-
-			return [
-				'rate_limited' => true,
-				'retry_after'  => $retry_after,
-			];
-		}
-
-		// Handle other errors.
-		if ( $status_code < 200 || $status_code >= 300 ) {
-			// Fall back to local scraper.
-			return $this->scrape_with_local_scraper( $url );
-		}
-
-		$body = wp_remote_retrieve_body( $response );
-		$data = json_decode( $body, true );
-
-		if ( empty( $data ) || ! isset( $data['data'] ) ) {
-			// Fall back to local scraper.
-			return $this->scrape_with_local_scraper( $url );
-		}
-
-		$scraped_data = $data['data'];
-
-		// Try multiple possible image field names from the external service.
-		$thumbnail = null;
-		$image_fields = [ 'lead_image_url', 'image', 'og_image', 'thumbnail', 'external_thumbnail_url', 'remote_thumbnail_uri' ];
-		foreach ( $image_fields as $field ) {
-			if ( ! empty( $scraped_data[ $field ] ) ) {
-				$thumbnail = $scraped_data[ $field ];
-				break;
-			}
-		}
-
-		// Try multiple possible description field names from the external service.
-		$description = '';
-		$desc_fields = [ 'description', 'dek', 'excerpt' ];
-		foreach ( $desc_fields as $field ) {
-			if ( ! empty( $scraped_data[ $field ] ) ) {
-				$description = $scraped_data[ $field ];
-				break;
-			}
-		}
-
-		// Extract alt text for the lead image.
-		$thumbnail_alt = '';
-		$alt_fields    = [ 'lead_image_alt', 'image_alt', 'og_image_alt' ];
-		foreach ( $alt_fields as $field ) {
-			if ( ! empty( $scraped_data[ $field ] ) ) {
-				$thumbnail_alt = $scraped_data[ $field ];
-				break;
-			}
-		}
+		$data = $result['data'];
 
 		return [
 			'url'    => $url,
 			'status' => 'success',
 			'type'   => 'external',
 			'data'   => [
-				'title'         => $this->sanitize_title( isset( $scraped_data['title'] ) ? $scraped_data['title'] : '' ),
-				'description'   => $description,
-				'thumbnail_uri' => $thumbnail,
-				'thumbnail_alt' => $thumbnail_alt,
-				'source'        => isset( $scraped_data['source'] ) ? $scraped_data['source'] : 'external-service',
-			],
-		];
-	}
-
-	/**
-	 * Scrape using the local LinkScraper as fallback.
-	 *
-	 * @param string $url The URL to scrape.
-	 * @return array Result array.
-	 */
-	private function scrape_with_local_scraper( $url ) {
-		$scraper = new LinkScraper();
-		$result  = $scraper->scrape( $url );
-
-		if ( empty( $result['title'] ) && empty( $result['remote_thumbnail_uri'] ) ) {
-			return $this->create_error_result( $url, __( 'Could not scrape URL. No title or image found.', 'mediavine' ) );
-		}
-
-		return [
-			'url'    => $url,
-			'status' => 'success',
-			'type'   => 'external',
-			'data'   => [
-				'title'         => $this->sanitize_title( isset( $result['title'] ) ? $result['title'] : '' ),
-				'description'   => isset( $result['description'] ) ? $result['description'] : '',
-				'thumbnail_uri' => isset( $result['remote_thumbnail_uri'] ) ? $result['remote_thumbnail_uri'] : null,
-				'source'        => isset( $result['source'] ) ? $result['source'] : 'local-scraper',
+				'title'         => isset( $data['title'] ) ? $data['title'] : '',
+				'description'   => isset( $data['description'] ) ? $data['description'] : '',
+				'thumbnail_uri' => isset( $data['thumbnail_uri'] ) ? $data['thumbnail_uri'] : null,
+				'thumbnail_alt' => isset( $data['thumbnail_alt'] ) ? $data['thumbnail_alt'] : '',
+				'source'        => isset( $data['source'] ) ? $data['source'] : $result['source'],
 			],
 		];
 	}
@@ -621,20 +486,7 @@ class Bulk_Scrape_API {
 	 * @return string Sanitized title.
 	 */
 	private function sanitize_title( $title ) {
-		if ( empty( $title ) ) {
-			return '';
-		}
-
-		// Remove all types of newlines and carriage returns.
-		$title = str_replace( [ "\r\n", "\r", "\n" ], ' ', $title );
-
-		// Collapse multiple spaces into one.
-		$title = preg_replace( '/\s+/', ' ', $title );
-
-		// Trim whitespace.
-		$title = trim( $title );
-
-		return $title;
+		return Scraped_Content_Normalizer::sanitize_title( $title );
 	}
 
 	/**

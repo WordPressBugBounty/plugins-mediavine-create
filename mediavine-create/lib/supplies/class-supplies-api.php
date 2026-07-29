@@ -28,7 +28,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			$supply = self::$models_v2->mv_supplies->create( $params );
 
 			if ( empty( $supply ) ) {
-				return new \WP_Error( 409, __( 'Entry Not Created', 'mediavine' ), [ 'message' => __( 'A conflict occurred and the Supply could not be created', 'mediavine' ) ] );
+				return new \WP_Error( 409, __( 'Entry Not Created', 'mediavine-create' ), [ 'message' => __( 'A conflict occurred and the Supply could not be created', 'mediavine-create' ) ] );
 			}
 			$data     = self::$api_services->prepare_item_for_response( $supply, $request );
 			$response = API_Services::set_response_data( $data, $response );
@@ -60,7 +60,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			}
 
 			if ( ! wp_is_numeric_array( $data ) ) {
-				return new \WP_Error( 404, __( 'No Entries Found', 'mediavine' ), [ 'message' => __( 'No Supplies were found for the given Creation', 'mediavine' ) ] );
+				return new \WP_Error( 404, __( 'No Entries Found', 'mediavine-create' ), [ 'message' => __( 'No Supplies were found for the given Creation', 'mediavine-create' ) ] );
 			}
 			foreach ( $data as &$supply ) {
 				$supply = self::$api_services->prepare_item_for_response( $supply, $request );
@@ -84,7 +84,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			$supply = self::$models_v2->mv_supplies->create( $params['id'] );
 
 			if ( empty( $supply ) ) {
-				return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine' ), [ 'message' => __( 'The Supply could not be found', 'mediavine' ) ] );
+				return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine-create' ), [ 'message' => __( 'The Supply could not be found', 'mediavine-create' ) ] );
 			}
 
 			$data     = self::$api_services->prepare_item_for_response( $supply, $request );
@@ -107,7 +107,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			$deleted = self::$models_v2->mv_supplies->delete( $params['id'] );
 
 			if ( ! $deleted ) {
-				return new \WP_Error( 409, __( 'Entry Could Not Be Deleted', 'mediavine' ), [ 'message' => __( 'A conflict occurred and the Supply could not be deleted', 'mediavine' ) ] );
+				return new \WP_Error( 409, __( 'Entry Could Not Be Deleted', 'mediavine-create' ), [ 'message' => __( 'A conflict occurred and the Supply could not be deleted', 'mediavine-create' ) ] );
 			}
 			$data     = self::$api_services->prepare_item_for_response( $deleted, $request );
 			$response = API_Services::set_response_data( $data, $response );

@@ -226,6 +226,26 @@ Defined at lib/creations/class-creations-api.php
 
 # Filters in Create
 
+## Filter: mv_create_trusted_proxy_ips
+
+_Added 2026-07-17._
+
+```php
+apply_filters( 'mv_create_trusted_proxy_ips', false ): bool|string[]
+```
+
+Applied in `lib/reviews/class-reviews-api.php` (`get_client_ip()`), which backs the per-IP review-submission rate limit.
+
+By default review rate limiting keys on `REMOTE_ADDR` only, because forwarded headers (`X-Forwarded-For` / `X-Real-IP`) are trivially spoofable and would otherwise let a client bypass the 5/hour limit. Sites genuinely behind a trusted reverse proxy (Cloudflare, Nginx, an ALB, etc.) can opt back into reading the forwarded client IP:
+
+- Return `true` to always trust the forwarded headers.
+- Return an array of proxy IPs to trust the forwarded headers **only** when the immediate peer (`REMOTE_ADDR`) is one of those IPs.
+- Return `false` (default) to never trust them.
+
+**Returns**
+
+- `bool|string[]` — `true`, an allow-list of trusted proxy IPs, or `false`.
+
 ## Filter: mv_create_init_settings
 
 ```php
@@ -852,24 +872,6 @@ Allow devs to filter the Create card data prior to publish
 
 - `object` Modified Creation object
 
-## Filter: mv_create_should_set_object_terms
-
-```php
-apply_filters( 'mv_create_should_set_object_terms', $max ) : boolean $max
-```
-
-Applied in `lib/creations/class-creations.php`
-
-Allow devs to filter whether the object terms should be reset.
-
-**Parameters**
-
-- `$max` Maximum `should_set_object_terms` of revisions
-
-**Returns**
-
-- `boolean`
-
 ## Filter: mv_create_is_theme_genesis
 
 ```php
@@ -1426,7 +1428,7 @@ apply_filters( 'mv_create_maximum_number_of_revisions', $max_reviews ) : int $ma
 
 Applied in `lib/revisions/class-revisions.php`
 
-Modify the maximum number of Create card revisions for a given Create card.
+Modify the maximum number of Create card revisions for a given Create card. Defaults to `15`.
 
 **Parameters**
 

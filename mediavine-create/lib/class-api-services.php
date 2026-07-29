@@ -98,12 +98,18 @@ class API_Services {
 		return $errors;
 	}
 
+	/**
+	 * Legacy permission callback; prefer \Mediavine\Permissions::editor.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return bool|\WP_Error
+	 */
 	public function permitted( \WP_REST_Request $request ) {
 		$sanitized = $request->sanitize_params();
 		if ( is_wp_error( $sanitized ) ) {
-			return false;
+			return $sanitized;
 		}
-		return \Mediavine\Permissions::is_user_authorized();
+		return \Mediavine\Permissions::editor( $request );
 	}
 
 	function prepare_collection_links( $request ) {
@@ -177,7 +183,7 @@ class API_Services {
 				$limit = get_option( 'posts_per_page' );
 			}
 			if ( 1 < $page ) {
-				$page_offset          = ( $limit * ( $page - 1 ) ) + 1;
+				$page_offset          = $limit * ( $page - 1 );
 				$query_args['offset'] = $page_offset;
 			}
 		}
@@ -187,12 +193,16 @@ class API_Services {
 			$query_args['offset'] = $offset;
 		}
 
+		// Allowlist ORDER BY / ORDER direction here at the request boundary.
+		// sanitize_text_field() does NOT strip SQL metacharacters, and these
+		// end up as raw identifiers/keywords in the query, so they must be
+		// validated (not merely sanitized) to prevent SQL injection.
 		if ( ! empty( $params['order_by'] ) ) {
-			$query_args['order_by'] = sanitize_text_field( $params['order_by'] );
+			$query_args['order_by'] = \Mediavine\MV_DBI::sanitize_sql_order_by( $params['order_by'] );
 		}
 
 		if ( ! empty( $params['order'] ) ) {
-			$query_args['order'] = sanitize_text_field( $params['order'] );
+			$query_args['order'] = \Mediavine\MV_DBI::sanitize_sql_order( $params['order'] );
 		}
 
 		$response->query_args = $query_args;
@@ -284,7 +294,7 @@ class API_Services {
 			if ( in_array( $key, [ 'author', 'category' ], true ) ) {
 				$response_data[ $key ] = '';
 				if ( ! empty( $value ) ) {
-					$term = get_term( $value, 'category' ); // TEMP
+					$term = get_term( $value, 'category' );
 					if ( ! empty( $term->name ) ) {
 						$response_data[ $key ] = $term->name;
 					}
@@ -305,34 +315,7 @@ class API_Services {
 	 * @return mixed
 	 */
 	public static function to_bool( $item ) {
-		if ( function_exists( 'filter_var' ) ) {
-			$result = filter_var( $item, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-		} else {
-			if ( in_array(
-				$item, [
-					0,
-					'0',
-					'',
-					'false',
-					'FALSE',
-					false,
-				], true
-			) ) {
-				$result = false;
-			}
-			if ( in_array(
-				$item, [
-					1,
-					'1',
-					'true',
-					'TRUE',
-					true,
-				], true
-			) ) {
-				$result = true;
-			}
-			$result = $item;
-		}
+		$result = filter_var( $item, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 		if ( ! is_bool( $result ) ) {
 			return $item;
 		}

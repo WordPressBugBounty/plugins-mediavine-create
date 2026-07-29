@@ -1,9 +1,10 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 if ( ! empty( $args['creation']['ingredients'] ) ) {
 	$group_index = 0;
 	?>
 	<div class="mv-create-ingredients">
-		<h2 class="mv-create-ingredients-title mv-create-title-secondary"><?php esc_html_e( 'Ingredients', 'mediavine' ); ?></h2>
+		<h2 class="mv-create-ingredients-title mv-create-title-secondary"><?php esc_html_e( 'Ingredients', 'mediavine-create' ); ?></h2>
 
 		<?php foreach ( $args['creation']['ingredients'] as $group => $ingredients ) { ?>
 			<?php
@@ -17,7 +18,7 @@ if ( ! empty( $args['creation']['ingredients'] ) ) {
 					<div class="mv-create-ingredient-group-header">
 						<h3><?php echo esc_html( $group ); ?></h3>
 						<button type="button" class="mv-create-ingredient-group-toggle" aria-expanded="true" style="display: none;">
-							<span class="screen-reader-text"><?php esc_html_e( 'Toggle ingredient group', 'mediavine' ); ?></span>
+							<span class="screen-reader-text"><?php esc_html_e( 'Toggle ingredient group', 'mediavine-create' ); ?></span>
 						</button>
 					</div>
 				<?php } ?>
@@ -32,30 +33,7 @@ if ( ! empty( $args['creation']['ingredients'] ) ) {
 							<?php
 							if ( ! empty( $ingredient['original_text'] ) ) {
 								if ( ! empty( $ingredient['link'] ) ) {
-									preg_match( '/([^[]*?)\[(.*)\](.*)/', $ingredient['original_text'], $matches );
-									if ( empty( $matches ) ) {
-										$before    = '';
-										$after     = '';
-										$link_text = $ingredient['original_text'];
-									} else {
-										$before    = $matches[1];
-										$link_text = $matches[2];
-										$after     = $matches[3];
-									}
-
-									echo wp_kses_post( $before );
-									echo '<a href="' . esc_url( $ingredient['link'] ) . '"';
-									if ( $ingredient['nofollow'] ) {
-										echo ' rel="nofollow"';
-									}
-									// Check for internal links
-									if ( strpos( $ingredient['link'], get_site_url() ) !== 0 ) {
-										echo ' target="_blank"';
-									}
-									echo '>';
-									echo wp_kses_post( $link_text );
-									echo '</a>';
-									echo wp_kses_post( $after );
+									\Mediavine\Create\Creations_Views::render_supply_link( $ingredient );
 								} else {
 									echo wp_kses_post( $ingredient['original_text'] );
 								}

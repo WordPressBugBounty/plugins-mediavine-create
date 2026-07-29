@@ -52,9 +52,14 @@ class LinkScraper {
 	 * @return array            Array
 	 */
 	public function scrape( $url, $priority = [ 'open-graph', 'amazon', 'fallback' ] ) {
-		$response = wp_remote_get( $url );
+		// Fetch through the SSRF-guarded helper so an authenticated user can't turn
+		// this scraper into an SSRF that reflects internal content back in the REST
+		// response. The helper validates the initial URL *and every redirect hop*
+		// against a guard that (unlike WP's) also blocks link-local (169.254.x) and
+		// CGNAT, returning a WP_Error for any unsafe hop.
+		$response = mv_create_safe_remote_get( $url );
 
-		// Early return if request fails
+		// Early return if request fails or was blocked as unsafe.
 		if ( is_wp_error( $response ) ) {
 			return array_merge( $this->defaults, [ 'source' => 'default' ] );
 		}

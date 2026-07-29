@@ -7,7 +7,38 @@ use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Ziplist {
+class Import_Ziplist extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'ziplist';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe['original_id'] );
+	}
+
+	/**
+	 * Build the per-recipe REST result after store + ratings.
+	 *
+	 * @param array $stored_recipe Stored Create recipe.
+	 * @param array $serialized    Serialized source recipe.
+	 * @param array $found_recipe  Original find stub.
+	 * @return array
+	 */
+	public static function format_result( $stored_recipe, $serialized, $found_recipe ) {
+		return $stored_recipe;
+	}
 
 	public static $table_name = 'amd_zlrecipe_recipes';
 
@@ -62,8 +93,10 @@ class Import_Ziplist {
 					}
 					foreach ( $matches[1] as $recipe_id ) {
 						$statement = "SELECT recipe_title as title FROM {$models->amd_zlrecipe_recipes->table_name} where recipe_id = %s";
+						// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 						$prepared  = $wpdb->prepare( $statement, $recipe_id );
 						$results   = $wpdb->get_results( $prepared );
+						// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 						if ( empty( $results ) ) {
 							continue;
 						}
@@ -136,7 +169,7 @@ class Import_Ziplist {
 			$formatted[ $key ] = html_entity_decode( $recipe->{$value} );
 		}
 
-		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		$ingredients_sections = [];
 
@@ -181,14 +214,16 @@ class Import_Ziplist {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$success    = true;
 		$post_model = new \Mediavine\MV_DBI( 'posts' );
 		$mv_model   = new \Mediavine\MV_DBI( 'mv_creations' );
 		$creation   = $mv_model->find_one( $api_data['id'] );
 
-		$ziplist_shortcode = '[amd-zlrecipe-recipe:' . $api_data['original_id'] . ']';
+		// original_id is always a numeric recipe/post ID; coerce to int so it
+		// cannot break out of the LIKE literal below and inject SQL.
+		$ziplist_shortcode = '[amd-zlrecipe-recipe:' . absint( $api_data['original_id'] ) . ']';
 
 		$statement = "SELECT ID,
 						ID as post_id,
@@ -211,7 +246,7 @@ class Import_Ziplist {
 
 			$zip_shortcode = "[amd-zlrecipe-recipe:{$api_data['original_id']}]";
 
-			if ( Str::contains( $zip_shortcode, $content ) ) {
+			if ( Str::contains( $content, $zip_shortcode ) ) {
 				$thumbnail    = wp_get_attachment_url( $creation->thumbnail_id );
 				$mv_shortcode = "[mv_create key=\"{$creation->id}\" title=\"{$creation->title}\" thumbnail=\"{$thumbnail}\" type=\"recipe\"]";
 

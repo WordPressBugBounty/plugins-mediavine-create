@@ -47,13 +47,17 @@ class Supplies extends Plugin {
 		$table       = self::$models_v2->mv_supplies->table_name;
 		$creation_id = intval( $creation_id );
 
-		$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d ORDER BY %s, %s ASC", [ $creation_id, 'type', 'position' ] );
+		// ORDER BY identifiers cannot use prepare() %s — they become quoted string
+		// literals and sorting silently no-ops. Interpolate only allowlisted columns.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+		$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d ORDER BY type, position ASC", [ $creation_id ] );
 
 		if ( $type ) {
-			$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d AND type = %s ORDER BY %s, %s ASC", [ $creation_id, $type, 'type', 'position' ] );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+			$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d AND type = %s ORDER BY type, position ASC", [ $creation_id, $type ] );
 		}
 
-		// SECURITY CHECKED: This query is properly prepared.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		return $wpdb->get_results( $prepared_statement );
 	}
 
@@ -150,7 +154,7 @@ class Supplies extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -168,7 +172,7 @@ class Supplies extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -181,7 +185,7 @@ class Supplies extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

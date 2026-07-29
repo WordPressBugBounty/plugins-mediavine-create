@@ -75,8 +75,8 @@ class Reviews_API extends Reviews {
 			$more_required = true;
 			$errors        = $this::$api_services->normalize_errors(
 				$errors, 403, [
-					'title'   => __( 'Missing required fields', 'mediavine' ),
-					'details' => __( 'Through no fault of yours, something is wrong', 'mediavine' ),
+					'title'   => __( 'Missing required fields', 'mediavine-create' ),
+					'details' => __( 'Through no fault of yours, something is wrong', 'mediavine-create' ),
 				], 'error'
 			);
 		}
@@ -90,8 +90,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Title is Too Long', 'mediavine' ),
-						'details' => __( 'Title must be 200 characters or fewer', 'mediavine' ),
+						'title'   => __( 'Title is Too Long', 'mediavine-create' ),
+						'details' => __( 'Title must be 200 characters or fewer', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -104,8 +104,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'URLs Not Allowed', 'mediavine' ),
-						'details' => __( 'Reviews cannot contain URLs', 'mediavine' ),
+						'title'   => __( 'URLs Not Allowed', 'mediavine-create' ),
+						'details' => __( 'Reviews cannot contain URLs', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -116,8 +116,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Review is Too Long', 'mediavine' ),
-						'details' => __( 'Review must be 1000 characters or fewer', 'mediavine' ),
+						'title'   => __( 'Review is Too Long', 'mediavine-create' ),
+						'details' => __( 'Review must be 1000 characters or fewer', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -129,8 +129,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Email is Too Long', 'mediavine' ),
-						'details' => __( 'Email must be 254 characters or fewer', 'mediavine' ),
+						'title'   => __( 'Email is Too Long', 'mediavine-create' ),
+						'details' => __( 'Email must be 254 characters or fewer', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -141,8 +141,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 403, [
-						'title'   => __( 'Email is Invalid', 'mediavine' ),
-						'details' => __( 'Email address provided is invalid', 'mediavine' ),
+						'title'   => __( 'Email is Invalid', 'mediavine-create' ),
+						'details' => __( 'Email address provided is invalid', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -153,8 +153,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Name is Too Long', 'mediavine' ),
-						'details' => __( 'Name must be 99 characters or fewer', 'mediavine' ),
+						'title'   => __( 'Name is Too Long', 'mediavine-create' ),
+						'details' => __( 'Name must be 99 characters or fewer', 'mediavine-create' ),
 					], 'error'
 				);
 			} elseif ( ! empty( $raw_params['author_name'] ) && wp_strip_all_tags( $raw_params['author_name'] ) !== $raw_params['author_name'] ) {
@@ -164,16 +164,16 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Name Contains Invalid Characters', 'mediavine' ),
-						'details' => __( 'Name cannot contain HTML or special markup', 'mediavine' ),
+						'title'   => __( 'Name Contains Invalid Characters', 'mediavine-create' ),
+						'details' => __( 'Name cannot contain HTML or special markup', 'mediavine-create' ),
 					], 'error'
 				);
 			} elseif ( preg_match( '/https?:\/\/|www\./i', $params['author_name'] ) ) {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Name Contains URL', 'mediavine' ),
-						'details' => __( 'Name cannot contain URLs', 'mediavine' ),
+						'title'   => __( 'Name Contains URL', 'mediavine-create' ),
+						'details' => __( 'Name cannot contain URLs', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -189,8 +189,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Name cannot be a number', 'mediavine' ),
-						'details' => __( 'Name of author cannot be a number', 'mediavine' ),
+						'title'   => __( 'Name cannot be a number', 'mediavine-create' ),
+						'details' => __( 'Name of author cannot be a number', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -199,8 +199,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Name is Required', 'mediavine' ),
-						'details' => __( 'Name is required for reviews less than 4 Stars', 'mediavine' ),
+						'title'   => __( 'Name is Required', 'mediavine-create' ),
+						'details' => __( 'Name is required for reviews less than 4 Stars', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -209,8 +209,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Email is Required', 'mediavine' ),
-						'details' => __( 'Email is required for reviews less than 4 Stars', 'mediavine' ),
+						'title'   => __( 'Email is Required', 'mediavine-create' ),
+						'details' => __( 'Email is required for reviews less than 4 Stars', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -219,8 +219,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Title is Required', 'mediavine' ),
-						'details' => __( 'Title is required for reviews less than 4 Stars', 'mediavine' ),
+						'title'   => __( 'Title is Required', 'mediavine-create' ),
+						'details' => __( 'Title is required for reviews less than 4 Stars', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -229,8 +229,8 @@ class Reviews_API extends Reviews {
 				$error  = true;
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
-						'title'   => __( 'Message is Required', 'mediavine' ),
-						'details' => __( 'Message is required for reviews less than 4 Stars', 'mediavine' ),
+						'title'   => __( 'Message is Required', 'mediavine-create' ),
+						'details' => __( 'Message is required for reviews less than 4 Stars', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -321,21 +321,9 @@ class Reviews_API extends Reviews {
 		$response    = $this::$api_services->default_response;
 		$status_code = $this::$api_services->default_status;
 
-		// Check rate limit (read-only, does not increment)
-		$rate_limit_check = $this->check_review_rate_limit( false );
-		if ( $rate_limit_check['exceeded'] ) {
-			$status_code        = 429;
-			$response['errors'] = $this::$api_services->normalize_errors(
-				[], $status_code, [
-					'title'   => __( 'Rate Limit Exceeded', 'mediavine' ),
-					'details' => __( 'You are submitting reviews too quickly. Please try again later.', 'mediavine' ),
-				], 'error'
-			);
-			return new \WP_REST_Response( $response, $status_code );
-		}
-
-		// Honeypot check — hidden field should be empty.
-		// Return 201 to avoid signaling detection to bots.
+		// Honeypot check — hidden field should be empty. Return a normal 201
+		// success-shaped response and silently discard, so bots can't tell the
+		// honeypot was detected (and never consume a rate-limit slot).
 		$honeypot = $request->get_param( 'create_website' );
 		if ( ! empty( $honeypot ) ) {
 			return new \WP_REST_Response( [ 'data' => (object) [ 'id' => 0 ] ], 201 );
@@ -346,8 +334,8 @@ class Reviews_API extends Reviews {
 			$status_code        = 403;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				$response['errors'], $status_code, [
-					'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-					'details' => __( 'Your submission includes unsafe characters', 'mediavine' ),
+					'title'   => __( 'Unsafe Content Submission', 'mediavine-create' ),
+					'details' => __( 'Your submission includes unsafe characters', 'mediavine-create' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
@@ -375,12 +363,24 @@ class Reviews_API extends Reviews {
 		$errors     = $result['errors'];
 
 		if ( ! $error ) {
+			// Atomically check-and-increment the rate limit only once the
+			// submission has passed validation, so malformed retries don't burn
+			// a legitimate visitor's slots but valid spam still counts.
+			$rate_limit_check = $this->check_review_rate_limit();
+			if ( $rate_limit_check['exceeded'] ) {
+				$status_code        = 429;
+				$response['errors'] = $this::$api_services->normalize_errors(
+					[], $status_code, [
+						'title'   => __( 'Rate Limit Exceeded', 'mediavine-create' ),
+						'details' => __( 'You are submitting reviews too quickly. Please try again later.', 'mediavine-create' ),
+					], 'error'
+				);
+				return new \WP_REST_Response( $response, $status_code );
+			}
+
 			$inserted = self::$models->reviews->insert( $new_review );
 
 			if ( $inserted ) {
-				// Increment rate limit only on successful insert
-				$this->check_review_rate_limit( true );
-
 				$this->Reviews->update_creation_rating( $inserted );
 				$response    = [];
 				$response    = $this::$api_services->prepare_item_for_response( $inserted, $request );
@@ -396,21 +396,55 @@ class Reviews_API extends Reviews {
 		return new \WP_REST_Response( $response, $status_code );
 	}
 
+	/**
+	 * Whether the request may update a review (Create capability or matching handshake).
+	 *
+	 * @param array $params Must include `id`; optional `handshake` for anonymous editors.
+	 * @return bool
+	 */
 	function is_authorized_review_update( $params ) {
 		// Any authorized users are safe to edit
 		if ( \Mediavine\Permissions::is_user_authorized() ) {
 			return true;
 		}
 
-		// Get current review to check handshake
-		$review    = self::$models_v2->mv_reviews->select_one( (int) $params['id'] );
-		$handshake = ( ! empty( $review->handshake ) ) ? (int) $review->handshake : false;
+		if ( empty( $params['id'] ) || empty( $params['handshake'] ) ) {
+			return false;
+		}
 
-		if ( ! empty( $params['handshake'] ) && (int) $params['handshake'] === $handshake ) {
+		// Get current review to check handshake (per-review edit token; never exposed on reads)
+		$review = self::$models_v2->mv_reviews->select_one( (int) $params['id'] );
+		if ( empty( $review ) || empty( $review->handshake ) ) {
+			return false;
+		}
+
+		return (int) $params['handshake'] === (int) $review->handshake;
+	}
+
+	/**
+	 * Permission callback for POST /reviews/{id}.
+	 *
+	 * Anonymous edits require the per-review handshake token minted at create time.
+	 * Create-authorized users may edit without a handshake.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return bool|\WP_Error
+	 */
+	function can_update_single_review( \WP_REST_Request $request ) {
+		$params = [
+			'id'        => $request['id'],
+			'handshake' => $request->get_param( 'handshake' ),
+		];
+
+		if ( $this->is_authorized_review_update( $params ) ) {
 			return true;
 		}
 
-		return false;
+		return new \WP_Error(
+			'rest_forbidden',
+			__( 'You are not authorized to edit this review.', 'mediavine-create' ),
+			[ 'status' => rest_authorization_required_code() ]
+		);
 	}
 
 	/**
@@ -429,8 +463,8 @@ class Reviews_API extends Reviews {
 			$status_code        = 403;
 			$response['errors'] = $this::$api_services->normalize_errors(
 				$response['errors'], $status_code, [
-					'title'   => __( 'Unsafe Content Submission', 'mediavine' ),
-					'details' => __( 'Your submission includes unsafe characters', 'mediavine' ),
+					'title'   => __( 'Unsafe Content Submission', 'mediavine-create' ),
+					'details' => __( 'Your submission includes unsafe characters', 'mediavine-create' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
@@ -444,7 +478,7 @@ class Reviews_API extends Reviews {
 		if ( ! $this->is_authorized_review_update( $params ) ) {
 			return new \WP_Error(
 				'rest_forbidden',
-				__( 'You are not authorized to edit this review.', 'mediavine' ),
+				__( 'You are not authorized to edit this review.', 'mediavine-create' ),
 				[ 'status' => 401 ]
 			);
 		}
@@ -454,7 +488,7 @@ class Reviews_API extends Reviews {
 			if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_EDIT ) ) {
 				return new \WP_Error(
 					'feature_gated',
-					__( 'Editing reviews requires a Pro subscription', 'mediavine' ),
+					__( 'Editing reviews requires a Pro subscription', 'mediavine-create' ),
 					[
 						'status'      => 403,
 						'upgrade_url' => GateKeeper::get_upgrade_url(),
@@ -554,7 +588,7 @@ class Reviews_API extends Reviews {
 			if ( empty( floatval( $params['creation'] ) ) ) {
 				return new \WP_Error(
 					'rest_forbidden',
-					__( 'You are not allowed to view all reviews.', 'mediavine' ),
+					__( 'You are not allowed to view all reviews.', 'mediavine-create' ),
 					[ 'status' => 401 ]
 				);
 			}
@@ -564,7 +598,7 @@ class Reviews_API extends Reviews {
 			if ( ! $this->has_public_associated_post( $creation ) ) {
 				return new \WP_Error(
 					'creation_not_public',
-					__( 'This creation is not associated with a public post.', 'mediavine' ),
+					__( 'This creation is not associated with a public post.', 'mediavine-create' ),
 					[ 'status' => 401 ]
 				);
 			}
@@ -712,8 +746,18 @@ class Reviews_API extends Reviews {
 
 			$response['links'] = $this::$api_services->prepare_collection_links( $request );
 
-			$is_authenticated  = \Mediavine\Permissions::is_user_authorized();
-			$creation_cache    = [];
+			$is_authenticated = \Mediavine\Permissions::is_user_authorized();
+			$creation_cache   = [];
+
+			// Batch-load responses so the client does not N+1 per review.
+			$review_ids              = array_map(
+				function( $review ) {
+					return (int) $review->id;
+				},
+				$reviews
+			);
+			$responses_by_review_id  = Review_Responses::get_responses_for_reviews( $review_ids );
+			$can_see_admin_responses = GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_RESPOND );
 
 			$response = [];
 			foreach ( $reviews as $review ) {
@@ -749,7 +793,17 @@ class Reviews_API extends Reviews {
 				// Do not display handshake. Ever.
 				unset( $review->handshake );
 
-				$response[] = $this::$api_services->prepare_item_for_response( $review, $request, $relationships );
+				$review_id             = (int) $review->id;
+				$prepared              = $this::$api_services->prepare_item_for_response( $review, $request, $relationships );
+				$prepared['responses'] = $this->prepare_embedded_responses(
+					isset( $responses_by_review_id[ $review_id ] )
+						? $responses_by_review_id[ $review_id ]
+						: [],
+					$request,
+					$is_authenticated,
+					$can_see_admin_responses
+				);
+				$response[] = $prepared;
 			}
 
 			$status_code = 200;
@@ -815,10 +869,11 @@ class Reviews_API extends Reviews {
 		$review    = self::$models_v2->mv_reviews->select_one_by_id( $review_id );
 
 		if ( ! $review ) {
-			return new \WP_Error( 404, __( 'Review Not Found', 'mediavine' ), [ 'status' => 404 ] );
+			return new \WP_Error( 404, __( 'Review Not Found', 'mediavine-create' ), [ 'status' => 404 ] );
 		}
 
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$deleted = $wpdb->delete( self::$models_v2->mv_reviews->table_name, [ 'id' => $review_id ] );
 
 		if ( $deleted ) {
@@ -829,10 +884,52 @@ class Reviews_API extends Reviews {
 		}
 
 		if ( ! $deleted ) {
-			return new \WP_Error( 409, __( 'Entry Could Not Be Deleted', 'mediavine' ), [ 'message' => __( 'A conflict occurred and the single review could not be deleted', 'mediavine' ) ] );
+			return new \WP_Error( 409, __( 'Entry Could Not Be Deleted', 'mediavine-create' ), [ 'message' => __( 'A conflict occurred and the single review could not be deleted', 'mediavine-create' ) ] );
 		}
 
 		return new \WP_REST_Response( $response, $status_code );
+	}
+
+	/**
+	 * Shape review responses for embedding on the reviews list payload.
+	 *
+	 * Mirrors sanitization / visibility rules in Review_Responses_API::get_review_responses.
+	 *
+	 * @param array            $responses               Raw response rows for one review.
+	 * @param \WP_REST_Request $request                 Current request (for prepare_item_for_response).
+	 * @param bool             $is_authenticated        Whether the requester is authorized.
+	 * @param bool             $can_see_admin_responses Whether admin responses should be included.
+	 * @return array
+	 */
+	private function prepare_embedded_responses( $responses, $request, $is_authenticated, $can_see_admin_responses ) {
+		$prepared = [];
+
+		foreach ( (array) $responses as $resp ) {
+			if ( ! $can_see_admin_responses && ! empty( $resp->is_admin_response ) ) {
+				continue;
+			}
+
+			$resp->content     = wp_kses(
+				$resp->content, [
+					'p'      => [],
+					'br'     => [],
+					'strong' => [],
+					'em'     => [],
+					'b'      => [],
+					'i'      => [],
+				]
+			);
+			$resp->author_name = wp_kses( $resp->author_name, [] );
+
+			if ( ! $is_authenticated ) {
+				unset( $resp->author_email );
+				unset( $resp->author_id );
+			}
+
+			$prepared[] = $this::$api_services->prepare_item_for_response( $resp, $request );
+		}
+
+		return $prepared;
 	}
 
 	/**
@@ -859,12 +956,19 @@ class Reviews_API extends Reviews {
 	}
 
 	/**
-	 * Check if review submission rate limit has been exceeded.
+	 * Atomically check the per-IP submission rate limit and reserve a slot.
 	 *
-	 * @param bool $increment Whether to increment the submission count.
+	 * Reads the recent-submission window, and — in the same operation — either
+	 * reports the limit as exceeded (without recording anything) or records the
+	 * current submission and reports the limit as clear. Collapsing the check and
+	 * the increment into a single call removes the TOCTOU window that existed when
+	 * the read-only check and the increment were separate calls, so a burst of
+	 * concurrent requests can no longer each pass a stale check before any of them
+	 * increments.
+	 *
 	 * @return array Array with 'exceeded' boolean.
 	 */
-	private function check_review_rate_limit( $increment = false ) {
+	private function check_review_rate_limit() {
 		if ( \Mediavine\Permissions::is_user_authorized() ) {
 			return [ 'exceeded' => false ];
 		}
@@ -872,12 +976,12 @@ class Reviews_API extends Reviews {
 		$transient_key = 'mv_review_rate_limit_' . md5( self::get_client_ip() );
 		$submissions   = get_transient( $transient_key );
 
-		if ( ! $submissions ) {
+		if ( ! is_array( $submissions ) ) {
 			$submissions = [];
 		}
 
 		$current_time = time();
-		$hour_ago     = $current_time - 3600;
+		$hour_ago     = $current_time - HOUR_IN_SECONDS;
 
 		$submissions = array_filter( $submissions, function( $timestamp ) use ( $hour_ago ) {
 			return $timestamp > $hour_ago;
@@ -887,28 +991,54 @@ class Reviews_API extends Reviews {
 			return [ 'exceeded' => true ];
 		}
 
-		if ( $increment ) {
-			$submissions[] = $current_time;
-			set_transient( $transient_key, $submissions, 3600 );
-		}
+		$submissions[] = $current_time;
+		set_transient( $transient_key, array_values( $submissions ), HOUR_IN_SECONDS );
 
 		return [ 'exceeded' => false ];
 	}
 
 	/**
-	 * Get the client IP address, checking proxy headers when available.
+	 * Get the client IP address for rate limiting.
 	 *
-	 * Prefers HTTP_X_FORWARDED_FOR and HTTP_X_REAL_IP (common behind load
-	 * balancers and reverse proxies like Cloudflare, Nginx, AWS ALB) before
-	 * falling back to REMOTE_ADDR.
+	 * Defaults to REMOTE_ADDR — the only value a remote client cannot spoof.
+	 * Forwarded headers (HTTP_X_FORWARDED_FOR / HTTP_X_REAL_IP) are trivially
+	 * spoofable and would let an attacker bypass the per-IP rate limit, so they
+	 * are honored only when a site explicitly opts in via the
+	 * `mv_create_trusted_proxy_ips` filter. The filter may return:
+	 *   - `true`             — always trust forwarded headers (site is always behind a trusted proxy)
+	 *   - array of IPs       — trust forwarded headers only when the immediate peer
+	 *                          (REMOTE_ADDR) is one of the listed proxy IPs
+	 *   - `false` (default)  — never trust forwarded headers
 	 *
 	 * @return string Client IP address.
 	 */
 	private static function get_client_ip() {
+		$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+
+		/**
+		 * Filter which reverse proxies are trusted to supply the real client IP.
+		 *
+		 * @param bool|string[] $trusted_proxies `true` to always trust forwarded
+		 *                                       headers, or an array of proxy IPs
+		 *                                       that must match REMOTE_ADDR. Default false.
+		 */
+		$trusted_proxies = apply_filters( 'mv_create_trusted_proxy_ips', false );
+
+		$trust_forwarded = false;
+		if ( true === $trusted_proxies ) {
+			$trust_forwarded = true;
+		} elseif ( is_array( $trusted_proxies ) && ! empty( $trusted_proxies ) ) {
+			$trust_forwarded = in_array( $remote_addr, $trusted_proxies, true );
+		}
+
+		if ( ! $trust_forwarded ) {
+			return $remote_addr;
+		}
+
 		// X-Forwarded-For may contain a chain: "client, proxy1, proxy2".
 		// The first (leftmost) IP is the original client.
 		if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$ips = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+			$ips = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
 			$ip  = trim( $ips[0] );
 			if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
 				return $ip;
@@ -916,13 +1046,13 @@ class Reviews_API extends Reviews {
 		}
 
 		if ( ! empty( $_SERVER['HTTP_X_REAL_IP'] ) ) {
-			$ip = trim( $_SERVER['HTTP_X_REAL_IP'] );
+			$ip = trim( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) ) );
 			if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
 				return $ip;
 			}
 		}
 
-		return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+		return $remote_addr;
 	}
 
 	function init() {

@@ -125,8 +125,8 @@ class Importers {
 
 		// Handle dismissal
 		if (
-			isset( $_GET['mv_create_dismiss_importer_migration'] ) &&
-			wp_verify_nonce( $_GET['_wpnonce'], 'mv_create_dismiss_importer_migration' )
+			isset( $_GET['mv_create_dismiss_importer_migration'], $_GET['_wpnonce'] ) &&
+			wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'mv_create_dismiss_importer_migration' )
 		) {
 			delete_transient( 'mv_create_importer_migration_notice' );
 			return;
@@ -136,14 +136,15 @@ class Importers {
 		?>
 		<div class="notice notice-info is-dismissible">
 			<p>
-				<strong><?php esc_html_e( 'Create Recipe Importer Migration', 'mediavine' ); ?></strong>
+				<strong><?php esc_html_e( 'Create Recipe Importer Migration', 'mediavine-create' ); ?></strong>
 			</p>
 			<p>
 				<?php
 				printf(
 					/* translators: %s: settings page URL */
 					wp_kses(
-						__( 'The standalone Create Recipe Importer plugin has been integrated into Create. The standalone plugin has been deactivated and the integrated importers have been enabled. You can manage this setting in <a href="%s">Settings → Advanced</a>.', 'mediavine' ),
+						/* translators: %s: URL to the Settings -> Advanced page */
+						__( 'The standalone Create Recipe Importer plugin has been integrated into Create. The standalone plugin has been deactivated and the integrated importers have been enabled. You can manage this setting in <a href="%s">Settings → Advanced</a>.', 'mediavine-create' ),
 						[ 'a' => [ 'href' => [] ] ]
 					),
 					esc_url( $settings_url )
@@ -151,7 +152,7 @@ class Importers {
 				?>
 			</p>
 			<p>
-				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button"><?php esc_html_e( 'Dismiss', 'mediavine' ); ?></a>
+				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button"><?php esc_html_e( 'Dismiss', 'mediavine-create' ); ?></a>
 			</p>
 		</div>
 		<?php
@@ -178,6 +179,7 @@ class Importers {
 		global $wpdb;
 		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
 		if ( version_compare( $last_plugin_version, '1.4.19', '<' ) ) {
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 			$creations = $wpdb->get_results(
 				"SELECT id, category, secondary_term, metadata
 					FROM {$wpdb->prefix}mv_creations
@@ -186,6 +188,7 @@ class Importers {
 						AND metadata NOT LIKE '%fixed_wpurp_cuisine%'",
 				ARRAY_A
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$ids       = [];
 			foreach ( $creations as $creation ) {
 				if ( ! empty( $creation['secondary_term'] ) && is_numeric( $creation['secondary_term'] ) ) {
@@ -218,6 +221,7 @@ class Importers {
 		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
 
 		if ( version_compare( $last_plugin_version, '1.4.18', '<' ) ) {
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 			$creations = $wpdb->get_results(
 				"SELECT id, original_post_id, secondary_term, keywords, metadata
 					FROM {$wpdb->prefix}mv_creations
@@ -231,6 +235,7 @@ class Importers {
 						AND metadata NOT LIKE '%fixed_tasty_cuisine_keywords%'",
 				ARRAY_A
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$ids       = [];
 			foreach ( $creations as $creation ) {
 				$post = get_post( $creation['original_post_id'] );

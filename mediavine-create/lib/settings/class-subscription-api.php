@@ -34,18 +34,9 @@ class Subscription_API {
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ __CLASS__, 'handle_sync' ],
-				'permission_callback' => [ __CLASS__, 'check_permissions' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);
-	}
-
-	/**
-	 * Permission check — require admin capability.
-	 *
-	 * @return bool True if the current user can manage options.
-	 */
-	public static function check_permissions() {
-		return current_user_can( 'manage_options' );
 	}
 
 	/**

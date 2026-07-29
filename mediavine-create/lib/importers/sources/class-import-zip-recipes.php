@@ -7,7 +7,51 @@ use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Zip_Recipes {
+class Import_Zip_Recipes extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'zip_recipes';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe['original_id'] );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return static::get_ratings( $stored_recipe );
+	}
+
+	/**
+	 * Attach native ratings onto the arrays that will be returned.
+	 *
+	 * @param array $stored_recipe Stored recipe (by ref).
+	 * @param array $found_recipe  Found stub (by ref).
+	 * @param array $ratings       Rating rows.
+	 * @return void
+	 */
+	public static function assign_native_ratings( &$stored_recipe, &$found_recipe, $ratings ) {
+		$found_recipe['ratings'] = $ratings;
+	}
 
 	public static $table_name = 'amd_zlrecipe_recipes';
 
@@ -73,8 +117,10 @@ class Import_Zip_Recipes {
 					}
 					foreach ( $matches[1] as $index => $recipe_id ) {
 						$statement          = "SELECT recipe_title as title FROM {$models->amd_zlrecipe_recipes->table_name} where recipe_id=%s";
+						// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 						$prepared_statement = $wpdb->prepare( $statement, $recipe_id );
 						$results            = $wpdb->get_results( $prepared_statement );
+						// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 						if ( empty( $results ) ) {
 							return [];
 						}
@@ -153,7 +199,7 @@ class Import_Zip_Recipes {
 			$formatted[ $key ] = html_entity_decode( $recipe->{$value} );
 		}
 
-		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		$ingredients_sections = [];
 
@@ -199,6 +245,7 @@ class Import_Zip_Recipes {
 	public static function ratings_table_exists() {
 		global $wpdb;
 		$statement = "SELECT count(*) as table_exists FROM information_schema.TABLES WHERE TABLE_NAME = '{$wpdb->prefix}zrdn_visitor_ratings'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$result = $wpdb->get_row( $statement );
 		return $result ? $result->table_exists : 0;
 	}
@@ -211,7 +258,10 @@ class Import_Zip_Recipes {
 			return $ratings;
 		}
 
-		$statement = "SELECT rating, user_id FROM {$wpdb->prefix}zrdn_visitor_ratings WHERE recipe_id={$recipe['original_id']}";
+		// original_id is always a numeric recipe ID; coerce to int to prevent SQLi.
+		$zrdn_recipe_id = absint( $recipe['original_id'] );
+		$statement = "SELECT rating, user_id FROM {$wpdb->prefix}zrdn_visitor_ratings WHERE recipe_id={$zrdn_recipe_id}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$results   = $wpdb->get_results( $statement, ARRAY_A );
 		if ( empty( $results ) ) {
 			return $ratings;
@@ -233,7 +283,7 @@ class Import_Zip_Recipes {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$success   = true;
 		$zip_model = new \Mediavine\MV_DBI( self::$table_name );

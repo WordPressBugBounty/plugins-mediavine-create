@@ -4,10 +4,68 @@ namespace Mediavine\Create\Importers\Sources;
 
 use Mediavine\Create\Helpers\Arr;
 use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Importers\Helpers\Safe_Unserialize;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 use Mediavine\Create\Plugin;
 
-class Import_Recipe_Maker {
+class Import_Recipe_Maker extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'recipe_maker';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		$full_recipe       = $serialized;
+		$full_recipe['id'] = $stored_recipe['id'];
+		return static::get_ratings( $full_recipe );
+	}
+
+	/**
+	 * Whether this importer supports the reimport endpoint.
+	 *
+	 * @return bool
+	 */
+	public static function supports_reimport() {
+		return true;
+	}
+
+	/**
+	 * Prepare api_data before reimport. Return false to abort.
+	 *
+	 * @param array $api_data creation_id / original_id payload.
+	 * @return array|false
+	 */
+	public static function prepare_reimport_data( $api_data ) {
+		$api_data['original_id'] = static::find_recipe_id_from_parent_post( $api_data['original_id'] );
+		if ( ! $api_data['original_id'] ) {
+			return false;
+		}
+		return $api_data;
+	}
 
 	private static $post_type = 'wprm_recipe';
 	public static $pairs      = [
@@ -34,7 +92,7 @@ class Import_Recipe_Maker {
 		$shortcode            = '[wprm-recipe';
 		$match                = false;
 
-		if ( Str::contains( $compatibility_string, $content ) || Str::contains( $shortcode, $content ) ) {
+		if ( Str::contains( $content, $compatibility_string ) || Str::contains( $content, $shortcode ) ) {
 			$match = true;
 		}
 		return $match;
@@ -83,13 +141,17 @@ class Import_Recipe_Maker {
 		}
 
 		$statement = "SELECT id as original_id, post_title as title, IFNULL((SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key='wprm_parent_post_id' AND post_id=original_id LIMIT 1), FALSE) as canonical_post_id FROM {$wpdb->posts} WHERE post_type='{$post_type}' AND post_status = 'publish';";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $statement, ARRAY_A );
 	}
 
 	public static function find_recipe_id_from_parent_post( $parent_post_id ) {
 		global $wpdb;
 
+		// parent_post_id comes from the request payload; coerce to int to prevent SQLi.
+		$parent_post_id = absint( $parent_post_id );
 		$statement = "SELECT post_id AS recipe_id FROM {$wpdb->postmeta} WHERE meta_key='wprm_parent_post_id' AND meta_value={$parent_post_id}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$results   = $wpdb->get_row( $statement );
 
 		return ! empty( $results->recipe_id ) ? $results->recipe_id : false;
@@ -114,7 +176,7 @@ class Import_Recipe_Maker {
 			'original_id'       => $recipe_id,
 			'title'             => html_entity_decode( $post->post_title ),
 			'description'       => self::parse_description( $post->post_content ),
-			'active_time_label' => __( 'Cook Time', 'mediavine' ),
+			'active_time_label' => __( 'Cook Time', 'mediavine-create' ),
 			'total_time'        => 0,
 			'nutrition'         => [],
 		];
@@ -197,7 +259,7 @@ class Import_Recipe_Maker {
 		$formatted['keywords'] = self::get_recipe_keywords( $recipe_id, 'wprm_keyword' );
 
 		if ( ! empty( $results[ $prefix . 'rating' ] ) ) {
-			$rating = unserialize( $results[ $prefix . 'rating' ][0] );
+			$rating = unserialize( $results[ $prefix . 'rating' ][0], [ 'allowed_classes' => false ] );
 
 			$formatted['rating']       = $rating['average'];
 			$formatted['rating_count'] = $rating['count'];
@@ -236,10 +298,10 @@ class Import_Recipe_Maker {
 			return '';
 		}
 
-		$wprm_video = maybe_unserialize( $source_video );
+		$wprm_video = Safe_Unserialize::maybe( $source_video );
 		$video      = [];
 		if ( $wprm_video === $source_video ) {
-			$slug = Str::contains( '.com', $source_video ) ?
+			$slug = Str::contains( $source_video, '.com' ) ?
 				MV_Recipe_Importer::extract_video_id_from_video_url( $source_video ) :
 				MV_Recipe_Importer::extract_mcp_video_slug_from_embed_code( $source_video );
 
@@ -384,7 +446,7 @@ class Import_Recipe_Maker {
 	private static function parse_ingredients( $content ) {
 		$global_ingredients = isset( self::$recipe['wprm_ingredient_links_type'][0] ) && 'global' === self::$recipe['wprm_ingredient_links_type'][0];
 
-		$ingredients     = unserialize( $content );
+		$ingredients     = unserialize( $content, [ 'allowed_classes' => false ] );
 		$ingredient_keys = [
 			'quantity' => 'amount',
 			'unit'     => 'unit',
@@ -441,7 +503,7 @@ class Import_Recipe_Maker {
 	}
 
 	private static function parse_ingredient_link( $link ) {
-		$link = maybe_unserialize( $link );
+		$link = Safe_Unserialize::maybe( $link );
 		if ( ! empty( $link['url'] ) ) {
 			return $link['url'];
 		}
@@ -452,14 +514,14 @@ class Import_Recipe_Maker {
 		if ( empty( $content ) ) {
 			return $content;
 		}
-		$content = mb_convert_encoding( $content, 'HTML-ENTITIES', 'UTF-8' );
+		$content = Str::to_html_entities( $content );
 
 		return wpautop( $content );
 	}
 
 	private static function parse_instructions( $content ) {
 		$Create                 = new \Mediavine\Create\Plugin();
-		$instructions_groups    = unserialize( $content );
+		$instructions_groups    = unserialize( $content, [ 'allowed_classes' => false ] );
 		$formatted_instructions = '';
 		$parsed_instructions    = [];
 		foreach ( $instructions_groups as $instructions_group ) {
@@ -470,7 +532,7 @@ class Import_Recipe_Maker {
 			$section['instructions'] = '<ol>';
 			foreach ( $instructions_group['instructions'] as $instruction ) {
 				$text = wpautop( $instruction['text'] );
-				$text = mb_convert_encoding( $text, 'HTML-ENTITIES', 'UTF-8' );
+				$text = Str::to_html_entities( $text );
 				$doc  = new \DOMDocument();
 				@$doc->loadHTML( $text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
 				$xpath = new \DOMXPath( $doc );
@@ -507,8 +569,10 @@ class Import_Recipe_Maker {
 			JOIN {$models->wprm_ratings->table_name} AS r ON (c.comment_id = r.comment_id)
 			WHERE comment_post_ID='%s'";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$prepared = $wpdb->prepare( $statement, [ $recipe['id'], $recipe['canonical_post_id'] ] );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$ratings = $wpdb->get_results( $prepared, ARRAY_A );
 		if ( $ratings ) {
 			$importer::$comment_ratings_retrieved[] = $recipe['canonical_post_id'];
@@ -527,8 +591,10 @@ class Import_Recipe_Maker {
 			FROM {$models->wprm_ratings->table_name}
 			WHERE recipe_id='%d'";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$prepared = $wpdb->prepare( $statement, [ $recipe['id'], $recipe['original_id'] ] );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $prepared, ARRAY_A );
 	}
 
@@ -546,7 +612,7 @@ class Import_Recipe_Maker {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		if ( empty( $api_data['original_id'] ) ) {
 			$api_data['error'] = $error_message;
@@ -596,6 +662,7 @@ class Import_Recipe_Maker {
 							AND post_status='publish'
 							AND ( post_content LIKE '%{$wprm_embed_check}%'
 							OR post_content LIKE '%{$wprm_block_check}%')";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$posts     = $wpdb->get_results( $statement, ARRAY_A );
 
 		if ( empty( $posts ) ) {
@@ -626,7 +693,7 @@ class Import_Recipe_Maker {
 			preg_match( $re, $post['original_content'], $matches );
 
 			if ( empty( $matches ) ) {
-				if ( ! Str::contains( $wprm_shortcode, $post['original_content'] ) ) {
+				if ( ! Str::contains( $post['original_content'], $wprm_shortcode ) ) {
 					continue;
 				}
 			}
@@ -679,7 +746,7 @@ class Import_Recipe_Maker {
 	private static function build_video( array $video ) {
 		$video['imported'] = [
 			'importer'         => 'recipe_maker',
-			'imported_on'      => date( 'Y-m-d H:i:s' ),
+			'imported_on'      => gmdate( 'Y-m-d H:i:s' ),
 			'importer_version' => Plugin::VERSION,
 		];
 

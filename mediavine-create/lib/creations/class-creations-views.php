@@ -89,15 +89,15 @@ class Creations_Views extends Creations {
 
 		if ( $total > 0 ) {
 			/* translators: %s: average star rating, e.g. "4.9" */
-			$stars_label   = sprintf( __( '%s Stars', 'mediavine' ), sprintf( '%.1f', $rating ) );
+			$stars_label   = sprintf( __( '%s Stars', 'mediavine-create' ), sprintf( '%.1f', $rating ) );
 			$reviews_label = $total > 1
 				/* translators: %s: number of reviews */
-				? sprintf( __( '%s Reviews', 'mediavine' ), $total )
+				? sprintf( __( '%s Reviews', 'mediavine-create' ), $total )
 				/* translators: %s: number of reviews */
-				: sprintf( __( '%s Review', 'mediavine' ), $total );
+				: sprintf( __( '%s Review', 'mediavine-create' ), $total );
 			$count = '<span>' . esc_html( $stars_label . ' (' . $reviews_label . ')' ) . '</span>';
 		} else {
-			$count = esc_html( __( 'No Ratings', 'mediavine' ) );
+			$count = esc_html( __( 'No Ratings', 'mediavine-create' ) );
 		}
 
 		return '<div class="mv-reviews"><div>' . $stars . '</div><div class="mv-reviews-reviewcount">' . $count . '</div></div>';
@@ -154,9 +154,11 @@ class Creations_Views extends Creations {
 
 		// Add script to footer with data attributes
 		add_action('wp_footer', function() use ($studio_script, $site_url, $debug) {
+			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- third-party Create Studio embed with custom module attributes; output dynamically in wp_footer.
 			printf('<script defer type="module" id="create-studio-embed" data-site-url="%s" src="%s" %s></script>',
 			esc_attr($site_url),
 			esc_url($studio_script),
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $debug is a fixed attribute literal or empty, not user input.
 			$debug);
 		}, 20);
 
@@ -184,7 +186,9 @@ class Creations_Views extends Creations {
 		add_shortcode('mv_recipe', [ $this, 'mv_recipe_shortcode' ]);
 
 		// Theme preview banner for admins
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence check for a navigable admin theme-preview URL; not a state change.
 		if ( ! empty( $_GET['create_theme'] ) ) {
+			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_theme_preview_banner_assets' ] );
 			add_action( 'wp_footer', [ $this, 'render_theme_preview_banner' ] );
 		}
 		add_action( 'admin_post_mv_create_apply_theme', [ $this, 'handle_apply_theme' ] );
@@ -196,33 +200,83 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Allowed social footer icon view suffixes.
+	 *
+	 * Used to prevent path traversal when building `include` paths from
+	 * card/custom-field data (CRE-212).
+	 *
+	 * @var string[]
+	 */
+	const ALLOWED_SOCIAL_ICONS = [ 'facebook', 'instagram', 'pinterest' ];
+
+	/**
+	 * Allowed list layout view suffixes.
+	 *
+	 * @var string[]
+	 */
+	const ALLOWED_LIST_LAYOUTS = [ 'circles', 'grid', 'hero', 'numbered' ];
+
+	/**
+	 * Allowlist a social icon name before it is used in a view path.
+	 *
+	 * @param mixed $social_icon Candidate icon slug from settings/custom fields.
+	 * @return string Allowed icon slug, or empty string when rejected.
+	 */
+	public static function sanitize_social_icon( $social_icon ) {
+		if ( ! is_string( $social_icon ) ) {
+			return '';
+		}
+
+		$social_icon = strtolower( trim( $social_icon ) );
+
+		return in_array( $social_icon, self::ALLOWED_SOCIAL_ICONS, true ) ? $social_icon : '';
+	}
+
+	/**
+	 * Allowlist a list layout name before it is used in a view path.
+	 *
+	 * @param mixed $layout Candidate layout slug from card data.
+	 * @return string Allowed layout slug, or empty string when rejected.
+	 */
+	public static function sanitize_list_layout( $layout ) {
+		if ( ! is_string( $layout ) ) {
+			return '';
+		}
+
+		$layout = strtolower( trim( $layout ) );
+
+		return in_array( $layout, self::ALLOWED_LIST_LAYOUTS, true ) ? $layout : '';
+	}
+
+	/**
 	 * Gets the opening portion of the social profile link tag
 	 *
 	 * @param string $social_service Selected social service
 	 * @return string HTML output of the opening tag for the social media profile link
 	 */
 	public static function get_social_link_tag( $social_service ) {
-		$tag = null;
-		if ( ! empty($social_service) ) {
-			$username = Settings::get_setting('mv_create_social_cta_' . $social_service . '_user');
+		$tag            = null;
+		$social_service = self::sanitize_social_icon( $social_service );
+		if ( ! empty( $social_service ) ) {
+			$username = Settings::get_setting( 'mv_create_social_cta_' . $social_service . '_user' );
 
-			if ( ! empty($username) ) {
+			if ( ! empty( $username ) ) {
 				switch ( $social_service ) {
 					case 'facebook':
 						$link  = 'https://www.facebook.com/' . $username;
-						$title = __('Facebook Page:', 'mediavine') . ' ' . $username;
+						$title = __( 'Facebook Page:', 'mediavine-create' ) . ' ' . $username;
 						break;
 					case 'instagram':
 						$link  = 'https://instagram.com/' . $username;
-						$title = __('Instagram:', 'mediavine') . ' ' . $username;
+						$title = __( 'Instagram:', 'mediavine-create' ) . ' ' . $username;
 						break;
 					case 'pinterest':
 						$link  = 'https://www.pinterest.com/' . $username;
-						$title = __('Pinterest Profile:', 'mediavine') . ' ' . $username;
+						$title = __( 'Pinterest Profile:', 'mediavine-create' ) . ' ' . $username;
 						break;
 				}
 
-				if ( ! empty($title) && ! empty($link) ) {
+				if ( ! empty( $title ) && ! empty( $link ) ) {
 					$tag = '<a href="' . $link . '" title="' . $title . '" class="mv-create-social-link" target="_blank" rel="noreferrer noopener">';
 				}
 			}
@@ -323,6 +377,7 @@ class Creations_Views extends Creations {
 		}
 		$custom_css = \Mediavine\Settings::get_setting( 'mv_create_custom_css' );
 		if ( ! empty( $custom_css ) && GateKeeper::can_access( GateKeeper::FEATURE_CUSTOM_CSS ) ) {
+			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet, WordPress.Security.EscapeOutput.OutputNotEscaped -- intentional late (wp_footer @999) inline dynamic per-card CSS; enqueuing cannot preserve cascade priority. Content stripped of tags before output.
 			echo '<style id="mv-create-custom-css">' . wp_strip_all_tags( $custom_css ) . '</style>';
 		}
 	}
@@ -413,8 +468,9 @@ class Creations_Views extends Creations {
 	public function add_async_styles( $tag, $handle, $href ) {
 		$prefix = 'mv-create-card_';
 		if ( 'mv-create-card-base' === $handle || substr($handle, 0, strlen($prefix)) === $prefix ) {
-			$new_tag  = '<link rel="stylesheet preload" class="mv-create-styles" href="' . $href . '" as="style">';
-			$new_tag .= "<noscript>$tag</noscript>";
+			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- style_loader_tag rewrite of an already-enqueued mv-create handle into async preload + noscript fallback.
+			$new_tag  = '<link rel="stylesheet preload" class="mv-create-styles" href="' . esc_url( $href ) . '" as="style">';
+			$new_tag .= '<noscript>' . $tag . '</noscript>';
 
 			$tag = $new_tag;
 		}
@@ -426,15 +482,7 @@ class Creations_Views extends Creations {
 		$base_url = apply_filters('mv_recipe_stylesheet', Plugin::assets_url() . 'client/build/card-base.' . Plugin::VERSION . '.css');
 		wp_register_style('mv-create-card-base', $base_url, [], Plugin::VERSION);
 
-		 $card_styles = [
-			 'big-image',
-			 'centered',
-			 'centered-dark',
-			 'dark',
-			 'square',
-			 'editorial',
-			 'modern',
-		 ];
+		$card_styles = Creations_Views_Themes::get_style_slugs();
 		foreach ( $card_styles as $card_style ) {
 			$style_url = apply_filters('mv_recipe_stylesheet', Plugin::assets_url() . "client/build/card-$card_style." . Plugin::VERSION . '.css');
 			wp_register_style("mv-create-card_$card_style", $style_url, [ 'mv-create-card-base' ], Plugin::VERSION);
@@ -452,7 +500,8 @@ class Creations_Views extends Creations {
 	public function add_async_attribute( $tag, $handle ) {
 		$prefix = Plugin::PLUGIN_DOMAIN . '/client.js';
 		if ( substr($handle, 0, strlen($prefix)) === $prefix ) {
-			$tag = str_replace(' src', ' async data-noptimize src', $tag);
+			// Vite emits native ESM; modules are deferred by default. Keep async + noptimize.
+			$tag = str_replace( ' src', ' async type="module" data-noptimize src', $tag );
 		}
 
 		return $tag;
@@ -607,32 +656,22 @@ class Creations_Views extends Creations {
 
 	public static function prep_creation_view( $atts ) {
 		$id       = get_current_post_id();
-		$creation = self::$models_v2->mv_creations->find_one($atts['key']);
+		$creation = self::$models_v2->mv_creations->find_one( $atts['key'] );
 
-		// We need a creation id to move any further, meaning creation does exist
-		if ( empty($creation->id) ) {
+		// We need a creation id to move any further, meaning creation does exist.
+		if ( empty( $creation->id ) ) {
 			return;
 		}
-		// These are to be removed later
-		$creation = self::restore_video_data($creation);
-		$creation = \Mediavine\Create\Products::restore_product_images($creation);
 
-		// Check if post is associated to card
-		$associated_posts = [];
-		if ( ! empty($creation->associated_posts) ) {
-			$associated_posts = json_decode($creation->associated_posts ?: '[]');
-		}
-		if ( is_singular() && ! in_array($id, $associated_posts, true) ) {
-			self::associate_post_with_creation($creation->id, $id);
-		}
+		self::maybe_self_heal_post_association( $creation, $id );
 
 		// This stays forever.
 		// This method checks several factors to decide if the card needs
 		// to be republished before being displayed. It allows us to add cards
 		// to a `republish_queue` when things need to be fixed en masse.
-		$creation = \Mediavine\Create\Publish::maybe_republish($creation);
+		$creation = \Mediavine\Create\Publish::maybe_republish( $creation );
 
-		$published_creation = json_decode($creation->published ?: '{}', true);
+		$published_creation = json_decode( $creation->published ?: '{}', true );
 
 		// Merge card-level fields that live outside the published JSON blob.
 		// Always use the DB column as source of truth, overriding any stale
@@ -647,430 +686,63 @@ class Creations_Views extends Creations {
 		}
 
 		// If a card specifies its own layout (for instance, for Lists)
-		// it should override the style
-		if ( ! empty($atts['layout']) ) {
+		// it should override the style.
+		if ( ! empty( $atts['layout'] ) ) {
 			$atts['style'] = $atts['layout'];
 		}
 
 		if ( $published_creation ) {
-			$published_creation['classes'] = [
-				'mv-create-card',
-				'mv-create-card-' . $atts['key'],
-				'mv-' . $atts['type'] . '-card',
-				'mv-create-card-style-' . str_replace('/', '-', $atts['style']),
-			];
+			$classes = Creations_Views_Card_Class_Builder::build_base_classes( $atts );
 
-			// Only have mv-no-js class if not print
-			if ( empty($atts['print']) ) {
-				$published_creation['classes'][] = 'mv-no-js';
-			}
-
-			// Add specific classes to print layout
-			if ( ! empty($atts['print']) ) {
-				$published_creation['classes'][] = 'mv-create-xl';
-				$published_creation['classes'][] = 'js';
-			}
-
-			$aggressive_buttons = \Mediavine\Settings::get_setting(self::$settings_group . '_aggressive_buttons');
-			if ( $aggressive_buttons ) {
-				$published_creation['classes'][] = 'mv-create-aggressive-buttons';
-			}
-
-			$aggressive_widgets = \Mediavine\Settings::get_setting(self::$settings_group . '_aggressive_widgets');
-			if ( $aggressive_widgets ) {
-				$published_creation['classes'][] = 'mv-create-aggressive-widgets';
-			}
-
-			$aggressive_nutrition = \Mediavine\Settings::get_setting(self::$settings_group . '_aggressive_nutrition');
-			if ( $aggressive_nutrition ) {
-				$published_creation['classes'][] = 'mv-create-aggressive-nutrition';
-			}
-
-			$center_cards = \Mediavine\Settings::get_setting(self::$settings_group . '_center_cards', true);
-			if ( $center_cards ) {
-				$published_creation['classes'][] = 'mv-create-center-cards';
-			}
-
-			// We don't want to waste resources for lists
+			// We don't want to waste resources for lists.
 			if ( 'list' !== $atts['type'] ) {
-				// Forced settings classes
-				$uppercase = \Mediavine\Settings::get_setting(self::$settings_group . '_force_uppercase');
-				if ( $uppercase || is_null($uppercase) ) { // Null means no setting, so we get default
-					$published_creation['classes'][] = 'mv-create-has-uppercase';
-				}
-				$aggressive_lists = \Mediavine\Settings::get_setting(self::$settings_group . '_aggressive_lists');
-				if ( $aggressive_lists ) {
-					$published_creation['classes'][] = 'mv-create-aggressive-lists';
-				}
-				$use_ugly_nutrition_display = \Mediavine\Settings::get_setting(self::$settings_group . '_use_realistic_nutrition_display');
-				if ( $use_ugly_nutrition_display ) {
-					$published_creation['classes'][] = 'mv-create-traditional-nutrition';
-				}
-
-				// Print view
-				if ( $atts['print'] ) {
-					$published_creation['classes'][] = 'mv-create-print-view';
-
-					// Hide images on print
-					$mv_create_enable_print_thumbnails = \Mediavine\Settings::get_setting(self::$settings_group . '_enable_print_thumbnails');
-					if ( empty($mv_create_enable_print_thumbnails) ) {
-						$published_creation['classes'][] = 'mv-create-hide-img';
-					}
-				}
-
-				// Make sure products have images
+				// Make sure products have images.
 				if ( $published_creation['products'] ) {
 					foreach ( $published_creation['products'] as &$product ) {
-						$product['thumbnail_src'] = Products_Map::get_correct_thumbnail_src($product);
+						$product['thumbnail_src'] = Products_Map::get_correct_thumbnail_src( $product );
 					}
+					unset( $product );
 				}
 
-				// Custom fields need to be decoded before we prep the social footer content
-				$published_creation['custom_fields'] = json_decode($published_creation['custom_fields'] ?: '{}', true);
-
-				// Get social footer content if enabled
-				$published_creation['social_footer'] = \Mediavine\Settings::get_setting(self::$settings_group . '_social_footer', false);
-				if ( $published_creation['social_footer'] ) {
-					// Get correct social footer content, either from settings or override
-					$published_creation['social_icon']      = self::get_custom_field(
-						$published_creation,
-						'mv_create_social_footer_icon',
-						\Mediavine\Settings::get_setting(self::$settings_group . '_social_service'),
-						true
-					);
-					$published_creation['social_cta_title'] = self::get_custom_field(
-						$published_creation,
-						'mv_create_social_footer_header',
-						\Mediavine\Settings::get_setting(self::$settings_group . '_social_cta_title_' . $atts['type'])
-					);
-
-					// Grab default title if empty
-					if ( empty($published_creation['social_cta_title']) ) {
-						$social_card_type = 'recipe';
-						if ( 'diy' === $atts['type'] ) {
-							$social_card_type = 'project';
-						}
-						$published_creation['social_cta_title'] = sprintf(
-							// Translators: Type of card. Will output either 'recipe' or 'project'
-							__('Did you make this %s?', 'mediavine'),
-							$social_card_type
-						);
-					}
-
-					$published_creation['social_cta_body'] = self::get_custom_field(
-						$published_creation,
-						'mv_create_social_footer_content'
-					);
-
-					// The WYSIWYG changes empty values to `<p></p>` so we need to check for that and grab the global setting value
-					if ( '<p></p>' === $published_creation['social_cta_body'] || empty($published_creation['social_cta_body']) ) {
-						$published_creation['social_cta_body'] = \Mediavine\Settings::get_setting(self::$settings_group . '_social_cta_body_' . $atts['type']);
-					}
-
-					// Grab default message if body empty
-					if ( '<p></p>' === $published_creation['social_cta_body'] || empty($published_creation['social_cta_body']) ) {
-						$published_creation['social_cta_body'] = '<p>' . sprintf(
-							// Translators: Social Service name with link
-							__('Please leave a comment on the blog or share a photo on %s', 'mediavine'),
-							self::get_social_link_tag($published_creation['social_icon']) . ucfirst($published_creation['social_icon']) . '</a>'
-						) . '</p>';
-					}
-
-					$published_creation['social_body_kses'] = [
-						'a'      => [
-							'class'  => true,
-							'href'   => true,
-							'target' => true,
-							'rel'    => true,
-						],
-						'strong' => [
-							'class' => true,
-						],
-						'em'     => [
-							'class' => true,
-						],
-					];
-				}
+				$published_creation = Creations_Views_Social_Footer::prepare( $published_creation, $atts['type'] );
 			}
 
-			// Add image tags
-			$img_sizes                    = self::get_all_image_sizes(__FUNCTION__);
+			// Add image tags.
+			$img_sizes                    = self::get_all_image_sizes( __FUNCTION__ );
 			$img_size                     = self::get_image_size();
-			$published_creation['images'] = \Mediavine\View_Loader::get_mv_image_tags($published_creation, $img_sizes);
+			$published_creation['images'] = \Mediavine\View_Loader::get_mv_image_tags( $published_creation, $img_sizes );
 
-			// Determine if card has an image
-			$has_img_class = 'mv-create-no-image';
-			if ( ! is_null($published_creation['images']) ) {
-				$has_img_class = 'mv-create-has-image';
+			$classes = Creations_Views_Card_Class_Builder::append_image_classes(
+				$classes,
+				$atts,
+				! is_null( $published_creation['images'] ),
+				$img_size
+			);
+			$published_creation['classes'] = implode( ' ', $classes );
+
+			$published_creation = Creations_Views_Pinterest_Markup::prepare( $published_creation, $img_size );
+			$pinterest_location = $published_creation['pinterest_class'];
+
+			// Enable override of author by default copyright.
+			if ( \Mediavine\Settings::get_setting( self::$settings_group . '_copyright_override' ) ) {
+				$published_creation['author'] = \Mediavine\Settings::get_setting( self::$settings_group . '_copyright_attribution' );
 			}
 
-			$published_creation['classes'][] = $has_img_class;
-
-			// Add photo ratio class for list layouts
-			if ( 'list' === $atts['type'] && 'mv_create_no_ratio' !== $img_size ) {
-				$published_creation['classes'][] = 'mv-create-list-ratio-' . str_replace( 'mv_create_', '', $img_size );
-			}
-
-			$published_creation['classes'] = implode(' ', $published_creation['classes']);
-
-			if ( isset($published_creation['images'][ $img_size ]) ) {
-				$description          = htmlentities($published_creation['pinterest_description'] ?: '');
-				$data_pin_description = 'data-pin-description="' . $description . '"';
-
-				$published_creation['images'][ $img_size ] = str_replace(' alt', " $data_pin_description alt", $published_creation['images'][ $img_size ]);
-			}
-
-			// Get Pinterest settings
-			$pinterest_location = \Mediavine\Settings::get_setting(self::$settings_group . '_pinterest_location', 'mv-creation-pin-button');
-
-			$published_creation['pinterest_class'] = $pinterest_location;
-
-			if ( isset($published_creation['images']) && isset($published_creation['images']['mv_create_vert']) && 'off' !== $pinterest_location ) {
-
-				// Set Pinterest description as image alt text so browser extension picks it up
-				$pin_img                                        = $published_creation['images']['mv_create_vert'];
-				$pin_img_alt_text                               = 'alt="" data-pin-description="' . htmlentities($published_creation['pinterest_description'] ?: '' ) . '"';
-				$published_creation['images']['mv_create_vert'] = str_replace('class', "$pin_img_alt_text class", $pin_img);
-
-				$has_img_class = 'mv-create-no-image';
-				if ( ! is_null($published_creation['images']) ) {
-					$has_img_class = 'mv-create-has-image';
-				}
-
-				$published_creation['pinterest_display'] = true;
-
-				if ( empty($published_creation['pinterest_description']) ) {
-					$published_creation['pinterest_description'] = $published_creation['title'];
-				}
-
-				if ( empty($published_creation['pinterest_url']) ) {
-					$published_creation['pinterest_url'] = get_the_permalink();
-				}
-
-				if ( empty($published_creation['pinterest_img_id']) ) {
-					$published_creation['pinterest_img_id'] = $published_creation['thumbnail_id'];
-				}
-			}
-
-			// Remove Pinterest image if the Pinterest button display is set to off
-			if ( isset($published_creation['images']) && 'off' === $pinterest_location ) {
-				unset($published_creation['images']['mv_create_vert']);
-			}
-
-			// Enable override of author by default copyright
-			if ( \Mediavine\Settings::get_setting(self::$settings_group . '_copyright_override') ) {
-				$published_creation['author'] = \Mediavine\Settings::get_setting(self::$settings_group . '_copyright_attribution');
-			}
-
-			$published_creation_pinterest_img = wp_get_attachment_image_src($published_creation['pinterest_img_id'], 'mv_creation_vert');
-			if ( is_array($published_creation_pinterest_img) ) {
+			$published_creation_pinterest_img = wp_get_attachment_image_src( $published_creation['pinterest_img_id'], 'mv_creation_vert' );
+			if ( is_array( $published_creation_pinterest_img ) ) {
 				$published_creation['pinterest_img'] = $published_creation_pinterest_img[0];
 			}
 
-			if ( 'list' === $atts['type'] && ! empty($published_creation['list_items']) && is_array($published_creation['list_items']) ) {
-				// Force pinterest if not set to off
-				if ( 'off' !== $pinterest_location ) {
-					$published_creation['pinterest_display'] = true;
-				}
+			$published_creation = Creations_Views_List_Item_Preparer::prepare(
+				$published_creation,
+				$atts,
+				$pinterest_location
+			);
 
-				$atts['layout'] = $published_creation['layout'];
-				$img_sizes      = self::get_all_image_sizes(__FUNCTION__);
-				$photo_ratio    = self::get_image_size();
-				$has_ratio      = ( 'mv_create_no_ratio' !== $photo_ratio );
-
-				// Order list items by position because we can't guarantee DB write order
-				usort(
-					$published_creation['list_items'],
-					function ( $a, $b ) {
-						if ( $a['position'] > $b['position'] ) {
-							return 1;
-						}
-						if ( $b['position'] > $a['position'] ) {
-							return -1;
-						}
-
-						return 0;
-					}
-				);
-
-				$list_ads_enabled = \Mediavine\Settings::get_setting( self::$settings_group . '_list_ads_enabled', Plugin_Checker::has_mv_ads() ? '1' : '0' );
-				$published_creation['list_items_between_ads'] = $list_ads_enabled
-					? \Mediavine\Settings::get_setting( self::$settings_group . '_list_items_between_ads', 3 )
-					: 0;
-				global $post;
-				foreach ( $published_creation['list_items'] as $key => &$item ) {
-					if (
-						! empty($post) &&
-						'post' === $item['content_type'] &&
-						(int) $item['relation_id'] === (int) $post->ID
-					) {
-						unset($published_creation['list_items'][ $key ]);
-						continue;
-					}
-
-					// Section dividers (explicit type or legacy text-with-no-media)
-					// don't get image/url/button prep — promote the legacy heuristic
-					// to an explicit content_type so downstream code (templates,
-					// JSON-LD, numbering) handles it consistently.
-					if ( self::is_list_item_divider( $item ) ) {
-						$item['content_type'] = 'divider';
-						continue;
-					}
-
-					// Thumbnail url logic
-					$layout_image_sizes   = [
-						'circles'  => 'mv_create_1x1',
-						'grid'     => $has_ratio ? $photo_ratio : 'mv_create_16x9',
-						'hero'     => $has_ratio ? $photo_ratio : 'mv_create_vert',
-						'numbered' => $has_ratio ? $photo_ratio : 'mv_create_vert',
-					];
-					$thumbnail_image_size = 'mv_create_1x1';
-					if ( array_key_exists($atts['layout'], $layout_image_sizes) ) {
-						$thumbnail_image_size = $layout_image_sizes[ $atts['layout'] ];
-					}
-
-					// Generate thumbnail if it doesn't exist
-					// Skip synchronous image processing during REST API requests or in admin to avoid timeouts
-					if ( ( ! defined('REST_REQUEST') || ! REST_REQUEST ) && ! is_admin() ) {
-						Images::check_image_size($item['thumbnail_id'], $img_sizes);
-					}
-					$highest_res_image = Images::get_highest_available_image_size($item['thumbnail_id'], $thumbnail_image_size);
-
-					$item_alt_text = get_post_meta( $item['thumbnail_id'], '_wp_attachment_image_alt', true );
-					if ( empty( $item_alt_text ) ) {
-						/* translators: %s: list item title */
-						$item_alt_text = sprintf( __( 'Image for %s', 'mediavine' ), $item['title'] );
-					}
-
-					$item['thumbnail_url'] = wp_get_attachment_image(
-						$item['thumbnail_id'],
-						$highest_res_image,
-						false,
-						[
-							'class'          => 'mv-list-single-img no_pin ggnoads',
-							'alt'            => $item_alt_text,
-							'data-pin-nopin' => 'true',
-						]
-					);
-
-					$item['pinterest_url'] = wp_get_attachment_image_url(
-						$item['thumbnail_id'],
-						'mv_create_vert',
-						false
-					);
-
-					// Get permalink for all non-external items, including CPTs
-					// Products use their URL from the products table, not a permalink
-					if ( 'external' !== $item['content_type'] && 'product' !== $item['content_type'] ) {
-						$item['url'] = get_the_permalink($item['canonical_post_id']);
-					}
-
-					// Provide button text
-					$item['btn_text'] = self::resolve_list_item_button_text( $item );
-
-					if ( 'card' === $item['content_type'] ) {
-						// We don't wany any unassociated cards
-						if ( empty($item['canonical_post_id']) ) {
-							unset($published_creation['list_items'][ $key ]);
-							continue;
-						}
-
-						$item['url']  = get_the_permalink($item['canonical_post_id']);
-						$item_data    = \mv_create_get_creation($item['relation_id'], true);
-						$item['data'] = [];
-
-						$item_meta = json_decode($item['meta'] ?: '{}');
-
-						// Add meta types
-						if ( is_array($item_meta) ) {
-							if ( in_array('prep_time', $item_meta, true) && ! empty($item_data->prep_time) ) {
-								$time_output = self::prep_creation_time($item_data->prep_time);
-								if ( ! empty($time_output['time']) ) {
-									$item['data'][] = [ __('Prep Time', 'mediavine'), $time_output['time'] ];
-								}
-							}
-							if ( in_array('active_time', $item_meta, true) && ! empty($item_data->active_time) ) {
-								$time_output = self::prep_creation_time($item_data->active_time);
-								if ( ! empty($time_output['time']) ) {
-									$item['data'][] = [ __('Active Time', 'mediavine'), $time_output['time'] ];
-								}
-							}
-							if ( in_array('additional_time', $item_meta, true) && ! empty($item_data->additional_time) ) {
-								$time_output = self::prep_creation_time($item_data->additional_time);
-								if ( ! empty($time_output['time']) ) {
-									$item['data'][] = [ __('Additional Time', 'mediavine'), $time_output['time'] ];
-								}
-							}
-							if ( in_array('total_time', $item_meta, true) && ! empty($item_data->total_time) ) {
-								$time_output = self::prep_creation_time($item_data->total_time);
-								if ( ! empty($time_output['time']) ) {
-									$item['data'][] = [ __('Total Time', 'mediavine'), $time_output['time'] ];
-								}
-							}
-							if ( in_array('yield', $item_meta, true) && ! empty($item_data->yield) ) {
-								$item['data'][] = [ __('Yield', 'mediavine'), $item_data->yield ];
-							}
-							if ( in_array('category', $item_meta, true) && ! empty($item_data->category) ) {
-								$term           = \get_term($item_data->category, 'category');
-								$item['data'][] = [ __('Category', 'mediavine'), $term->name ];
-							}
-							// Recipes
-							if ( in_array('calories', $item_meta, true) && ! empty($item_data->nutrition) ) {
-								$item['data'][] = [ __('Calories', 'mediavine'), $item_data->nutrition->calories ];
-							}
-							if ( in_array('cuisine', $item_meta, true) && ! empty($item_data->secondary_term) ) {
-								$term           = \get_term($item_data->secondary_term, 'mv_cuisine');
-								$item['data'][] = [ __('Cuisine', 'mediavine'), $term->name ];
-							}
-							// DIY
-							if ( in_array('project_type', $item_meta, true) && ! empty($item_data->secondary_term) ) {
-								$term           = \get_term($item_data->secondary_term, 'mv_project_types');
-								$item['data'][] = [ __('Project Type', 'mediavine'), $term->name ];
-							}
-							if ( in_array('cost', $item_meta, true) && ! empty($item_data->estimated_cost) ) {
-								$item['data'][] = [ __('Cost', 'mediavine'), $item_data->estimated_cost ];
-							}
-							if ( in_array('difficulty', $item_meta, true) && ! empty($item_data->difficulty) ) {
-								$item['data'][] = [ __('Difficulty', 'mediavine'), $item_data->difficulty ];
-							}
-						}
-
-						// Add Pinterest
-						$item['pinterest'] = [];
-						if ( ! empty($item_data->pinterest_url) ) {
-							$item['pinterest']['url'] = $item_data->pinterest_url;
-						} elseif ( ! empty($item_data->canonical_post_id) ) {
-							$item['pinterest']['url'] = get_permalink($item_data->canonical_post_id);
-						} else {
-							$item['pinterest']['url'] = $item['url'];
-						}
-
-						if ( ! empty($item_data->pinterest_description) ) {
-							$item['pinterest']['description'] = Str::truncate($item_data->pinterest_description, 500);
-						} else {
-							$item['pinterest']['description'] = Str::truncate(strip_tags($item['description']), 500);
-						}
-
-						if ( ! empty($item_data->pinterest_img_id) ) {
-							$pinterest_img = wp_get_attachment_image_src($item_data->pinterest_img_id, 'mv_creation_vert');
-						} else {
-							$pinterest_img = wp_get_attachment_image_src($item['thumbnail_id'], 'mv_creation_vert');
-						}
-
-						// have this fail (no Pin button) if no image is available
-						if ( ! empty($pinterest_img[0]) ) {
-							$item['pinterest']['img'] = $pinterest_img[0];
-						}
-					}
-
-					$item = self::create_list_item_extra($item);
-				}
-			}
-
-			// Add unit conversion data if feature is enabled and card is a recipe
-			$uc_is_recipe   = 'recipe' === $atts['type'];
-			$uc_gatekeeper  = GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION );
-			$uc_setting     = Settings::get_setting( 'mv_create_enable_unit_conversion', false );
+			// Add unit conversion data if feature is enabled and card is a recipe.
+			$uc_is_recipe  = 'recipe' === $atts['type'];
+			$uc_gatekeeper = GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION );
+			$uc_setting    = Settings::get_setting( 'mv_create_enable_unit_conversion', false );
 
 			if ( $uc_is_recipe && $uc_gatekeeper && $uc_setting ) {
 				$conversion_data = self::get_unit_conversion_data( $creation->id );
@@ -1079,87 +751,91 @@ class Creations_Views extends Creations {
 				}
 			}
 
-			// Remove hardcoded ad hints from instructions
-			$published_creation['instructions'] = str_replace('<div class="mv-create-target"><div class="mv_slot_target" data-slot="recipe"></div></div>', '', (string) $published_creation['instructions']);
+			// Remove hardcoded ad hints from instructions.
+			$published_creation['instructions'] = str_replace( '<div class="mv-create-target"><div class="mv_slot_target" data-slot="recipe"></div></div>', '', (string) $published_creation['instructions'] );
 
-			// Remove meta span tags from instructions
-			$mv_schema_meta_regex               = get_shortcode_regex([ 'mv_schema_meta' ]);
-			$published_creation['instructions'] = preg_replace('/' . $mv_schema_meta_regex . '/s', '', $published_creation['instructions']);
+			// Remove meta span tags from instructions.
+			$mv_schema_meta_regex               = get_shortcode_regex( [ 'mv_schema_meta' ] );
+			$published_creation['instructions'] = preg_replace( '/' . $mv_schema_meta_regex . '/s', '', $published_creation['instructions'] );
 
-			// Sanitize empty-ish fields, which may contain nothing but empty p tags
+			// Sanitize empty-ish fields, which may contain nothing but empty p tags.
 			$fields_to_check = [ 'instructions', 'notes' ];
 
-			// Loop over fields
 			foreach ( $fields_to_check as $field ) {
 				$temp = $published_creation[ $field ];
-				// Strip out HTML tags
-				$no_more_tags   = strip_tags($temp ?: '');
-				$no_more_spaces = preg_replace('/\s+/', '', $no_more_tags);
-				// If the -stripped- string doesn't have any content, we set to null
-				if ( ! strlen($no_more_spaces) ) {
+				// Strip out HTML tags.
+				$no_more_tags   = wp_strip_all_tags( $temp ?: '' );
+				$no_more_spaces = preg_replace( '/\s+/', '', $no_more_tags );
+				// If the -stripped- string doesn't have any content, we set to null.
+				if ( ! strlen( $no_more_spaces ) ) {
 					$published_creation[ $field ] = null;
 				}
 			}
 
-			// Prevent multiple JSON-LD for Lists and How Tos
-			if (
-				( self::$multiple_recipes && 'recipe' === $atts['type'] ) ||
-				( self::$multiple_howtos && 'diy' === $atts['type'] ) ||
-				( self::$multiple_lists && 'list' === $atts['type'] )
-			) {
-				unset($published_creation['json_ld']);
-			}
+			$published_creation = self::apply_json_ld_guards( $published_creation, $atts, $id );
+		}
 
-			$is_canonical = false;
-			if ( $id === (int) $published_creation['canonical_post_id'] ) {
-				$is_canonical = true;
-			}
+		return $published_creation;
+	}
 
-			// Only set howto to true if JSON_LD is outputted
-			if (
-				$is_canonical &&
-				! empty($published_creation['json_ld']) &&
-				'recipe' === $atts['type'] &&
-				// Reverse of what is used to display JSON-LD
-				! (
-					// Check isset so old cards still display schema,
-					// and check empty because of some PHP interpreting `! $var` as strict with 0 strings
-					isset($published_creation['schema_display']) &&
-					empty($published_creation['schema_display'])
-				)
-			) {
+	/**
+	 * Self-heal: when a card renders on a singular post missing from associated_posts,
+	 * write the association during render so the card stays linked to that post.
+	 *
+	 * @param object $creation Creation row.
+	 * @param int    $post_id  Current post ID.
+	 */
+	public static function maybe_self_heal_post_association( $creation, $post_id ) {
+		$associated_posts = [];
+		if ( ! empty( $creation->associated_posts ) ) {
+			$associated_posts = json_decode( $creation->associated_posts ?: '[]' );
+		}
+		if ( is_singular() && ! in_array( $post_id, $associated_posts, true ) ) {
+			self::associate_post_with_creation( $creation->id, $post_id );
+		}
+	}
+
+	/**
+	 * Prevent duplicate JSON-LD for the same card type on a page, then mark this
+	 * card as having emitted schema when it is canonical and schema is enabled.
+	 *
+	 * @param array $published_creation Published card data.
+	 * @param array $atts               Shortcode attributes.
+	 * @param int   $post_id            Current post ID.
+	 * @return array
+	 */
+	public static function apply_json_ld_guards( $published_creation, $atts, $post_id ) {
+		$type = isset( $atts['type'] ) ? $atts['type'] : '';
+
+		$already_emitted = [
+			'recipe' => self::$multiple_recipes,
+			'diy'    => self::$multiple_howtos,
+			'list'   => self::$multiple_lists,
+		];
+
+		if ( ! isset( $already_emitted[ $type ] ) ) {
+			return $published_creation;
+		}
+
+		// Prevent multiple JSON-LD for Lists and How Tos (and recipes).
+		if ( $already_emitted[ $type ] ) {
+			unset( $published_creation['json_ld'] );
+		}
+
+		$is_canonical = ( $post_id === (int) $published_creation['canonical_post_id'] );
+
+		// Only set the multi-card flag if JSON-LD is outputted.
+		// Reverse of what is used to display JSON-LD: check isset so old cards
+		// still display schema, and check empty because of some PHP interpreting
+		// `! $var` as strict with 0 strings.
+		$schema_suppressed = isset( $published_creation['schema_display'] ) && empty( $published_creation['schema_display'] );
+
+		if ( $is_canonical && ! empty( $published_creation['json_ld'] ) && ! $schema_suppressed ) {
+			if ( 'recipe' === $type ) {
 				self::$multiple_recipes = true;
-			}
-
-			// Only set howto to true if JSON_LD is outputted
-			if (
-				$is_canonical &&
-				! empty($published_creation['json_ld']) &&
-				'diy' === $atts['type'] &&
-				// Reverse of what is used to display JSON-LD
-				! (
-					// Check isset so old cards still display schema,
-					// and check empty because of some PHP interpreting `! $var` as strict with 0 strings
-					isset($published_creation['schema_display']) &&
-					empty($published_creation['schema_display'])
-				)
-			) {
+			} elseif ( 'diy' === $type ) {
 				self::$multiple_howtos = true;
-			}
-
-			// Only set list to true if JSON_LD is outputted
-			if (
-				$is_canonical &&
-				! empty($published_creation['json_ld']) &&
-				'list' === $atts['type'] &&
-				// Reverse of what is used to display JSON-LD
-				! (
-					// Check isset so old cards still display schema,
-					// and check empty because of some PHP interpreting `! $var` as strict with 0 strings
-					isset($published_creation['schema_display']) &&
-					empty($published_creation['schema_display'])
-				)
-			) {
+			} elseif ( 'list' === $type ) {
 				self::$multiple_lists = true;
 			}
 		}
@@ -1200,67 +876,67 @@ class Creations_Views extends Creations {
 
 			$nutrition_facts = [
 				'calories'        => [
-					'name'  => __('Calories', 'mediavine'),
+					'name'  => __('Calories', 'mediavine-create'),
 					'unit'  => null,
 					'class' => 'calories',
 				],
 				'total_fat'       => [
-					'name'  => __('Total Fat', 'mediavine'),
+					'name'  => __('Total Fat', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'total-fat',
 				],
 				'saturated_fat'   => [
-					'name'  => __('Saturated Fat', 'mediavine'),
+					'name'  => __('Saturated Fat', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'saturated-fat mv-create-nutrition-indent',
 				],
 				'trans_fat'       => [
-					'name'  => __('Trans Fat', 'mediavine'),
+					'name'  => __('Trans Fat', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'trans-fat mv-create-nutrition-indent',
 				],
 				'unsaturated_fat' => [
-					'name'  => __('Unsaturated Fat', 'mediavine'),
+					'name'  => __('Unsaturated Fat', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'unsaturated-fat mv-create-nutrition-indent',
 				],
 				'cholesterol'     => [
-					'name'  => __('Cholesterol', 'mediavine'),
+					'name'  => __('Cholesterol', 'mediavine-create'),
 					'unit'  => 'mg',
 					'class' => 'cholesterol',
 				],
 				'sodium'          => [
-					'name'  => __('Sodium', 'mediavine'),
+					'name'  => __('Sodium', 'mediavine-create'),
 					'unit'  => 'mg',
 					'class' => 'sodium',
 				],
 				'carbohydrates'   => [
-					'name'  => __('Carbohydrates', 'mediavine'),
+					'name'  => __('Carbohydrates', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'carbohydrates',
 				],
 				'net_carbs'       => [
-					'name'  => __('Net Carbohydrates', 'mediavine'),
+					'name'  => __('Net Carbohydrates', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'net-carbohydrates mv-create-nutrition-indent',
 				],
 				'fiber'           => [
-					'name'  => __('Fiber', 'mediavine'),
+					'name'  => __('Fiber', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'fiber mv-create-nutrition-indent',
 				],
 				'sugar'           => [
-					'name'  => __('Sugar', 'mediavine'),
+					'name'  => __('Sugar', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'sugar mv-create-nutrition-indent',
 				],
 				'sugar_alcohols'  => [
-					'name'  => __('Sugar Alcohols', 'mediavine'),
+					'name'  => __('Sugar Alcohols', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'sugar-alcohols mv-create-nutrition-indent',
 				],
 				'protein'         => [
-					'name'  => __('Protein', 'mediavine'),
+					'name'  => __('Protein', 'mediavine-create'),
 					'unit'  => 'g',
 					'class' => 'protein',
 				],
@@ -1377,15 +1053,15 @@ class Creations_Views extends Creations {
 		}
 
 		if ( 'product' === ( $item['content_type'] ?? '' ) ) {
-			return __( 'View Product', 'mediavine' );
+			return __( 'View Product', 'mediavine-create' );
 		}
 
 		if ( 'recipe' === ( $item['secondary_type'] ?? '' ) ) {
-			return __( 'Get the Recipe', 'mediavine' );
+			return __( 'Get the Recipe', 'mediavine-create' );
 		}
 
 		if ( 'diy' === ( $item['secondary_type'] ?? '' ) ) {
-			return __( 'Read the Guide', 'mediavine' );
+			return __( 'Read the Guide', 'mediavine-create' );
 		}
 
 		$custom_buttons = \Mediavine\Settings::get_setting( self::$settings_group . '_custom_buttons', 'Continue Reading\nRead More\nGet Recipe' );
@@ -1393,7 +1069,7 @@ class Creations_Views extends Creations {
 
 		$first = trim( $buttons[0] ?? '' );
 
-		return '' !== $first ? $first : __( 'Continue Reading', 'mediavine' );
+		return '' !== $first ? $first : __( 'Continue Reading', 'mediavine-create' );
 	}
 
 	public static function create_list_item_extra( $item ) {
@@ -1419,6 +1095,115 @@ class Creations_Views extends Creations {
 		$item['extra'] = preg_replace('/^\s*$/', '', $item['extra']);
 
 		return $item;
+	}
+
+	/**
+	 * Renders the anchor markup for a linked supply (ingredient, material, or tool).
+	 *
+	 * Supplies use a square-bracket convention to mark the linked portion of the
+	 * text: in `2 cups [all-purpose flour], sifted`, only "all-purpose flour"
+	 * becomes the link text, and the text before/after the brackets renders
+	 * around the anchor. When original_text contains no brackets, the entire
+	 * text becomes the link text.
+	 *
+	 * Callers are expected to have already checked that original_text and link
+	 * are non-empty.
+	 *
+	 * @param array $supply Supply data with original_text, link, and optional nofollow keys.
+	 * @return void
+	 */
+	public static function render_supply_link( $supply ) {
+		preg_match( '/([^[]*?)\[(.*)\](.*)/', $supply['original_text'], $matches );
+		if ( empty( $matches ) ) {
+			$before    = '';
+			$after     = '';
+			$link_text = $supply['original_text'];
+		} else {
+			$before    = $matches[1];
+			$link_text = $matches[2];
+			$after     = $matches[3];
+		}
+
+		echo wp_kses_post( $before );
+		echo '<a href="' . esc_url( $supply['link'] ) . '"';
+		if ( ! empty( $supply['nofollow'] ) ) {
+			echo ' rel="nofollow"';
+		}
+		// Check for internal links
+		if ( strpos( $supply['link'], get_site_url() ) !== 0 ) {
+			echo ' target="_blank"';
+		}
+		echo '>';
+		echo wp_kses_post( $link_text );
+		echo '</a>';
+		echo wp_kses_post( $after );
+	}
+
+	/**
+	 * Builds the link/target rendering context for a linkable list item.
+	 *
+	 * @param array $item                     List item data.
+	 * @param mixed $open_external_in_new_tab Value of the mv_create_external_link_tab setting.
+	 * @param mixed $open_internal_in_new_tab Value of the mv_create_internal_link_tab setting.
+	 * @return array {
+	 *     @type string $target_blank         Empty string or 'target="_blank"'.
+	 *     @type string $target_blank_boolean 'false' or 'true'.
+	 *     @type string $item_classes         CSS classes for the list item wrapper.
+	 *     @type string $product_data_attr    Empty string or a data-mv-product-id attribute.
+	 * }
+	 */
+	public static function get_list_item_link_context( $item, $open_external_in_new_tab, $open_internal_in_new_tab ) {
+		$target_blank         = '';
+		$target_blank_boolean = 'false';
+		// Products and external links open in new tab by default
+		if ( $open_external_in_new_tab && isset( $item['content_type'] ) && ( 'external' === $item['content_type'] || 'product' === $item['content_type'] ) ) {
+			$target_blank         = 'target="_blank"';
+			$target_blank_boolean = 'true';
+		}
+		if ( $open_internal_in_new_tab && isset( $item['content_type'] ) && ( 'external' !== $item['content_type'] && 'product' !== $item['content_type'] ) ) {
+			$target_blank         = 'target="_blank"';
+			$target_blank_boolean = 'true';
+		}
+
+		// Add product-specific CSS class
+		$item_classes = 'mv-art-link mv-list-single mv-list-single-' . esc_attr( $item['relation_id'] );
+		if ( 'product' === $item['content_type'] ) {
+			$item_classes .= ' mv-list-product';
+		}
+
+		// Add product ID for tracking/analytics
+		$product_data_attr = '';
+		if ( 'product' === $item['content_type'] && ! empty( $item['relation_id'] ) ) {
+			$product_data_attr = 'data-mv-product-id="' . esc_attr( $item['relation_id'] ) . '"';
+		}
+
+		return [
+			'target_blank'         => $target_blank,
+			'target_blank_boolean' => $target_blank_boolean,
+			'item_classes'         => $item_classes,
+			'product_data_attr'    => $product_data_attr,
+		];
+	}
+
+	/**
+	 * Renders the section-divider list item markup shared by every list layout.
+	 *
+	 * Emits the same bytes as the inline template block it replaced: each markup
+	 * line is prefixed with $indent, and a trailing $indent reproduces the
+	 * indentation the template emitted before its next PHP open tag, keeping
+	 * rendered output byte-identical.
+	 *
+	 * @param array  $item         List item data.
+	 * @param array  $allowed_html Allowed HTML tags for the description, per create_wp_kses.
+	 * @param string $indent       Leading whitespace matching the calling template's markup depth.
+	 * @return void
+	 */
+	public static function render_list_divider( $item, $allowed_html, $indent = "\t\t\t" ) {
+		echo esc_html( $indent ) . '<div id="create-list-item-' . esc_attr( $item['id'] ) . '" class="mv-list-text" data-mv-create-list-content-type="divider">' . "\n";
+		echo esc_html( $indent ) . "\t" . '<h2 class="mv-list-single-title">' . esc_html( $item['title'] ) . '</h2>' . "\n";
+		echo esc_html( $indent ) . "\t" . '<div class="mv-list-single-description">' . wp_kses( wpautop( $item['description'] ), $allowed_html ) . '</div>' . "\n";
+		echo esc_html( $indent ) . '</div>' . "\n";
+		echo esc_html( $indent );
 	}
 
 	/**
@@ -1485,20 +1270,20 @@ class Creations_Views extends Creations {
 		}
 
 		// Theme preview override (admin only)
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme preview; value validated against an allowlist below.
 		if ( ! empty( $_GET['create_theme'] ) && current_user_can( 'manage_options' ) ) {
-			$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ) );
-			$valid_themes  = [ 'square', 'dark', 'centered', 'centered-dark', 'big-image', 'editorial', 'modern' ];
-			if ( in_array( $preview_theme, $valid_themes, true ) ) {
+			$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme preview; value validated against an allowlist below.
+			if ( Creations_Views_Themes::is_valid( $preview_theme ) ) {
 				$atts['style'] = $preview_theme;
 			}
 		}
 
 		// Apply theme fallback for gated themes if user doesn't have Pro access
 		// Allow admins to preview gated themes via ?create_theme= without fallback
-		$gated_themes    = [ 'editorial', 'modern' ];
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme-preview presence check; not a state change.
 		$is_theme_preview = ! empty( $_GET['create_theme'] ) && current_user_can( 'manage_options' );
-		if ( in_array( $atts['style'], $gated_themes, true ) && ! GateKeeper::is_pro_or_higher() && ! $is_theme_preview ) {
-			$atts['style'] = 'big-image'; // Fallback to Hero Image theme
+		if ( Creations_Views_Themes::is_gated( $atts['style'] ) && ! GateKeeper::is_pro_or_higher() && ! $is_theme_preview ) {
+			$atts['style'] = Creations_Views_Themes::get_fallback_style( $atts['style'] );
 		}
 
 		// Print view
@@ -1514,15 +1299,11 @@ class Creations_Views extends Creations {
 			$card_type = 'list';
 		}
 
-		$card_style_hook_function = $card_type . '_style_' . str_replace('-', '_', $atts['style']) . '_hooks';
-		if ( ! method_exists('Mediavine\Create\Creations_Views_Hooks', $card_style_hook_function) ) {
-			$card_style_hook_function = 'card_style_square_hooks';
-			if ( 'list' === $atts['type'] ) {
-				$card_style_hook_function = 'list_style_square_hooks';
-				$atts['style']            = 'square';
-			}
+		$resolved_style = Creations_Views_Hooks::resolve_style_hooks( $atts['style'], $card_type );
+		if ( 'list' === $card_type && $resolved_style !== $atts['style'] ) {
+			$atts['style'] = $resolved_style;
 		}
-		Creations_Views_Hooks::$card_style_hook_function($atts['type'], $atts['version']);
+		Creations_Views_Hooks::register_style_hooks( $resolved_style, $card_type );
 
 		// Hooks for template overrides cannot be removed unless they are run AFTER we have hooked them
 		do_action('mv_create_modify_card_style_hooks', $atts['style'], $atts['type']);
@@ -1538,11 +1319,13 @@ class Creations_Views extends Creations {
 
 		// Don't display a card if there's no creation data
 		if ( empty($atts['creation']) ) {
+			Creations_Views_Hooks::unregister_style_hooks( $resolved_style, $card_type );
 			return;
 		}
 
 		// Don't display a list if there are no list items
 		if ( 'list' === $atts['creation']['type'] && empty($atts['creation']['list_items']) ) {
+			Creations_Views_Hooks::unregister_style_hooks( $resolved_style, $card_type );
 			return;
 		}
 
@@ -1557,12 +1340,12 @@ class Creations_Views extends Creations {
 			}
 		}
 
-		$atts['creation']['secondary_term_label'] = __('Type', 'mediavine');
+		$atts['creation']['secondary_term_label'] = __('Type', 'mediavine-create');
 		if ( 'recipe' === $atts['creation']['type'] ) {
-			$atts['creation']['secondary_term_label'] = __('Cuisine', 'mediavine');
+			$atts['creation']['secondary_term_label'] = __('Cuisine', 'mediavine-create');
 		}
 		if ( 'diy' === $atts['creation']['type'] ) {
-			$atts['creation']['secondary_term_label'] = __('Project Type', 'mediavine');
+			$atts['creation']['secondary_term_label'] = __('Project Type', 'mediavine-create');
 		}
 
 		$atts['enable_nutrition']                = \Mediavine\Settings::get_setting(self::$settings_group . '_enable_nutrition');
@@ -1596,34 +1379,16 @@ class Creations_Views extends Creations {
 		 */
 		do_action('mv_create_card_after_render', $atts, $creation_view);
 
-		// We have some overlapping actions that can create duplicate content if we don't clean up after a card is rendered.
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 10);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_pin_button' ], 20);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_title' ], 30);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 20);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 40);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 50);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 60);
-		remove_action('mv_create_card_header', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 70);
-		remove_action('mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 30);
-		remove_action('mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_description' ], 20);
-		remove_action('mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 10);
-		remove_action('mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 20);
-		remove_action('mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_ad_div' ], 40);
-		remove_action('mv_create_card_content', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_list' ], 10);
-		remove_action('mv_create_card_image_container', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_image' ], 10);
-		remove_action('mv_create_card_image_container', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_rating' ], 20);
-		remove_action('mv_create_card_image_container', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_print_button' ], 30);
-		remove_action('mv_create_card_footer', [ 'Mediavine\Create\Creations_Views_Hooks', 'mv_create_footer' ], 10);
+		// Clear style hooks so overlapping actions cannot create duplicate content on the next card.
+		Creations_Views_Hooks::unregister_style_hooks( $resolved_style, $card_type );
 
 		remove_filter('wp_kses_allowed_html', [ $this, 'create_wp_kses' ], 10);
 
 		if ( ! empty($creation_view) ) {
 			self::$has_card = true;
-			if ( ! apply_filters('mv_create_dev_mode', false) ) {
-				wp_enqueue_style('mv-create-card_' . $atts['style']);
-			}
+			// Theme CSS is always PHP-enqueued (card-base + card-{style}). The Vite client no longer
+			// imports card-all.scss, so this must run in mv_create_dev_mode as well.
+			wp_enqueue_style('mv-create-card_' . $atts['style']);
 			wp_enqueue_script(Plugin::PLUGIN_DOMAIN . '/client.js');
 			self::enqueue_studio_script();
 
@@ -1674,9 +1439,9 @@ class Creations_Views extends Creations {
 		$time_display_order = explode(',', $time_display_order);
 		$time_display_order = array_intersect($time_display_order, $creation_times_keys);
 		$localized_labels   = [
-			'Prep Time'       => __('Prep Time', 'mediavine'),
-			'Cook Time'       => __('Cook Time', 'mediavine'),
-			'Additional Time' => __('Additional Time', 'mediavine'),
+			'Prep Time'       => __('Prep Time', 'mediavine-create'),
+			'Cook Time'       => __('Cook Time', 'mediavine-create'),
+			'Additional Time' => __('Additional Time', 'mediavine-create'),
 		];
 
 		foreach ( $time_display_order as $time_display ) {
@@ -1696,7 +1461,7 @@ class Creations_Views extends Creations {
 		}
 
 		if ( count($prepared_times) && ! empty($creation['total_time']) ) {
-			$prepared_times[] = static::prep_creation_time($creation['total_time'], 'total_time', __('Total Time', 'mediavine'));
+			$prepared_times[] = static::prep_creation_time($creation['total_time'], 'total_time', __('Total Time', 'mediavine-create'));
 		}
 
 		// We will set additionals if DIY type and nothing previously added
@@ -1704,11 +1469,11 @@ class Creations_Views extends Creations {
 			$diy_additionals = [
 				'difficulty'     => [
 					'value' => $creation['difficulty'],
-					'label' => __('Difficulty', 'mediavine'),
+					'label' => __('Difficulty', 'mediavine-create'),
 				],
 				'estimated_cost' => [
 					'value' => $creation['estimated_cost'],
-					'label' => __('Estimated Cost', 'mediavine'),
+					'label' => __('Estimated Cost', 'mediavine-create'),
 				],
 			];
 			$additionals     = apply_filters('mv_create_diy_additionals', $diy_additionals, $creation);
@@ -1755,28 +1520,28 @@ class Creations_Views extends Creations {
 		// Prep time formats for translation
 		$time_text = [
 			'years'   => [
-				'single' => __('year', 'mediavine'),
-				'plural' => __('years', 'mediavine'),
+				'single' => __('year', 'mediavine-create'),
+				'plural' => __('years', 'mediavine-create'),
 			],
 			'months'  => [
-				'single' => __('month', 'mediavine'),
-				'plural' => __('months', 'mediavine'),
+				'single' => __('month', 'mediavine-create'),
+				'plural' => __('months', 'mediavine-create'),
 			],
 			'days'    => [
-				'single' => __('day', 'mediavine'),
-				'plural' => __('days', 'mediavine'),
+				'single' => __('day', 'mediavine-create'),
+				'plural' => __('days', 'mediavine-create'),
 			],
 			'hours'   => [
-				'single' => __('hour', 'mediavine'),
-				'plural' => __('hours', 'mediavine'),
+				'single' => __('hour', 'mediavine-create'),
+				'plural' => __('hours', 'mediavine-create'),
 			],
 			'minutes' => [
-				'single' => __('minute', 'mediavine'),
-				'plural' => __('minutes', 'mediavine'),
+				'single' => __('minute', 'mediavine-create'),
+				'plural' => __('minutes', 'mediavine-create'),
 			],
 			'seconds' => [
-				'single' => __('second', 'mediavine'),
-				'plural' => __('seconds', 'mediavine'),
+				'single' => __('second', 'mediavine-create'),
+				'plural' => __('seconds', 'mediavine-create'),
 			],
 		];
 
@@ -1950,6 +1715,30 @@ class Creations_Views extends Creations {
 		return $disallowed_handles;
 	}
 
+	/**
+	 * Whether the print view may be rendered for the current request.
+	 *
+	 * CVE-2026-16992: the print route is public so readers can print a card, but only
+	 * a published card is public. The render path reaches
+	 * `Publish::maybe_republish()`, so the check has to sit above it: without
+	 * it, a single anonymous GET both disclosed a draft's content and flipped
+	 * the draft to published, which in turn opened the gated read routes.
+	 *
+	 * @param object|null $creation Creation DB row.
+	 * @return bool
+	 */
+	public static function can_render_print_view( $creation ) {
+		if ( empty($creation) ) {
+			return false;
+		}
+
+		if ( ! empty($creation->published) ) {
+			return true;
+		}
+
+		return \Mediavine\Permissions::is_user_authorized();
+	}
+
 	public function print_view( \WP_REST_Request $request ) {
 		header('Content-Type: text/html; charset=' . get_option('blog_charset'));
 		$api_services = new \Mediavine\Create\API_Services();
@@ -1970,7 +1759,13 @@ class Creations_Views extends Creations {
 
 		if ( empty($creation) ) {
 			header('HTTP/1.0 404 Not Found');
-			esc_html_e('No Card with ID found', 'mediavine');
+			esc_html_e('No Card with ID found', 'mediavine-create');
+			exit();
+		}
+
+		if ( ! self::can_render_print_view($creation) ) {
+			header('HTTP/1.0 404 Not Found');
+			esc_html_e('No Card with ID found', 'mediavine-create');
 			exit();
 		}
 
@@ -2100,7 +1895,7 @@ class Creations_Views extends Creations {
 		if ( ! empty($item['asin']) && ! empty($external_thumbnail_url) ) {
 			$alt = ! empty( $item['title'] )
 				/* translators: %s: list item title */
-				? sprintf( __( 'Image for %s', 'mediavine' ), $item['title'] )
+				? sprintf( __( 'Image for %s', 'mediavine-create' ), $item['title'] )
 				: '';
 			return sprintf('<img src="%s" alt="%s" data-pin-nopin="true" />', $external_thumbnail_url, esc_attr( $alt ));
 		}
@@ -2189,7 +1984,7 @@ class Creations_Views extends Creations {
 			$args['pinterest'] = [
 				'img'         => empty($item['asin']) ? $item['pinterest_url'] : self::get_external_thumbnail_url($item),
 				'url'         => $item['url'],
-				'description' => Str::truncate(strip_tags($description), 500),
+				'description' => Str::truncate(wp_strip_all_tags( $description), 500),
 			];
 		} else {
 			$args['pinterest'] = $item['pinterest'];
@@ -2203,21 +1998,19 @@ class Creations_Views extends Creations {
 	 */
 	public function handle_apply_theme() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'flavor' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'mediavine-create' ) );
 		}
 
 		check_admin_referer( 'mv_create_apply_theme' );
 
-		$theme        = sanitize_text_field( wp_unslash( $_GET['create_theme'] ?? '' ) );
-		$valid_themes = [ 'square', 'dark', 'centered', 'centered-dark', 'big-image', 'editorial', 'modern' ];
+		$theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ?? '' ) );
 
-		if ( ! in_array( $theme, $valid_themes, true ) ) {
-			wp_die( esc_html__( 'Invalid theme.', 'flavor' ) );
+		if ( ! Creations_Views_Themes::is_valid( $theme ) ) {
+			wp_die( esc_html__( 'Invalid theme.', 'mediavine-create' ) );
 		}
 
-		$gated_themes = [ 'editorial', 'modern' ];
-		if ( in_array( $theme, $gated_themes, true ) && ! GateKeeper::is_pro_or_higher() ) {
-			wp_die( esc_html__( 'This theme requires a Pro subscription.', 'flavor' ) );
+		if ( Creations_Views_Themes::is_gated( $theme ) && ! GateKeeper::is_pro_or_higher() ) {
+			wp_die( esc_html__( 'This theme requires a Pro subscription.', 'mediavine-create' ) );
 		}
 
 		\Mediavine\Settings::update_setting( self::$settings_group . '_card_style', $theme );
@@ -2230,6 +2023,32 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Enqueue CSS/JS for the theme preview banner (?create_theme=).
+	 */
+	public function enqueue_theme_preview_banner_assets() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$base = Plugin::assets_url() . 'assets/theme-preview-banner/';
+
+		wp_enqueue_style(
+			'mv-create-theme-preview-banner',
+			$base . 'theme-preview-banner.css',
+			[],
+			Plugin::VERSION
+		);
+
+		wp_enqueue_script(
+			'mv-create-theme-preview-banner',
+			$base . 'theme-preview-banner.js',
+			[],
+			Plugin::VERSION,
+			true
+		);
+	}
+
+	/**
 	 * Render a floating banner when previewing a card theme via ?create_theme=
 	 *
 	 * Styled to match the ThemeSelector modal action bar from the admin UI.
@@ -2239,20 +2058,11 @@ class Creations_Views extends Creations {
 			return;
 		}
 
-		$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ) );
-		$gated_themes  = [ 'editorial', 'modern' ];
+		$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme-preview banner; not a state change.
 		$is_pro        = GateKeeper::is_pro_or_higher();
-		$is_premium    = in_array( $preview_theme, $gated_themes, true ) && ! $is_pro;
+		$is_premium    = Creations_Views_Themes::is_gated( $preview_theme ) && ! $is_pro;
 		$upgrade_url   = GateKeeper::get_upgrade_url();
-		$theme_options = [
-			'square'        => 'Simple Square',
-			'dark'          => 'Dark Simple Square',
-			'centered'      => 'Classy Circle',
-			'centered-dark' => 'Dark Classy Circle',
-			'big-image'     => 'Hero Image',
-			'editorial'     => 'Editorial',
-			'modern'        => 'Modern',
-		];
+		$theme_options = Creations_Views_Themes::get_labels();
 
 		if ( ! isset( $theme_options[ $preview_theme ] ) ) {
 			return;
@@ -2273,238 +2083,21 @@ class Creations_Views extends Creations {
 		$base_url  = remove_query_arg( 'create_theme' );
 		$bar_class = $is_premium ? ' mv-preview-bar--pro' : '';
 		?>
-		<style>
-			#mv-create-theme-preview-bar {
-				position: fixed;
-				bottom: 0;
-				left: 0;
-				right: 0;
-				z-index: 999999;
-				padding: 14px 24px;
-				border-top: 1px solid #e8e6e3;
-				background: #fff;
-				font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-				box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-			}
-			#mv-create-theme-preview-bar * {
-				box-sizing: border-box;
-			}
-			.mv-preview-bar__inner {
-				max-width: 800px;
-				margin: 0 auto;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 16px;
-			}
-			.mv-preview-bar__info {
-				flex: 1;
-				min-width: 0;
-			}
-			.mv-preview-bar__label {
-				font-size: 0.8125rem;
-				color: #78716c;
-				margin: 0 0 2px;
-			}
-			.mv-preview-bar__name {
-				font-size: 0.9375rem;
-				font-weight: 600;
-				color: #1c1917;
-				margin: 0;
-				display: flex;
-				align-items: center;
-				gap: 8px;
-			}
-			.mv-preview-bar__badge {
-				display: inline-flex;
-				align-items: center;
-				gap: 4px;
-				padding: 2px 8px;
-				font-size: 0.6875rem;
-				font-weight: 600;
-				color: #3d5b6d;
-				background: #f0f5f7;
-				border-radius: 9999px;
-				text-transform: uppercase;
-				letter-spacing: 0.02em;
-			}
-			.mv-preview-bar__badge--premium {
-				color: #d4af37;
-				background: rgba(212, 175, 55, 0.1);
-			}
-			.mv-preview-bar__actions {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				flex-shrink: 0;
-			}
-			.mv-preview-bar__select {
-				height: 34px;
-				padding: 0 32px 0 12px;
-				font-family: inherit;
-				font-size: 0.8125rem;
-				color: #44403c;
-				background: #fff;
-				border: 1px solid #e8e6e3;
-				border-radius: 8px;
-				cursor: pointer;
-				appearance: none;
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
-				background-repeat: no-repeat;
-				background-position: right 10px center;
-				transition: all 150ms ease;
-			}
-			.mv-preview-bar__select:hover {
-				border-color: #d4d1cc;
-				background-color: #fafaf9;
-			}
-			.mv-preview-bar__select:focus-visible {
-				outline: 2px solid #3d5b6d;
-				outline-offset: 2px;
-			}
-			.mv-preview-bar__btn-cancel {
-				display: inline-flex;
-				align-items: center;
-				height: 34px;
-				padding: 0 14px;
-				font-family: inherit;
-				font-size: 0.8125rem;
-				font-weight: 500;
-				color: #57534e;
-				background: transparent;
-				border: 1px solid #e8e6e3;
-				border-radius: 8px;
-				cursor: pointer;
-				text-decoration: none;
-				transition: all 150ms ease;
-			}
-			.mv-preview-bar__btn-cancel:hover {
-				background: #f5f4f3;
-				border-color: #d4d1cc;
-				color: #292524;
-				text-decoration: none;
-			}
-			.mv-preview-bar__btn-cancel:focus-visible {
-				outline: 2px solid #3d5b6d;
-				outline-offset: 2px;
-			}
-			.mv-preview-bar__btn-apply {
-				display: inline-flex;
-				align-items: center;
-				gap: 5px;
-				height: 34px;
-				padding: 0 16px;
-				font-family: inherit;
-				font-size: 0.8125rem;
-				font-weight: 600;
-				color: #fff;
-				background: #3d5b6d;
-				border: none;
-				border-radius: 8px;
-				cursor: pointer;
-				text-decoration: none;
-				transition: all 150ms ease;
-			}
-			.mv-preview-bar__btn-apply:hover {
-				background: #2d4555;
-				color: #fff;
-				text-decoration: none;
-			}
-			.mv-preview-bar__btn-apply:focus-visible {
-				outline: 2px solid #3d5b6d;
-				outline-offset: 2px;
-			}
-			.mv-preview-bar__btn-apply svg {
-				width: 14px;
-				height: 14px;
-				fill: currentColor;
-			}
-			/* Pro/Premium variant */
-			#mv-create-theme-preview-bar.mv-preview-bar--pro {
-				background: #1c1917;
-				border-top-color: #44403c;
-				box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
-			}
-			.mv-preview-bar--pro .mv-preview-bar__label {
-				color: #a8a29e;
-			}
-			.mv-preview-bar--pro .mv-preview-bar__name {
-				color: #fff;
-			}
-			.mv-preview-bar--pro .mv-preview-bar__select {
-				color: #e7e5e4;
-				background-color: #292524;
-				border-color: #44403c;
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8a29e' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
-			}
-			.mv-preview-bar--pro .mv-preview-bar__select:hover {
-				border-color: #57534e;
-				background-color: #1c1917;
-			}
-			.mv-preview-bar--pro .mv-preview-bar__btn-cancel {
-				color: #a8a29e;
-				border-color: #44403c;
-			}
-			.mv-preview-bar--pro .mv-preview-bar__btn-cancel:hover {
-				background: #292524;
-				border-color: #57534e;
-				color: #e7e5e4;
-			}
-			.mv-preview-bar__btn-upgrade {
-				display: inline-flex;
-				align-items: center;
-				gap: 5px;
-				height: 34px;
-				padding: 0 16px;
-				font-family: inherit;
-				font-size: 0.8125rem;
-				font-weight: 600;
-				color: #d4af37;
-				background: transparent;
-				border: 1px solid #d4af37;
-				border-radius: 8px;
-				cursor: pointer;
-				text-decoration: none;
-				transition: all 150ms ease;
-			}
-			.mv-preview-bar__btn-upgrade:hover {
-				background: rgba(212, 175, 55, 0.1);
-				color: #d4af37;
-				text-decoration: none;
-			}
-			.mv-preview-bar__btn-upgrade:focus-visible {
-				outline: 2px solid #d4af37;
-				outline-offset: 2px;
-			}
-			@media (max-width: 640px) {
-				.mv-preview-bar__inner {
-					flex-direction: column;
-					align-items: stretch;
-					gap: 8px;
-				}
-				#mv-create-theme-preview-bar {
-					padding: 12px 16px;
-				}
-				.mv-preview-bar__actions {
-					justify-content: flex-end;
-				}
-			}
-		</style>
 		<div id="mv-create-theme-preview-bar" class="<?php echo esc_attr( trim( $bar_class ) ); ?>">
 			<div class="mv-preview-bar__inner">
 				<div class="mv-preview-bar__info">
-					<p class="mv-preview-bar__label"><?php esc_html_e( 'Previewing theme', 'flavor' ); ?></p>
+					<p class="mv-preview-bar__label"><?php esc_html_e( 'Previewing theme', 'mediavine-create' ); ?></p>
 					<p class="mv-preview-bar__name">
 						<?php echo esc_html( $theme_options[ $preview_theme ] ); ?>
 						<?php if ( $is_premium ) : ?>
 							<span class="mv-preview-bar__badge mv-preview-bar__badge--premium">
 								<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-								<?php esc_html_e( 'Premium', 'flavor' ); ?>
+								<?php esc_html_e( 'Premium', 'mediavine-create' ); ?>
 							</span>
 						<?php else : ?>
 							<span class="mv-preview-bar__badge">
 								<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-								<?php esc_html_e( 'Preview', 'flavor' ); ?>
+								<?php esc_html_e( 'Preview', 'mediavine-create' ); ?>
 							</span>
 						<?php endif; ?>
 					</p>
@@ -2513,7 +2106,7 @@ class Creations_Views extends Creations {
 					<select id="mv-preview-bar-select" class="mv-preview-bar__select">
 						<?php foreach ( $theme_options as $value => $label ) :
 							$option_label = $label;
-							if ( in_array( $value, $gated_themes, true ) && ! $is_pro ) {
+							if ( Creations_Views_Themes::is_gated( $value ) && ! $is_pro ) {
 								$option_label .= ' (Premium)';
 							}
 						?>
@@ -2526,43 +2119,21 @@ class Creations_Views extends Creations {
 						<?php endforeach; ?>
 					</select>
 					<a href="<?php echo esc_url( $dismiss_url ); ?>" class="mv-preview-bar__btn-cancel">
-						<?php esc_html_e( 'Cancel', 'flavor' ); ?>
+						<?php esc_html_e( 'Cancel', 'mediavine-create' ); ?>
 					</a>
 					<?php if ( $is_premium ) : ?>
 						<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" class="mv-preview-bar__btn-upgrade">
-							<?php esc_html_e( 'Upgrade to Pro', 'flavor' ); ?>
+							<?php esc_html_e( 'Upgrade to Pro', 'mediavine-create' ); ?>
 						</a>
 					<?php else : ?>
 						<a href="<?php echo esc_url( $apply_url ); ?>" class="mv-preview-bar__btn-apply">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-							<?php esc_html_e( 'Apply Theme', 'flavor' ); ?>
+							<?php esc_html_e( 'Apply Theme', 'mediavine-create' ); ?>
 						</a>
 					<?php endif; ?>
 				</div>
 			</div>
 		</div>
-		<script>
-		(function() {
-			var select = document.getElementById('mv-preview-bar-select');
-			if (!select) return;
-
-			// Get the card hash: preserve existing hash, or find the first card on the page.
-			function getCardHash() {
-				var existing = window.location.hash;
-				if (existing && existing.indexOf('mv-creation') !== -1) {
-					return existing;
-				}
-				var card = document.querySelector('[id^="mv-creation-"]');
-				return card ? '#' + card.id : '';
-			}
-
-			select.addEventListener('change', function() {
-				if (this.value) {
-					window.location.href = this.value + getCardHash();
-				}
-			});
-		})();
-		</script>
 		<?php
 	}
 }

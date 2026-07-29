@@ -23,9 +23,9 @@ class Images_API extends Images {
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 400, [
 						/* translators: %s: field name */
-						'title'   => sprintf( __( 'Missing Required %s', 'mediavine' ), $name ),
+						'title'   => sprintf( __( 'Missing Required %s', 'mediavine-create' ), $name ),
 						/* translators: %s: field name */
-						'details' => sprintf( __( '%s is a required field.', 'mediavine' ), $key ),
+						'details' => sprintf( __( '%s is a required field.', 'mediavine-create' ), $key ),
 					], 'error'
 				);
 			}
@@ -114,14 +114,14 @@ class Images_API extends Images {
 			if ( empty( $updated ) || ( is_array( $updated ) && ! empty( $updated['error'] ) ) ) {
 				$status_code = 304;
 				$errors      = [
-					'title'   => __( 'Nothing to Update', 'mediavine' ),
-					'details' => __( 'Nothing in the current request has changed.', 'mediavine' ),
+					'title'   => __( 'Nothing to Update', 'mediavine-create' ),
+					'details' => __( 'Nothing in the current request has changed.', 'mediavine-create' ),
 				];
 
 				if ( ! empty( $updated['error'] ) ) {
 					$status_code = 500;
 					$errors      = [
-						'title'   => __( 'Database Update Error', 'mediavine' ),
+						'title'   => __( 'Database Update Error', 'mediavine-create' ),
 						'details' => $updated['error'],
 					];
 				}
@@ -196,8 +196,8 @@ class Images_API extends Images {
 		if ( empty( $image ) ) {
 			$response['errors'] = $this::$api_services->normalize_errors(
 				[], $status_code, [
-					'title'   => __( 'Resource Not Found', 'mediavine' ),
-					'details' => __( 'No image with that ID.', 'mediavine' ),
+					'title'   => __( 'Resource Not Found', 'mediavine-create' ),
+					'details' => __( 'No image with that ID.', 'mediavine-create' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
@@ -221,8 +221,8 @@ class Images_API extends Images {
 		if ( empty( $deleted ) ) {
 			$response['errors'] = $this::$api_services->normalize_errors(
 				[], $status_code, [
-					'title'   => __( 'Resource Not Found', 'mediavine' ),
-					'details' => __( 'No image with that ID.', 'mediavine' ),
+					'title'   => __( 'Resource Not Found', 'mediavine-create' ),
+					'details' => __( 'No image with that ID.', 'mediavine-create' ),
 				], 'error'
 			);
 			return new \WP_REST_Response( $response, $status_code );
@@ -254,8 +254,8 @@ class Images_API extends Images {
 		$url    = $params['uri'];
 
 		// Look for URL in post meta
-		// SECURITY CHECKED: This query is properly prepared.
 		$statement = $wpdb->prepare( "SELECT meta_value as url, post_id as id FROM {$wpdb->prefix}postmeta WHERE meta_value = %s", $url );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$img_data  = $wpdb->get_results( $statement, ARRAY_A );
 
 		// If image exists, return true

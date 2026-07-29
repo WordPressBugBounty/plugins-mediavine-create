@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 if ( ! empty( $args['creation']['social_footer'] ) ) { ?>
 	<div class="mv-create-social">
 		<?php do_action( 'mv_create_card_social_icon', $args ); ?>

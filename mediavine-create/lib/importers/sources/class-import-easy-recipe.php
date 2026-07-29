@@ -3,8 +3,109 @@
 namespace Mediavine\Create\Importers\Sources;
 
 use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Easy_Recipe {
+class Import_Easy_Recipe extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'ez_recipes';
+	}
+
+	/**
+	 * Whether serialize_found() returns a list of recipes for one found row.
+	 *
+	 * @return bool
+	 */
+	public static function returns_multiple() {
+		return true;
+	}
+
+	/**
+	 * Whether an empty/false serialization should skip the found row.
+	 *
+	 * @return bool
+	 */
+	public static function skip_empty_serialization() {
+		return true;
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		$importer = new Import_Easy_Recipe();
+		return $importer->serializer( $found_recipe['original_id'] );
+	}
+
+	/**
+	 * Mutate serialized data before store_found_recipe.
+	 *
+	 * @param array $serialized   Serialized recipe.
+	 * @param array $found_recipe Original find stub.
+	 * @return array
+	 */
+	public static function prepare_serialized( $serialized, $found_recipe ) {
+		$serialized['original_post_id']  = $found_recipe['original_id'];
+		$serialized['canonical_post_id'] = $found_recipe['original_id'];
+		$serialized['importer']          = static::get_slug();
+		return $serialized;
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return $context->get_ratings_from_comments( $found_recipe['original_id'], 'ERRating', $stored_recipe['id'] );
+	}
+
+	/**
+	 * Attach native ratings onto the arrays that will be returned.
+	 *
+	 * @param array $stored_recipe Stored recipe (by ref).
+	 * @param array $found_recipe  Found stub (by ref).
+	 * @param array $ratings       Rating rows.
+	 * @return void
+	 */
+	public static function assign_native_ratings( &$stored_recipe, &$found_recipe, $ratings ) {
+		$found_recipe['ratings'] = $ratings;
+	}
+
+	/**
+	 * Post ID used for the SRP ratings double-check.
+	 *
+	 * @param array $stored_recipe Stored Create recipe.
+	 * @return int|string|null
+	 */
+	public static function get_srp_ratings_post_id( $stored_recipe ) {
+		return isset( $stored_recipe['original_id'] ) ? $stored_recipe['original_id'] : null;
+	}
+
+	/**
+	 * Build the per-recipe REST result after store + ratings.
+	 *
+	 * @param array $stored_recipe Stored Create recipe.
+	 * @param array $serialized    Serialized source recipe.
+	 * @param array $found_recipe  Original find stub.
+	 * @return array
+	 */
+	public static function format_result( $stored_recipe, $serialized, $found_recipe ) {
+		$found_recipe['id'] = $stored_recipe['id'];
+		return MV_Recipe_Importer::verify_required_fields( $found_recipe, $serialized );
+	}
 
 	/**
 	 * Check for existence of EZ Recipe
@@ -18,7 +119,7 @@ class Import_Easy_Recipe {
 	}
 
 	public static function process_replacement( $content, $shortcode, $mv_recipe ) {
-		if ( ! Str::contains( 'endeasyrecipe', $content ) ) {
+		if ( ! Str::contains( $content, 'endeasyrecipe' ) ) {
 			$re = '/<div[^>]+class=[\'"][^\'"]*ERNutrition[^\'"]*[\'"][^>]*>(.*)<\/div>/Us';
 			preg_match_all( $re, $content, $matches );
 			if ( ! empty( $matches[0] ) ) {
@@ -55,7 +156,7 @@ class Import_Easy_Recipe {
 		$and = self::process_replacement( $content, $shortcode, $mv_recipe );
 
 		$change          = $and['change'];
-		$recipe['error'] = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$recipe['error'] = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		if ( $change ) {
 			$updated_post_id = wp_update_post(
@@ -147,6 +248,7 @@ class Import_Easy_Recipe {
 		}
 
 		$statement = "SELECT id AS original_id, post_title AS title, post_content, id AS canonical_post_id FROM {$wpdb->posts} WHERE post_content LIKE '%easyrecipe%' AND post_content LIKE '%ERName%' AND post_type = 'post' AND post_status IN ('publish', 'draft');";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$data      = $wpdb->get_results( $statement );
 		if ( $data ) {
 			foreach ( $data as $recipe ) {

@@ -656,14 +656,14 @@ class EasyRecipeDocument extends EasyRecipeDOMDocument {
 		$data->recipeIX = $nRecipe;
 		$data->version  = $this->recipeVersion;
 
-		$new_recipe['title']    = strip_tags( $this->getElementValueByClassName( 'ERName', '*', $recipe ) );
+		$new_recipe['title']    = wp_strip_all_tags(  $this->getElementValueByClassName( 'ERName', '*', $recipe ) );
 		$new_recipe['cuisine']  = $this->getElementValueByClassName( 'cuisine', 'span', $recipe );
 		$new_recipe['category'] = $this->getElementValueByClassName( 'type', 'span', $recipe );
 		if ( ! isset( $new_recipe['type'] ) ) {
 			$data->type = $this->getElementValueByClassName( 'tag', 'span', $recipe );
 		}
 		// Some people actually put links in their author field 🤦
-		$new_recipe['author'] = strip_tags( $this->getElementValueByClassName( 'author', 'span', $recipe ) );
+		$new_recipe['author'] = wp_strip_all_tags(  $this->getElementValueByClassName( 'author', 'span', $recipe ) );
 
 		/**
 		 * EasyRecipe versions less than 3.0.0 store an ISO8601 interval string
@@ -692,7 +692,7 @@ class EasyRecipeDocument extends EasyRecipeDOMDocument {
 			}
 		}
 
-		$new_recipe['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$new_recipe['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		$new_recipe['yield']       = $this->getElementValueByClassName( 'yield', 'span', $recipe );
 		$new_recipe['description'] = $this->lessDumbShortCodes( $this->getElementValueByClassName( 'summary', '*', $recipe ), $this->allowed_tags );
@@ -752,7 +752,7 @@ class EasyRecipeDocument extends EasyRecipeDOMDocument {
 						continue;
 					}
 					$item = Ingredient_Parse::parse( $ingredient->nodeValue );
-					$item['original_text'] = strip_tags( MV_Recipe_Importer::replace_simple_shortcodes( $item['original_text'] ) );
+					$item['original_text'] = wp_strip_all_tags(  MV_Recipe_Importer::replace_simple_shortcodes( $item['original_text'] ) );
 
 					$re = '/(.*)\[url\shref="(.*?)".*\](.*)\[\/url]/i';
 					preg_match_all( $re, $item['original_text'], $matches, PREG_SET_ORDER, 0 );

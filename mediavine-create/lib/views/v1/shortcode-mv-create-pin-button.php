@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 // All the reasons we shouldn't output the Pin button:
 if (
 	// This is a print layout

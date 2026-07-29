@@ -17,9 +17,52 @@ class Reviews extends Plugin {
 		$this->reviews_api->init();
 		$this->review_responses_api = Review_Responses_API::get_instance();
 		$this->review_responses_api->init();
-		add_filter( 'allowed_http_origin', '__return_true' );
+		add_filter( 'rest_pre_serve_request', [ $this, 'send_review_cors_headers' ], 10, 3 );
 		add_action( 'rest_api_init', [ $this, 'reviews_routes' ] );
 		add_action( 'rest_api_init', [ $this, 'review_responses_routes' ] );
+	}
+
+	/**
+	 * Send narrowly-scoped CORS headers for the public review routes only.
+	 *
+	 * Replaces the former site-wide `add_filter( 'allowed_http_origin', '__return_true' )`
+	 * override, which forced WordPress's origin allowlist to pass for *every* REST
+	 * route and — combined with `Access-Control-Allow-Credentials: true` — let any
+	 * third-party page make credentialed cross-origin reads against endpoints that
+	 * don't independently check nonces.
+	 *
+	 * Review submission and reading is public and unauthenticated, so a review left
+	 * from a cached/AMP page served on a different origin still works. Crucially we
+	 * do NOT emit `Access-Control-Allow-Credentials`, so this only ever exposes the
+	 * already-public review data, and only for the review routes.
+	 *
+	 * @param bool                       $served  Whether the request has already been served.
+	 * @param \WP_HTTP_Response|mixed    $result  Result to send to the client.
+	 * @param \WP_REST_Request|mixed     $request Request used to generate the response.
+	 * @return bool
+	 */
+	function send_review_cors_headers( $served, $result, $request ) {
+		if ( ! $request instanceof \WP_REST_Request ) {
+			return $served;
+		}
+
+		$reviews_prefix = '/' . $this->api_route . '/' . $this->api_version . '/reviews';
+		if ( 0 !== strpos( (string) $request->get_route(), $reviews_prefix ) ) {
+			return $served;
+		}
+
+		$origin = get_http_origin();
+		if ( empty( $origin ) ) {
+			return $served;
+		}
+
+		// Public data only — reflect the origin but never allow credentials.
+		header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
+		header( 'Access-Control-Allow-Methods: OPTIONS, GET, POST' );
+		header( 'Access-Control-Allow-Headers: Authorization, Content-Type, Accept, X-WP-Nonce' );
+		header( 'Vary: Origin', false );
+
+		return $served;
 	}
 
 	/**
@@ -31,11 +74,11 @@ class Reviews extends Plugin {
 	 */
 	public static function get_reviews( $creation_id, $args = [] ) {
 		if ( ! isset( $creation_id ) ) {
-			return new \WP_Error( 'no_value', __( 'Creation ID was not set in function call', 'mediavine' ), [ 'message' => __( 'A Creation ID was not included in the request', 'mediavine' ) ] );
+			return new \WP_Error( 'no_value', __( 'Creation ID was not set in function call', 'mediavine-create' ), [ 'message' => __( 'A Creation ID was not included in the request', 'mediavine-create' ) ] );
 		}
 
 		if ( ! is_numeric( $creation_id ) ) {
-			return new \WP_Error( 'non_numeric', __( 'Creation ID value was not a number', 'mediavine' ), [ 'message' => __( 'A Creation ID variable was included but was non-numeric', 'mediavine' ) ] );
+			return new \WP_Error( 'non_numeric', __( 'Creation ID value was not a number', 'mediavine-create' ), [ 'message' => __( 'A Creation ID variable was included but was non-numeric', 'mediavine-create' ) ] );
 		}
 
 		$limit  = 50;
@@ -46,7 +89,7 @@ class Reviews extends Plugin {
 		}
 
 		if ( isset( $args['offset'] ) ) {
-			$limit = $args['offset'];
+			$offset = $args['offset'];
 		}
 
 		$reviews = self::$models_v2->mv_reviews->find(
@@ -70,14 +113,16 @@ class Reviews extends Plugin {
 		register_rest_route(
 			$route_namespace, '/reviews', [
 				[
+					// Public by design: visitor ratings/reviews. Rate-limited + validated in create_reviews.
 					'methods'             => 'POST',
 					'callback'            => [ $this->reviews_api, 'create_reviews' ],
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 				[
+					// Public read; read_reviews still restricts listing without a public creation.
 					'methods'             => 'GET',
 					'callback'            => [ $this->reviews_api, 'read_reviews' ],
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -88,23 +133,20 @@ class Reviews extends Plugin {
 					'methods'             => 'GET',
 					'callback'            => [ $this->reviews_api, 'read_single_review' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
+					// Mutating: require Create capability or matching per-review handshake token.
 					'methods'             => 'POST',
 					'callback'            => [ $this->reviews_api, 'update_single_review' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ $this->reviews_api, 'can_update_single_review' ],
 				],
 				[
 					'methods'             => 'DELETE',
 					'callback'            => [ $this->reviews_api, 'delete_single_review' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -118,6 +160,7 @@ class Reviews extends Plugin {
 		register_rest_route(
 			$route_namespace, '/reviews/(?P<review_id>\d+)/responses', [
 				[
+					// Public read of responses attached to a review.
 					'methods'             => 'GET',
 					'callback'            => [ $this->review_responses_api, 'get_review_responses' ],
 					'args'                => [
@@ -128,7 +171,7 @@ class Reviews extends Plugin {
 							},
 						],
 					],
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 				[
 					'methods'             => 'POST',
@@ -141,9 +184,7 @@ class Reviews extends Plugin {
 							},
 						],
 					],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -154,17 +195,13 @@ class Reviews extends Plugin {
 					'methods'             => 'POST',
 					'callback'            => [ $this->review_responses_api, 'update_response' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => 'DELETE',
 					'callback'            => [ $this->review_responses_api, 'delete_response_api' ],
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

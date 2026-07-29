@@ -99,7 +99,7 @@ class Instructions_Cleaner {
 		}
 
 		// Strip all HTML tags and check if any content remains
-		$text_content = strip_tags( $html );
+		$text_content = wp_strip_all_tags(  $html );
 		
 		// Remove various types of whitespace and HTML entities
 		$text_content = preg_replace( '/\s+/', '', $text_content );
@@ -122,7 +122,7 @@ class Instructions_Cleaner {
 	public static function has_only_empty_lists( $html, $creation_id = 0 ) {
 		// Remove all non-list tags and see if anything meaningful remains
 		$list_only = preg_replace( '/<(?!\/?(ol|ul|li))[^>]*>/', '', $html );
-		$list_only = strip_tags( $list_only );
+		$list_only = wp_strip_all_tags(  $list_only );
 		$list_only = preg_replace( '/\s+/', '', $list_only );
 		
 		return empty( $list_only );
@@ -187,6 +187,6 @@ class Instructions_Cleaner {
 			$details
 		);
 
-		error_log( $message );
+		\Mediavine\Create\Help::log( $message );
 	}
 }

@@ -3,9 +3,42 @@
 namespace Mediavine\Create\Importers\Sources;
 
 use Mediavine\Create\Helpers\Arr;
+use Mediavine\Create\Importers\Helpers\Safe_Unserialize;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_WP_Ultimate_Recipe {
+class Import_WP_Ultimate_Recipe extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'wp_ultimate';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return static::get_ratings( $stored_recipe );
+	}
 
 	private static $post_type = 'recipe';
 	public static $pairs      = [
@@ -59,6 +92,7 @@ class Import_WP_Ultimate_Recipe {
 		}
 
 		$statement = "SELECT id as original_id, post_title as title, IFNULL((SELECT ID FROM {$wpdb->posts} WHERE post_type='post' AND post_status IN ('publish', 'draft') AND post_content LIKE CONCAT('%[ultimate-recipe id=\"', original_id, '\"%') LIMIT 1), FALSE) as canonical_post_id FROM {$wpdb->posts} WHERE post_type = '{$post_type}' AND post_type != 'revision'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $statement, ARRAY_A );
 	}
 
@@ -79,8 +113,8 @@ class Import_WP_Ultimate_Recipe {
 
 		$formatted = [
 			'original_id'           => $recipe_id,
-			'active_time_label'     => __( 'Cook Time', 'mediavine' ),
-			'additional_time_label' => __( 'Passive Time', 'mediavine' ),
+			'active_time_label'     => __( 'Cook Time', 'mediavine-create' ),
+			'additional_time_label' => __( 'Passive Time', 'mediavine-create' ),
 			'total_time'            => 0,
 			'author'                => $author,
 		];
@@ -122,7 +156,7 @@ class Import_WP_Ultimate_Recipe {
 			$formatted['thumbnail_id'] = $results['_thumbnail_id'][0];
 		}
 
-		$terms = maybe_unserialize( $results['recipe_terms'][0] );
+		$terms = Safe_Unserialize::maybe( $results['recipe_terms'][0] );
 
 		foreach ( $terms['cuisine'] as $cuisine ) {
 			if ( $cuisine ) {
@@ -142,7 +176,7 @@ class Import_WP_Ultimate_Recipe {
 	}
 
 	private static function parse_ingredients( $content ) {
-		$ingredients     = maybe_unserialize( $content );
+		$ingredients     = Safe_Unserialize::maybe( $content );
 		$ingredient_keys = [
 			'quantity' => 'amount',
 			'unit'     => 'unit',
@@ -175,7 +209,7 @@ class Import_WP_Ultimate_Recipe {
 	}
 
 	private static function parse_instructions( $content ) {
-		$instructions  = maybe_unserialize( $content );
+		$instructions  = Safe_Unserialize::maybe( $content );
 		$results_array = [];
 		foreach ( $instructions as $instruction ) {
 			if ( ! empty( $instruction['group'] ) && ! array_key_exists( $instruction['group'], $results_array ) ) {
@@ -208,7 +242,7 @@ class Import_WP_Ultimate_Recipe {
 			return;
 		}
 
-		$wpurp_nutrition = maybe_unserialize( $content );
+		$wpurp_nutrition = Safe_Unserialize::maybe( $content );
 		$nutrition       = [];
 
 		$nutrition_pairs = [
@@ -238,7 +272,7 @@ class Import_WP_Ultimate_Recipe {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		global $wpdb;
 		$models = \Mediavine\MV_DBI::get_models(
@@ -270,6 +304,7 @@ class Import_WP_Ultimate_Recipe {
 						FROM {$wpdb->posts}
 						WHERE post_content LIKE '%{$embed_check}%'
 						AND post_type NOT IN ('revision', 'attachment', 'nav_menu_item')";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$posts     = $wpdb->get_results( $statement, ARRAY_A );
 
 		if ( empty( $posts ) ) {
@@ -328,11 +363,11 @@ class Import_WP_Ultimate_Recipe {
 		}
 
 		foreach ( $ratings as $rating ) {
-			$rating = maybe_unserialize( $rating );
+			$rating = Safe_Unserialize::maybe( $rating );
 			$name   = '';
 			if ( $rating['user'] ) {
-				$author = get_user( $rating['user'] );
-				$name   = "{$author->firstName} {$author->lastName}";
+				$author = get_userdata( $rating['user'] );
+				$name   = $author ? trim( $author->first_name . ' ' . $author->last_name ) : '';
 			}
 
 			$new_rating = [

@@ -20,7 +20,7 @@ class Importer_Compatibility {
 			if ( ! self::is_importer_compatible() ) {
 				printf(
 					'<div class="notice notice-error"><p>%1$s</p></div>',
-					wp_kses_post( __( 'The currently installed version of <strong>Create Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated.', 'mediavine' ) )
+					wp_kses_post( __( 'The currently installed version of <strong>Create Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated.', 'mediavine-create' ) )
 				);
 
 				$plugin_slug = 'mediavine-recipe-importers/mediavine-recipe-importer.php';

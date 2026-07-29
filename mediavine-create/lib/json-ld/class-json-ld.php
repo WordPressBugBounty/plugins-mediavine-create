@@ -125,7 +125,9 @@ class JSON_LD {
 				break;
 			case 'video':
 				if ( isset( $creation['video'] ) || isset( $creation['external_video'] ) ) {
-					$json_ld = $this->json_ld_types->add_json_ld_video( $json_ld, $creation['video'], $creation['external_video'], $creation );
+					$mv_video  = isset( $creation['video'] ) ? $creation['video'] : null;
+					$ext_video = isset( $creation['external_video'] ) ? $creation['external_video'] : null;
+					$json_ld   = $this->json_ld_types->add_json_ld_video( $json_ld, $mv_video, $ext_video, $creation );
 				}
 				break;
 			case 'item_list':

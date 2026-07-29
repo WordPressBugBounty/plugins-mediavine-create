@@ -160,7 +160,7 @@ class Unit_Conversion extends Plugin {
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => [ $this, 'handle_conversion_request' ],
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 					'args'                => [
 						'id' => [
 							'required'          => true,
@@ -181,6 +181,16 @@ class Unit_Conversion extends Plugin {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function handle_conversion_request( \WP_REST_Request $request ) {
+		// Pro-tier feature: the route registers on every install, but only
+		// tiers that can access unit conversion may trigger a conversion.
+		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION ) ) {
+			return new \WP_Error(
+				'forbidden',
+				__( 'Unit conversion is not available on your current plan.', 'mediavine-create' ),
+				[ 'status' => 403 ]
+			);
+		}
+
 		$creation_id = (int) $request->get_param( 'id' );
 
 		$creation = self::$models_v2->mv_creations->find_one_by_id( $creation_id );
@@ -188,7 +198,7 @@ class Unit_Conversion extends Plugin {
 		if ( empty( $creation ) ) {
 			return new \WP_Error(
 				'not_found',
-				__( 'Creation not found', 'mediavine' ),
+				__( 'Creation not found', 'mediavine-create' ),
 				[ 'status' => 404 ]
 			);
 		}
@@ -262,7 +272,7 @@ class Unit_Conversion extends Plugin {
 
 			// Fall back to parsing original_text when unit column is empty.
 			if ( empty( $unit ) && ! empty( $supply->original_text ) ) {
-				$parsed = $this->parse_amount_unit( strip_tags( $supply->original_text ) );
+				$parsed = $this->parse_amount_unit( wp_strip_all_tags(  $supply->original_text ) );
 				if ( $parsed ) {
 					if ( '' === $amount ) {
 						$amount = $parsed['amount'];
@@ -409,7 +419,7 @@ class Unit_Conversion extends Plugin {
 		if ( empty( $response['success'] ) ) {
 			return new \WP_Error(
 				'conversion_api_error',
-				__( 'Unit conversion API request failed', 'mediavine' ),
+				__( 'Unit conversion API request failed', 'mediavine-create' ),
 				[
 					'status'      => $response['status_code'] ?? 500,
 					'api_response' => $response['data'] ?? null,

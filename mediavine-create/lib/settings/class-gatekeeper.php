@@ -203,6 +203,9 @@ class GateKeeper {
 	/**
 	 * Feature fallback values when feature is gated.
 	 *
+	 * Theme feature fallbacks must stay aligned with
+	 * Creations_Views_Themes::get_fallback_style() for the matching style slug.
+	 *
 	 * @var array
 	 */
 	private static $feature_fallbacks = [
@@ -218,7 +221,7 @@ class GateKeeper {
 	 * @var array
 	 */
 	private static $gated_setting_defaults = [
-		// Themes — gated values are 'editorial' and 'modern'; fallback handled separately via card_style check.
+		// Themes: gated card_style values are reset via Creations_Views_Themes in enforce_feature_fallbacks().
 		// Products
 		'products_display_mode'  => 'gallery',
 		'products_section_title' => 'Recommended Products',
@@ -248,12 +251,11 @@ class GateKeeper {
 	public static function init() {
 		add_action( 'admin_init', [ __CLASS__, 'maybe_sync_subscription' ] );
 		add_action( 'mv_create_sync_subscription', [ __CLASS__, 'sync_subscription' ] );
-		add_action( 'mv_create_setting_updated_mv_create_enable_interactive_mode', [ __CLASS__, 'sync_interactive_mode' ] );
 		add_action( 'mv_create_setting_updated_mv_create_enable_interactive_mode', [ __CLASS__, 'maybe_disable_hands_free_mode' ] );
-		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_button_text', [ __CLASS__, 'sync_interactive_mode_button_text' ] );
-		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_cta_variant', [ __CLASS__, 'sync_interactive_mode_cta_variant' ] );
-		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_cta_title', [ __CLASS__, 'sync_interactive_mode_cta_title' ] );
-		add_action( 'mv_create_setting_updated_mv_create_interactive_mode_cta_subtitle', [ __CLASS__, 'sync_interactive_mode_cta_subtitle' ] );
+
+		foreach ( self::interactive_mode_studio_keys() as $setting_slug => $studio_key ) {
+			add_action( 'mv_create_setting_updated_' . $setting_slug, [ __CLASS__, 'sync_setting_to_studio' ], 10, 1 );
+		}
 
 		// Auto-detect trial extension steps when features are enabled.
 		foreach ( self::$setting_to_trial_step as $setting_slug => $step ) {
@@ -267,12 +269,30 @@ class GateKeeper {
 	}
 
 	/**
-	 * Sync the interactive mode setting to Create Studio.
+	 * Map of Create setting slugs to Create Studio payload keys for interactive mode.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function interactive_mode_studio_keys() {
+		return [
+			'mv_create_enable_interactive_mode'       => 'interactive_mode_enabled',
+			'mv_create_interactive_mode_button_text'  => 'interactive_mode_button_text',
+			'mv_create_interactive_mode_cta_variant'  => 'interactive_mode_cta_variant',
+			'mv_create_interactive_mode_cta_title'    => 'interactive_mode_cta_title',
+			'mv_create_interactive_mode_cta_subtitle' => 'interactive_mode_cta_subtitle',
+		];
+	}
+
+	/**
+	 * Sync an interactive-mode setting to Create Studio.
+	 *
+	 * Hooked for each slug in interactive_mode_studio_keys(); the Studio payload
+	 * key is resolved from the setting slug.
 	 *
 	 * @param object $setting The setting object with slug and value.
 	 * @return void
 	 */
-	public static function sync_interactive_mode( $setting ) {
+	public static function sync_setting_to_studio( $setting ) {
 		if ( self::$syncing_from_studio ) {
 			return;
 		}
@@ -286,10 +306,20 @@ class GateKeeper {
 			return;
 		}
 
+		$keys = self::interactive_mode_studio_keys();
+		if ( empty( $setting->slug ) || empty( $keys[ $setting->slug ] ) ) {
+			return;
+		}
+
+		$studio_key = $keys[ $setting->slug ];
+		$value      = ( 'interactive_mode_enabled' === $studio_key )
+			? ! empty( $setting->value )
+			: sanitize_text_field( $setting->value );
+
 		Create_Studio_Client::request(
 			'POST',
 			'/sites/' . $site_id,
-			[ 'interactive_mode_enabled' => ! empty( $setting->value ) ]
+			[ $studio_key => $value ]
 		);
 	}
 
@@ -303,114 +333,6 @@ class GateKeeper {
 		if ( ! empty( $setting->value ) ) {
 			Settings::update_setting( 'mv_create_enable_hands_free_mode', false );
 		}
-	}
-
-	/**
-	 * Sync the interactive mode button text to Create Studio.
-	 *
-	 * @param object $setting The setting object with slug and value.
-	 * @return void
-	 */
-	public static function sync_interactive_mode_button_text( $setting ) {
-		if ( self::$syncing_from_studio ) {
-			return;
-		}
-
-		if ( ! Create_Studio_Client::is_site_connected() ) {
-			return;
-		}
-
-		$site_id = Create_Studio_Client::get_site_id();
-		if ( empty( $site_id ) ) {
-			return;
-		}
-
-		Create_Studio_Client::request(
-			'POST',
-			'/sites/' . $site_id,
-			[ 'interactive_mode_button_text' => sanitize_text_field( $setting->value ) ]
-		);
-	}
-
-	/**
-	 * Sync the interactive mode CTA variant to Create Studio.
-	 *
-	 * @param object $setting The setting object with slug and value.
-	 * @return void
-	 */
-	public static function sync_interactive_mode_cta_variant( $setting ) {
-		if ( self::$syncing_from_studio ) {
-			return;
-		}
-
-		if ( ! Create_Studio_Client::is_site_connected() ) {
-			return;
-		}
-
-		$site_id = Create_Studio_Client::get_site_id();
-		if ( empty( $site_id ) ) {
-			return;
-		}
-
-		Create_Studio_Client::request(
-			'POST',
-			'/sites/' . $site_id,
-			[ 'interactive_mode_cta_variant' => sanitize_text_field( $setting->value ) ]
-		);
-	}
-
-	/**
-	 * Sync the interactive mode CTA title to Create Studio.
-	 *
-	 * @param object $setting The setting object with slug and value.
-	 * @return void
-	 */
-	public static function sync_interactive_mode_cta_title( $setting ) {
-		if ( self::$syncing_from_studio ) {
-			return;
-		}
-
-		if ( ! Create_Studio_Client::is_site_connected() ) {
-			return;
-		}
-
-		$site_id = Create_Studio_Client::get_site_id();
-		if ( empty( $site_id ) ) {
-			return;
-		}
-
-		Create_Studio_Client::request(
-			'POST',
-			'/sites/' . $site_id,
-			[ 'interactive_mode_cta_title' => sanitize_text_field( $setting->value ) ]
-		);
-	}
-
-	/**
-	 * Sync the interactive mode CTA subtitle to Create Studio.
-	 *
-	 * @param object $setting The setting object with slug and value.
-	 * @return void
-	 */
-	public static function sync_interactive_mode_cta_subtitle( $setting ) {
-		if ( self::$syncing_from_studio ) {
-			return;
-		}
-
-		if ( ! Create_Studio_Client::is_site_connected() ) {
-			return;
-		}
-
-		$site_id = Create_Studio_Client::get_site_id();
-		if ( empty( $site_id ) ) {
-			return;
-		}
-
-		Create_Studio_Client::request(
-			'POST',
-			'/sites/' . $site_id,
-			[ 'interactive_mode_cta_subtitle' => sanitize_text_field( $setting->value ) ]
-		);
 	}
 
 	/**
@@ -572,9 +494,6 @@ class GateKeeper {
 				'group' => 'mv_create_subscription',
 			]
 		);
-
-		// Reset the cached settings to ensure fresh read on next access.
-		Settings::reset_settings();
 	}
 
 	/**
@@ -661,18 +580,13 @@ class GateKeeper {
 
 		$prefix = Plugin::$settings_group . '_';
 
-		// Reset gated theme to fallback.
-		$card_style   = Settings::get_setting( $prefix . 'card_style' );
-		$gated_themes = [
-			'editorial' => self::FEATURE_THEME_EDITORIAL,
-			'modern'    => self::FEATURE_THEME_MODERN,
-		];
-
-		if ( ! empty( $card_style ) && isset( $gated_themes[ $card_style ] ) ) {
-			$fallback = self::get_fallback( $gated_themes[ $card_style ] );
-			if ( $fallback ) {
-				Settings::update_setting( $prefix . 'card_style', $fallback );
-			}
+		// Reset gated theme to fallback (slugs/fallbacks from Creations_Views_Themes).
+		$card_style = Settings::get_setting( $prefix . 'card_style' );
+		if ( ! empty( $card_style ) && Creations_Views_Themes::is_gated( $card_style ) ) {
+			Settings::update_setting(
+				$prefix . 'card_style',
+				Creations_Views_Themes::get_fallback_style( $card_style )
+			);
 		}
 
 		// Reset all other gated settings to their defaults.
@@ -776,11 +690,8 @@ class GateKeeper {
 		}
 
 		// For premium_theme step, only trigger on actual premium themes.
-		if ( 'premium_theme' === $step ) {
-			$premium_themes = [ 'editorial', 'modern' ];
-			if ( ! in_array( $setting->value, $premium_themes, true ) ) {
-				return;
-			}
+		if ( 'premium_theme' === $step && ! Creations_Views_Themes::is_gated( $setting->value ) ) {
+			return;
 		}
 
 		// For toolbar_layout step, skip the default value.

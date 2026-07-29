@@ -40,9 +40,7 @@ class Dashboard_API {
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'get_stats' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -52,16 +50,12 @@ class Dashboard_API {
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'get_checklist' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'update_checklist' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -71,9 +65,7 @@ class Dashboard_API {
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'get_achievements' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -83,9 +75,7 @@ class Dashboard_API {
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'get_tips' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -95,9 +85,7 @@ class Dashboard_API {
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'dismiss_tip' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -107,9 +95,7 @@ class Dashboard_API {
 				[
 					'methods'             => 'GET',
 					'callback'            => [ $this, 'get_broadcasts' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -119,9 +105,7 @@ class Dashboard_API {
 				[
 					'methods'             => 'POST',
 					'callback'            => [ $this, 'dismiss_broadcast' ],
-					'permission_callback' => function () {
-						return \Mediavine\Permissions::is_user_authorized();
-					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -140,10 +124,12 @@ class Dashboard_API {
 		$reviews_table   = $wpdb->prefix . 'mv_reviews';
 
 		// Card counts by type.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$card_counts = $wpdb->get_results(
 			"SELECT type, COUNT(*) as count FROM {$creations_table} GROUP BY type",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$cards = [
 			'total'  => 0,
@@ -160,21 +146,26 @@ class Dashboard_API {
 		}
 
 		// Review stats.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$total_reviews = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$reviews_table}" );
 		$avg_rating    = (float) $wpdb->get_var( "SELECT AVG(rating) FROM {$reviews_table}" );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$week_ago  = gmdate( 'Y-m-d H:i:s', strtotime( '-7 days' ) );
 		$month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-30 days' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$this_week = (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM {$reviews_table} WHERE created >= %s", $week_ago )
 		);
 		$this_month = (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM {$reviews_table} WHERE created >= %s", $month_ago )
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Previous period for trend.
 		$two_weeks_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-14 days' ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$last_week     = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$reviews_table} WHERE created >= %s AND created < %s",
@@ -182,6 +173,7 @@ class Dashboard_API {
 				$week_ago
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Determine trend.
 		$trend = 'stable';
@@ -192,6 +184,7 @@ class Dashboard_API {
 		}
 
 		// Recent 5 reviews.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$recent = $wpdb->get_results(
 			"SELECT r.id, r.rating, r.author_name AS reviewer_name, r.review_title, r.created, r.creation,
 					c.title as card_title
@@ -201,6 +194,7 @@ class Dashboard_API {
 			 LIMIT 5",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return new \WP_REST_Response( [
 			'cards'   => $cards,
@@ -235,22 +229,27 @@ class Dashboard_API {
 		$creations_table = $wpdb->prefix . 'mv_creations';
 
 		// 1. Create a card — auto-detect if any cards exist.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$card_exists  = (bool) $wpdb->get_var( "SELECT 1 FROM {$creations_table} LIMIT 1" );
 		$create_card  = $card_exists || ! empty( $stored['create_card'] );
 
 		// 2. Import cards — auto-detect if any card has importer metadata.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$imported_exists = (bool) $wpdb->get_var(
 			"SELECT 1 FROM {$creations_table} WHERE metadata LIKE '%\"import\"%' LIMIT 1"
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$import_cards    = $imported_exists || ! empty( $stored['import_cards'] );
 
 		// 3. Auto-detect: theme has been modified (created != modified in mv_settings).
 		$select_theme = false;
 		$settings_table = $wpdb->prefix . 'mv_settings';
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$card_style_row = $wpdb->get_row(
 			"SELECT created, modified FROM {$settings_table} WHERE slug = 'mv_create_card_style' LIMIT 1",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		if ( $card_style_row && $card_style_row['created'] !== $card_style_row['modified'] ) {
 			$select_theme = true;
 		}
@@ -371,6 +370,7 @@ class Dashboard_API {
 		}
 
 		// Card Creator - tiered.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$card_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$creations_table}" );
 		$card_tier  = null;
 		if ( $card_count >= 1000 ) {
@@ -399,6 +399,7 @@ class Dashboard_API {
 		}
 
 		// Review Magnet - tiered.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$reviews_table}" );
 		$review_tier  = null;
 		if ( $review_count >= 1000 ) {
@@ -460,6 +461,7 @@ class Dashboard_API {
 
 		$settings_table  = $wpdb->prefix . 'mv_settings';
 		$checklist_items = [
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			'create_card'     => (bool) $wpdb->get_var( "SELECT 1 FROM {$creations_table} LIMIT 1" ) || ! empty( $checklist_stored['create_card'] ),
 			'import_cards'    => (bool) $wpdb->get_var( "SELECT 1 FROM {$creations_table} WHERE metadata LIKE '%\"import\"%' LIMIT 1" ) || ! empty( $checklist_stored['import_cards'] ),
 			'select_theme'    => (bool) $wpdb->get_var( "SELECT 1 FROM {$settings_table} WHERE slug = 'mv_create_card_style' AND created != modified LIMIT 1" ) || ! empty( $checklist_stored['select_theme'] ),
@@ -469,6 +471,7 @@ class Dashboard_API {
 			'register_studio' => ! empty( \Mediavine\Settings::get_setting( 'mv_create_api_token' ) ) || ! empty( $checklist_stored['register_studio'] ),
 			'sign_up_pro'     => $is_pro || ! empty( $checklist_stored['sign_up_pro'] ),
 		];
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$checklist_count = count( array_filter( $checklist_items ) );
 		$checklist_total = count( $checklist_items );
@@ -481,6 +484,7 @@ class Dashboard_API {
 
 		// Product Pro - tiered (10/100/250).
 		$products_table = $wpdb->prefix . 'mv_products';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$product_count  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$products_table}" );
 		$product_tier   = null;
 		if ( $product_count >= 250 ) {
@@ -526,9 +530,11 @@ class Dashboard_API {
 		// The unlock is also triggered directly by the reviews API on edit/delete.
 		// Here we also check if any reviews have been edited by admin.
 		if ( empty( $stored['moderator']['unlocked'] ) ) {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			$admin_edited = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM {$reviews_table} WHERE edited_by_admin = 1"
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			if ( $admin_edited > 0 ) {
 				$stored['moderator'] = [
 					'unlocked'    => true,
@@ -540,13 +546,13 @@ class Dashboard_API {
 			$stored['moderator'] = [ 'unlocked' => false, 'unlocked_at' => null ];
 		}
 
-		// Amazon Connected - single (all 4 PA-API settings configured).
-		$amazon_enabled    = \Mediavine\Settings::get_setting( 'mv_create_enable_amazon' );
-		$amazon_access_key = \Mediavine\Settings::get_setting( 'mv_create_paapi_access_key' );
-		$amazon_secret_key = \Mediavine\Settings::get_setting( 'mv_create_paapi_secret_key' );
-		$amazon_tag        = \Mediavine\Settings::get_setting( 'mv_create_paapi_tag' );
-		$amazonian  = ! empty( $amazon_enabled ) && ! empty( $amazon_access_key ) &&
-							 ! empty( $amazon_secret_key ) && ! empty( $amazon_tag );
+		// Amazon Connected - single (Creators API credentials configured).
+		$amazon_enabled = \Mediavine\Settings::get_setting( 'mv_create_enable_amazon' );
+		$creators_id    = \Mediavine\Settings::get_setting( 'mv_create_creators_credential_id' );
+		$creators_sec   = \Mediavine\Settings::get_setting( 'mv_create_creators_credential_secret' );
+		$amazon_tag     = \Mediavine\Settings::get_setting( 'mv_create_paapi_tag' );
+		$amazonian      = ! empty( $amazon_enabled ) && ! empty( $creators_id ) &&
+							 ! empty( $creators_sec ) && ! empty( $amazon_tag );
 		if ( $amazonian && empty( $stored['amazonian']['unlocked'] ) ) {
 			$stored['amazonian'] = [
 				'unlocked'    => true,
@@ -568,9 +574,11 @@ class Dashboard_API {
 		}
 
 		// Homecoming - single (imported cards from another plugin).
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$imported_exists = (bool) $wpdb->get_var(
 			"SELECT 1 FROM {$creations_table} WHERE metadata LIKE '%\"import\"%' LIMIT 1"
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		if ( $imported_exists && empty( $stored['homecoming']['unlocked'] ) ) {
 			$stored['homecoming'] = [
 				'unlocked'    => true,
@@ -581,10 +589,12 @@ class Dashboard_API {
 		}
 
 		// Jack of All Cards - single (at least one of each card type: recipe, diy, list).
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$type_counts = $wpdb->get_results(
 			"SELECT type, COUNT(*) as count FROM {$creations_table} WHERE type IN ('recipe', 'diy', 'list') GROUP BY type",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$has_all_types = count( $type_counts ) >= 3;
 		if ( $has_all_types && empty( $stored['jack_of_all_cards']['unlocked'] ) ) {
 			$stored['jack_of_all_cards'] = [
@@ -749,33 +759,33 @@ class Dashboard_API {
 			[
 				'id'    => 'fallback-structured-data',
 				'type'  => 'tip',
-				'title' => __( 'Add structured data to every post', 'mediavine' ),
-				'body'  => __( 'Embedding a Create card adds Recipe or HowTo schema automatically, helping your content appear in Google rich results.', 'mediavine' ),
+				'title' => __( 'Add structured data to every post', 'mediavine-create' ),
+				'body'  => __( 'Embedding a Create card adds Recipe or HowTo schema automatically, helping your content appear in Google rich results.', 'mediavine-create' ),
 			],
 			[
 				'id'    => 'fallback-list-cards',
 				'type'  => 'tip',
-				'title' => __( 'Use List cards for roundups', 'mediavine' ),
-				'body'  => __( 'List cards generate ItemList schema and link to your other content — great for roundup posts.', 'mediavine' ),
+				'title' => __( 'Use List cards for roundups', 'mediavine-create' ),
+				'body'  => __( 'List cards generate ItemList schema and link to your other content — great for roundup posts.', 'mediavine-create' ),
 			],
 			[
 				'id'    => 'fallback-customize-colors',
 				'type'  => 'tip',
-				'title' => __( 'Customize your card colors', 'mediavine' ),
-				'body'  => __( 'Match your cards to your brand by setting primary and secondary colors in Settings.', 'mediavine' ),
+				'title' => __( 'Customize your card colors', 'mediavine-create' ),
+				'body'  => __( 'Match your cards to your brand by setting primary and secondary colors in Settings.', 'mediavine-create' ),
 				'path'  => 'settings#appearance',
 			],
 			[
 				'id'    => 'fallback-reviews',
 				'type'  => 'tip',
-				'title' => __( 'Add reviews to boost engagement', 'mediavine' ),
-				'body'  => __( 'Enable reviews on your cards to let readers rate your recipes. Higher engagement signals help with SEO.', 'mediavine' ),
+				'title' => __( 'Add reviews to boost engagement', 'mediavine-create' ),
+				'body'  => __( 'Enable reviews on your cards to let readers rate your recipes. Higher engagement signals help with SEO.', 'mediavine-create' ),
 			],
 			[
 				'id'    => 'fallback-connect-studio',
 				'type'  => 'tip',
-				'title' => __( 'Connect to Create Studio', 'mediavine' ),
-				'body'  => __( 'Link your site to Create Studio for analytics, remote settings, and Pro features.', 'mediavine' ),
+				'title' => __( 'Connect to Create Studio', 'mediavine-create' ),
+				'body'  => __( 'Link your site to Create Studio for analytics, remote settings, and Pro features.', 'mediavine-create' ),
 				'path'  => 'settings#create-studio',
 			],
 		];
@@ -952,6 +962,12 @@ class Dashboard_API {
 	 * @return array|null Broadcast data or null if none active.
 	 */
 	public static function get_active_broadcast() {
+		// Connecting to Create Studio is the consent to contact create.studio.
+		// Unconnected installs must never fetch the broadcast feed (WP.org Guideline 7).
+		if ( ! Create_Studio_Client::is_site_connected() ) {
+			return null;
+		}
+
 		// Request-scoped static cache to avoid multiple remote calls per page load.
 		static $result_cache = null;
 		static $cache_checked = false;

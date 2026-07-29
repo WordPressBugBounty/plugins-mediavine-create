@@ -5,7 +5,48 @@ namespace Mediavine\Create\Importers\Sources;
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Simple_Recipes_Pro_Legacy {
+class Import_Simple_Recipes_Pro_Legacy extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'simple_recipe_pro_legacy';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return Import_Simple_Recipes_Pro::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
+	}
+
+	/**
+	 * Whether to also run the Simple Recipes Pro ratings double-check.
+	 *
+	 * @return bool
+	 */
+	public static function should_check_srp_ratings() {
+		return false;
+	}
 
 	// MV -> SRP
 	public static $recipe_pairs = [
@@ -152,13 +193,13 @@ class Import_Simple_Recipes_Pro_Legacy {
 			$formatted[ $key ] = $srp_data[ $value ];
 		}
 
-		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine' );
+		$formatted['active_time_label'] = __( 'Cook Time', 'mediavine-create' );
 
 		if ( isset( $formatted['additional_time'] ) ) {
-			$formatted['additional_time_label'] = __( 'Wait Time', 'mediavine' );
+			$formatted['additional_time_label'] = __( 'Wait Time', 'mediavine-create' );
 		}
 
-		$formatted['ingredient_sections'] = self::parse_ingredients( unserialize( $srp_ingredients[0]->meta_value ) );
+		$formatted['ingredient_sections'] = self::parse_ingredients( unserialize( $srp_ingredients[0]->meta_value, [ 'allowed_classes' => false ] ) );
 
 		unset( $formatted['ingredients'] );
 
@@ -186,7 +227,7 @@ class Import_Simple_Recipes_Pro_Legacy {
 		}
 
 		if ( isset( $formatted['description'] ) ) {
-			$formatted['description'] = strip_tags( $formatted['description'] );
+			$formatted['description'] = wp_strip_all_tags( $formatted['description'] );
 		}
 
 		return $formatted;
@@ -235,7 +276,7 @@ class Import_Simple_Recipes_Pro_Legacy {
 
 	public static function replace( $api_data ) {
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$models       = \Mediavine\MV_DBI::get_models( [ 'posts', 'mv_creations' ] );
 		$post_model   = $models->posts;
@@ -247,6 +288,10 @@ class Import_Simple_Recipes_Pro_Legacy {
 			return $api_data;
 		}
 
+		// original_id is always a WordPress post ID; coerce to int so it cannot be
+		// used to inject SQL when interpolated into the statement below.
+		$original_id = absint( $api_data['original_id'] );
+
 		$recipe = $recipe_model->find_one( $api_data['id'] );
 
 		$simple_shortcode = '[simple-recipe]';
@@ -256,7 +301,7 @@ class Import_Simple_Recipes_Pro_Legacy {
 		$statement = "SELECT ID as post_id,
 						post_content as original_content
 						FROM {$models->posts->table_name}
-						WHERE ID = {$api_data['original_id']}
+						WHERE ID = {$original_id}
 						AND post_type NOT IN ('revision', 'attachment', 'nav_menu_item')";
 		$posts     = $post_model->find(
 			[

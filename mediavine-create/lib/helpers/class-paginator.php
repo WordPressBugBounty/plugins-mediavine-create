@@ -8,6 +8,11 @@ class Paginator {
 	/**
 	 * Get links with required fields from a table.
 	 *
+	 * Looks up first/last/current plus keyset-neighbor (prev/next) rows
+	 * instead of loading every matching row into PHP, so cost stays flat
+	 * regardless of table size. `previous`/`next` wrap around to `last`/`first`
+	 * at the boundaries, matching the ordered-list behavior this replaces.
+	 *
 	 * @param string $table
 	 * @param array  $fields
 	 * @param mixed  $id
@@ -35,17 +40,17 @@ class Paginator {
 
 		$table = Str::contains( $table, $wpdb->prefix ) ? $table : $wpdb->prefix . $table;
 
-		// Build and prep where clause
-		$where  = '';
-		$params = [];
+		// Build and prep the scoping where clause, shared by every query below.
+		$scope_where  = '';
+		$scope_params = [];
 		if ( ! empty( $type ) ) {
 			if ( is_array( $type ) ) {
 				$placeholders = implode(',', array_fill(0, count($type), '%s'));
-				$where        = "WHERE type IN ($placeholders)";
-				$params       = $type;
+				$scope_where  = "type IN ($placeholders)";
+				$scope_params = $type;
 			} else {
-				$where  = 'WHERE type = %s';
-				$params = [ $type ];
+				$scope_where  = 'type = %s';
+				$scope_params = [ $type ];
 			}
 		}
 
@@ -58,34 +63,53 @@ class Paginator {
 		}
 		$sanitized_fields = trim( implode( ', ', $sanitized_fields ), ', ' );
 
-		// SECURITY CHECKED: This query is properly prepared.
-		$statement = "SELECT {$sanitized_fields} FROM {$table} {$where} ORDER BY {$id_column} ASC";
-		$prepared  = $wpdb->prepare( $statement, $params );
-		$items     = $wpdb->get_results( $prepared, ARRAY_A );
+		// Fetches a single row matching the shared scope plus an optional extra
+		// condition (bound via %d against $id_column), ordered so LIMIT 1 picks
+		// the boundary or keyset-neighbor row the caller wants.
+		$fetch_one = function ( $extra_where, $extra_params, $order ) use ( $wpdb, $table, $sanitized_fields, $id_column, $scope_where, $scope_params ) {
+			$conditions = $scope_where;
+			if ( $extra_where ) {
+				$conditions = $conditions ? "{$conditions} AND {$extra_where}" : $extra_where;
+			}
+			$where  = $conditions ? "WHERE {$conditions}" : '';
+			$params = array_merge( $scope_params, $extra_params );
 
-		if ( empty( $items ) ) {
+			$statement = "SELECT {$sanitized_fields} FROM {$table} {$where} ORDER BY {$id_column} {$order} LIMIT 1";
+
+			// wpdb::prepare() requires a placeholder to bind; skip it when there's
+			// nothing to bind (no type filter and no id comparison) — the rest of
+			// the statement is already built from allowlisted/sanitized parts.
+			if ( $params ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+				$statement = $wpdb->prepare( $statement, $params );
+			}
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+			$row = $wpdb->get_row( $statement, ARRAY_A );
+			return $row ? $row : null;
+		};
+
+		$first = $fetch_one( '', [], 'ASC' );
+		if ( empty( $first ) ) {
 			return [];
 		}
-		$links = [
-			'first' => reset( $items ),
-			'last'  => end( $items ),
-		];
-		$total = count( $items );
 
-		foreach ( $items as $key => $item ) {
-			if ( $item[ $id_column ] == $id ) { // phpcs:ignore
-				$links['current'] = $items[ $key ];
-				// If the item is not the first in the array ($key > 0),
-				// the previous item is one index lower than the current ($key - 1).
-				// If the key is the first in the array ($key === 0),
-				// the previous item is the last item in the array (end( $items ))
-				$links['previous'] = $key > 0 ? $items[ $key - 1 ] : end( $items );
-				// If the item index is lower than the count - 1 (because 0-indexing),
-				// the next item is the next index ($key + 1).
-				// Otherwise, the next item is the first in the array ( reset($items) ).
-				$links['next'] = $key < $total - 1 ? $items[ $key + 1 ] : reset( $items );
-			}
+		$links = [
+			'first' => $first,
+			'last'  => $fetch_one( '', [], 'DESC' ),
+		];
+
+		$current = $fetch_one( "{$id_column} = %d", [ (int) $id ], 'ASC' );
+		if ( empty( $current ) ) {
+			return $links;
 		}
+		$links['current'] = $current;
+
+		// A missing neighbor means $current sits at that boundary; wrap around.
+		$previous          = $fetch_one( "{$id_column} < %d", [ (int) $id ], 'DESC' );
+		$links['previous'] = $previous ? $previous : $links['last'];
+		$next              = $fetch_one( "{$id_column} > %d", [ (int) $id ], 'ASC' );
+		$links['next']     = $next ? $next : $links['first'];
 
 		return $links;
 	}

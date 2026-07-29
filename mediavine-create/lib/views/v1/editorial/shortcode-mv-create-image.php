@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 $mv_create_enable_print_thumbnails = \Mediavine\Settings::get_setting( 'mv_create_enable_print_thumbnails' );
 if ( ! $args['print'] || ! empty( $mv_create_enable_print_thumbnails ) ) {
 	// Editorial theme uses no fixed ratio for full-width images

@@ -68,7 +68,8 @@ class Admin_Bar {
 					'id'        => $creation->id,
 					'object_id' => $creation->object_id,
 					'type'      => $creation->type,
-					'title'     => $creation->title ?: sprintf( __( 'Untitled %s', 'mediavine' ), $type_label ),
+					/* translators: %s: creation type (e.g. Recipe, How-To) */
+					'title'     => $creation->title ?: sprintf( __( 'Untitled %s', 'mediavine-create' ), $type_label ),
 				];
 			}
 		}
@@ -94,7 +95,7 @@ class Admin_Bar {
 			$wp_admin_bar->add_node(
 				[
 					'id'    => 'mv-create-cards',
-					'title' => '<span class="mv-create-admin-bar-icon">' . $icon_svg . '</span> ' . __( 'Edit Create Card', 'mediavine' ),
+					'title' => '<span class="mv-create-admin-bar-icon">' . $icon_svg . '</span> ' . __( 'Edit Create Card', 'mediavine-create' ),
 					'href'  => $edit_url,
 				]
 			);
@@ -103,7 +104,7 @@ class Admin_Bar {
 			$wp_admin_bar->add_node(
 				[
 					'id'    => 'mv-create-cards',
-					'title' => '<span class="mv-create-admin-bar-icon">' . $icon_svg . '</span> ' . __( 'Edit Create Cards', 'mediavine' ),
+					'title' => '<span class="mv-create-admin-bar-icon">' . $icon_svg . '</span> ' . __( 'Edit Create Cards', 'mediavine-create' ),
 					'href'  => false,
 				]
 			);
@@ -138,9 +139,9 @@ class Admin_Bar {
 	 */
 	private function get_type_label( $type ) {
 		$labels = [
-			'recipe' => __( 'Recipe', 'mediavine' ),
-			'diy'    => __( 'How-To', 'mediavine' ),
-			'list'   => __( 'List', 'mediavine' ),
+			'recipe' => __( 'Recipe', 'mediavine-create' ),
+			'diy'    => __( 'How-To', 'mediavine-create' ),
+			'list'   => __( 'List', 'mediavine-create' ),
 		];
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( $type );

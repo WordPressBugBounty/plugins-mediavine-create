@@ -29,8 +29,6 @@ class Creations extends Plugin {
 
 	public $creations_meta_blocks = null;
 
-	public $object_terms_set = false;
-
 	private $table_name = 'mv_creations';
 
 	public $schema = [
@@ -310,56 +308,6 @@ class Creations extends Plugin {
 	}
 
 	/**
-	 * Restore any missing video data in a creation
-	 *
-	 * @param object $creation  creation data
-	 * @return object creation data with restored video data
-	 */
-	public static function restore_video_data( $creation ) {
-		if ( ! empty($creation->video) || ! isset($creation->original_object_id) || Str::contains('video_data_restored', $creation->metadata) ) {
-			return $creation;
-		}
-
-		$metadata = json_decode($creation->metadata ?: '{}');
-		// Fallback to prevent PHP errors if metadata was empty
-		if ( ! is_object($metadata) ) {
-			$metadata = new \stdClass();
-		}
-		$metadata->video_data_restored = true;
-		$creation->metadata            = wp_json_encode($metadata);
-
-		$models = \Mediavine\MV_DBI::get_models(null, 'mv_recipes');
-
-		if ( ! isset($models->mv_recipes) ) {
-			return $creation;
-		}
-		$recipe_model = $models->mv_recipes;
-
-		$recipe = $recipe_model->find_one(
-			[
-				'col' => 'object_id',
-				'key' => $creation->original_object_id,
-			]
-		);
-
-		if ( ! isset($recipe->id) || empty($recipe->video_data) ) {
-			return $creation;
-		}
-
-		$creation->video = $recipe->video_data;
-
-		$creation = self::$models_v2->mv_creations->update_without_modified_date( (array) $creation);
-
-		\Mediavine\Create\Publish::update_publish_queue(
-			[
-				$creation->id,
-			]
-		);
-
-		return $creation;
-	}
-
-	/**
 	 * Get the `type` of a given creation.
 	 *
 	 * @param int $creation_id  the ID of the Create card
@@ -370,10 +318,11 @@ class Creations extends Plugin {
 
 		$creation_type = '';
 
-		// SECURITY CHECKED: This query is properly prepared.
 		$statement = "SELECT type FROM {$wpdb->prefix}mv_creations WHERE id = %d";
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$prepared  = $wpdb->prepare($statement, [ $creation_id ]);
 		$result    = $wpdb->get_row($prepared);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! empty($result->type) ) {
 			$creation_type = $result->type;
@@ -408,20 +357,33 @@ class Creations extends Plugin {
 		$search_term = $query->query['s'];
 		$creations   = $wpdb->prefix . 'mv_creations';
 
-		$search = "AND
+		// Build the LIKE term with wildcard escaping and pass it through
+		// $wpdb->prepare() as %s placeholders. The term is user-supplied (?s=),
+		// so it must never be interpolated directly into the query string.
+		$like = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
+		$search = $wpdb->prepare(
+			" AND
 			(
-				({$wpdb->posts}.post_title LIKE '%$search_term%') OR
-				({$wpdb->posts}.post_excerpt LIKE '%$search_term%') OR
-				({$wpdb->posts}.post_content LIKE '%$search_term%') OR
+				({$wpdb->posts}.post_title LIKE %s) OR
+				({$wpdb->posts}.post_excerpt LIKE %s) OR
+				({$wpdb->posts}.post_content LIKE %s) OR
 				({$wpdb->posts}.ID IN (
 					SELECT DISTINCT {$wpdb->posts}.ID
 					FROM {$creations}
 					JOIN {$wpdb->posts}
 					ON {$creations}.canonical_post_id = {$wpdb->posts}.ID
-					WHERE {$creations}.published LIKE '%$search_term%'
+					WHERE {$creations}.published LIKE %s
 				))
 			)
-		";
+		",
+			$like,
+			$like,
+			$like,
+			$like
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $search;
 	}
@@ -574,11 +536,11 @@ class Creations extends Plugin {
 	 */
 	public static function get_creation_ids_by_post( $post_id, $filter_types = [] ) {
 		if ( ! isset($post_id) ) {
-			return new \WP_Error('no_value', __('Post ID was not set in function call', 'mediavine'), [ 'message' => __('A Post ID was not included in the request', 'mediavine') ]);
+			return new \WP_Error('no_value', __('Post ID was not set in function call', 'mediavine-create'), [ 'message' => __('A Post ID was not included in the request', 'mediavine-create') ]);
 		}
 
 		if ( ! is_numeric($post_id) ) {
-			return new \WP_Error('non_numeric', __('Post ID value was not a number', 'mediavine'), [ 'message' => __('A Post ID varable was included but was non-numeric', 'mediavine') ]);
+			return new \WP_Error('non_numeric', __('Post ID value was not a number', 'mediavine-create'), [ 'message' => __('A Post ID varable was included but was non-numeric', 'mediavine-create') ]);
 		}
 
 		$creations = self::$models_v2->mv_creations->where(
@@ -765,14 +727,14 @@ class Creations extends Plugin {
 			true
 		);
 
-		$data['prep_time_label']       = ! empty($original_data['prep_time_label']) ? $original_data['prep_time_label'] : __('Prep Time', 'mediavine');
-		$data['active_time_label']     = ! empty($original_data['active_time_label']) ? $original_data['active_time_label'] : __('Active Time', 'mediavine');
-		$data['additional_time_label'] = ! empty($original_data['additional_time_label']) ? $original_data['additional_time_label'] : __('Additional Time', 'mediavine');
+		$data['prep_time_label']       = ! empty($original_data['prep_time_label']) ? $original_data['prep_time_label'] : __('Prep Time', 'mediavine-create');
+		$data['active_time_label']     = ! empty($original_data['active_time_label']) ? $original_data['active_time_label'] : __('Active Time', 'mediavine-create');
+		$data['additional_time_label'] = ! empty($original_data['additional_time_label']) ? $original_data['additional_time_label'] : __('Additional Time', 'mediavine-create');
 
 		$data['object_id'] = $object_id;
 
 		if ( isset($data['type']) && ( 'recipe' === $data['type'] ) ) {
-			$data['active_time_label'] = ! empty($original_data['active_time_label']) ? $original_data['active_time_label'] : __('Cook Time', 'mediavine');
+			$data['active_time_label'] = ! empty($original_data['active_time_label']) ? $original_data['active_time_label'] : __('Cook Time', 'mediavine-create');
 		}
 
 		if ( empty($data['instructions']) ) {
@@ -831,74 +793,6 @@ class Creations extends Plugin {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Checks if the object terms should be reset.
-	 *
-	 * @return boolean
-	 */
-	public function should_set_object_terms() {
-		 $should_set_object_terms = ! $this->object_terms_set;
-
-		/**
-		 * Filters whether the object terms should be reset.
-		 *
-		 * @param bool $max maximum should_set_object_terms of revisions
-		 */
-		$should_set_object_terms = apply_filters('mv_create_should_set_object_terms', true);
-
-		return $should_set_object_terms;
-	}
-
-	/**
-	 * Resets a specific term association between a term and an object id.
-	 *
-	 * Locks the resetting of the term ID with 60 second transient, or until process completed.
-	 *
-	 * @param int    $object_id  Post object ID, typically a Create card
-	 * @param int    $term_id    Term ID
-	 * @param string $taxonomy   Type of taxonomy to target
-	 * @return void
-	 */
-	public function reset_term_association( $object_id, $term_id, $taxonomy = 'category' ) {
-		// Avoid all race conditions by locking with transient
-		if ( false !== ( get_transient('mv_create_reset_term_association_locked') ) ) {
-			return;
-		}
-		set_transient('mv_create_reset_term_association_locked_' . $object_id, true, MINUTE_IN_SECONDS);
-
-		// Delete previous term associations and update with the new term
-		wp_delete_object_term_relationships($object_id, $taxonomy);
-		wp_set_object_terms($object_id, $term_id, $taxonomy);
-
-		// Remove lock
-		delete_transient('mv_create_reset_term_association_locked_' . $object_id);
-	}
-
-	/**
-	 * Resets the primary and secondary term associations if available
-	 *
-	 * @param object $data  Retrieved Creation data
-	 * @return void
-	 */
-	function reset_term_associations( $data ) {
-		// Make sure we should be (re)setting the terms
-		if ( ! $this->should_set_object_terms() ) {
-			return;
-		}
-
-		// Delete previous category associations and update with the new category.
-		if ( ! empty($data->category) ) {
-			$this->reset_term_association($data->object_id, (int) $data->category);
-		}
-		// Do the same checks for the secondary term
-		if ( ! empty($data->secondary_term) && isset(self::$term_map[ $data->type ]) ) {
-			$this->reset_term_association($data->object_id, (int) $data->secondary_term, 'mv_' . self::$term_map[ $data->type ]);
-		}
-
-		// Prevent reset from running multiple times
-		$this->object_terms_set = true;
 	}
 
 	/**
@@ -1056,13 +950,14 @@ class Creations extends Plugin {
 		$update = [ 'id' => $creation->id ];
 
 		// Update post ids IF they don't exist
-		$republish = false;
+		$republish                   = false;
+		$preserve_original_object_id = false;
 		if ( ! $creation->original_post_id || 0 === $creation->original_post_id ) {
 			$update['original_post_id']  = $post_id;
 			$update['canonical_post_id'] = $post_id;
 
-			$republish = true;
-			add_filter('mv_create_dbi_update_remove_original_object_id', '__return_false');
+			$republish                   = true;
+			$preserve_original_object_id = true;
 		}
 
 		// There may be cases where the canonical was removed, but not the original
@@ -1086,10 +981,16 @@ class Creations extends Plugin {
 
 		// If changes to associated posts or we had to republish because we changed the canonical
 		if ( $creation->associated_posts !== $update['associated_posts'] || $republish ) {
-			self::$models_v2->mv_creations->update_without_modified_date(
-				$update
-			);
-			add_filter('mv_create_dbi_update_remove_original_object_id', '__return_true');
+			$do_update = function() use ( $update ) {
+				self::$models_v2->mv_creations->update_without_modified_date(
+					$update
+				);
+			};
+			if ( $preserve_original_object_id ) {
+				with_filter( 'mv_create_dbi_update_remove_original_object_id', '__return_false', $do_update );
+			} else {
+				$do_update();
+			}
 		}
 	}
 
@@ -1099,9 +1000,6 @@ class Creations extends Plugin {
 	 * @param int $post_id  the id of the post we want removed
 	 */
 	public static function unassociate_post_with_creations( $post_id ) {
-		// We don't want to set terms until we associate
-		add_filter('mv_create_should_set_object_terms', '__return_false');
-
 		// get creations with associated_posts LIKE '%"{$post_id}"%'
 		$creations = self::$models_v2->mv_creations->find(
 			[
@@ -1335,18 +1233,10 @@ class Creations extends Plugin {
 	function routes() {
 		 $namespace = $this->api_root . '/' . $this->api_version;
 
-		register_rest_route(
-			$namespace,
-			'/print/(?P<id>\d+)',
-			[
-				[
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'print_view' ],
-					'permission_callback' => '__return_true',
-					'args'                => CreationsArgs\validate_id(),
-				],
-			]
-		);
+		// `/print/(?P<id>\d+)` used to be registered here against a callback this
+		// class does not define, so it could only ever fatal. Nothing links to
+		// it (the print button points at `/creations/{id}/print`), so it is gone
+		// rather than repaired: one public print route is enough surface.
 
 		register_rest_route(
 			$namespace,
@@ -1355,7 +1245,7 @@ class Creations extends Plugin {
 				[
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'render_view' ],
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -1375,7 +1265,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::READABLE,
@@ -1388,7 +1278,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -1407,7 +1297,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -1427,7 +1317,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 					'args'                => CreationsArgs\validate_id(),
 				],
 				[
@@ -1440,7 +1330,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 					'args'                => CreationsArgs\validate_id(),
 				],
 				[
@@ -1455,7 +1345,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 					'args'                => CreationsArgs\validate_id(),
 				],
 				'schema' => function () {
@@ -1479,7 +1369,7 @@ class Creations extends Plugin {
 						);
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -1499,7 +1389,7 @@ class Creations extends Plugin {
 						);
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -1519,7 +1409,7 @@ class Creations extends Plugin {
 						);
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -1539,7 +1429,7 @@ class Creations extends Plugin {
 						);
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -1557,7 +1447,7 @@ class Creations extends Plugin {
 						);
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -1575,11 +1465,21 @@ class Creations extends Plugin {
 						);
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
 
+		/**
+		 * Public HTML JSON-LD endpoint for crawlers and tooling.
+		 *
+		 * Uses `Permissions::allow_public` because it only exposes schema already
+		 * published on the front-end card: it serves the stored `json_ld` column
+		 * and nothing else. Unpublished or never-published cards return 404 — we
+		 * never regenerate schema on an anonymous request (CRE-206), both to
+		 * avoid leaking draft recipe data and to keep anonymous hits from
+		 * amplifying image/schema work.
+		 */
 		register_rest_route(
 			$namespace,
 			'/creations/(?P<id>\d+)/jsonld',
@@ -1587,18 +1487,26 @@ class Creations extends Plugin {
 				[
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => function ( \WP_REST_Request $request ) {
-						header('Content-Type: text/html; charset=' . get_option('blog_charset'));
-						$creation = self::prep_publish_creation( (int) $request['id']);
+						$creation_id = (int) $request['id'];
+						$creation    = self::$models_v2->mv_creations->find_one( $creation_id );
+
+						// CRE-206: Only published cards expose JSON-LD, and only
+						// the schema stored at publish time. Never regenerate for
+						// unpublished/never-published drafts.
+						if ( ! is_object( $creation ) || empty( $creation->published ) || empty( $creation->json_ld ) ) {
+							status_header( 404 );
+							exit;
+						}
+
+						header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
 						$allowed_html = [ 'script' => [ 'type' => [] ] ];
-						if ( ! empty($creation->json_ld) ) {
-							print wp_kses('<script type="application/ld+json">' . $creation->json_ld . '</script>', $allowed_html);
-						}
+						print wp_kses( '<script type="application/ld+json">' . $creation->json_ld . '</script>', $allowed_html );
 
 						exit;
 					},
 					'args'                => CreationsArgs\validate_id(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 				],
 			]
 		);
@@ -1617,7 +1525,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -1637,7 +1545,7 @@ class Creations extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

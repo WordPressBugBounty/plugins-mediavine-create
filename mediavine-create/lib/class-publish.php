@@ -2,8 +2,6 @@
 namespace Mediavine\Create;
 
 use Mediavine\MV_DBI;
-use Mediavine\Create\Helpers\Arr;
-use Mediavine\Create\Helpers\Str;
 
 class Publish extends Plugin {
 
@@ -12,18 +10,51 @@ class Publish extends Plugin {
 
 		if ( ! $creation_id ) {
 			return new \WP_Error(
-				404, __( 'Entry Not Found', 'mediavine' ), [
-					'message' => __( 'The Creation could not be found', 'mediavine' ),
+				404, __( 'Entry Not Found', 'mediavine-create' ), [
+					'message' => __( 'The Creation could not be found', 'mediavine-create' ),
 					'class'   => 'Mediavine\Create\Publish',
 					'method'  => 'publish',
 				]
 			);
 		}
 
-		$creation                = Creations::publish_creation( (int) $creation_id );
+		$creation = Creations::publish_creation( (int) $creation_id );
+		if ( empty( $creation ) ) {
+			return new \WP_Error(
+				404, __( 'Entry Not Found', 'mediavine-create' ), [
+					'message' => __( 'The Creation could not be found', 'mediavine-create' ),
+					'class'   => 'Mediavine\Create\Publish',
+					'method'  => 'publish',
+				]
+			);
+		}
 		$creation->thumbnail_uri = wp_get_attachment_url( $creation->thumbnail_id );
 		$response                = API_Services::set_response_data( $creation, $response );
 		return $response;
+	}
+
+	/**
+	 * Whether a render-time republish may run for the current request.
+	 *
+	 * A render-time republish is a write (it drains queues, regenerates the
+	 * published snapshot and can flip a draft to published). Front-end renders
+	 * keep that self-healing behaviour, since a card only reaches them through
+	 * a post its author placed it in. REST reads are public surface where the
+	 * caller picks the card id, so an anonymous caller must never be able to
+	 * trigger the write by addressing an id directly.
+	 *
+	 * @return bool True when the current request may perform the write.
+	 */
+	public static function can_republish_at_render() {
+		$is_rest_request = function_exists( 'wp_is_rest_endpoint' )
+			? wp_is_rest_endpoint()
+			: ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+
+		if ( ! $is_rest_request ) {
+			return true;
+		}
+
+		return \Mediavine\Permissions::is_user_authorized();
 	}
 
 	/**
@@ -32,16 +63,14 @@ class Publish extends Plugin {
 	 * @return object $creation full creation object whether new or original
 	 */
 	public static function maybe_republish( $creation ) {
+		// CVE-2026-16992: leave the row (and the queues) untouched rather than
+		// half-processing them, so an anonymous REST read never mutates state.
+		if ( ! self::can_republish_at_render() ) {
+			return $creation;
+		}
+
 		self::do_actions( $creation->id );
 		$should_republish = false;
-
-		// $should_republish bool passed on to return prior result, preventing false negatives
-		$should_republish = self::list_link_repair( $creation, $should_republish );
-		$should_republish = self::remove_associated_post_revisions( $creation, $should_republish );
-		$should_republish = self::fix_associated_posts_column( $creation, $should_republish );
-		$should_republish = self::fix_imported_ratings_dates( $creation, $should_republish );
-		$should_republish = self::fix_canonical_post_id( $creation, $should_republish );
-		$should_republish = self::fix_create_slug( $creation, $should_republish );
 
 		$publish_queue        = [];
 		$publish_queue_option = get_option( 'mv_publish_queue' );
@@ -74,379 +103,26 @@ class Publish extends Plugin {
 	}
 
 	/**
-	 * Repairs list links on a Create list
-	 *
-	 * @param object $creation Create card data
-	 * @param bool   $should_republish Current $should_republish value to potentially be passed on
-	 * @return bool True if data updated and republish should happen, false if it doesn't need to happen
-	 */
-	private static function list_link_repair( $creation, $should_republish ) {
-
-		if ( 'list' !== $creation->type ) {
-			return $should_republish;
-		}
-
-		$metadata = [];
-		if ( ! empty( $creation->metadata ) ) {
-			$metadata = json_decode( $creation->metadata ?: '{}', true );
-		}
-
-		if ( ! empty( $metadata['list_link_repaired'] ) ) {
-			return $should_republish;
-		}
-
-		$items = self::$models_v2->mv_relations->find(
-			[
-				'where' => [
-					'creation' => $creation->id,
-				],
-			]
-		);
-
-		foreach ( $items as &$item ) {
-			if ( 'card' !== $item->content_type ) {
-				continue;
-			}
-
-			if ( $item->relation_id !== $item->canonical_post_id ) {
-				continue;
-			}
-
-			$found_creation = self::$models_v2->mv_creations->find_one_by_id( $item->relation_id );
-
-			if ( ! empty( $found_creation->canonical_post_id ) ) {
-				$item->url = get_permalink( $found_creation->canonical_post_id );
-
-				$updated_item = self::$models_v2->mv_relations->update(
-					[
-						'id'                => $item->id,
-						'url'               => $item->url,
-						'canonical_post_id' => $found_creation->canonical_post_id,
-					]
-				);
-			}
-		}
-
-		$metadata['list_link_repaired'] = true;
-		$updated_creation               = self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'       => $creation->id,
-				'metadata' => wp_json_encode( $metadata ),
-			]
-		);
-
-		return true;
-	}
-
-
-	private static function fix_associated_posts_column( $creation, $should_republish ) {
-		if (
-			empty( $creation->associated_posts ) ||
-			Str::contains( 'fixed_associated_posts_column', $creation->metadata ) ||
-			Str::contains( '""', $creation->associated_posts )
-		) {
-			return $should_republish;
-		}
-		$associated_posts = json_decode( $creation->associated_posts ?: '[]', true );
-		$associated_posts = wp_json_encode( array_map( 'strval', $associated_posts ) );
-
-		$updated_creation = self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'               => $creation->id,
-				'associated_posts' => $associated_posts,
-			]
-		);
-		if ( is_wp_error( $updated_creation ) ) {
-			return $should_republish;
-		}
-
-		$metadata                                  = json_decode( $creation->metadata ?: '{}', true );
-		$metadata['fixed_associated_posts_column'] = true;
-		self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'       => $creation->id,
-				'metadata' => wp_json_encode( $metadata ),
-			]
-		);
-		return true;
-	}
-
-
-	private static function fix_canonical_post_id( $creation, $should_republish ) {
-		// return $should_republish;
-		if ( empty( $creation->canonical_post_id ) ) {
-			return $should_republish;
-		}
-
-		$associated_posts = ! empty( $creation->associated_posts ) ? json_decode( $creation->associated_posts ?: '[]', true ) : [];
-		if ( empty( $associated_posts ) || in_array( $creation->canonical_post_id, $associated_posts, true ) ) {
-			return $should_republish;
-		}
-
-		// Use first associated post if found
-		$canonical_post_id = Arr::first( $associated_posts );
-
-		// Use original post ID if available and in associated posts
-		if (
-			! empty( $creation->original_post_id ) &&
-			in_array( $creation->original_post_id, $associated_posts, true )
-		) {
-			$canonical_post_id = $creation->original_post_id;
-		}
-
-		if ( empty( $canonical_post_id ) ) {
-			return $should_republish;
-		}
-		// Update creation with new metadata and associated posts
-		self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'                => $creation->id,
-				'canonical_post_id' => $canonical_post_id,
-			]
-		);
-
-		return true;
-	}
-
-	/**
-	 * Fix the slug for a Create post type if incorrect
-	 *
-	 * We check for '-creation' at the end of the slug. If it's not there then we will
-	 * update the slug to include it. This will prevent Yoast SEO Premium from causing
-	 * bad page redirects.
-	 *
-	 * @param object $creation Full creation data
-	 * @param bool   $should_republish Previous republish value
-	 * @return bool True if we should republish or the previous value if no changes are to be made
-	 */
-	public static function fix_create_slug( $creation, $should_republish ) {
-		$metadata = [];
-		if ( ! empty( $creation->metadata ) ) {
-			$metadata = json_decode( $creation->metadata ?: '{}', true );
-		}
-
-		if ( ! empty( $metadata['slug_repaired'] ) ) {
-			return $should_republish;
-		}
-
-		$post_slug   = get_post_field( 'post_name', $creation->object_id );
-		$update_slug = false;
-		if ( ! empty( $post_slug ) ) {
-			$end_of_slug = substr( $post_slug, -9 );
-			if ( '-creation' !== $end_of_slug ) {
-				$update_slug = true;
-			}
-		}
-		if ( $update_slug ) {
-			$update_post = wp_update_post(
-				[
-					'ID'        => $creation->object_id,
-					'post_name' => $post_slug . '-creation',
-				]
-			);
-			if ( is_wp_error( $update_post ) ) {
-				return $should_republish;
-			}
-
-			// Legacy support for old Create post types, and old WP revision support
-			global $wpdb;
-
-			// Remove any trailing digits
-			// SECURITY CHECKED: This query is properly sanitized. Custom LIKE doesn't work with preparation.
-			$trimmed_slug   = preg_replace( '/-[0-9]*$/', '', $post_slug );
-			$statement      = "SELECT * FROM {$wpdb->prefix}posts
-				WHERE post_name LIKE '{$trimmed_slug}%'
-				AND ( post_type = 'mv_create'
-					OR post_type = 'mv_creations'
-					OR post_type = 'mv_products'
-					OR post_type = 'mv_recipes'
-				)
-			";
-			$prepared       = $wpdb->prepare( $statement, [] );
-			$matching_posts = $wpdb->get_results( $prepared );
-			foreach ( $matching_posts as $matching_post ) {
-				if ( ! empty( $matching_post->post_name ) ) {
-					$end_of_slug = substr( $matching_post->post_name, -9 );
-					if ( '-creation' !== $end_of_slug ) {
-						$update_post = wp_update_post(
-							[
-								'ID'        => $matching_post->ID,
-								'post_name' => $matching_post->post_name . '-creation',
-							]
-						);
-						if ( is_wp_error( $update_post ) ) {
-							return $should_republish;
-						}
-					}
-				}
-			}
-		}
-
-		$metadata['slug_repaired'] = true;
-		self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'       => $creation->id,
-				'metadata' => wp_json_encode( $metadata ),
-			]
-		);
-		return true;
-	}
-
-	/**
-	 * Removes previously associated revisions from a Create card
-	 *
-	 * @param object $creation Create card data
-	 * @param bool   $should_republish Current $should_republish value to potentially be passed on
-	 * @return bool True if data updated and republish should happen, false if it doesn't need to happen
-	 */
-	private static function remove_associated_post_revisions( $creation, $should_republish ) {
-		$metadata = [];
-		if ( ! empty( $creation->metadata ) ) {
-			$metadata = json_decode( $creation->metadata ?: '{}', true );
-		}
-
-		if ( ! empty( $metadata['revisions_removed'] ) ) {
-			return $should_republish;
-		}
-
-		$associated_posts = [];
-		if ( ! empty( $creation->associated_posts ) ) {
-			$associated_posts = json_decode( $creation->associated_posts ?: '[]', true );
-		}
-
-		foreach ( $associated_posts as $key => $associated_post ) {
-			$post_status      = get_post_status( $associated_post );
-			$allowed_statuses = [
-				'publish',
-				'future',
-				'draft',
-				'pending',
-				'private',
-			];
-
-			if ( ! in_array( $post_status, $allowed_statuses, true ) ) {
-				unset( $associated_posts[ $key ] );
-			}
-		}
-
-		$metadata['revisions_removed'] = true;
-
-		// Update creation with new metadata and associated posts
-		self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'               => $creation->id,
-				'metadata'         => wp_json_encode( $metadata ),
-				'associated_posts' => wp_json_encode( array_values( array_unique( $associated_posts ) ) ),
-			]
-		);
-
-		return true;
-	}
-
-	/**
-	 * Fixes review creation dates for imported ratings/reviews.
-	 *
-	 * Recipe ratings imported previously were assigned a created date on import,
-	 * which means all ratings imported for a given recipe had the same date. This function
-	 * reassigns any rating creation dates possible.
-	 *
-	 * Remove December 2019
-	 *
-	 * @since 1.4.10
-	 *
-	 * @return void
-	 */
-	public static function fix_imported_ratings_dates( $creation, $should_republish ) {
-		global $wpdb;
-
-		if (
-			'recipe' !== $creation->type ||
-			! Str::contains( $creation->metadata, 'import' ) ||
-			Str::contains( $creation->metadata, 'fixed_ratings_dates' ) ||
-			empty( $creation->original_post_id )
-		) {
-			return $should_republish;
-		}
-
-		$dbi       = self::$models_v2->mv_reviews;
-		$statement = "SELECT
-			r.id as id,
-			comment_date AS created,
-			comment_date AS modified
-			FROM {$wpdb->commentmeta} AS cm
-			JOIN {$wpdb->comments} AS c ON (c.comment_ID = cm.comment_id)
-			JOIN {$dbi->table_name} AS r ON (c.comment_author_email=r.author_email)
-			WHERE c.comment_approved = 1
-			AND cm.meta_key IN ('ERRating', 'cookbook_comment_rating', 'recipe_rating', 'wprm-comment-rating')
-			AND cm.meta_value != 0
-			AND c.comment_post_ID = %d";
-
-		if ( Str::contains( $creation->metadata, [ 'meal_planner', 'recipe_maker' ] ) ) {
-			if ( Str::contains( $creation->metadata, 'meal_planner' ) ) {
-				$table_name = 'mpprecipe_ratings';
-			}
-			if ( Str::contains( $creation->metadata, 'recipe_maker' ) ) {
-				$table_name = 'wprm_ratings';
-			}
-			$statement = "SELECT
-				r.id as id,
-				comment_date AS created,
-				comment_date AS modified
-				FROM {$wpdb->prefix}{$table_name} AS ir
-				JOIN {$wpdb->comments} AS c ON (c.comment_ID = ir.comment_id)
-				JOIN {$dbi->table_name} AS r ON (c.comment_author_email=r.author_email)
-				WHERE c.comment_approved = 1
-				AND c.comment_post_ID = %d";
-		}
-
-		// SECURITY CHECKED: This query is properly prepared.
-		$prepared = $wpdb->prepare( $statement, [ $creation->original_post_id ] );
-		$ratings  = $wpdb->get_results( $prepared, ARRAY_A );
-
-		foreach ( $ratings as $data ) {
-			$date             = date( 'Y-m-d H:i:s' );
-			$data['created']  = isset( $data['created'] ) ? $data['created'] : $date;
-			$data['modified'] = isset( $data['modified'] ) ? $data['modified'] : $date;
-
-			if ( is_wp_error( $data ) ) {
-				continue;
-			}
-
-			// because our insert, upsert, and update methods overwrite `created` and `modified` dates,
-			// we have to manually perform an update here
-			$normalized_data = $dbi->normalize_data( $data );
-			add_filter( 'query', [ $dbi, 'allow_null' ] );
-			$wpdb->update( $dbi->table_name, $normalized_data, [ 'id' => $normalized_data['id'] ] );
-			remove_filter( 'query', [ $dbi, 'allow_null' ] );
-		}
-
-		$metadata                        = json_decode( $creation->metadata ?: '{}', true );
-		$metadata['fixed_ratings_dates'] = true;
-
-		// Update creation with new metadata and associated posts
-		self::$models_v2->mv_creations->update_without_modified_date(
-			[
-				'id'       => $creation->id,
-				'metadata' => wp_json_encode( $metadata ),
-			]
-		);
-
-		return true;
-	}
-
-	/**
 	 * Add Creations to republish queue.
 	 *
-	 * @param \WP_REST_Request  $request
-	 * @param \WP_REST_Response $response
+	 * Capability is enforced by the route `permission_callback`
+	 * (`API_Services::permitted`). An explicit `confirm` query/body param is
+	 * also required so a casually authenticated GET cannot enqueue a full-site
+	 * republish.
 	 *
-	 * @return void|bool|array|\WP_REST_Response
+	 * @param \WP_REST_Request  $request  Incoming REST request.
+	 * @param \WP_REST_Response $response Response being built.
+	 * @return void|bool|array|\WP_REST_Response|\WP_Error
 	 */
 	public static function republish_creations( \WP_REST_Request $request, \WP_REST_Response $response ) {
 		$params = $request->get_params();
 
-		if ( 'pubeng' !== $params['auth'] ) {
-			return false;
+		if ( empty( $params['confirm'] ) ) {
+			return new \WP_Error(
+				'mv_create_republish_unconfirmed',
+				__( 'Republish requires an explicit confirm parameter.', 'mediavine-create' ),
+				[ 'status' => 400 ]
+			);
 		}
 
 		if ( empty( $params['type'] ) ) {
@@ -493,7 +169,9 @@ class Publish extends Plugin {
 			$queued_ids = array_values(
 				array_filter(
 					$queued_ids, function( $item ) use ( $id ) {
-						return $item !== $id;
+						// Cast both sides: queue ids are stored as strings, but
+						// callers may pass an int (membership check already casts).
+						return (string) $item !== (string) $id;
 					}
 				)
 			);
@@ -577,7 +255,7 @@ class Publish extends Plugin {
 
 	public static function prepare_creation( $creation ) {
 		if ( empty( $creation->id ) ) {
-			return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine' ), [ 'message' => __( 'The Creation could not be found', 'mediavine' ) ] );
+			return new \WP_Error( 404, __( 'Entry Not Found', 'mediavine-create' ), [ 'message' => __( 'The Creation could not be found', 'mediavine-create' ) ] );
 		}
 
 		unset( $creation->published );
@@ -764,7 +442,7 @@ class Publish extends Plugin {
 		if ( empty( $creation->pinterest_img_id ) ) {
 			$creation->pinterest_img_id = 0;
 		}
-		$images = Creations::add_images_to_creation( $creation, $creation->thumbnail_id, $creation->pinterest_img_id, $creation->type );
+		$images = Creations::add_images_to_creation( $creation, $creation->thumbnail_id, $creation->pinterest_img_id );
 
 		if ( ! empty( $images ) ) {
 			// Make sure we generate base image sizes for published data

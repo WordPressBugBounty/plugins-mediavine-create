@@ -37,6 +37,13 @@ class Relations extends Plugin {
 	public $amazon_queue;
 
 	/**
+	 * Shared Amazon refresh service for list-item Amazon links.
+	 *
+	 * @var Amazon_Refresh_Service
+	 */
+	public $amazon_refresh;
+
+	/**
 	 * @var Amazon
 	 */
 	public $amazon;
@@ -64,10 +71,27 @@ class Relations extends Plugin {
 			]
 		);
 
+		$this->amazon_refresh = new Amazon_Refresh_Service(
+			[
+				'queue'              => $this->amazon_queue,
+				'amazon'             => $this->amazon,
+				'model'              => self::$models_v2->mv_relations,
+				'expiring_transient' => 'mv_amazon_expiring_amazon_links',
+				'url_field'          => 'url',
+				'extra_where'        => [
+					[ 'content_type', '=', 'external' ],
+				],
+				'apply_result'       => function ( $product, $item ) {
+					$product['meta']    = $item;
+					$product['expires'] = $item['expires'];
+					return $product;
+				},
+			]
+		);
+		$this->amazon_refresh->register();
+
 		add_filter( 'mv_custom_schema', [ $this, 'custom_schema' ] );
 		add_action( 'rest_api_init', [ $this, 'routes' ] );
-		add_action( 'init', [ $this, 'step_amazon_queue' ] );
-		add_action( 'init', [ $this, 'refresh_amazon_links' ] );
 	}
 
 	public function custom_schema( $tables ) {
@@ -112,86 +136,19 @@ class Relations extends Plugin {
 	}
 
 	public function build_amazon_data( $id ) {
-		$product = (array) self::$models_v2->mv_relations->select_one( $id );
-		if ( empty( $product ) ) {
-			return false;
-		}
-
-		if ( is_wp_error( $product ) ) {
-			return false;
-		}
-
-		if ( empty( $product['asin'] ) ) {
-			$product['asin'] = $this->amazon->get_asin_from_link( $product['url'] );
-		}
-
-		$result = $this->amazon->get_products_by_asin( $product['asin'] );
-
-		// Move on if error
-		if ( is_wp_error( $result ) ) {
-			return false;
-		}
-
-		// move on if empty
-		if ( empty( $result[ $product['asin'] ] ) ) {
-			return false;
-		}
-
-		$product['meta']    = $result[ $product['asin'] ];
-		$product['expires'] = $result[ $product['asin'] ]['expires'];
-
-		self::$models_v2->mv_relations->update( $product );
+		return $this->amazon_refresh->build_amazon_data( $id );
 	}
 
 	public function refresh_amazon_links() {
-		$transient = 'mv_amazon_expiring_amazon_links';
-		if ( get_transient( $transient ) ) {
-			return false;
-		}
-
-		$THREE_HOURS       = 3 * 60 * 60;
-		$amazon_rate_limit = apply_filters( 'mv_create_amazon_rate_limit', $THREE_HOURS );
-		$expiring          = $this->get_expiring_amazon_links( $amazon_rate_limit );
-		if ( empty( $expiring ) ) {
-			return false;
-		}
-
-		$expiring = array_column( $expiring, 'id' );
-		$this->amazon_queue->push_many( $expiring );
-
-		set_transient( $transient, time(), $amazon_rate_limit );
+		return $this->amazon_refresh->refresh_expiring();
 	}
 
 	public function step_amazon_queue() {
-		// Only run the queue if Amazon is setup
-		if ( $this->amazon->amazon_affiliates_setup() ) {
-			return $this->amazon_queue->step(
-				function ( $item ) {
-					$this->build_amazon_data( $item );
-				}
-			);
-		}
+		return $this->amazon_refresh->step_queue();
 	}
 
 	public function get_expiring_amazon_links( $within, $limit = 50 ) {
-		$timestamp = date( 'Y-m-d H:i:s', strtotime( "+{$within} seconds" ) );
-		$model     = self::$models_v2->mv_relations;
-		$model->set_select( '*' )
-			->set_order_by( 'expires' )
-			->set_order( 'ASC' )
-			->set_limit( $limit );
-		$links = $model->where(
-			[
-				// make sure the product is an Amazon link and has an expiration
-				[ 'asin', 'IS NOT', 'NULL' ],
-				[ 'expires', 'IS NOT', 'NULL' ],
-				// and that the expiration is $within the $timestamp
-				[ 'expires', '<', $timestamp ],
-				[ 'content_type', '=', 'external' ],
-			]
-		);
-
-		return $links;
+		return $this->amazon_refresh->get_expiring( $within, $limit );
 	}
 
 	public static function get_creation_relations( $creation_id ) {
@@ -203,7 +160,7 @@ class Relations extends Plugin {
 			$creation_id = $model->key();
 		}
 		$creation_id = intval( $creation_id );
-		// SECURITY CHECKED: This query is properly prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$prepared_statement = $wpdb->prepare(
 			"SELECT {$table}.*,
 				{$products_table}.title as product_title,
@@ -218,7 +175,9 @@ class Relations extends Plugin {
 			ORDER BY {$table}.type, {$table}.position ASC",
 			[ $creation_id ]
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$relations = $wpdb->get_results( $prepared_statement );
 		if ( empty( $relations ) ) {
 			return $relations;
@@ -366,11 +325,9 @@ class Relations extends Plugin {
 		// Merge product data with list overrides
 		// List-specific values take precedence over product defaults
 		if ( empty( $relation->title ) && ! empty( $relation->product_title ) ) {
-			// Clean up title - remove newlines and excessive whitespace from scraped content
-			$relation->title = preg_replace( '/\s+/', ' ', trim( $relation->product_title ) );
+			$relation->title = Scraped_Content_Normalizer::sanitize_title( $relation->product_title );
 		} elseif ( ! empty( $relation->title ) ) {
-			// Also clean existing title if it has newlines
-			$relation->title = preg_replace( '/\s+/', ' ', trim( $relation->title ) );
+			$relation->title = Scraped_Content_Normalizer::sanitize_title( $relation->title );
 		}
 
 		if ( empty( $relation->description ) && ! empty( $relation->product_description ) ) {
@@ -448,7 +405,7 @@ class Relations extends Plugin {
 						$request
 					);
 				},
-				'permission_callback' => [ self::$api_services, 'permitted' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 			]
 		);
 
@@ -465,7 +422,7 @@ class Relations extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -478,7 +435,7 @@ class Relations extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

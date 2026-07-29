@@ -16,7 +16,7 @@ class Display implements Settings_Group {
 				'order' => 0,
 				'data'  => [
 					'type'         => 'color_picker',
-					'label'        => __( 'Theme Colors' ),
+					'label'        => __( 'Theme Colors', 'mediavine-create' ),
 					'instructions' => null,
 				],
 			],
@@ -27,12 +27,12 @@ class Display implements Settings_Group {
 				'order' => 30,
 				'data'  => [
 					'type'         => 'select',
-					'label'        => __( 'Photo Ratio', 'mediavine' ),
-					'instructions' => __( 'Select an aspect ratio for photo display. Some card styles, such as Classy Circle, will ignore this setting.', 'mediavine' ),
-					'default'      => __( 'No fixed ratio', 'mediavine' ),
+					'label'        => __( 'Photo Ratio', 'mediavine-create' ),
+					'instructions' => __( 'Select an aspect ratio for photo display. Some card styles, such as Classy Circle, will ignore this setting.', 'mediavine-create' ),
+					'default'      => __( 'No fixed ratio', 'mediavine-create' ),
 					'options'      => [
 						[
-							'label' => __( 'No fixed ratio', 'mediavine' ),
+							'label' => __( 'No fixed ratio', 'mediavine-create' ),
 							'value' => 'mv_create_no_ratio',
 						],
 						[
@@ -57,9 +57,9 @@ class Display implements Settings_Group {
 				'order' => 35,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Enable Print Thumbnails', 'mediavine' ),
-					'instructions' => __( 'By default, card thumbnails will display in the print view. This can be disabled.', 'mediavine' ),
-					'default'      => __( 'Enabled', 'mediavine' ),
+					'label'        => __( 'Enable Print Thumbnails', 'mediavine-create' ),
+					'instructions' => __( 'By default, card thumbnails will display in the print view. This can be disabled.', 'mediavine-create' ),
+					'default'      => __( 'Enabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -69,28 +69,28 @@ class Display implements Settings_Group {
 				'order' => 40,
 				'data'  => [
 					'type'         => 'select',
-					'label'        => __( 'Pinterest Button Location', 'mediavine' ),
-					'instructions' => __( 'Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right.', 'mediavine' ),
-					'default'      => __( 'Top Right', 'mediavine' ),
+					'label'        => __( 'Pinterest Button Location', 'mediavine-create' ),
+					'instructions' => __( 'Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right.', 'mediavine-create' ),
+					'default'      => __( 'Top Right', 'mediavine-create' ),
 					'options'      => [
 						[
-							'label' => __( 'Off', 'mediavine' ),
+							'label' => __( 'Off', 'mediavine-create' ),
 							'value' => 'off',
 						],
 						[
-							'label' => __( 'Top Left', 'mediavine' ),
+							'label' => __( 'Top Left', 'mediavine-create' ),
 							'value' => 'mv-pinterest-btn-left',
 						],
 						[
-							'label' => __( 'Inside Top Left', 'mediavine' ),
+							'label' => __( 'Inside Top Left', 'mediavine-create' ),
 							'value' => 'mv-pinterest-btn-left-inside',
 						],
 						[
-							'label' => __( 'Inside Top Right', 'mediavine' ),
+							'label' => __( 'Inside Top Right', 'mediavine-create' ),
 							'value' => 'mv-pinterest-btn-right-inside',
 						],
 						[
-							'label' => __( 'Top Right', 'mediavine' ),
+							'label' => __( 'Top Right', 'mediavine-create' ),
 							'value' => 'mv-pinterest-btn-right',
 						],
 					],
@@ -103,9 +103,9 @@ class Display implements Settings_Group {
 				'order' => 50,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Force Uppercase', 'mediavine' ),
-					'instructions' => __( 'By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired.', 'mediavine' ),
-					'default'      => __( 'Enabled', 'mediavine' ),
+					'label'        => __( 'Force Uppercase', 'mediavine-create' ),
+					'instructions' => __( 'By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired.', 'mediavine-create' ),
+					'default'      => __( 'Enabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -115,9 +115,9 @@ class Display implements Settings_Group {
 				'order' => 51,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Use Theme Body Font Size', 'mediavine' ),
-					'instructions' => __( 'If enabled, the Create card body font size will match that of the theme.', 'mediavine' ),
-					'default'      => __( 'Disabled', 'mediavine' ),
+					'label'        => __( 'Use Theme Body Font Size', 'mediavine-create' ),
+					'instructions' => __( 'If enabled, the Create card body font size will match that of the theme.', 'mediavine-create' ),
+					'default'      => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -127,9 +127,9 @@ class Display implements Settings_Group {
 				'order' => 55,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Aggressive List CSS', 'mediavine' ),
-					'instructions' => __( 'Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards.', 'mediavine' ),
-					'default'      => __( 'Disabled', 'mediavine' ),
+					'label'        => __( 'Aggressive List CSS', 'mediavine-create' ),
+					'instructions' => __( 'Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards.', 'mediavine-create' ),
+					'default'      => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -139,9 +139,9 @@ class Display implements Settings_Group {
 				'order' => 60,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Aggressive Buttons CSS', 'mediavine' ),
-					'instructions' => __( "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style.", 'mediavine' ),
-					'default'      => __( 'Disabled', 'mediavine' ),
+					'label'        => __( 'Aggressive Buttons CSS', 'mediavine-create' ),
+					'instructions' => __( "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style.", 'mediavine-create' ),
+					'default'      => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -151,9 +151,9 @@ class Display implements Settings_Group {
 				'order' => 65,
 				'data'  => [
 					'type'         => 'checkbox',
-					'label'        => __( 'Center Full Width Cards', 'mediavine' ),
-					'instructions' => __( 'When a card reaches its max width of 700px, center the card within the content area.', 'mediavine' ),
-					'default'      => __( 'Enabled', 'mediavine' ),
+					'label'        => __( 'Center Full Width Cards', 'mediavine-create' ),
+					'instructions' => __( 'When a card reaches its max width of 700px, center the card within the content area.', 'mediavine-create' ),
+					'default'      => __( 'Enabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -163,57 +163,57 @@ class Display implements Settings_Group {
 				'order' => 90,
 				'data'  => [
 					'type'    => 'theme_select',
-					'label'   => __( 'Card Style', 'mediavine' ),
-					'default' => __( 'Simple Square', 'mediavine' ),
+					'label'   => __( 'Card Style', 'mediavine-create' ),
+					'default' => __( 'Simple Square', 'mediavine-create' ),
 					'options' => [
 						[
-							'label' => __( 'Editorial', 'mediavine' ),
+							'label' => __( 'Editorial', 'mediavine-create' ),
 							'value' => 'editorial',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-editorial.webp' ),
-							'title' => __( 'Editorial<br>by Mischief Marmot', 'mediavine' ),
+							'title' => __( 'Editorial<br>by Mischief Marmot', 'mediavine-create' ),
 							'gated' => true,
 						],
 						[
-							'label' => __( 'Modern Elegant', 'mediavine' ),
+							'label' => __( 'Modern Elegant', 'mediavine-create' ),
 							'value' => 'modern',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-modern.webp' ),
-							'title' => __( 'Modern Elegant<br>by Mischief Marmot', 'mediavine' ),
+							'title' => __( 'Modern Elegant<br>by Mischief Marmot', 'mediavine-create' ),
 							'gated' => true,
 						],
 						[
-							'label' => __( 'Hero Image by Purr Design', 'mediavine' ),
+							'label' => __( 'Hero Image by Purr Design', 'mediavine-create' ),
 							'value' => 'big-image',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-big-image.webp' ),
 							/* translators: credit name and url */
-							'title' => sprintf( __( 'Hero Image<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
+							'title' => sprintf( __( 'Hero Image<br>by %s', 'mediavine-create' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
-							'label' => __( 'Simple Square by Purr Design', 'mediavine' ),
+							'label' => __( 'Simple Square by Purr Design', 'mediavine-create' ),
 							'value' => 'square',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-default.webp' ),
 							/* translators: credit name and url */
-							'title' => sprintf( __( 'Simple Square<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
+							'title' => sprintf( __( 'Simple Square<br>by %s', 'mediavine-create' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
-							'label' => __( 'Dark Simple Square by Purr Design', 'mediavine' ),
+							'label' => __( 'Dark Simple Square by Purr Design', 'mediavine-create' ),
 							'value' => 'dark',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-dark.webp' ),
 							/* translators: credit name and url */
-							'title' => sprintf( __( 'Dark Simple Square<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
+							'title' => sprintf( __( 'Dark Simple Square<br>by %s', 'mediavine-create' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
-							'label' => __( 'Classy Circle by Purr Design', 'mediavine' ),
+							'label' => __( 'Classy Circle by Purr Design', 'mediavine-create' ),
 							'value' => 'centered',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-centered.webp' ),
 							/* translators: credit name and url */
-							'title' => sprintf( __( 'Classy Circle<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
+							'title' => sprintf( __( 'Classy Circle<br>by %s', 'mediavine-create' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						[
-							'label' => __( 'Dark Classy Circle by Purr Design', 'mediavine' ),
+							'label' => __( 'Dark Classy Circle by Purr Design', 'mediavine-create' ),
 							'value' => 'centered-dark',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-centered-dark.webp' ),
 							/* translators: credit name and url */
-							'title' => sprintf( __( 'Dark Classy Circle<br>by %s', 'mediavine' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
+							'title' => sprintf( __( 'Dark Classy Circle<br>by %s', 'mediavine-create' ), '<a href="https://www.purrdesign.com/" target="_blank">Purr Design<span class="dashicons dashicons-external"></span></a>' ),
 						],
 						
 					],

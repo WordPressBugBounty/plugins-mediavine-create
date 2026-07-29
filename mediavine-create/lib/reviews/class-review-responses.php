@@ -49,13 +49,13 @@ class Review_Responses extends Plugin {
 
 		// Build the email
 		$to = $review->author_email;
-		$reviewer_name = ! empty( $review->author_name ) ? $review->author_name : __( 'Reviewer', 'mediavine' );
-		$responder_name = ! empty( $response->author_name ) ? $response->author_name : __( 'Someone', 'mediavine' );
+		$reviewer_name = ! empty( $review->author_name ) ? $review->author_name : __( 'Reviewer', 'mediavine-create' );
+		$responder_name = ! empty( $response->author_name ) ? $response->author_name : __( 'Someone', 'mediavine-create' );
 
 		$blogname = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 
 		/* translators: %s: Post title */
-		$subject = sprintf( __( '[%1$s] New response to your review on "%2$s"', 'mediavine' ), $blogname, $post_title );
+		$subject = sprintf( __( '[%1$s] New response to your review on "%2$s"', 'mediavine-create' ), $blogname, $post_title );
 
 		$message = sprintf(
 			/* translators: 1: Reviewer name, 2: Responder name, 3: Post title */
@@ -71,7 +71,7 @@ View the full conversation:
 
 ---
 You are receiving this email because you left a review and opted to receive notifications.
-', 'mediavine' ),
+', 'mediavine-create' ),
 			$reviewer_name,
 			$responder_name,
 			$post_title,
@@ -124,11 +124,11 @@ You are receiving this email because you left a review and opted to receive noti
 
 	public static function get_responses_for_review( $review_id, $args = [] ) {
 		if ( ! isset( $review_id ) ) {
-			return new \WP_Error( 'no_value', __( 'Review ID was not set in function call', 'mediavine' ), [ 'message' => __( 'A Review ID was not included in the request', 'mediavine' ) ] );
+			return new \WP_Error( 'no_value', __( 'Review ID was not set in function call', 'mediavine-create' ), [ 'message' => __( 'A Review ID was not included in the request', 'mediavine-create' ) ] );
 		}
 
 		if ( ! is_numeric( $review_id ) ) {
-			return new \WP_Error( 'non_numeric', __( 'Review ID value was not a number', 'mediavine' ), [ 'message' => __( 'A Review ID variable was included but was non-numeric', 'mediavine' ) ] );
+			return new \WP_Error( 'non_numeric', __( 'Review ID value was not a number', 'mediavine-create' ), [ 'message' => __( 'A Review ID variable was included but was non-numeric', 'mediavine-create' ) ] );
 		}
 
 		$limit  = 50;
@@ -155,6 +155,50 @@ You are receiving this email because you left a review and opted to receive noti
 		);
 
 		return $responses;
+	}
+
+	/**
+	 * Batch-fetch approved responses for many reviews in one query.
+	 *
+	 * Returns a map of review_id => array of response objects (created ASC).
+	 * Reviews with no responses are omitted (callers should default to []).
+	 *
+	 * @param int[] $review_ids Review IDs to fetch responses for.
+	 * @return array<int, array<int, object>>
+	 */
+	public static function get_responses_for_reviews( $review_ids ) {
+		$review_ids = array_values( array_filter( array_map( 'intval', (array) $review_ids ) ) );
+		if ( empty( $review_ids ) ) {
+			return [];
+		}
+
+		$responses = self::$models_v2->mv_reviews_responses->find(
+			[
+				'where'      => [
+					'review_id' => [ 'IN' => $review_ids ],
+				],
+				'conditions' => [
+					[ 'status', '=', 'approved' ],
+				],
+				'order_by'   => 'created',
+				'order'      => 'ASC',
+			]
+		);
+
+		if ( ! is_array( $responses ) ) {
+			return [];
+		}
+
+		$by_review = [];
+		foreach ( $responses as $response ) {
+			$rid = (int) $response->review_id;
+			if ( ! isset( $by_review[ $rid ] ) ) {
+				$by_review[ $rid ] = [];
+			}
+			$by_review[ $rid ][] = $response;
+		}
+
+		return $by_review;
 	}
 
 	public function init() {

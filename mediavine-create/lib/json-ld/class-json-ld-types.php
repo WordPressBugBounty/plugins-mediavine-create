@@ -439,21 +439,7 @@ class JSON_LD_Types {
 			$image_size = $image[ $map_info['size'] ];
 
 			// Because we calculate highest resolution image, we can ignore the high_res suffixes
-			$resolutions = apply_filters(
-				'mv_create_image_resolutions', [
-					'_medium_res',
-					'_medium_high_res',
-					'_high_res',
-				]
-			);
-			foreach ( $resolutions as $resolution ) {
-				$continue = false;
-				if ( strpos( $image_size, $resolution ) ) {
-					$continue = true;
-					break;
-				}
-			}
-			if ( $continue ) {
+			if ( Images::size_has_resolution_suffix( $image_size ) ) {
 				continue;
 			}
 
@@ -529,31 +515,31 @@ class JSON_LD_Types {
 			'mv_json_ld_nutrition_map', [
 				'calories'        => [
 					'schema' => 'calories',
-					'text'   => __( ' calories', 'mediavine' ),
+					'text'   => __( ' calories', 'mediavine-create' ),
 				],
 				'carbohydrates'   => [
 					'schema' => 'carbohydrateContent',
-					'text'   => __( ' grams carbohydrates', 'mediavine' ),
+					'text'   => __( ' grams carbohydrates', 'mediavine-create' ),
 				],
 				'cholesterol'     => [
 					'schema' => 'cholesterolContent',
-					'text'   => __( ' milligrams cholesterol', 'mediavine' ),
+					'text'   => __( ' milligrams cholesterol', 'mediavine-create' ),
 				],
 				'total_fat'       => [
 					'schema' => 'fatContent',
-					'text'   => __( ' grams fat', 'mediavine' ),
+					'text'   => __( ' grams fat', 'mediavine-create' ),
 				],
 				'fiber'           => [
 					'schema' => 'fiberContent',
-					'text'   => __( ' grams fiber', 'mediavine' ),
+					'text'   => __( ' grams fiber', 'mediavine-create' ),
 				],
 				'protein'         => [
 					'schema' => 'proteinContent',
-					'text'   => __( ' grams protein', 'mediavine' ),
+					'text'   => __( ' grams protein', 'mediavine-create' ),
 				],
 				'saturated_fat'   => [
 					'schema' => 'saturatedFatContent',
-					'text'   => __( ' grams saturated fat', 'mediavine' ),
+					'text'   => __( ' grams saturated fat', 'mediavine-create' ),
 				],
 				'serving_size'    => [
 					'schema' => 'servingSize',
@@ -561,19 +547,19 @@ class JSON_LD_Types {
 				],
 				'sodium'          => [
 					'schema' => 'sodiumContent',
-					'text'   => __( ' milligrams sodium', 'mediavine' ),
+					'text'   => __( ' milligrams sodium', 'mediavine-create' ),
 				],
 				'sugar'           => [
 					'schema' => 'sugarContent',
-					'text'   => __( ' grams sugar', 'mediavine' ),
+					'text'   => __( ' grams sugar', 'mediavine-create' ),
 				],
 				'trans_fat'       => [
 					'schema' => 'transFatContent',
-					'text'   => __( ' grams trans fat', 'mediavine' ),
+					'text'   => __( ' grams trans fat', 'mediavine-create' ),
 				],
 				'unsaturated_fat' => [
 					'schema' => 'unsaturatedFatContent',
-					'text'   => __( ' grams unsaturated fat', 'mediavine' ),
+					'text'   => __( ' grams unsaturated fat', 'mediavine-create' ),
 				],
 			]
 		);
@@ -584,6 +570,9 @@ class JSON_LD_Types {
 		];
 
 		foreach ( $nutrition_map as $key => $schema_data ) {
+			if ( ! isset( $value[ $key ] ) ) {
+				continue;
+			}
 			if ( ! empty( $value[ $key ] ) || ( '0' === $value[ $key ] ) || ( 0 === $value[ $key ] ) ) {
 				$nutrition[ $schema_data['schema'] ] = $value[ $key ] . $schema_data['text'];
 				$has_nutrition                       = true;
@@ -645,7 +634,7 @@ class JSON_LD_Types {
 				continue;
 			}
 			
-			$author_name = ! empty( $review->author_name ) ? $review->author_name : __( 'Anonymous', 'mediavine' );
+			$author_name = ! empty( $review->author_name ) ? $review->author_name : __( 'Anonymous', 'mediavine-create' );
 			$author_name = mb_substr( $author_name, 0, Reviews_API::MAX_AUTHOR_NAME_LENGTH );
 
 			$review_item = [
@@ -706,12 +695,11 @@ class JSON_LD_Types {
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( true );
 		}
-		// Use UTF-8 encoding declaration to properly handle UTF-8 content
-		$entities = htmlentities( do_shortcode( $value ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false );
-		$decoded  = function_exists( 'mb_convert_encoding' )
-			? mb_convert_encoding( $entities, 'ISO-8859-1', 'UTF-8' )
-			: $entities;
-		$load     = $dom->loadHTML( htmlspecialchars_decode( $decoded ) );
+		// Encode high-bit UTF-8 as numeric entities so libxml's ISO-8859-1
+		// default does not collapse emoji/CJK/★ to "?". Prefer the XML
+		// encoding prelude as a belt-and-suspenders when mbstring is absent.
+		$html = Str::to_html_entities( do_shortcode( $value ) );
+		$load = $dom->loadHTML( '<?xml encoding="UTF-8">' . $html );
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( false );
 		}
@@ -837,6 +825,14 @@ class JSON_LD_Types {
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_video( $json_ld, $mv_video, $ext_video, $creation ) {
+		// Empty video fields must not emit a null/empty video node or trigger
+		// an undefined-variable warning when neither input is present.
+		if ( ! $mv_video && ! $ext_video ) {
+			return $json_ld;
+		}
+
+		$video = null;
+
 		if ( $mv_video ) {
 			$value = (array) json_decode( $mv_video, true );
 			$video = [ '@type' => 'VideoObject' ];
@@ -867,14 +863,9 @@ class JSON_LD_Types {
 			}
 
 			if ( ! empty( $video_slug ) ) {
-				$api_endpoint = sprintf( 'https://video.mediavine.com/videos/%s.json', $video_slug );
-				$data         = wp_remote_retrieve_body( wp_remote_get( $api_endpoint ) );
-
-				if ( ! empty( $data ) ) {
-					$video_data = json_decode( $data );
-					if ( ! empty( $video_data->video->meta->thumbnailUrl ) ) {
-						$video['thumbnailUrl'] = $video_data->video->meta->thumbnailUrl;
-					}
+				$thumbnail_url = $this->get_remote_video_thumbnail_url( $video_slug );
+				if ( ! empty( $thumbnail_url ) ) {
+					$video['thumbnailUrl'] = $thumbnail_url;
 				}
 			}
 
@@ -888,7 +879,18 @@ class JSON_LD_Types {
 				$video['uploadDate'] = gmdate( 'c', strtotime( $creation['modified'] ) );
 			}
 		} elseif ( $ext_video ) {
-			$value = (array) json_decode( $ext_video, true );
+			$value = json_decode( $ext_video, true );
+			if ( ! is_array( $value ) ) {
+				return $json_ld;
+			}
+
+			$required_keys = [ 'name', 'description', 'thumbnailUrl', 'contentUrl', 'duration', 'uploadDate' ];
+			foreach ( $required_keys as $key ) {
+				if ( ! isset( $value[ $key ] ) ) {
+					return $json_ld;
+				}
+			}
+
 			$video = [
 				'@type'        => 'VideoObject',
 				'name'         => $value['name'],
@@ -900,10 +902,63 @@ class JSON_LD_Types {
 			];
 		}
 
+		if ( null === $video ) {
+			return $json_ld;
+		}
+
 		$video            = $this->filter_json_ld_value( $video, 'video', 'video', $json_ld, $creation );
 		$json_ld['video'] = $video;
 
 		return $json_ld;
+	}
+
+	/**
+	 * Resolves the thumbnail URL for a Mediavine video slug from the remote
+	 * video.mediavine.com JSON-LD endpoint, caching the result in a transient.
+	 *
+	 * This runs on the public render path, so the remote lookup is cached
+	 * (including negative results) to avoid an unbounded external call on every
+	 * uncached page view. The service is disclosed under "== External services =="
+	 * in README.txt.
+	 *
+	 * @param string $video_slug The Mediavine video slug/key.
+	 * @return string The resolved thumbnail URL, or empty string if none.
+	 */
+	protected function get_remote_video_thumbnail_url( $video_slug ) {
+		$cache_key = 'mv_create_video_thumb_' . md5( $video_slug );
+		$cached    = get_transient( $cache_key );
+
+		// A cached value is either a URL string or an empty-string sentinel for
+		// a negative lookup; `false` means the transient is absent/expired.
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$api_endpoint  = sprintf( 'https://video.mediavine.com/videos/%s.json', $video_slug );
+		$response      = wp_remote_get( $api_endpoint, [ 'timeout' => 3 ] );
+		$thumbnail_url = '';
+
+		if ( ! is_wp_error( $response ) ) {
+			$data = wp_remote_retrieve_body( $response );
+			if ( ! empty( $data ) ) {
+				$video_data = json_decode( $data );
+				if ( ! empty( $video_data->video->meta->thumbnailUrl ) ) {
+					$thumbnail_url = $video_data->video->meta->thumbnailUrl;
+				}
+			}
+		}
+
+		/**
+		 * Filters the TTL (in seconds) for the cached remote video thumbnail lookup.
+		 *
+		 * @param int    $ttl        Cache lifetime in seconds. Default 12 hours.
+		 * @param string $video_slug The Mediavine video slug being looked up.
+		 */
+		$ttl = apply_filters( 'mv_create_video_thumbnail_cache_ttl', 12 * HOUR_IN_SECONDS, $video_slug );
+
+		set_transient( $cache_key, $thumbnail_url, $ttl );
+
+		return $thumbnail_url;
 	}
 
 	/**
@@ -917,7 +972,7 @@ class JSON_LD_Types {
 	 */
 	public function add_json_ld_item_list( $json_ld, $item_list, $schema_prop, $creation = [] ) {
 		$item_list_element = [];
-		$current_host      = parse_url( home_url() );
+		$current_host      = wp_parse_url(  home_url() );
 		// Google requires ListItem position to be a 1-based number
 		$position = 1;
 		$types    = [ 'external', 'card' ];
@@ -958,16 +1013,26 @@ class JSON_LD_Types {
 					$permalink = get_the_permalink( $item->relation_id );
 				}
 
-				// No valid permalink, so move on
-				if ( empty( $permalink ) || ! wp_http_validate_url( $permalink ) ) {
+				// Skip empty / non-http(s) permalinks. Avoid wp_http_validate_url()
+				// here — it calls gethostbyname() for off-site hosts, which can
+				// stall schema generation (and tests) on DNS.
+				if ( empty( $permalink ) ) {
+					continue;
+				}
+				$permalink_parts  = wp_parse_url( $permalink );
+				$permalink_scheme = is_array( $permalink_parts ) ? ( $permalink_parts['scheme'] ?? '' ) : '';
+				$permalink_host   = is_array( $permalink_parts ) ? ( $permalink_parts['host'] ?? '' ) : '';
+				if (
+					empty( $permalink_host ) ||
+					! in_array( $permalink_scheme, [ 'http', 'https' ], true )
+				) {
 					continue;
 				}
 
 				// Don't add external URLs to JSON-LD
-				$permalink_host = parse_url( $permalink );
 				// If the link is a subdomain, we want to keep it in the JSON-LD
 				// If the link is neither a subdomain nor the primary domain, skip it
-				if ( ! Str::is_same_host_or_subdomain( $permalink_host['host'] ?? '', $current_host['host'] ?? '' ) ) {
+				if ( ! Str::is_same_host_or_subdomain( $permalink_host, $current_host['host'] ?? '' ) ) {
 					continue;
 				}
 			}

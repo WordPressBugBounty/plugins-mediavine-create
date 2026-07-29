@@ -1,10 +1,7 @@
 <?php
-
-/**
- *  Load i18n.
- */
-function mv_create_load_plugin_textdomain() {
-	load_plugin_textdomain( 'mediavine', false, mv_create_plugin_basename_dir( 'languages' ) );
+// Prevent direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 /**
@@ -20,25 +17,8 @@ function mv_create_table_exists( $table_name, $prefix = '' ) {
 	$table_name = preg_replace('/[^a-zA-Z0-9_]/', '', $table_name );
 	$statement  = "SHOW TABLES LIKE '%{$table_name}%'";
 
-	// SECURITY CHECKED: Nothing in this query can be sanitized.
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 	return ! empty( $wpdb->get_results( $statement ) );
-}
-
-/**
- * Manually log an error in Sentry.
- *
- * @param string $message the message we want to log (can be formatted with `print_f` style placeholders)
- * @param array  $message_params if `$message` is formatted, this is an array of values to replace format markers
- * @param array  $data an array of contextual data -- must be associative, not numeric
- * @param string $level the log level (debug, info, warning, error, fatal)
- *
- * Example: mv_create_log( 'this is a %', ['serious problem'], ['someVar' => 'had an issue'], $level = 'error');
- * This will produce a sentry report with the message "this is a serious problem" and a full stack trace.
- *
- * @return string uuid of Sentry event
- */
-function mv_create_log( $message, $message_params = [], $data = [], $level = 'info' ) {
-	return '';
 }
 
 /**
@@ -90,15 +70,29 @@ function mv_create_get_creation( $id, $published = false ) {
  * Get a custom field registered to a creation
  *
  * @since 1.1.0
- * @param {string}                        $slug   Custom field slug
- * @param {number}                        $id     Creation ID
- * @param {mixed}          Value of field
+ * @param {number} $id   Creation ID
+ * @param {string} $slug Custom field slug
+ * @return {mixed} Value of field, or null if missing
  */
 function mv_create_get_field( $id, $slug ) {
-	$creation      = mv_create_get_creation( $id );
-	$custom_fields = $creation->custom_fields;
-	$parsed_data   = json_decode( $custom_fields );
-	if ( empty( $parsed_data ) || empty( $parsed_data[ $slug ] ) ) {
+	$creation = mv_create_get_creation( $id );
+	if ( empty( $creation ) || is_wp_error( $creation ) ) {
+		return null;
+	}
+
+	$custom_fields = null;
+	if ( is_array( $creation ) && isset( $creation['custom_fields'] ) ) {
+		$custom_fields = $creation['custom_fields'];
+	} elseif ( is_object( $creation ) && isset( $creation->custom_fields ) ) {
+		$custom_fields = $creation->custom_fields;
+	}
+
+	if ( empty( $custom_fields ) || ! is_string( $custom_fields ) ) {
+		return null;
+	}
+
+	$parsed_data = json_decode( $custom_fields, true );
+	if ( empty( $parsed_data ) || ! is_array( $parsed_data ) || empty( $parsed_data[ $slug ] ) ) {
 		return null;
 	}
 	return $parsed_data[ $slug ];
@@ -158,4 +152,118 @@ function mv_create_register_custom_field( $field ) {
 			return $arr;
 		}
 	);
+}
+
+/**
+ * SSRF guard: decide whether a URL is safe to fetch server-side.
+ *
+ * Layers WordPress's wp_http_validate_url() (scheme, embedded credentials,
+ * unsafe ports, unresolvable hosts, IPv6 literals, and its built-in private
+ * ranges: 127/8, 10/8, 0/8, 172.16-31, 192.168) with an explicit check for the
+ * IPv4 ranges WP misses — link-local 169.254.0.0/16 (the cloud-metadata
+ * endpoint 169.254.169.254) and carrier-grade NAT 100.64.0.0/10.
+ *
+ * Requests to the site's own host are allowed without a DNS lookup, mirroring
+ * wp_http_validate_url()'s same-host rule — self-requests are not the threat.
+ *
+ * @param string $url URL to validate.
+ * @return bool True when the URL is safe to request.
+ */
+function mv_create_is_safe_remote_url( $url ) {
+	if ( empty( $url ) || ! is_string( $url ) || ! wp_http_validate_url( $url ) ) {
+		return false;
+	}
+
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+	if ( empty( $host ) ) {
+		return false;
+	}
+	$host = trim( $host, '[]' );
+
+	$home_host = wp_parse_url( get_option( 'home' ), PHP_URL_HOST );
+	if ( $home_host && strtolower( $home_host ) === strtolower( $host ) ) {
+		return true;
+	}
+
+	// Resolve the host (a literal IP resolves to itself) and re-inspect the IP.
+	if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+		$ip = $host;
+	} else {
+		$ip = gethostbyname( $host );
+		if ( ! $ip || $ip === $host ) {
+			// Could not resolve to an IP — treat as unsafe.
+			return false;
+		}
+	}
+
+	// Reject loopback, private, and reserved ranges. This covers 169.254/16 and
+	// all non-global IPv6 addresses.
+	if ( false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+		return false;
+	}
+
+	// PHP's filter flags don't cover carrier-grade NAT (100.64.0.0/10); reject it too.
+	if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+		$long = ip2long( $ip );
+		if ( false !== $long && ( $long & 0xffc00000 ) === ( ip2long( '100.64.0.0' ) & 0xffc00000 ) ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * SSRF-safe wrapper around wp_safe_remote_get() that validates every redirect
+ * hop with mv_create_is_safe_remote_url().
+ *
+ * WordPress follows redirects but only re-validates each Location with
+ * wp_http_validate_url() (WP_Http::validate_redirects()), which — like the
+ * initial-URL check — misses link-local (169.254.169.254) and CGNAT
+ * (100.64.0.0/10). So a public URL that 302s to the cloud-metadata endpoint
+ * would slip past a pre-check on the initial URL only. Here we disable
+ * automatic redirect following and walk each hop ourselves, rejecting any hop
+ * whose host isn't globally routable.
+ *
+ * @param string $url  URL to fetch.
+ * @param array  $args Optional wp_remote_get() args. `redirection` caps the hop
+ *                     count (default 5); it's enforced manually.
+ * @return array|\WP_Error The final WP HTTP response array, or a WP_Error when a
+ *                         hop is unsafe, the request fails, or redirects loop.
+ */
+function mv_create_safe_remote_get( $url, $args = [] ) {
+	$max_redirects = isset( $args['redirection'] ) ? (int) $args['redirection'] : 5;
+	// We follow redirects manually so each hop passes the stronger guard.
+	$args['redirection'] = 0;
+
+	$current = $url;
+	for ( $hop = 0; $hop <= $max_redirects; $hop++ ) {
+		if ( ! mv_create_is_safe_remote_url( $current ) ) {
+			return new \WP_Error(
+				'mv_create_unsafe_url',
+				__( 'Refused to fetch a URL that resolves to a private or reserved address.', 'mediavine-create' )
+			);
+		}
+
+		$response = wp_safe_remote_get( $current, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		if ( $code < 300 || $code >= 400 ) {
+			return $response;
+		}
+
+		$location = wp_remote_retrieve_header( $response, 'location' );
+		if ( empty( $location ) ) {
+			// A redirect status with no Location — nothing more to follow.
+			return $response;
+		}
+
+		// Resolve relative redirects against the current URL before re-checking.
+		$current = \WP_Http::make_absolute_url( $location, $current );
+	}
+
+	return new \WP_Error( 'http_request_failed', __( 'Too many redirects.', 'mediavine-create' ) );
 }

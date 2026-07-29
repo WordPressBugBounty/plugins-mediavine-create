@@ -394,33 +394,4 @@ class EasyRecipeDOMDocument extends DOMDocument {
 	public function xpath() {
 		return new DOMXPath( $this );
 	}
-
-	private function dumpNode( $node, $offset = 0 ) {
-		$class = get_class( $node );
-		$id    = '';
-		if ( $class == 'DOMElement' ) {
-			foreach ( $node->attributes as $attribute ) {
-				$id .= " $attribute->name=$attribute->value";
-			}
-		}
-
-		$nodeName = isset( $node->nodeName ) ? $node->nodeName : 'noname';
-		echo str_pad( '', $offset ) . "&lt;$nodeName$id&gt;\n";
-
-		if ( $class == 'DOMText' ) {
-			$val = trim( $node->nodeValue );
-			if ( $val != "\n" ) {
-				echo str_pad( '', $offset ) . "'$val'\n";
-			}
-		}
-		for ( $n = $node->firstChild; $n; $n = $n->nextSibling ) {
-			$this->dumpNode( $n, $offset + 2 );
-		}
-	}
-
-	public function dump( $node = null ) {
-		echo "<pre>\n";
-		$this->dumpNode( $node ? $node : $this );
-		echo "</pre>\n";
-	}
 }

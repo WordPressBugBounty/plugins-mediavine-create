@@ -5,9 +5,61 @@ namespace Mediavine\Create\Importers\Sources;
 use Mediavine\Create\Helpers\Arr;
 use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
+use Mediavine\Create\Importers\Helpers\Safe_Unserialize;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
-class Import_Cookbook {
+class Import_Cookbook extends Abstract_Source_Importer {
+
+	/**
+	 * Registry slug for this importer.
+	 *
+	 * @return string
+	 */
+	public static function get_slug() {
+		return 'cookbook';
+	}
+
+	/**
+	 * Serialize a found-recipe row into Create card data.
+	 *
+	 * @param array $found_recipe Recipe stub from find.
+	 * @return array|array[]|false
+	 */
+	public static function serialize_found( $found_recipe ) {
+		return static::serializer( $found_recipe );
+	}
+
+	/**
+	 * Collect native ratings after a recipe has been stored.
+	 *
+	 * @param array              $stored_recipe Stored Create recipe (has id).
+	 * @param array              $serialized    Serialized source recipe.
+	 * @param array              $found_recipe  Original find stub.
+	 * @param MV_Recipe_Importer $context       Importer host (ratings helpers).
+	 * @return array|false
+	 */
+	public static function get_import_ratings( $stored_recipe, $serialized, $found_recipe, MV_Recipe_Importer $context ) {
+		return static::get_ratings( $stored_recipe['original_id'], $stored_recipe['id'] );
+	}
+
+	/**
+	 * Post ID used for the SRP ratings double-check.
+	 *
+	 * @param array $stored_recipe Stored Create recipe.
+	 * @return int|string|null
+	 */
+	public static function get_srp_ratings_post_id( $stored_recipe ) {
+		return isset( $stored_recipe['original_id'] ) ? $stored_recipe['original_id'] : null;
+	}
+
+	/**
+	 * Whether this importer supports the reimport endpoint.
+	 *
+	 * @return bool
+	 */
+	public static function supports_reimport() {
+		return true;
+	}
 
 	private static $regex           = '/<!--Cookbook Recipe (\d+)-->.+?<!--End Cookbook Recipe-->/ms';
 	private static $shortcode_regex = '/\[cookbook_recipe id="(\d*)".*?[?^\]]/s';
@@ -63,9 +115,12 @@ class Import_Cookbook {
 
 		global $wpdb;
 
-		$cookbook_shortcode = '<!--Cookbook Recipe ' . $cookbook_recipe_id . '-->';
+		// Cookbook recipe IDs are always numeric; coerce to int so the value
+		// cannot break out of the LIKE literal below and inject SQL.
+		$cookbook_shortcode = '<!--Cookbook Recipe ' . absint( $cookbook_recipe_id ) . '-->';
 
 		$statement = "SELECT ID as id FROM {$wpdb->posts} WHERE post_content LIKE '%{$cookbook_shortcode}%' AND post_type NOT IN ('revision', 'attachment', 'nav_menu_item')";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$posts     = $wpdb->get_results( $statement, ARRAY_A );
 
 		if ( empty( $posts ) ) {
@@ -81,10 +136,11 @@ class Import_Cookbook {
 		if ( ! empty( $post_id ) ) {
 			$post = get_post( $post_id );
 
-			if ( $post && Str::contains( '<!--Cookbook', $post->post_content ) || $post && Str::contains( '[cookbook_recipe', $post->post_content ) ) {
+			if ( $post && Str::contains( $post->post_content, '<!--Cookbook' ) || $post && Str::contains( $post->post_content, '[cookbook_recipe' ) ) {
 				$ids = static::cookbook_get_recipe_ids_from_content( $post->post_content );
 				foreach ( $ids as $index => $recipe_id ) {
 					$statement = "SELECT post_title as title FROM {$wpdb->posts} where ID = $recipe_id and post_type = 'cookbook_recipe'";
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 					$results   = $wpdb->get_results( $statement );
 					if ( empty( $results ) ) {
 						continue;
@@ -100,6 +156,7 @@ class Import_Cookbook {
 		}
 
 		$statement = "SELECT id AS original_id, post_title AS title, IFNULL((SELECT ID FROM {$wpdb->posts} WHERE post_type='post' AND post_status IN ('publish', 'draft') AND (post_content LIKE CONCAT('%[cookbook-recipe id=\"', original_id, '\"%') OR post_content LIKE CONCAT('%<!--Cookbook Recipe ', original_id, '-->%'))), FALSE) as canonical_post_id FROM {$wpdb->posts} WHERE post_type = 'cookbook_recipe';";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		return $wpdb->get_results( $statement, ARRAY_A );
 	}
 
@@ -129,12 +186,12 @@ class Import_Cookbook {
 			'original_post_id'      => $recipe_id,
 			'canonical_post_id'     => $canonical_post_id,
 			'title'                 => $post->post_title,
-			'active_time_label'     => __( 'Cook Time', 'mediavine' ),
-			'additional_time_label' => __( 'Inactive Time', 'mediavine' ),
+			'active_time_label'     => __( 'Cook Time', 'mediavine-create' ),
+			'additional_time_label' => __( 'Inactive Time', 'mediavine-create' ),
 			'total_time'            => 0,
 			'yield'                 => '',
 			'author'                => $author,
-			'description'           => strip_tags( $post->post_content ),
+			'description'           => wp_strip_all_tags(  $post->post_content ),
 		];
 
 		foreach ( self::$pairs as $mv_key => $rm_key ) {
@@ -201,7 +258,7 @@ class Import_Cookbook {
 	}
 
 	private static function time_to_seconds( $value ) {
-		$time    = maybe_unserialize( $value );
+		$time    = Safe_Unserialize::maybe( $value );
 		$seconds = 0;
 		if ( isset( $time['hours'] ) ) {
 			$seconds += $time['hours'] * HOUR_IN_SECONDS;
@@ -220,7 +277,7 @@ class Import_Cookbook {
 		$section = [
 			'ingredients' => [],
 		];
-		$value   = maybe_unserialize( $value );
+		$value   = Safe_Unserialize::maybe( $value );
 		if ( isset( $value['parsed'] ) ) {
 			foreach ( $value['parsed'] as $group ) {
 				if ( empty( $group['content'] ) ) {
@@ -263,7 +320,7 @@ class Import_Cookbook {
 
 	private static function parse_nutrition( $value ) {
 		$nutrition = [];
-		$value     = maybe_unserialize( $value );
+		$value     = Safe_Unserialize::maybe( $value );
 
 		foreach ( self::$nutrition_keys as $key ) {
 			if ( 'serving_size' === $key && ! empty( $value[ $key ] ) ) {
@@ -286,7 +343,7 @@ class Import_Cookbook {
 
 	private static function parse_instructions( $value ) {
 		$instructions = '';
-		$value        = maybe_unserialize( $value );
+		$value        = Safe_Unserialize::maybe( $value );
 		if ( isset( $value['parsed'] ) ) {
 			foreach ( $value['parsed'] as $group ) {
 				$content = $group['content'];
@@ -338,7 +395,7 @@ class Import_Cookbook {
 	public static function replace( $api_data ) {
 		global $wpdb;
 		$api_data['error'] = null;
-		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine' );
+		$error_message     = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 
 		$recipe_model = new \Mediavine\MV_DBI( 'mv_creations' );
 
@@ -353,8 +410,11 @@ class Import_Cookbook {
 			return $api_data;
 		}
 
-		$cookbook_markup    = '<!--Cookbook Recipe ' . $api_data['original_id'] . '-->';
-		$cookbook_shortcode = '[cookbook_recipe id="' . $api_data['original_id'] . '"]';
+		// original_id is always a numeric recipe ID; coerce to int so it cannot
+		// break out of the LIKE literals below and inject SQL.
+		$cookbook_original_id = absint( $api_data['original_id'] );
+		$cookbook_markup      = '<!--Cookbook Recipe ' . $cookbook_original_id . '-->';
+		$cookbook_shortcode   = '[cookbook_recipe id="' . $cookbook_original_id . '"]';
 		$thumbnail          = wp_get_attachment_url( $creation->thumbnail_id );
 		$mv_shortcode       = '[mv_create key="' . $creation->id . '" title="' . $creation->title . '" thumbnail="' . $thumbnail . '" type="recipe"]';
 
@@ -367,6 +427,7 @@ class Import_Cookbook {
 						LIKE '%{$cookbook_shortcode}%'
 						AND post_type
 						NOT IN ('revision', 'attachment', 'nav_menu_item')";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- importer false positive: SQL identifiers trusted/core tables; values bound via prepare()
 		$posts     = $wpdb->get_results( $statement );
 
 		if ( empty( $posts ) ) {
@@ -394,7 +455,7 @@ class Import_Cookbook {
 
 				\Mediavine\Create\Creations::publish_creation( $creation->id );
 			} else {
-				$api_data['error'] = __( 'Failed to process shortcode replacement', 'mediavine' );
+				$api_data['error'] = __( 'Failed to process shortcode replacement', 'mediavine-create' );
 			}
 		}
 
@@ -406,7 +467,7 @@ class Import_Cookbook {
 		$change             = false;
 		$cookbook_markup    = '<!--Cookbook Recipe ' . $cookbook_recipe_id . '-->';
 		$cookbook_shortcode = '[cookbook_recipe id="' . $cookbook_recipe_id . '"]';
-		if ( Str::contains( $cookbook_markup, $content ) ) {
+		if ( Str::contains( $content, $cookbook_markup ) ) {
 			// https://regex101.com/r/YkEVhL/1
 			// Matches cookbook markup for specified recipe
 			$re = '/<!--Cookbook Recipe ' . $cookbook_recipe_id . '-->(.+?)<!--End Cookbook Recipe-->/s';
@@ -416,9 +477,9 @@ class Import_Cookbook {
 				$change  = true;
 			}
 		}
-		if ( Str::contains( $cookbook_shortcode, $content ) ) {
+		if ( Str::contains( $content, $cookbook_shortcode ) ) {
 			$content = Str::replace( $cookbook_shortcode, $mv_shortcode, $content );
-			if ( ! Str::contains( $cookbook_shortcode, $content ) ) {
+			if ( ! Str::contains( $content, $cookbook_shortcode ) ) {
 				$change = true;
 			}
 		}

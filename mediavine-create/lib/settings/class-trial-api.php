@@ -45,7 +45,7 @@ class Trial_API {
 			[
 				'methods'             => 'POST',
 				'callback'            => [ __CLASS__, 'handle_extend' ],
-				'permission_callback' => [ __CLASS__, 'check_permissions' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 				'args'                => [
 					'step' => [
 						'required'          => true,
@@ -58,15 +58,6 @@ class Trial_API {
 				],
 			]
 		);
-	}
-
-	/**
-	 * Permission check — require admin capability.
-	 *
-	 * @return bool True if user can manage options.
-	 */
-	public static function check_permissions() {
-		return current_user_can( 'manage_options' );
 	}
 
 	/**

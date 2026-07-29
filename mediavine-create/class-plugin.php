@@ -18,11 +18,11 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.5.3';
+	const VERSION = '2.5.4';
 
 	const DB_VERSION = '2.4.1';
 
-	const TEXT_DOMAIN = 'mediavine';
+	const TEXT_DOMAIN = 'mediavine-create';
 
 	const PLUGIN_DOMAIN = 'mv_create';
 
@@ -180,12 +180,6 @@ class Plugin {
 		return MV_CREATE_DIR . '/' . self::PLUGIN_ACTIVATION_FILE;
 	}
 
-	public function load_models() {
-		$models_loader = new \stdClass();
-
-		return $models_loader;
-	}
-
 	/**
 	 * Runs hook at plugin activation.
 	 *
@@ -266,8 +260,10 @@ class Plugin {
 		// Initialize Welcome Notice (handles 2.0 upgrade welcome screen)
 		\Mediavine\Create\Welcome_Notice::get_instance();
 
-		// Initialize Broadcast Notice (shows Studio broadcast banners in WP admin)
-		\Mediavine\Create\Broadcast_Notice::get_instance();
+		// Initialize Broadcast Notice only when connected (connecting = consent to Studio contact).
+		if ( \Mediavine\Create\Create_Studio_Client::is_site_connected() ) {
+			\Mediavine\Create\Broadcast_Notice::get_instance();
+		}
 
 		// Initialize Admin Bar (adds quick edit links for Create cards)
 		\Mediavine\Create\Admin_Bar::get_instance();
@@ -344,9 +340,8 @@ class Plugin {
 			}
 		);
 
-		// Load translations and run upgrade check at init. The upgrade hooks
-		// (create_settings, etc.) use __() so textdomain must load first.
-		add_action( 'init', 'mv_create_load_plugin_textdomain', 0 );
+		// Run upgrade check at init. Translations are auto-loaded by WordPress
+		// 4.6+ for wp.org-hosted plugins since the text domain matches the slug.
 		add_action( 'init', [ $this, 'plugin_update_check' ], 1 );
 		add_action( 'init', [ $this, 'init_translatable_data' ], 2 );
 
@@ -360,18 +355,12 @@ class Plugin {
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_settings' ], 30 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_shapes' ], 35 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'republish_queue' ], 40 );
-		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_reviews_table' ], 50 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'importer_admin_notice' ], 60 );
-		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'fix_cloned_ratings' ], 70 );
-		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'fix_cookbook_canonical_post_ids' ], 80 );
-		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'add_initial_revision_to_cards' ], 85 );
-		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'queue_existing_amazon_products' ], 90 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_services_api' ], 95 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'purge_used_css_caches_for_widget_safelist' ], 100 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'schedule_image_metadata_backfill' ], 105 );
 
 		// Fixes
-		add_action( 'mv_fix_video_description_queue_action', [ $this, 'fix_video_description' ] );
 		add_action( 'mv_create_backfill_image_metadata', [ $this, 'backfill_image_metadata' ] );
 
 		// Shortcodes
@@ -384,9 +373,9 @@ class Plugin {
 
 		add_filter( 'rest_prepare_post', [ $this, 'rest_prepare_post' ], 10, 3 );
 
-		add_filter( 'mv_create_paapi_access_key_settings_value', 'trim', 10 );
-		add_filter( 'mv_create_paapi_secret_key_settings_value', 'trim', 10 );
 		add_filter( 'mv_create_paapi_tag_settings_value', 'trim', 10 );
+		add_filter( 'mv_create_creators_credential_id_settings_value', 'trim', 10 );
+		add_filter( 'mv_create_creators_credential_secret_settings_value', 'trim', 10 );
 		add_filter( 'mv_create_localized_admin_settings', [ $this, 'set_custom_post_type_option_value' ], 10 );
 		$Images = new Images();
 		$Images->init();
@@ -428,13 +417,9 @@ class Plugin {
 		Creations::get_instance();
 		Supplies::get_instance();
 
-		$Images->step_queue();
-
 		Revisions::get_instance();
 
 		$JSON_LD = JSON_LD::get_instance();
-
-		\Mediavine\API_Services::get_instance();
 
 		$Dashboard_API = new Dashboard_API();
 		$Dashboard_API->init();
@@ -474,12 +459,11 @@ class Plugin {
 		Plugin_Checker::get_instance();
 		Theme_Checker::get_instance();
 
-		// Version-specific feature registration.
-		if ( defined( 'MV_CREATE_IS_PRO' ) ) {
-			$this->register_pro_features();
-		} else {
-			$this->register_free_features();
-		}
+		// Initialize unit conversion. It registers its REST route and cache
+		// invalidation hook on every install; Pro-tier access is enforced at
+		// runtime by GateKeeper (the mv_create_is_pro filter registered above
+		// plus GateKeeper::can_access checks at the REST and output layers).
+		Unit_Conversion::get_instance()->init();
 	}
 
 	/**
@@ -516,23 +500,6 @@ class Plugin {
 	}
 
 	/**
-	 * Register Pro-only features.
-	 */
-	public function register_pro_features() {
-		add_filter( 'mv_create_is_pro', '__return_true' );
-
-		$unit_conversion = Unit_Conversion::get_instance();
-		$unit_conversion->init();
-	}
-
-	/**
-	 * Register Free-only features.
-	 */
-	public function register_free_features() {
-		// Do nothing.
-	}
-
-	/**
 	 * Initialize data that requires translated strings.
 	 * Hooked to 'init' so the textdomain is loaded first.
 	 */
@@ -562,8 +529,8 @@ class Plugin {
 				'order' => 105,
 				'data'  => [
 					'type'         => 'api_authentication',
-					'label'        => __( 'Product Registration', 'mediavine' ),
-					'instructions' => __( 'In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs.', 'mediavine' ),
+					'label'        => __( 'Product Registration', 'mediavine-create' ),
+					'instructions' => __( 'In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs.', 'mediavine-create' ),
 				],
 			],
 			[
@@ -811,108 +778,9 @@ class Plugin {
 	 * @return  array             List of settings after migrated changes made
 	 */
 	public function update_settings( $settings ) {
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		// Update incorrect card style slug of mv_create to square (Remove Jan 2020)
-		if ( version_compare( $last_plugin_version, '1.4.8', '<' ) ) {
-			$settings = \Mediavine\Settings::migrate_setting_value( $settings, self::$settings_group . '_card_style', 'mv_create', 'square' );
-		}
-
+		// Version-gated setting migrations live here. Drop any block once every
+		// supported install has passed its version gate (see docs/MigrationPolicy.md).
 		return $settings;
-	}
-
-	public function fix_video_description( $id ) {
-		// fix the video description
-		$creations = new \Mediavine\MV_DBI( 'mv_creations' );
-		$creation  = $creations->find_one_by_id( $id );
-
-		if ( ! empty( $creation->video ) ) {
-			$video_data         = json_decode($creation->video ?: '{}');
-			$make_the_call      = false;
-			$video_data_changed = false;
-			$update_data        = [
-				'id' => $creation->id,
-			];
-
-			if ( empty( $video_data->description ) ) {
-				if (
-					! empty( $video_data->rawData ) &&
-					! empty( $video_data->rawData->description )
-				) {
-					$video_data->description = $video_data->rawData->description;
-					$video_data_changed      = true;
-				} else {
-					$make_the_call = true;
-				}
-			}
-
-			if ( empty( $video_data->duration ) ) {
-				if (
-					! empty( $video_data->rawData ) &&
-					! empty( $video_data->rawData->duration )
-				) {
-					$video_data->duration = 'PT' . $video_data->rawData->duration . 'S';
-					$video_data_changed   = true;
-				} else {
-					$make_the_call = true;
-				}
-			}
-
-			if ( $make_the_call && $video_data->slug ) {
-				$api_data = file_get_contents( 'https://embed.mediavine.com/oembed/?url=https%3A%2F%2Fvideo.mediavine.com%2Fvideos%2F' . $video_data->slug );
-				if ( $api_data ) {
-					$new_video_data = json_decode($api_data ?: '{}');
-
-					if ( ! empty( $new_video_data->duration ) ) {
-						$video_data->duration = 'PT' . $new_video_data->duration . 'S';
-						$video_data_changed   = true;
-					}
-
-					if ( ! empty( $new_video_data->description ) ) {
-						$video_data->description = $new_video_data->description;
-						$video_data_changed      = true;
-					}
-
-					if ( ! empty( $new_video_data->keywords ) ) {
-						$video_data->keywords = $new_video_data->keywords;
-						$video_data_changed   = true;
-					}
-				}
-			}
-
-			if ( $video_data_changed ) {
-				$creation->video      = wp_json_encode( $video_data );
-				$update_data['video'] = $creation->video;
-				if ( ! empty( $creation->json_ld ) ) {
-					$json_ld     = json_decode($creation->json_ld ?: '{}');
-					$upload_date = $json_ld->video->uploadDate;
-					if ( ! empty( $video_data->rawData->uploadDate ) ) {
-						$upload_date = $video_data->rawData->uploadDate;
-					}
-
-					$json_ld->video         = [
-						'@type'        => 'VideoObject',
-						'name'         => $json_ld->video->name,
-						'description'  => $video_data->description,
-						'thumbnailUrl' => $json_ld->video->thumbnailUrl,
-						'contentUrl'   => $json_ld->video->contentUrl,
-						'duration'     => $video_data->duration,
-						'uploadDate'   => $upload_date,
-					];
-					$creation->json_ld      = wp_json_encode( $json_ld );
-					$update_data['json_ld'] = $creation->json_ld;
-
-					if ( ! empty( $creation->published ) ) {
-						$published_data           = json_decode($creation->published ?: '{}');
-						$published_data->video    = $creation->json_ld;
-						$update_data['published'] = wp_json_encode( $published_data );
-					}
-				}
-
-				$creations->update( $update_data );
-
-			}
-		}
 	}
 
 	/**
@@ -927,18 +795,20 @@ class Plugin {
 	public function republish_queue() {
 		global $wpdb;
 		$creations = new \Mediavine\MV_DBI( 'mv_creations' );
-		$creations->set_limit( 10000 );
 		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
 		$republish_ids       = [];
 
 		// Republish cards with instructions that contain HTML entities (Remove January 2026)
 		if ( version_compare( $last_plugin_version, '1.9.14', '<' ) ) {
+			// Re-apply limit before each where(): query state resets after every call.
+			$creations->set_limit( 10000 );
 			$cards = $creations->where( [ 'published', 'LIKE', '%&lt;%' ] );
 			$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $cards, 'id' ) ) );
 		}
 
 		// Republish cards with rating_count > 0 (Remove January 2026)
 		if ( version_compare( $last_plugin_version, '1.9.12', '<' ) ) {
+			$creations->set_limit( 10000 );
 			$cards = $creations->where( [ 'rating_count', '>', 0 ] );
 			$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $cards, 'id' ) ) );
 		}
@@ -946,7 +816,7 @@ class Plugin {
 		// Republish cards with orphaned <li> tags in instructions (Remove February 2026)
 		if ( version_compare( $last_plugin_version, '1.10.1', '<' ) ) {
 			// Query for cards where published instructions start with <li> (orphaned list items)
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 			$orphaned_list_cards = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT id FROM {$wpdb->prefix}mv_creations
@@ -972,6 +842,19 @@ class Plugin {
 				$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $orphaned_list_cards, 'id' ) ) );
 			}
 		}
+
+		// Republish list cards so ItemList schema fixes (1-based positions,
+		// numberOfItems, url/@id, lookalike-host hardening, entity decoding)
+		// reach sites on the legacy inline JSON-LD path
+		// (mv_create_schema_in_head=false). Head-path sites rebuild ItemList at
+		// render time; inline-path sites serve frozen publish-time JSON-LD.
+		// Remove after January 2027 (or 12 minor releases past 2.5.4).
+		if ( version_compare( $last_plugin_version, '2.5.4', '<' ) ) {
+			$creations->set_limit( 10000 );
+			$list_cards    = $creations->where( [ 'type', '=', 'list' ] );
+			$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $list_cards, 'id' ) ) );
+		}
+
 		if ( ! empty( $republish_ids ) ) {
 			\Mediavine\Create\Publish::update_publish_queue( $republish_ids );
 		}
@@ -986,11 +869,11 @@ class Plugin {
 		$settings_url = admin_url( 'options-general.php?page=mv_settings&setting=mv_create_enable_importers' );
 		printf(
 			'<div class="notice notice-info"><p><strong>%1$s</strong></p><p>%2$s</p></div>',
-			wp_kses_post( __( 'Thanks for installing Create!', 'mediavine' ) ),
+			wp_kses_post( __( 'Thanks for installing Create!', 'mediavine-create' ) ),
 			wp_kses_post(
 				sprintf(
 					/* translators: %1$s: link to importer setting, %2$s: closing anchor tag */
-					__( 'If you\'re moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes.', 'mediavine' ),
+					__( 'If you\'re moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes.', 'mediavine-create' ),
 					'<a href="' . esc_url( $settings_url ) . '">',
 					'</a>'
 				)
@@ -1006,145 +889,6 @@ class Plugin {
 	public function importer_admin_notice() {
 		if ( ! class_exists( 'Mediavine\Create\Importer\Plugin' ) ) {
 			add_action( 'admin_notices', [ $this, 'importer_admin_notice_display' ] );
-		}
-	}
-
-	/**
-	 * Fixes reviews that were imported from other plugins.
-	 *
-	 * Importers were assigning a `recipe_id` to imported reviews instead of `creation`.
-	 * This caused reviews to not show up, even though they'd been imported.
-	 * This method fixes that by reassigning imported reviews.
-	 *
-	 * Remove Apr 2019
-	 *
-	 * @since 1.1.1
-	 *
-	 * @return {void}
-	 */
-	public function update_reviews_table() {
-		global $wpdb;
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		if ( version_compare( $last_plugin_version, '1.2.0', '<' ) ) {
-			// Not all users had the plugin when `recipe_id` was a column in the `mv_reviews` table.
-			// Check for this column before trying to update it.
-			// SECURITY CHECKED: Nothing in this query can be sanitized.
-			$has_recipe_id_column_statement = "SHOW COLUMNS FROM {$wpdb->prefix}mv_reviews LIKE 'recipe_id'";
-			$has_recipe_id_column           = $wpdb->get_row( $has_recipe_id_column_statement );
-			if ( ! $has_recipe_id_column ) {
-				return;
-			}
-
-			// SECURITY CHECKED: Nothing in this query can be sanitized.
-			$statement = "UPDATE {$wpdb->prefix}mv_reviews a
-							INNER JOIN {$wpdb->prefix}mv_reviews b on a.id = b.id
-							SET a.creation = b.recipe_id
-							WHERE b.recipe_id";
-			$wpdb->query( $statement );
-		}
-	}
-
-	/**
-	 * Fixes cloned cards' ratings.
-	 *
-	 * Previously, cloned cards retained the originating card's `rating` and `rating_count`
-	 * attributes, giving the client-facing card the appearance of its ratings having been
-	 * duplicated. Resetting the count resolves this issue.
-	 *
-	 * Remove November 2019
-	 *
-	 * @since 1.3.20
-	 *
-	 * @return void
-	 */
-	public function fix_cloned_ratings() {
-		global $wpdb;
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		if ( version_compare( $last_plugin_version, '1.3.20', '<' ) ) {
-			// SECURITY CHECKED: Nothing in this query can be sanitized.
-			$creations_with_ratings = $wpdb->get_results(
-				"SELECT id as creation FROM {$wpdb->prefix}mv_creations WHERE rating AND rating_count;"
-			);
-			$model                  = new Reviews_Models();
-			foreach ( $creations_with_ratings as $review ) {
-				$model->update_creation_rating( $review );
-			}
-		}
-	}
-
-	/**
-	 * Fixes canonical post ids of imported Cookbook recipes.
-	 *
-	 * Recipes imported from Cookbook were using the Cookbook recipe id as the canonical_post_id.
-	 * Obviously, this was not good, so we need to fix that.
-	 *
-	 * Remove December 2019
-	 *
-	 * @since 1.4.6
-	 *
-	 * @return void
-	 */
-	public function fix_cookbook_canonical_post_ids() {
-		global $wpdb;
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		if ( version_compare( $last_plugin_version, '1.4.6', '<' ) ) {
-			// SECURITY CHECKED: Nothing in this query can be sanitized.
-			$creations = $wpdb->get_results(
-				"SELECT * FROM {$wpdb->prefix}mv_creations WHERE type='recipe' AND metadata LIKE '%cookbook%' AND metadata NOT LIKE '%fixed_canonical_post_id%'",
-				ARRAY_A
-			);
-			$ids       = [];
-			foreach ( $creations as $creation ) {
-				$post     = get_post( $creation['canonical_post_id'] );
-				$metadata = json_decode($creation['metadata'] ?: '{}');
-				$posts    = json_decode($creation['associated_posts'] ?: '[]');
-				if ( 'cookbook_recipe' === $post->post_type && ! empty( $posts ) ) {
-					$creation['canonical_post_id'] = $posts[0];
-				}
-				$metadata->fixed_canonical_post_id = true;
-				$creation['metadata']              = wp_json_encode( $metadata );
-				self::$models_v2->mv_creations->update_without_modified_date( $creation );
-				$ids[] = $creation->id;
-			}
-			\Mediavine\Create\Publish::update_publish_queue( $ids );
-		}
-	}
-
-	/**
-	 * Ensures all current versions of create cards store a revision.
-	 *
-	 * Remove January 2020
-	 *
-	 * @since 1.4.11
-	 *
-	 * @return void
-	 */
-	public function add_initial_revision_to_cards() {
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		if ( version_compare( $last_plugin_version, '1.4.11', '<' ) ) {
-			Publish::add_all_to_publish_queue();
-		}
-	}
-
-	/**
-	 * Queues up all currently existing Amazon products after the API changes
-	 *
-	 * Remove May 2020
-	 *
-	 * @since 1.5.1
-	 *
-	 * @return void
-	 */
-	public function queue_existing_amazon_products() {
-		$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
-
-		if ( version_compare( $last_plugin_version, '1.5.4', '<' ) ) {
-			$Products = Products::get_instance();
-			$Products->initial_queue_products();
 		}
 	}
 
@@ -1192,6 +936,7 @@ class Plugin {
 		// Attachments Create sideloaded (they carry an `origin_uri` marker) that
 		// never received attachment metadata, excluding any already repaired or
 		// previously found to be unrepairable (e.g. the original file is gone).
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$attachment_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT p.ID
@@ -1210,6 +955,7 @@ class Plugin {
 				$batch_size
 			)
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( empty( $attachment_ids ) ) {
 			return;
@@ -1229,35 +975,6 @@ class Plugin {
 
 		// More may remain — process the next batch on the following cron tick.
 		wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'mv_create_backfill_image_metadata' );
-	}
-
-	/**
-	 * Sets the default JSON-LD Schema in Head setting to disabled for existing installs.
-	 *
-	 * Remove Sept 2021
-	 *
-	 * @since 1.6.7
-	 *
-	 * @return void
-	 */
-	public function set_default_schema_setting_on_existing_installs( $last_plugin_version ) {
-		// Don't run new installs (previous version newer than 1.6.7).
-		// We run the not (!) check because we sometimes give patch releases in an x.x.x.x format.
-		if ( ! version_compare( $last_plugin_version, '1.6.7', '<' ) ) {
-			return;
-		}
-
-		// Build mock setting for JSON-LD Schema in Head with disabled value.
-		$fake_schema_setting = [
-			[
-				'slug'  => self::$settings_group . '_schema_in_head',
-				'value' => false,
-			],
-		];
-
-		// Create mock setting into database before real settings are updated.
-		// This will keep the value of the fake setting, but everything else of the real setting.
-		Settings::create_settings( $fake_schema_setting );
 	}
 
 	/**
@@ -1295,7 +1012,7 @@ class Plugin {
 		$table = $wpdb->prefix . 'mv_settings';
 
 		// Move Jump to Recipe settings from Pro to reader_experience.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s OR slug LIKE %s",
@@ -1304,9 +1021,10 @@ class Plugin {
 				'%jump_to_how_to%'
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Move Social Footer settings from Pro to reader_experience.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s OR slug LIKE %s OR slug LIKE %s OR slug LIKE %s OR slug LIKE %s",
@@ -1318,9 +1036,10 @@ class Plugin {
 				'%pinterest_username%'
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Move Checklists, Reviews, and Ratings settings from Advanced to reader_experience.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s OR slug LIKE %s OR slug LIKE %s",
@@ -1330,9 +1049,10 @@ class Plugin {
 				'%rating%'
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Move Display settings to Appearance group.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table} SET `group` = %s WHERE `group` = %s",
@@ -1340,6 +1060,7 @@ class Plugin {
 				self::$settings_group . '_display'
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 
 	/**
@@ -1361,7 +1082,7 @@ class Plugin {
 		$table = $wpdb->prefix . 'mv_settings';
 
 		// Move Interactive Mode settings from reader_experience to interactive_mode.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table} SET `group` = %s WHERE slug LIKE %s",
@@ -1369,10 +1090,12 @@ class Plugin {
 				'%interactive_mode%'
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		// Remove legacy debugging setting.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->delete( $table, [ 'slug' => self::$settings_group . '_enable_debugging' ] );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 	}
 
 	/**
@@ -1395,7 +1118,7 @@ class Plugin {
 		$table = $wpdb->prefix . 'mv_settings';
 
 		// Replace .png with .webp in the data JSON for card style settings.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			"UPDATE {$table} SET data = REPLACE(data, 'card-style-editorial.png', 'card-style-editorial.webp'),
 				data = REPLACE(data, 'card-style-modern.png', 'card-style-modern.webp'),
@@ -1406,6 +1129,7 @@ class Plugin {
 				data = REPLACE(data, 'card-style-centered-dark.png', 'card-style-centered-dark.webp')
 			WHERE slug LIKE '%_card_style' AND data LIKE '%card-style-%.png%'"
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 
 	/**
@@ -1424,7 +1148,7 @@ class Plugin {
 		$table = $wpdb->prefix . 'mv_settings';
 
 		// Move Hands-free Mode from advanced to reader_experience.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table is $wpdb->prefix . literal or core table; values bound via prepare() where applicable
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$table} SET `group` = %s WHERE slug = %s",
@@ -1432,6 +1156,7 @@ class Plugin {
 				self::$settings_group . '_enable_hands_free_mode'
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 
 	/**
@@ -1439,31 +1164,27 @@ class Plugin {
 	 * pruned `.cs-*` / `.mv-create-*` selectors before the new safelist
 	 * filters in the rascal classes were registered.
 	 *
-	 * Sites running WP Rocket's "Remove Unused CSS" or LiteSpeed's "Unique
-	 * CSS" will keep serving the stale snapshot — and the broken widget
-	 * styling — until their cached copy is invalidated. The new filters
-	 * (Wp_Rocket::rucss_safelist, Litespeed_Cache::ucss_whitelist) only
-	 * apply when those caches are regenerated.
+	 * Sites running WP Rocket / LiteSpeed / Perfmatters / FlyingPress used-CSS
+	 * features will keep serving the stale snapshot — and the broken widget
+	 * styling — until their cached copy is invalidated. The new rascal hooks
+	 * (Wp_Rocket, Litespeed_Cache, Perfmatters, Flying_Press) only apply when
+	 * those caches are regenerated.
 	 *
-	 * Runs once on upgrade from < 2.4.5.
+	 * Runs once on upgrade from < 2.5.4.
+	 *
+	 * Bumped from 2.4.5 so sites that already ran the WP Rocket / LiteSpeed
+	 * purge also regenerate after Perfmatters / FlyingPress safelists land.
+	 * Remove by: ~2026-12 (see docs/MigrationPolicy.md).
 	 *
 	 * @param string $last_plugin_version The previous plugin version.
 	 * @return void
 	 */
 	public function purge_used_css_caches_for_widget_safelist( $last_plugin_version ) {
-		if ( ! version_compare( $last_plugin_version, '2.4.5', '<' ) ) {
+		if ( ! version_compare( $last_plugin_version, '2.5.4', '<' ) ) {
 			return;
 		}
 
-		// WP Rocket — clears page caches and the Used CSS table along with them.
-		if ( function_exists( 'rocket_clean_domain' ) ) {
-			rocket_clean_domain();
-		}
-
-		// LiteSpeed Cache — public purge_all() also wipes the UCSS folder.
-		if ( class_exists( '\LiteSpeed\Purge' ) && method_exists( '\LiteSpeed\Purge', 'purge_all' ) ) {
-			\LiteSpeed\Purge::purge_all( 'Mediavine Create 2.4.5 widget CSS safelist' );
-		}
+		\Mediavine\Cache_Manager::purge_full_page_caches( 'Mediavine Create 2.5.4 widget CSS safelist' );
 	}
 
 	/**
@@ -1535,28 +1256,28 @@ class Plugin {
 			'mv_create_fields', function ( $arr ) {
 			$arr[] = [
 				'slug'         => 'class',
-				'label'        => __( 'CSS Class', 'mediavine' ),
-				'instructions' => __( 'Add an additional CSS class to this card.', 'mediavine' ),
+				'label'        => __( 'CSS Class', 'mediavine-create' ),
+				'instructions' => __( 'Add an additional CSS class to this card.', 'mediavine-create' ),
 				'type'         => 'text',
 			];
 			$arr[] = [
 				'slug'         => 'mv_create_nutrition_disclaimer',
-				'label'        => __( 'Custom Nutrition Disclaimer', 'mediavine' ),
-				'instructions' => __( 'Example: Nutrition information isn\'t always accurate.', 'mediavine' ),
+				'label'        => __( 'Custom Nutrition Disclaimer', 'mediavine-create' ),
+				'instructions' => __( 'Example: Nutrition information isn\'t always accurate.', 'mediavine-create' ),
 				'type'         => 'textarea',
 				'card'         => 'recipe',
 			];
 			$arr[] = [
 				'slug'         => 'mv_create_affiliate_message',
-				'label'        => __( 'Custom Affiliate Message', 'mediavine' ),
-				'instructions' => __( 'Override the default affiliate message for this card.', 'mediavine' ),
+				'label'        => __( 'Custom Affiliate Message', 'mediavine-create' ),
+				'instructions' => __( 'Override the default affiliate message for this card.', 'mediavine-create' ),
 				'type'         => 'textarea',
 				'card'         => [ 'recipe', 'diy', 'list' ],
 			];
 			$arr[] = [
 				'slug'         => 'mv_create_show_list_affiliate_message',
-				'label'        => __( 'Show Custom Affiliate Message', 'mediavine' ),
-				'instructions' => __( 'Check this box to display an affiliate message on this List.', 'mediavine' ),
+				'label'        => __( 'Show Custom Affiliate Message', 'mediavine-create' ),
+				'instructions' => __( 'Check this box to display an affiliate message on this List.', 'mediavine-create' ),
 				'type'         => 'checkbox',
 				'card'         => 'list',
 			];
@@ -1565,8 +1286,8 @@ class Plugin {
 			if ( \Mediavine\Settings::get_setting( 'mv_create_social_footer', false ) ) {
 				$arr[] = [
 					'slug'         => 'mv_create_social_footer_icon',
-					'label'        => __( 'Social Footer Icon', 'mediavine' ),
-					'instructions' => __( 'Override the default social footer icon for this card.', 'mediavine' ),
+					'label'        => __( 'Social Footer Icon', 'mediavine-create' ),
+					'instructions' => __( 'Override the default social footer icon for this card.', 'mediavine-create' ),
 					'type'         => 'select',
 					'defaultValue' => 'default',
 					'options'      => [
@@ -1579,15 +1300,15 @@ class Plugin {
 				];
 				$arr[] = [
 					'slug'         => 'mv_create_social_footer_header',
-					'label'        => __( 'Social Footer Heading', 'mediavine' ),
-					'instructions' => __( 'Override the default social footer heading for this card.', 'mediavine' ),
+					'label'        => __( 'Social Footer Heading', 'mediavine-create' ),
+					'instructions' => __( 'Override the default social footer heading for this card.', 'mediavine-create' ),
 					'type'         => 'text',
 					'card'         => [ 'recipe', 'diy' ],
 				];
 				$arr[] = [
 					'slug'         => 'mv_create_social_footer_content',
-					'label'        => __( 'Social Footer Content', 'mediavine' ),
-					'instructions' => __( 'Override the default social footer content for this card.', 'mediavine' ),
+					'label'        => __( 'Social Footer Content', 'mediavine-create' ),
+					'instructions' => __( 'Override the default social footer content for this card.', 'mediavine-create' ),
 					'type'         => 'wysiwyg',
 					'card'         => [ 'recipe', 'diy' ],
 				];
@@ -1604,22 +1325,22 @@ class Plugin {
 	public static function get_shapes_data() {
 		return [
 			[
-				'name'   => __( 'Recipe', 'mediavine' ),
-				'plural' => __( 'Recipes', 'mediavine' ),
+				'name'   => __( 'Recipe', 'mediavine-create' ),
+				'plural' => __( 'Recipes', 'mediavine-create' ),
 				'slug'   => 'recipe',
 				'icon'   => 'carrot',
 				'shape'  => file_get_contents( __DIR__ . '/shapes/recipe.json' ),
 			],
 			[
-				'name'   => __( 'How-To', 'mediavine' ),
-				'plural' => __( 'How-Tos', 'mediavine' ),
+				'name'   => __( 'How-To', 'mediavine-create' ),
+				'plural' => __( 'How-Tos', 'mediavine-create' ),
 				'slug'   => 'diy',
 				'icon'   => 'lightbulb',
 				'shape'  => file_get_contents( __DIR__ . '/shapes/how-to.json' ),
 			],
 			[
-				'name'   => __( 'List', 'mediavine' ),
-				'plural' => __( 'Lists', 'mediavine' ),
+				'name'   => __( 'List', 'mediavine-create' ),
+				'plural' => __( 'Lists', 'mediavine-create' ),
 				'slug'   => 'list',
 				'icon'   => '',
 				'shape'  => file_get_contents( __DIR__ . '/shapes/list.json' ),

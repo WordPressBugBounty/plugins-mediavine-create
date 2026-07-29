@@ -61,9 +61,10 @@ class Nutrition extends Plugin {
 		$table       = self::$models_v2->mv_nutrition->table_name;
 		$creation_id = intval( $creation_id );
 
-		// SECURITY CHECKED: This query is properly prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$prepared_statement = $wpdb->prepare( "SELECT * FROM {$table} WHERE creation = %d", [ $creation_id ] );
 		$nutrition          = $wpdb->get_results( $prepared_statement );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		if ( count( $nutrition ) ) {
 			return $nutrition[0];
 		}
@@ -88,6 +89,25 @@ class Nutrition extends Plugin {
 	function routes() {
 		$namespace = $this->api_root . '/' . $this->api_version;
 
+		// Server-side proxy for Studio nutrition calculation. Keeps the site JWT
+		// on the server instead of shipping it to the browser.
+		register_rest_route(
+			$namespace, '/nutrition', [
+				[
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => function ( \WP_REST_Request $request ) {
+						return \Mediavine\Create\API_Services::middleware(
+							[
+								[ $this->api, 'proxy' ],
+							],
+							$request
+						);
+					},
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
+				],
+			]
+		);
+
 		register_rest_route(
 			$namespace, '/creations/(?P<id>\d+)/nutrition', [
 				[
@@ -100,7 +120,7 @@ class Nutrition extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -113,7 +133,7 @@ class Nutrition extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);

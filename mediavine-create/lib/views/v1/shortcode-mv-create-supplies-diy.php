@@ -1,6 +1,7 @@
+<?php defined( 'ABSPATH' ) || exit; ?>
 <?php if ( ! empty( $args['creation']['materials'] ) ) { ?>
 	<div class="mv-create-ingredients">
-		<h2 class="mv-create-ingredients-title mv-create-title-secondary"><?php esc_html_e( 'Materials', 'mediavine' ); ?></h2>
+		<h2 class="mv-create-ingredients-title mv-create-title-secondary"><?php esc_html_e( 'Materials', 'mediavine-create' ); ?></h2>
 
 		<?php foreach ( $args['creation']['materials'] as $group => $materials ) { ?>
 			<?php
@@ -21,30 +22,7 @@
 						<?php
 						if ( ! empty( $material['original_text'] ) ) {
 							if ( ! empty( $material['link'] ) ) {
-								preg_match( '/([^[]*?)\[(.*)\](.*)/', $material['original_text'], $matches );
-								if ( empty( $matches ) ) {
-									$before    = '';
-									$after     = '';
-									$link_text = $material['original_text'];
-								} else {
-									$before    = $matches[1];
-									$link_text = $matches[2];
-									$after     = $matches[3];
-								}
-
-								echo wp_kses_post( $before );
-								echo '<a href="' . esc_url( $material['link'] ) . '"';
-								if ( $material['nofollow'] ) {
-									echo ' rel="nofollow"';
-								}
-								// Check for internal links
-								if ( strpos( $material['link'], get_site_url() ) !== 0 ) {
-									echo ' target="_blank"';
-								}
-								echo '>';
-								echo wp_kses_post( $link_text );
-								echo '</a>';
-								echo wp_kses_post( $after );
+								\Mediavine\Create\Creations_Views::render_supply_link( $material );
 							} else {
 								echo wp_kses_post( $material['original_text'] );
 							}
@@ -61,7 +39,7 @@
 if ( ! empty( $args['creation']['tools'] ) ) {
 ?>
 	<div class="mv-create-ingredients">
-		<h2 class="mv-create-ingredients-title mv-create-title-secondary"><?php esc_html_e( 'Tools', 'mediavine' ); ?></h2>
+		<h2 class="mv-create-ingredients-title mv-create-title-secondary"><?php esc_html_e( 'Tools', 'mediavine-create' ); ?></h2>
 
 		<?php foreach ( $args['creation']['tools'] as $group => $tools ) { ?>
 			<?php
@@ -82,30 +60,7 @@ if ( ! empty( $args['creation']['tools'] ) ) {
 						<?php
 						if ( ! empty( $tool['original_text'] ) ) {
 							if ( ! empty( $tool['link'] ) ) {
-								preg_match( '/([^[]*?)\[(.*)\](.*)/', $tool['original_text'], $matches );
-								if ( empty( $matches ) ) {
-									$before    = '';
-									$after     = '';
-									$link_text = $tool['original_text'];
-								} else {
-									$before    = $matches[1];
-									$link_text = $matches[2];
-									$after     = $matches[3];
-								}
-
-								echo wp_kses_post( $before );
-								echo '<a href="' . esc_url( $tool['link'] ) . '"';
-								if ( $tool['nofollow'] ) {
-									echo ' rel="nofollow"';
-								}
-								// Check for internal links
-								if ( strpos( $tool['link'], get_site_url() ) !== 0 ) {
-									echo ' target="_blank"';
-								}
-								echo '>';
-								echo wp_kses_post( $link_text );
-								echo '</a>';
-								echo wp_kses_post( $after );
+								\Mediavine\Create\Creations_Views::render_supply_link( $tool );
 							} else {
 								echo wp_kses_post( $tool['original_text'] );
 							}

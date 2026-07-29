@@ -188,7 +188,7 @@ class Schema_Id_Injector {
 		
 		foreach ( $matches as $match ) {
 			$step_number = (int) $match[1];
-			$step_content = strip_tags( $match[2] );
+			$step_content = wp_strip_all_tags(  $match[2] );
 			$step_content = html_entity_decode( $step_content, ENT_QUOTES, 'UTF-8' );
 			$step_content = trim( $step_content );
 			
@@ -227,7 +227,7 @@ class Schema_Id_Injector {
 	 */
 	private static function validate_dom_output( $output, $original_html, $creation_id = 0 ) {
 		// Check 1: Output should not be empty if input had content
-		if ( empty( $output ) && ! empty( trim( strip_tags( $original_html ) ) ) ) {
+		if ( empty( $output ) && ! empty( trim( wp_strip_all_tags(  $original_html ) ) ) ) {
 			return [
 				'valid' => false,
 				'reason' => 'Check 1 failed: Output is empty while input had content'
@@ -246,8 +246,8 @@ class Schema_Id_Injector {
 		}
 
 		// Check 3: Should not have drastically different content length
-		$original_text = trim( strip_tags( $original_html ) );
-		$output_text = trim( strip_tags( $output ) );
+		$original_text = trim( wp_strip_all_tags(  $original_html ) );
+		$output_text = trim( wp_strip_all_tags(  $output ) );
 		
 		if ( strlen( $original_text ) > 10 && strlen( $output_text ) < ( strlen( $original_text ) * 0.5 ) ) {
 			return [
@@ -471,7 +471,7 @@ class Schema_Id_Injector {
 		);
 
 		// Log to WordPress error log
-		error_log( $message );
+		\Mediavine\Create\Help::log( $message );
 	}
 
 	/**

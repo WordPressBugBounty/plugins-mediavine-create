@@ -33,17 +33,10 @@ class Broadcast_Notice {
 	 * Handle banner dismiss action.
 	 */
 	public function handle_banner_dismiss() {
-		if ( ! isset( $_GET['mv_create_dismiss_broadcast'] ) ) {
-			return;
-		}
+		$action       = 'mv_create_dismiss_broadcast';
+		$broadcast_id = Admin_Notice_Helper::get_verified_dismiss_value( $action );
 
-		// Verify nonce to prevent CSRF.
-		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'mv_create_dismiss_broadcast' ) ) {
-			return;
-		}
-
-		$broadcast_id = sanitize_text_field( wp_unslash( $_GET['mv_create_dismiss_broadcast'] ) );
-		if ( empty( $broadcast_id ) ) {
+		if ( null === $broadcast_id || '' === $broadcast_id ) {
 			return;
 		}
 
@@ -62,9 +55,7 @@ class Broadcast_Notice {
 			update_user_meta( $user_id, 'mv_create_dismissed_broadcasts', $dismissed );
 		}
 
-		$redirect_url = remove_query_arg( [ 'mv_create_dismiss_broadcast', '_wpnonce' ] );
-		wp_safe_redirect( $redirect_url );
-		exit;
+		Admin_Notice_Helper::redirect_after_dismiss( [ $action ] );
 	}
 
 	/**
@@ -75,15 +66,13 @@ class Broadcast_Notice {
 			return;
 		}
 
-		// Don't show on Create admin pages.
-		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-		$is_create_page = (
-			strpos( $current_url, 'post_type=mv_create' ) !== false ||
-			strpos( $current_url, 'page=mv_settings' ) !== false ||
-			strpos( $current_url, 'page=mv_create_welcome' ) !== false
-		);
+		// Connecting to Create Studio is the consent to contact create.studio.
+		if ( ! Create_Studio_Client::is_site_connected() ) {
+			return;
+		}
 
-		if ( $is_create_page ) {
+		// Don't show on Create admin pages.
+		if ( Admin_Notice_Helper::is_create_page() ) {
 			return;
 		}
 
@@ -101,16 +90,13 @@ class Broadcast_Notice {
 			$cta_url = $broadcast['url'];
 		} elseif ( 'urgent' === $type ) {
 			$cta_url  = admin_url( 'update-core.php' );
-			$cta_text = $cta_text ? $cta_text : __( 'Update now', 'mediavine' );
+			$cta_text = $cta_text ? $cta_text : __( 'Update now', 'mediavine-create' );
 		}
 
 		$colors = $this->get_type_colors( $type );
 		$icon   = $this->get_type_icon( $type );
 
-		$dismiss_url = wp_nonce_url(
-			add_query_arg( 'mv_create_dismiss_broadcast', $broadcast['id'] ),
-			'mv_create_dismiss_broadcast'
-		);
+		$dismiss_url = Admin_Notice_Helper::get_dismiss_url( 'mv_create_dismiss_broadcast', $broadcast['id'] );
 
 		$f = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
@@ -143,7 +129,7 @@ class Broadcast_Notice {
 				esc_html( $cta_text )
 			) : '',
 			esc_url( $dismiss_url ),
-			esc_html__( 'Dismiss', 'mediavine' )
+			esc_html__( 'Dismiss', 'mediavine-create' )
 		);
 
 		printf(
@@ -158,7 +144,7 @@ class Broadcast_Notice {
 	 *
 	 * Uses Create's own palette rather than generic blues/purples.
 	 *
-	 * @param string $type
+	 * @param string $type Broadcast type slug.
 	 * @return array
 	 */
 	private function get_type_colors( $type ) {
@@ -177,7 +163,7 @@ class Broadcast_Notice {
 	/**
 	 * Get emoji icon for a broadcast type.
 	 *
-	 * @param string $type
+	 * @param string $type Broadcast type slug.
 	 * @return string
 	 */
 	private function get_type_icon( $type ) {

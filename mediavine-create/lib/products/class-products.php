@@ -52,6 +52,13 @@ class Products extends Plugin {
 	public $amazon_queue;
 
 	/**
+	 * Shared Amazon refresh service for product cards.
+	 *
+	 * @var Amazon_Refresh_Service
+	 */
+	public $amazon_refresh;
+
+	/**
 	 * DB table schema structure
 	 * @var string[]
 	 */
@@ -126,7 +133,7 @@ class Products extends Plugin {
 				if ( strpos($product['remote_thumbnail_uri'], '//') === 0 ) { // Only catch at beginning
 					$product['remote_thumbnail_uri'] = 'http:' . $product['remote_thumbnail_uri'];
 				} else {
-					$parsed_url                      = parse_url($product['remote_thumbnail_uri']);
+					$parsed_url                      = wp_parse_url( $product['remote_thumbnail_uri']);
 					$product['remote_thumbnail_uri'] = 'http://' . $parsed_url['host'] . $product['remote_thumbnail_uri'];
 				}
 			}
@@ -139,23 +146,26 @@ class Products extends Plugin {
 	}
 
 	/**
-	 * Restores product images
+	 * Restores missing product images via LinkScraper.
+	 *
+	 * Queue/cron only — never call from card read/render (prep_creation_view).
+	 * Always records completion so dead product links are not re-scraped forever.
 	 *
 	 * @param \stdClass $creation Creation object
 	 *
 	 * @return object|null
 	 */
 	public static function restore_product_images( $creation ) {
-		if ( empty($creation) ) {
+		if ( empty( $creation ) ) {
 			return $creation;
 		}
 
-		$metadata = json_decode($creation->metadata ?: '{}', true);
-		if ( empty($metadata) ) {
+		$metadata = json_decode( ! empty( $creation->metadata ) ? $creation->metadata : '{}', true );
+		if ( empty( $metadata ) ) {
 			$metadata = [];
 		}
 
-		if ( isset($metadata['product_images_restored']) && $metadata['product_images_restored'] ) {
+		if ( ! empty( $metadata['product_images_restored'] ) ) {
 			return $creation;
 		}
 
@@ -174,32 +184,108 @@ class Products extends Plugin {
 				continue;
 			}
 
-			if ( ! isset($product->link) ) {
+			if ( empty( $product->link ) ) {
 				continue;
 			}
 
-			$data = $scraper->scrape($product->link);
-			if ( ! isset($data['remote_thumbnail_uri']) ) {
+			$data = $scraper->scrape( $product->link );
+			if ( empty( $data['remote_thumbnail_uri'] ) ) {
 				continue;
 			}
 			$product->remote_thumbnail_uri = $data['remote_thumbnail_uri'];
-			unset($product->thumbnail_id);
+			unset( $product->thumbnail_id );
 
-			$product = self::prepare_product_thumbnail( (array) $product);
-			$updated = self::$models_v2->mv_products_map->update( (array) $product);
+			$product = self::prepare_product_thumbnail( (array) $product );
+			$updated = self::$models_v2->mv_products_map->update( (array) $product );
 			if ( $updated ) {
 				$changed = true;
 			}
 		}
 
+		// Always mark done — including when scrapes fail — so dead links stop
+		// re-entering the restore sweep (and formerly the render path) forever.
+		$metadata['product_images_restored'] = true;
+		$creation->metadata                  = wp_json_encode( $metadata );
+		$creation                            = self::$models_v2->mv_creations->update_without_modified_date( (array) $creation );
+
 		if ( $changed ) {
-			$metadata['product_images_restored'] = true;
-			$creation->metadata                  = wp_json_encode($metadata);
-			$creation                            = self::$models_v2->mv_creations->update_without_modified_date( (array) $creation);
-			return \Mediavine\Create\Creations::publish_creation($creation->id);
+			return \Mediavine\Create\Creations::publish_creation( $creation->id );
 		}
 
 		return $creation;
+	}
+
+	/**
+	 * Schedule a one-off background sweep that restores missing product images.
+	 *
+	 * Previously ran synchronously (with remote HTTP) on every card read/render.
+	 * Queued once per upgrade so scrapes happen off the front-end path.
+	 *
+	 * Remove after January 2027 (or 12 minor releases past 2.5.4).
+	 *
+	 * @param string $last_plugin_version Version being upgraded from.
+	 *
+	 * @return void
+	 */
+	public static function schedule_product_images_restore( $last_plugin_version = '' ) {
+		if ( empty( $last_plugin_version ) ) {
+			$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
+		}
+
+		if ( version_compare( $last_plugin_version, '2.5.4', '>=' ) ) {
+			return;
+		}
+
+		if ( ! wp_next_scheduled( 'mv_create_restore_product_images' ) ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'mv_create_restore_product_images' );
+		}
+	}
+
+	/**
+	 * Restore missing product thumbnails in small batches, rescheduling until done.
+	 *
+	 * @return void
+	 */
+	public static function process_product_images_restore_batch() {
+		global $wpdb;
+
+		$batch_size = 10;
+		$table      = $wpdb->prefix . 'mv_products_map';
+		$creations  = $wpdb->prefix . 'mv_creations';
+
+		// Creations with at least one product map row missing a thumbnail that
+		// have not yet completed (or been marked complete after a failed scrape).
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one-time migration; table names are $wpdb->prefix . literal
+		$creation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT pm.creation
+				FROM {$table} pm
+				INNER JOIN {$creations} c ON c.id = pm.creation
+				WHERE ( pm.thumbnail_id IS NULL OR pm.thumbnail_id = 0 )
+					AND ( c.metadata IS NULL OR c.metadata NOT LIKE %s )
+				LIMIT %d",
+				'%"product_images_restored":true%',
+				$batch_size
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+		if ( empty( $creation_ids ) ) {
+			return;
+		}
+
+		foreach ( $creation_ids as $creation_id ) {
+			$creation = self::$models_v2->mv_creations->find_one_by_id( (int) $creation_id );
+			if ( empty( $creation ) ) {
+				continue;
+			}
+			self::restore_product_images( $creation );
+		}
+
+		// More may remain — process the next batch on the following cron tick.
+		if ( count( $creation_ids ) >= $batch_size ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'mv_create_restore_product_images' );
+		}
 	}
 
 	/**
@@ -218,36 +304,40 @@ class Products extends Plugin {
 		$this->amazon       = Amazon_Adapter::get_instance();
 		$this->api          = new Products_API();
 
-		add_filter('mv_custom_schema', [ $this, 'custom_schema' ]);
-		add_action('rest_api_init', [ $this, 'routes' ]);
-		add_filter('mv_dbi_after_update_' . $this->table_name, [ $this, 'cascade_after_update' ]);
-		add_action('init', [ $this, 'refresh_product_images' ]);
-		add_action('init', [ $this, 'step_amazon_queue' ]);
-		add_action('mv_create_setting_updated_mv_create_paapi_secret_key', [ $this, 'lock_amazon_queue' ]);
+		$this->amazon_refresh = new Amazon_Refresh_Service(
+			[
+				'queue'              => $this->amazon_queue,
+				'amazon'             => $this->amazon,
+				'model'              => self::$models_v2->mv_products,
+				'expiring_transient' => 'mv_amazon_expiring_products',
+				'url_field'          => 'link',
+				'before_refresh'     => function () {
+					remove_action( 'mv_dbi_after_update_mv_products', [ self::get_instance(), 'cascade_after_update' ] );
+				},
+				'apply_result'       => function ( $product, $item ) {
+					$product['external_thumbnail_url'] = $item['external_thumbnail_url'];
+					$product['expires']                = $item['expires'];
+					return $product;
+				},
+			]
+		);
+		$this->amazon_refresh->register();
+
+		add_filter( 'mv_custom_schema', [ $this, 'custom_schema' ] );
+		add_action( 'rest_api_init', [ $this, 'routes' ] );
+		add_filter( 'mv_dbi_after_update_' . $this->table_name, [ $this, 'cascade_after_update' ] );
+		add_action( 'mv_create_setting_updated_mv_create_creators_credential_secret', [ $this, 'lock_amazon_queue' ] );
+		add_action( Plugin::PLUGIN_DOMAIN . '_plugin_updated', [ __CLASS__, 'schedule_product_images_restore' ], 106 );
+		add_action( 'mv_create_restore_product_images', [ __CLASS__, 'process_product_images_restore_batch' ] );
 	}
 
 	/**
 	 * Refresh Amazon images. Fired by Queue
+	 *
 	 * @return false|void
 	 */
 	public function refresh_product_images() {
-	  remove_action('mv_dbi_after_update_mv_products', [ self::get_instance(), 'cascade_after_update' ]);
-		$transient = 'mv_amazon_expiring_products';
-		if ( get_transient($transient) ) {
-			return false;
-		}
-
-		$three_hours       = 3 * 60 * 60;
-		$amazon_rate_limit = apply_filters('mv_create_amazon_rate_limit', $three_hours);
-		$expiring          = $this->get_expiring_products($amazon_rate_limit);
-		if ( empty($expiring) ) {
-			return false;
-		}
-
-		$expiring = array_column($expiring, 'id');
-		$this->amazon_queue->push_many($expiring);
-
-		set_transient($transient, time(), $amazon_rate_limit);
+		return $this->amazon_refresh->refresh_expiring();
 	}
 
 	/**
@@ -271,10 +361,7 @@ class Products extends Plugin {
 	 * @return false|mixed|void|null
 	 */
 	public function step_amazon_queue() {
-	   // Only run the queue if Amazon is setup
-		if ( $this->amazon->amazon_affiliates_setup() ) {
-			return $this->amazon_queue->step([ $this, 'build_amazon_data' ]);
-		}
+		return $this->amazon_refresh->step_queue();
 	}
 
 	/**
@@ -301,29 +388,7 @@ class Products extends Plugin {
 	 * @return false|void
 	 */
 	public function build_amazon_data( $product_id ) {
-		$product = (array) self::$models_v2->mv_products->select_one_by_id($product_id);
-		if ( empty($product) ) {
-			return false;
-		}
-
-		if ( is_wp_error($product) ) {
-			return false;
-		}
-
-		if ( empty($product['asin']) ) {
-			$product['asin'] = $this->amazon->get_asin_from_link($product['link']);
-		}
-
-		$result = $this->amazon->get_products_by_asin($product['asin']);
-
-		// Move on if empty or is an error
-		if ( empty($result) || is_wp_error($result) ) {
-			return false;
-		}
-
-		$product['external_thumbnail_url'] = $result[ $product['asin'] ]['external_thumbnail_url'];
-		$product['expires']                = $result[ $product['asin'] ]['expires'];
-		self::$models_v2->mv_products->update($product);
+		return $this->amazon_refresh->build_amazon_data( $product_id );
 	}
 
 	/**
@@ -357,11 +422,13 @@ class Products extends Plugin {
 		// Cascade updates to products_map table
 		if ( ! empty( $update_values ) ) {
 			add_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			$wpdb->update(
 				$wpdb->prefix . 'mv_products_map',
 				$update_values,
 				[ 'product_id' => $product->id ]
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			remove_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
 		}
 
@@ -375,6 +442,7 @@ class Products extends Plugin {
 
 		if ( ! empty( $relations_values ) ) {
 			add_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 			$wpdb->update(
 				$wpdb->prefix . 'mv_relations',
 				$relations_values,
@@ -383,6 +451,7 @@ class Products extends Plugin {
 					'content_type' => 'product',
 				]
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			remove_filter('query', [ self::$models_v2->mv_products, 'allow_null' ]);
 		}
 
@@ -453,10 +522,11 @@ class Products extends Plugin {
 		$creations    = $wpdb->prefix . 'mv_creations';
 		$products_map = $wpdb->prefix . 'mv_products_map';
 
-		// SECURITY CHECKED: This query is properly prepared.
 		$sql       = "SELECT $creations.type, $creations.object_id, $creations.id, $creations.title FROM $creations JOIN $products_map ON $creations.id = $products_map.creation WHERE $products_map.product_id = %d;";
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
 		$prepared  = $wpdb->prepare($sql, $product_id);
 		$creations = $wpdb->get_results($prepared);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return count($creations) ? $creations : [];
 	}
@@ -502,25 +572,7 @@ class Products extends Plugin {
 	 * @return array of products expiring
 	 */
 	public function get_expiring_products( $within = 10800, $limit = 50 ) {
-		$timestamp = date('Y-m-d H:i:s', strtotime("+{$within} seconds"));
-		$model     = self::$models_v2->mv_products;
-
-		$model->set_select('*')
-			->set_order_by('expires')
-			->set_order('ASC')
-			->set_limit($limit);
-
-		$products = self::$models_v2->mv_products->where(
-			[
-				// make sure the product is an Amazon link and has an expiration
-				[ 'asin', 'IS NOT', 'NULL' ],
-				[ 'expires', 'IS NOT', 'NULL' ],
-				// and that the expiration is $within the $timestamp
-				[ 'expires', '<', $timestamp ],
-			]
-		);
-
-		return $products;
+		return $this->amazon_refresh->get_expiring( $within, $limit );
 	}
 
 	/**
@@ -545,7 +597,7 @@ class Products extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -557,7 +609,7 @@ class Products extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -576,7 +628,7 @@ class Products extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -595,7 +647,7 @@ class Products extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -614,7 +666,7 @@ class Products extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -633,7 +685,7 @@ class Products extends Plugin {
 							$request
 						);
 					},
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
@@ -650,7 +702,7 @@ class Products extends Plugin {
 						'callback'            => function ( \WP_REST_Request $request ) {
 							return $this->api->debug_amazon_error( $request, new \WP_REST_Response() );
 						},
-						'permission_callback' => '__return_true',
+						'permission_callback' => [ \Mediavine\Permissions::class, 'allow_public' ],
 					],
 				]
 			);
@@ -672,7 +724,7 @@ class Products extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::DELETABLE,
@@ -685,7 +737,7 @@ class Products extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -698,7 +750,7 @@ class Products extends Plugin {
 						);
 					},
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
-					'permission_callback' => [ self::$api_services, 'permitted' ],
+					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
 			]
 		);
