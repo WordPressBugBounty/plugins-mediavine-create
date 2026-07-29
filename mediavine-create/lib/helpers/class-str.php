@@ -303,4 +303,15 @@ class Str {
 
 		return trim( implode( array_slice( $parts, 0, $last_part ) ) ) . $end_with;
 	}
+
+	/**
+	 * Get the class "basename" of the given object / class.
+	 *
+	 * @param  string|object $class
+	 * @return string
+	 */
+	public static function class_basename( $class ) {
+		$class = is_object( $class ) ? get_class( $class ) : $class;
+		return basename( str_replace( '\\', '/', $class ) );
+	}
 }

@@ -226,7 +226,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 		if ( func_num_args() === 2 ) {
 			return $this->contains(
 				function ( $item ) use ( $key, $value ) {
-				return mv_data_get( $item, $key ) === $value;
+				return Arr::data_get( $item, $key ) === $value;
 				}
 			);
 		}
@@ -522,7 +522,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 		}
 
 		return function ( $item ) use ( $key, $operator, $value ) {
-			$retrieved = mv_data_get( $item, $key );
+			$retrieved = Arr::data_get( $item, $key );
 
 			$strings = array_filter(
 				[ $retrieved, $value ], function ( $value ) {
@@ -585,7 +585,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 		return $this->filter(
 			function ( $item ) use ( $key, $values, $strict ) {
 				// phpcs:disable
-				return in_array( mv_data_get( $item, $key ), $values, $strict );
+				return in_array( Arr::data_get( $item, $key ), $values, $strict );
 				// phpcs:enable
 			}
 		);
@@ -623,7 +623,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 	public function whereNotBetween( $key, $values ) {
 		return $this->filter(
 			function ( $item ) use ( $key, $values ) {
-			return mv_data_get( $item, $key ) < reset( $values ) || mv_data_get( $item, $key ) > end( $values );
+			return Arr::data_get( $item, $key ) < reset( $values ) || Arr::data_get( $item, $key ) > end( $values );
 			}
 		);
 	}
@@ -642,7 +642,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 		return $this->reject(
 			function ( $item ) use ( $key, $values, $strict ) {
 				// phpcs:disable
-				return in_array( mv_data_get( $item, $key ), $values, $strict );
+				return in_array( Arr::data_get( $item, $key ), $values, $strict );
 				// phpcs:enable
 			}
 		);
@@ -741,7 +741,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 			return $this->items[ $key ];
 		}
 
-		return mv_get_value( $default );
+		return Arr::value( $default );
 	}
 
 	/**
@@ -1704,7 +1704,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 		}
 
 		return function ( $item ) use ( $value ) {
-			return mv_data_get( $item, $value );
+			return Arr::data_get( $item, $value );
 		};
 	}
 

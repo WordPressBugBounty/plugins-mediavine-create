@@ -18,6 +18,60 @@ class Arr {
 	}
 
 	/**
+	 * Resolve the given value, invoking it when it is a Closure.
+	 *
+	 * @param  mixed $value
+	 * @return mixed
+	 */
+	public static function value( $value ) {
+		return $value instanceof \Closure ? $value() : $value;
+	}
+
+	/**
+	 * Get an item from an array or object using "dot" notation.
+	 *
+	 * @param  mixed            $target
+	 * @param  string|array|int $key
+	 * @param  mixed            $default
+	 * @return mixed
+	 */
+	public static function data_get( $target, $key, $default = null ) {
+		if ( is_null( $key ) ) {
+			return $target;
+		}
+
+		$key = is_array( $key ) ? $key : explode( '.', $key );
+
+		while ( ! is_null( $segment = array_shift( $key ) ) ) {
+			if ( '*' === $segment ) {
+				if ( $target instanceof Collection ) {
+					$target = $target->all();
+				} elseif ( ! is_array( $target ) ) {
+					return static::value( $default );
+				}
+
+				$result = [];
+
+				foreach ( $target as $item ) {
+					$result[] = static::data_get( $item, $key );
+				}
+
+				return in_array( '*', $key, true ) ? static::collapse( $result ) : $result;
+			}
+
+			if ( static::accessible( $target ) && static::exists( $target, $segment ) ) {
+				$target = $target[ $segment ];
+			} elseif ( is_object( $target ) && isset( $target->{$segment} ) ) {
+				$target = $target->{$segment};
+			} else {
+				return static::value( $default );
+			}
+		}
+
+		return $target;
+	}
+
+	/**
 	 * Add an element to an array using "dot" notation if it doesn't exist.
 	 *
 	 * @param  array  $array
@@ -157,7 +211,7 @@ class Arr {
 	public static function first( $array, ?callable $callback = null, $default = null ) {
 		if ( is_null( $callback ) ) {
 			if ( empty( $array ) ) {
-				return mv_get_value( $default );
+				return static::value( $default );
 			}
 
 			foreach ( $array as $item ) {
@@ -171,7 +225,7 @@ class Arr {
 			}
 		}
 
-		return mv_get_value( $default );
+		return static::value( $default );
 	}
 
 	/**
@@ -184,7 +238,7 @@ class Arr {
 	 */
 	public static function last( $array, ?callable $callback = null, $default = null ) {
 		if ( is_null( $callback ) ) {
-			return empty( $array ) ? mv_get_value( $default ) : end( $array );
+			return empty( $array ) ? static::value( $default ) : end( $array );
 		}
 
 		return static::first( array_reverse( $array, true ), $callback, $default );
@@ -268,7 +322,7 @@ class Arr {
 	 */
 	public static function get( $array, $key, $default = null ) {
 		if ( ! static::accessible( $array ) ) {
-			return mv_get_value( $default );
+			return static::value( $default );
 		}
 
 		if ( is_null( $key ) ) {
@@ -280,14 +334,14 @@ class Arr {
 		}
 
 		if ( strpos( $key, '.' ) === false ) {
-			return isset( $array[ $key ] ) ? $array[ $key ] : mv_get_value( $default );
+			return isset( $array[ $key ] ) ? $array[ $key ] : static::value( $default );
 		}
 
 		foreach ( explode( '.', $key ) as $segment ) {
 			if ( static::accessible( $array ) && static::exists( $array, $segment ) ) {
 				$array = $array[ $segment ];
 			} else {
-				return mv_get_value( $default );
+				return static::value( $default );
 			}
 		}
 
@@ -391,7 +445,7 @@ class Arr {
 		list($value, $key) = static::explodePluckParameters( $value, $key );
 
 		foreach ( $array as $item ) {
-			$itemValue = mv_data_get( $item, $value );
+			$itemValue = static::data_get( $item, $value );
 
 			// If the key is "null", we will just append the value to the array and keep
 			// looping. Otherwise we will key the array using the value of the key we
@@ -399,7 +453,7 @@ class Arr {
 			if ( is_null( $key ) ) {
 				$results[] = $itemValue;
 			} else {
-				$itemKey = mv_data_get( $item, $key );
+				$itemKey = static::data_get( $item, $key );
 
 				if ( is_object( $itemKey ) && method_exists( $itemKey, '__toString' ) ) {
 					$itemKey = (string) $itemKey;

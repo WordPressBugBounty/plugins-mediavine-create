@@ -34,7 +34,6 @@ $mv_create_autoload_files = [
 	__DIR__ . '/functions.php',
 	__DIR__ . '/functions-feature-flags.php',
 	__DIR__ . '/functions-version-check.php',
-	__DIR__ . '/helpers.php',
 	__DIR__ . '/api/v1/creations-args.php',
 	__DIR__ . '/api/v1/creations-schema.php',
 	__DIR__ . '/helpers/functions-helpers.php',

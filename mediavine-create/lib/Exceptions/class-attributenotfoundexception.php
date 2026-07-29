@@ -1,6 +1,8 @@
 <?php
 namespace Mediavine\Create\Exceptions;
 
+use Mediavine\Create\Helpers\Str;
+
 class AttributeNotFoundException extends \RuntimeException {
 	/**
 	 * Name of the affected attribute.
@@ -44,7 +46,7 @@ class AttributeNotFoundException extends \RuntimeException {
 	 * @return $this
 	 */
 	public function set_model( $model ) {
-		$this->model = \class_basename( $model );
+		$this->model = Str::class_basename( $model );
 		return $this;
 	}
 
