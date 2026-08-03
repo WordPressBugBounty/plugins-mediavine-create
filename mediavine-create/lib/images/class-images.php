@@ -543,6 +543,18 @@ class Images {
 	/**
 	 * Finds the highest available resolution with the correct ratio
 	 *
+	 * When a hard-cropped intermediate is missing from attachment metadata and
+	 * the original is larger than that registered size, returns 'full' instead
+	 * of the base size name. Passing a missing base size into
+	 * wp_get_attachment_image() makes core's image_downsize() constrain the
+	 * full-res URL to the base dimensions (e.g. 180px for a square source
+	 * against mv_create_16x9), which stamps a tiny sizes attribute and causes
+	 * browsers to pick a grainy srcset candidate.
+	 *
+	 * Unconstrained sizes (height sentinel 9999, e.g. mv_create_vert) are
+	 * never rewritten to 'full' — callers like View_Loader key off the Create
+	 * size name, and downsize correctly only caps width for those sizes.
+	 *
 	 * @param int    $img_id Image ID
 	 * @param string $img_size Un-suffixed size resolution to test against
 	 * @param array  $available_sizes (Optional) List of sizes to test against
@@ -569,6 +581,33 @@ class Images {
 					}
 				}
 			}
+		}
+
+		$meta = wp_get_attachment_metadata( $img_id );
+		if ( ! empty( $meta['sizes'][ $img_size ] ) ) {
+			return $img_size;
+		}
+
+		$registered = self::get_image_sizes( [ $img_size ] );
+		if ( empty( $registered[ $img_size ] ) ) {
+			return $img_size;
+		}
+
+		// Soft / unconstrained sizes use height 9999 as a sentinel — never fall
+		// back to full based on dimension math that cannot succeed.
+		if ( self::is_unconstrained_image_size( $registered[ $img_size ] ) ) {
+			return $img_size;
+		}
+
+		if (
+			! empty( $meta['width'] ) &&
+			! empty( $meta['height'] ) &&
+			(
+				(int) $meta['width'] > (int) $registered[ $img_size ]['width'] ||
+				(int) $meta['height'] > (int) $registered[ $img_size ]['height']
+			)
+		) {
+			return 'full';
 		}
 
 		return $img_size;
@@ -619,12 +658,18 @@ class Images {
 	/**
 	 * Checks that Create sizes exist for ID and generates if they don't
 	 *
-	 * This only checks for the lowest size image (mv_create_1x1) so that smaller
-	 * images aren't continuously rebuilt. Images smaller than that size will
-	 * unfortunately have to deal with the performance hit, but should be rare
+	 * Probes $size (default mv_create_1x1). Callers that render a different
+	 * ratio must pass that size — otherwise an attachment that already has
+	 * 1x1 crops will early-return and never generate the ratio actually needed
+	 * (e.g. 16:9 on numbered lists). Images smaller than the probed size will
+	 * regenerate on each check; that should be rare.
+	 *
+	 * Unconstrained sizes (height 9999) never match registered dimensions
+	 * exactly, so those are treated as present once the metadata key exists.
 	 *
 	 * @param int|string $image_id ID of the image to check
 	 * @param array      $create_image_sizes Sizes to be generated if they exist
+	 * @param string     $size Size name to probe for existence
 	 * @param boolean    $return Return the $image_meta
 	 * @return array|void Image meta if $return is true
 	 */
@@ -636,28 +681,55 @@ class Images {
 			return;
 		}
 
-		$image_meta = wp_get_attachment_image_src( $image_id, $size );
+		$registered = $image_sizes[ $size ];
 
-		// Check given image with correct size and return true if correct
-		if (
-			! empty( $image_meta ) &&
-			$image_sizes[ $size ]['width'] === $image_meta[1] &&
-			$image_sizes[ $size ]['height'] === $image_meta[2]
-		) {
-			if ( $return ) {
-				return $image_meta;
+		// Soft / unconstrained sizes: registered height is a sentinel (9999),
+		// so exact dimension matching never succeeds. Presence in metadata is
+		// enough to avoid regenerating on every page load.
+		if ( self::is_unconstrained_image_size( $registered ) ) {
+			$attach_meta = wp_get_attachment_metadata( $image_id );
+			if ( ! empty( $attach_meta['sizes'][ $size ] ) ) {
+				if ( $return ) {
+					return wp_get_attachment_image_src( $image_id, $size );
+				}
+
+				return;
 			}
+		} else {
+			$image_meta = wp_get_attachment_image_src( $image_id, $size );
 
-			return;
+			// Check given image with correct size and return true if correct
+			if (
+				! empty( $image_meta ) &&
+				(int) $registered['width'] === (int) $image_meta[1] &&
+				(int) $registered['height'] === (int) $image_meta[2]
+			) {
+				if ( $return ) {
+					return $image_meta;
+				}
+
+				return;
+			}
 		}
+
 		// Generate image sizes
 		self::generate_intermediate_sizes( $image_id, $image_sizes );
 
 		if ( $return ) {
-			$image_meta = wp_get_attachment_image_src( $image_id, $size );
-
-			return $image_meta;
+			return wp_get_attachment_image_src( $image_id, $size );
 		}
+	}
+
+	/**
+	 * Whether a registered Create size uses an unconstrained height sentinel.
+	 *
+	 * @param array $size_meta Registered size meta with width/height.
+	 * @return bool
+	 */
+	public static function is_unconstrained_image_size( $size_meta ) {
+		return is_array( $size_meta )
+			&& ! empty( $size_meta['height'] )
+			&& (int) $size_meta['height'] >= 9999;
 	}
 
 	/**

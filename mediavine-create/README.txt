@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.5.5
+Stable tag: 2.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,18 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 2.6.0 =
+
+* FEATURE: New importer for recipes created with the GetMeCooking Recipe Template plugin, bringing over ingredients, instructions, times, servings, categories, and photos
+* ENHANCEMENT: Post editor screens now load a much smaller Create bundle, so Gutenberg and the Classic Editor open faster
+* FIX: List cards no longer show grainy or blurry images when the layout's Photo Ratio crop hasn't been generated for an image yet
+* FIX: The ingredient group collapse toggle keeps its own styling when Aggressive Button Styles are turned on
+* FIX: Review replies now show a clear message when loading or posting a reply fails, your reply text is kept if it doesn't go through, and your name and email prefill from your last reply
+* FIX: Imported recipes with no rating no longer save an invalid rating value
+* FIX: Edits to list items in the editor are no longer overwritten while you type
+* FIX: The EasyRecipe importer no longer fails with a fatal error when reading recipes out of your posts
+
 
 = 2.5.5 =
 

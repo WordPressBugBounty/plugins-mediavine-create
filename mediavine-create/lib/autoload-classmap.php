@@ -67,6 +67,7 @@ return array(
 	'Mediavine\\Create\\Importers\\Sources\\Abstract_Source_Importer' => 'lib/importers/sources/class-abstract-source-importer.php',
 	'Mediavine\\Create\\Importers\\Sources\\Import_Cookbook' => 'lib/importers/sources/class-import-cookbook.php',
 	'Mediavine\\Create\\Importers\\Sources\\Import_Easy_Recipe' => 'lib/importers/sources/class-import-easy-recipe.php',
+	'Mediavine\\Create\\Importers\\Sources\\Import_GetMeCooking' => 'lib/importers/sources/class-import-getmecooking.php',
 	'Mediavine\\Create\\Importers\\Sources\\Import_Meal_Planner' => 'lib/importers/sources/class-import-meal-planner.php',
 	'Mediavine\\Create\\Importers\\Sources\\Import_Purr' => 'lib/importers/sources/class-import-purr.php',
 	'Mediavine\\Create\\Importers\\Sources\\Import_Recipe_Maker' => 'lib/importers/sources/class-import-recipe-maker.php',

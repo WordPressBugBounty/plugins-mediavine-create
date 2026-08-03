@@ -8,6 +8,7 @@ use Mediavine\Create\Helpers\Str;
 use Mediavine\Create\Helpers\Collection;
 use Mediavine\Create\Importers\Sources\Import_Cookbook;
 use Mediavine\Create\Importers\Sources\Import_Easy_Recipe;
+use Mediavine\Create\Importers\Sources\Import_GetMeCooking;
 use Mediavine\Create\Importers\Sources\Import_Meal_Planner;
 use Mediavine\Create\Importers\Sources\Import_Purr;
 use Mediavine\Create\Importers\Sources\Import_Recipe_Maker;
@@ -105,6 +106,11 @@ class MV_Recipe_Importer extends Plugin {
 				'importer'    => Import_Easy_Recipe::class,
 				'recipes'     => [],
 				'plugin_meta' => [ 'name' => __( 'EasyRecipe/EasyRecipe Pro', 'mediavine-create' ) ],
+			],
+			'getmecooking'             => [
+				'importer'    => Import_GetMeCooking::class,
+				'recipes'     => [],
+				'plugin_meta' => [ 'name' => __( 'GetMeCooking Recipe Template', 'mediavine-create' ) ],
 			],
 			'meal_planner'             => [
 				'importer'    => Import_Meal_Planner::class,
@@ -578,7 +584,7 @@ class MV_Recipe_Importer extends Plugin {
 			$formatted_ingredient = [
 				'creation'      => $creation_id,
 				'amount'        => '',
-				'measurement'   => '',
+				'unit'          => '',
 				'original_text' => '',
 				'position'      => $position,
 				'group'         => 'mv-has-no-group',
@@ -589,8 +595,10 @@ class MV_Recipe_Importer extends Plugin {
 				$formatted_ingredient['amount'] = $ingredient['quantity'];
 			}
 
+			// mv_supplies stores the unit in `unit`; a `measurement` key would be
+			// silently dropped by MV_DBI::normalize_data().
 			if ( isset( $ingredient['unit'] ) ) {
-				$formatted_ingredient['measurement'] = $ingredient['unit'];
+				$formatted_ingredient['unit'] = $ingredient['unit'];
 			}
 
 			if ( isset( $ingredient['original_text'] ) ) {
@@ -904,11 +912,18 @@ class MV_Recipe_Importer extends Plugin {
 
 		// `'import'` key: which importer and an ident key for determining whether the recipe has been imported before
 		// `'imported_images'` key: image sources from original recipe to combat Google not using updated images for results (for shame, Google!)
+		// Optional `$found_recipe['import_meta']` is merged into `import` for source-specific
+		// fields we aren't mapping yet (e.g. GetMeCooking allergy/occasion taxonomies).
+		$import_meta = [];
+		if ( ! empty( $found_recipe['import_meta'] ) && is_array( $found_recipe['import_meta'] ) ) {
+			$import_meta = $found_recipe['import_meta'];
+		}
+		unset( $new_recipe['import_meta'] );
+		$import_meta['importer'] = $found_recipe['importer'];
+		$import_meta['identity'] = md5( $found_recipe['importer'] . $found_recipe['title'] );
+
 		$metadata               = [
-			'import'          => [
-				'importer' => $found_recipe['importer'],
-				'identity' => md5( $found_recipe['importer'] . $found_recipe['title'] ),
-			],
+			'import'          => $import_meta,
 			'imported_images' => $image_sources,
 		];
 		$new_recipe['metadata'] = wp_json_encode( $metadata );
@@ -1260,6 +1275,20 @@ class MV_Recipe_Importer extends Plugin {
 				$replaced[] = Import_Easy_Recipe::replace( $recipe, $mv_recipe );
 			}
 			$plugins['ez_recipes']['recipes'] = $replaced;
+		}
+
+		if ( ! empty( $plugins['getmecooking']['recipes'] ) ) {
+			$getmecooking_recipes = $plugins['getmecooking']['recipes'];
+			$replaced             = [];
+
+			foreach ( $getmecooking_recipes as $api_data ) {
+				if ( empty( $api_data['id'] ) ) {
+					continue;
+				}
+				$replaced[] = Import_GetMeCooking::replace( $api_data );
+			}
+
+			$plugins['getmecooking']['recipes'] = $replaced;
 		}
 
 		if ( ! empty( $plugins['meal_planner']['recipes'] ) ) {
@@ -2025,19 +2054,51 @@ class MV_Recipe_Importer extends Plugin {
 		$attributes = array_merge( $default_attributes, $attributes );
 		$block      = '';
 		if ( $attributes['key'] ) {
-			$block_attributes = json_encode(
+			// Titles/URLs may arrive HTML-escaped (esc_attr) so quotes survive shortcode
+			// attribute parsing — decode before JSON, then re-escape for the inner shortcode.
+			$title     = html_entity_decode( (string) $attributes['title'], ENT_QUOTES, 'UTF-8' );
+			$thumbnail = html_entity_decode( (string) $attributes['thumbnail'], ENT_QUOTES, 'UTF-8' );
+			$type      = (string) $attributes['type'];
+			$key       = (int) $attributes['key'];
+
+			$block_attributes = wp_json_encode(
 				[
-					'id'            => (int) $attributes['key'],
-					'title'         => esc_attr( $attributes['title'] ),
-					'thumbnail_uri' => esc_attr( $attributes['thumbnail'] ),
-					'type'          => esc_attr( $attributes['type'] ),
+					'id'            => $key,
+					'title'         => $title,
+					'thumbnail_uri' => $thumbnail,
+					'type'          => $type,
 					'layout'        => null,
 				]
 			);
-			$block            = "<!-- wp:mv/recipe {$block_attributes} -->\n\t<div class=\"wp-block-mv-recipe\">[mv_create key=\"{$attributes['key']}\" type=\"{$attributes['type']}\" title=\"{$attributes['title']}\" thumbnail=\"{$attributes['thumbnail']}\"]</div>\n<!-- /wp:mv/recipe -->";
+			$inner_shortcode  = self::format_mv_create_shortcode( $key, $title, $thumbnail, $type );
+			$block            = "<!-- wp:mv/recipe {$block_attributes} -->\n\t<div class=\"wp-block-mv-recipe\">{$inner_shortcode}</div>\n<!-- /wp:mv/recipe -->";
 		}
 
 		return trim( $block );
+	}
+
+	/**
+	 * Build an [mv_create] shortcode with attribute-safe title/thumbnail values.
+	 *
+	 * Unescaped quotes in titles break WordPress shortcode attribute parsing
+	 * (e.g. London "Bath" Buns). Prefer this over string concatenation in replace().
+	 *
+	 * @param int|string $id        Creation ID (key attribute).
+	 * @param string     $title     Recipe title.
+	 * @param string     $thumbnail Thumbnail URL.
+	 * @param string     $type      Card type.
+	 * @return string
+	 */
+	public static function format_mv_create_shortcode( $id, $title = '', $thumbnail = '', $type = 'recipe' ) {
+		// Attribute order matches the long-standing block output (key, type,
+		// title, thumbnail) so this stays a drop-in for existing content.
+		return sprintf(
+			'[mv_create key="%s" type="%s" title="%s" thumbnail="%s"]',
+			esc_attr( (string) $id ),
+			esc_attr( (string) $type ),
+			esc_attr( (string) $title ),
+			esc_attr( (string) $thumbnail )
+		);
 	}
 
 	/**

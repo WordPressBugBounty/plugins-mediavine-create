@@ -430,6 +430,11 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 		 */
 		$output .= '<style>.mv-create-jtr-wrapper{margin-bottom:20px}';
 
+		// The caret's width/height attributes are presentation attributes, which lose to
+		// any CSS rule -- including a theme's blanket `svg{width:100%;height:100%}` icon
+		// reset. Sizing via the class (specificity 0-1-0) keeps the caret bounded.
+		$output .= '.mv-create-jtr-caret{width:16px;height:16px;flex-shrink:0}';
+
 		// We will always needs the links styles for Continue to Content
 		$output .= "a.mv-create-jtr-link{display:inline-block;padding:10px 10px 10px 0;color:$base_color;font-size:16px;text-decoration:none!important;-webkit-transition:color .5s;transition:color .5s}a.mv-create-jtr-link:hover,a.mv-create-jtr-link:focus{color:$alt_color}.mv-create-jtr-link .mv-create-jtr-caret{margin-right:5px;padding-top:6px;fill:$base_color}.mv-create-jtr-link:hover .mv-create-jtr-caret,.mv-create-jtr-link:focus .mv-create-jtr-caret{fill:$alt_color}";
 

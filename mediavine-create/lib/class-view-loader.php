@@ -68,9 +68,21 @@ class View_Loader {
 					$image_alt_text = $card_object_array['title'];
 				}
 
-				// Replace image data with highest res data, and correct size name
-				if ( ! empty( $image_sizes[ $highest_res_image ] ) ) {
-					$image               = $available_images[ $highest_res_image ];
+				$img_tag = null;
+
+				if ( 'full' === $highest_res_image ) {
+					// Intermediate crop missing — serve the original file with the
+					// registered Create size's class so card templates still get a
+					// tag keyed by $image_size (e.g. mv_create_16x9).
+					$img_tag = self::mv_image_tag_from_full_attachment(
+						$image,
+						$image_size,
+						$image_sizes,
+						$image_alt_text
+					);
+				} elseif ( ! empty( $image_sizes[ $highest_res_image ] ) && ! empty( $available_images[ $highest_res_image ] ) ) {
+					// Replace image data with highest res data, and correct size name
+					$image               = (array) $available_images[ $highest_res_image ];
 					$image['image_size'] = $image_size;
 
 					$img_tag = self::mv_image_tag( $image, $image_sizes[ $highest_res_image ], $image_alt_text );
@@ -79,13 +91,45 @@ class View_Loader {
 				if ( ! empty( $img_tag ) ) {
 					$img_tags[ $image_size ] = $img_tag;
 				}
-
-				// Reset
-				$img_tag = null;
 			}
 		}
 
 		return $img_tags;
+	}
+
+	/**
+	 * Build a Create card <img> tag from the full attachment when a crop is missing.
+	 *
+	 * @param array  $image          Card image row (needs object_id).
+	 * @param string $image_size     Create size name to key the tag under.
+	 * @param array  $image_sizes    Registered Create size definitions.
+	 * @param string $image_alt_text Alt text.
+	 * @return string|null
+	 */
+	private static function mv_image_tag_from_full_attachment( $image, $image_size, $image_sizes, $image_alt_text ) {
+		if ( empty( $image['object_id'] ) || empty( $image_sizes[ $image_size ] ) ) {
+			return null;
+		}
+
+		$full_src = wp_get_attachment_image_src( (int) $image['object_id'], 'full' );
+		if ( empty( $full_src[0] ) ) {
+			return null;
+		}
+
+		$image_meta            = $image_sizes[ $image_size ];
+		$image_meta['width']   = $full_src[1];
+		$image_meta['height']  = $full_src[2];
+
+		$tag_image = [
+			'object_id'           => $image['object_id'],
+			'image_size'          => $image_size,
+			'image_url'           => $full_src[0],
+			'image_url_full_size' => $full_src[0],
+			'image_srcset'        => '',
+			'image_srcset_sizes'  => '',
+		];
+
+		return self::mv_image_tag( $tag_image, $image_meta, $image_alt_text );
 	}
 
 	/**

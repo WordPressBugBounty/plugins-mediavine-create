@@ -36,7 +36,7 @@ class Translation extends Plugin {
 			'CONSENT'              => __( 'To submit this review, I consent to the collection of this data.', 'mediavine-create' ),
 			'SUBMIT_REVIEW'        => __( 'Submit Review', 'mediavine-create' ),
 			'SUBMITTING'           => __( 'Submitting', 'mediavine-create' ),
-			'UPDATE'               => __( 'Update Review', 'mediavine-create' ),
+			'UPDATE_REVIEW'        => __( 'Update Review', 'mediavine-create' ),
 			'THANKS_RATING'        => __( 'Thanks for the rating!', 'mediavine-create' ),
 			'DID_YOU_MAKE_THIS'    => __( 'Did you make this? Tell us about it!', 'mediavine-create' ),
 			'LEAVE_REVIEW'         => __( 'Leave a review', 'mediavine-create' ),

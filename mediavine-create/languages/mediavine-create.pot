@@ -2,24 +2,24 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.5.5\n"
+"Project-Id-Version: Create 2.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-29T19:17:15+00:00\n"
+"POT-Creation-Date: 2026-08-03T15:17:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
 
 #. Plugin Name of the plugin
 #: mediavine-create.php
-#: admin/class-admin-init.php:367
-#: admin/class-admin-init.php:368
-#: admin/class-admin-init.php:437
-#: admin/class-admin-init.php:608
+#: admin/class-admin-init.php:462
+#: admin/class-admin-init.php:463
+#: admin/class-admin-init.php:532
+#: admin/class-admin-init.php:703
 msgid "Create"
 msgstr ""
 
@@ -43,32 +43,32 @@ msgstr ""
 msgid "https://create.studio/"
 msgstr ""
 
-#: admin/class-admin-init.php:377
-#: admin/class-admin-init.php:378
+#: admin/class-admin-init.php:472
+#: admin/class-admin-init.php:473
 #: lib/settings-group/class-advanced.php:273
 #: lib/settings-group/class-advanced.php:276
 msgid "Dashboard"
 msgstr ""
 
-#: admin/class-admin-init.php:385
+#: admin/class-admin-init.php:480
 #: class-plugin.php:1329
 #: lib/settings-group/class-advanced.php:284
 msgid "Recipes"
 msgstr ""
 
-#: admin/class-admin-init.php:386
+#: admin/class-admin-init.php:481
 #: class-plugin.php:1336
 #: lib/settings-group/class-advanced.php:288
 msgid "How-Tos"
 msgstr ""
 
-#: admin/class-admin-init.php:387
+#: admin/class-admin-init.php:482
 #: class-plugin.php:1343
 #: lib/settings-group/class-advanced.php:292
 msgid "Lists"
 msgstr ""
 
-#: admin/class-admin-init.php:412
+#: admin/class-admin-init.php:507
 #: lib/i18n/class-translation.php:52
 #: lib/settings-group/class-reader-experience.php:560
 #: lib/settings-group/class-reader-experience.php:567
@@ -77,38 +77,38 @@ msgstr ""
 msgid "Recommended Products"
 msgstr ""
 
-#: admin/class-admin-init.php:413
+#: admin/class-admin-init.php:508
 msgid "User Reviews"
 msgstr ""
 
-#: admin/class-admin-init.php:428
-#: admin/class-admin-init.php:436
+#: admin/class-admin-init.php:523
+#: admin/class-admin-init.php:531
 msgid "Create Plugin Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:429
+#: admin/class-admin-init.php:524
 msgid "Settings"
 msgstr ""
 
-#: admin/class-admin-init.php:448
+#: admin/class-admin-init.php:543
 #: lib/class-admin-bar.php:98
 msgid "Edit Create Card"
 msgstr ""
 
-#: admin/class-admin-init.php:449
+#: admin/class-admin-init.php:544
 msgid "Edit Card"
 msgstr ""
 
-#: admin/class-admin-init.php:458
+#: admin/class-admin-init.php:553
 msgid "Welcome to Create 2.0"
 msgstr ""
 
-#: admin/class-admin-init.php:459
+#: admin/class-admin-init.php:554
 msgid "Welcome"
 msgstr ""
 
-#: admin/class-admin-init.php:469
-#: admin/class-admin-init.php:470
+#: admin/class-admin-init.php:564
+#: admin/class-admin-init.php:565
 msgid "Theme Elements"
 msgstr ""
 
@@ -503,38 +503,39 @@ msgid "Disable Jump-to-Recipe"
 msgstr ""
 
 #. translators: %s: list item title
-#: lib/creations/class-creations-views-list-item-preparer.php:106
+#: lib/creations/class-creations-views-list-item-preparer.php:110
 #: lib/creations/class-creations-views.php:1898
 #, php-format
 msgid "Image for %s"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:175
+#: lib/creations/class-creations-views-list-item-preparer.php:179
 #: lib/creations/class-creations-views.php:1442
 #: lib/creations/class-creations.php:730
+#: lib/importers/sources/class-import-getmecooking.php:272
 #: lib/importers/sources/class-import-purr.php:159
 msgid "Prep Time"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:181
+#: lib/creations/class-creations-views-list-item-preparer.php:185
 #: lib/creations/class-creations.php:731
 msgid "Active Time"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:187
+#: lib/creations/class-creations-views-list-item-preparer.php:191
 #: lib/creations/class-creations-views.php:1444
 #: lib/creations/class-creations.php:732
-#: lib/importers/class-mv-recipe-importer.php:947
+#: lib/importers/class-mv-recipe-importer.php:962
 #: lib/importers/sources/class-import-purr.php:160
 msgid "Additional Time"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:193
+#: lib/creations/class-creations-views-list-item-preparer.php:197
 #: lib/creations/class-creations-views.php:1464
 msgid "Total Time"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:197
+#: lib/creations/class-creations-views-list-item-preparer.php:201
 #: lib/i18n/class-translation.php:45
 #: lib/views/v1/big-image/shortcode-mv-create-title.php:13
 #: lib/views/v1/centered/shortcode-mv-create-nutrition.php:20
@@ -546,35 +547,35 @@ msgstr ""
 msgid "Yield"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:201
+#: lib/creations/class-creations-views-list-item-preparer.php:205
 #: lib/i18n/class-translation.php:51
 #: lib/views/v1/shortcode-mv-create-footer.php:57
 msgid "Category"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:205
+#: lib/creations/class-creations-views-list-item-preparer.php:209
 #: lib/creations/class-creations-views.php:879
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:209
+#: lib/creations/class-creations-views-list-item-preparer.php:213
 #: lib/creations/class-creations-views.php:1345
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:214
+#: lib/creations/class-creations-views-list-item-preparer.php:218
 #: lib/creations/class-creations-views.php:1348
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:217
+#: lib/creations/class-creations-views-list-item-preparer.php:221
 msgid "Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views-list-item-preparer.php:220
+#: lib/creations/class-creations-views-list-item-preparer.php:224
 #: lib/creations/class-creations-views.php:1472
 msgid "Difficulty"
 msgstr ""
@@ -715,8 +716,9 @@ msgstr ""
 
 #: lib/creations/class-creations-views.php:1443
 #: lib/creations/class-creations.php:737
-#: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:695
+#: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:699
 #: lib/importers/sources/class-import-cookbook.php:189
+#: lib/importers/sources/class-import-getmecooking.php:279
 #: lib/importers/sources/class-import-meal-planner.php:243
 #: lib/importers/sources/class-import-purr.php:158
 #: lib/importers/sources/class-import-recipe-maker.php:179
@@ -1202,8 +1204,8 @@ msgstr ""
 msgid "The currently installed version of <strong>Create Recipe Importer</strong> is not compatible with <strong>Create by Mediavine</strong> and has been deactivated."
 msgstr ""
 
-#: lib/importers/class-importers-admin.php:90
 #: lib/importers/class-importers-admin.php:91
+#: lib/importers/class-importers-admin.php:92
 msgid "Import Recipes"
 msgstr ""
 
@@ -1217,74 +1219,78 @@ msgstr ""
 msgid "The standalone Create Recipe Importer plugin has been integrated into Create. The standalone plugin has been deactivated and the integrated importers have been enabled. You can manage this setting in <a href=\"%s\">Settings → Advanced</a>."
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:102
+#: lib/importers/class-mv-recipe-importer.php:103
 msgid "Cookbook"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:107
+#: lib/importers/class-mv-recipe-importer.php:108
 msgid "EasyRecipe/EasyRecipe Pro"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:112
+#: lib/importers/class-mv-recipe-importer.php:113
+msgid "GetMeCooking Recipe Template"
+msgstr ""
+
+#: lib/importers/class-mv-recipe-importer.php:118
 msgid "Meal Planner Pro Recipes"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:117
+#: lib/importers/class-mv-recipe-importer.php:123
 msgid "Purr Recipe Cards"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:122
+#: lib/importers/class-mv-recipe-importer.php:128
 msgid "WP Recipe Maker"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:127
+#: lib/importers/class-mv-recipe-importer.php:133
 msgid "Simple Recipes Pro"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:132
+#: lib/importers/class-mv-recipe-importer.php:138
 msgid "Simple Recipe Pro (Newer Versions)"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:137
+#: lib/importers/class-mv-recipe-importer.php:143
 msgid "Simple Recipe Pro (Older Versions)"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:142
+#: lib/importers/class-mv-recipe-importer.php:148
 msgid "WP Tasty"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:147
+#: lib/importers/class-mv-recipe-importer.php:153
 msgid "WP Ultimate Recipe"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:152
+#: lib/importers/class-mv-recipe-importer.php:158
 msgid "Yummly"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:157
+#: lib/importers/class-mv-recipe-importer.php:163
 msgid "ZipList Recipes"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:162
+#: lib/importers/class-mv-recipe-importer.php:168
 msgid "Zip Recipes"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:963
-#: lib/importers/class-mv-recipe-importer.php:1044
+#: lib/importers/class-mv-recipe-importer.php:978
+#: lib/importers/class-mv-recipe-importer.php:1059
 msgid "Recipe Not Generated"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:964
-#: lib/importers/class-mv-recipe-importer.php:1045
+#: lib/importers/class-mv-recipe-importer.php:979
+#: lib/importers/class-mv-recipe-importer.php:1060
 msgid "WordPress failed to create new recipe."
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:1004
+#: lib/importers/class-mv-recipe-importer.php:1019
 #: lib/importers/sources/class-import-cookbook.php:190
 msgid "Inactive Time"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:1114
+#: lib/importers/class-mv-recipe-importer.php:1129
 #: lib/reviews/class-review-responses-api.php:209
 #: lib/reviews/class-reviews-api.php:337
 #: lib/reviews/class-reviews-api.php:466
@@ -1292,18 +1298,19 @@ msgstr ""
 msgid "Unsafe Content Submission"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:1115
+#: lib/importers/class-mv-recipe-importer.php:1130
 #: lib/settings/class-settings-api.php:41
 msgid "You're submission includes unsafe characters"
 msgstr ""
 
-#: lib/importers/class-mv-recipe-importer.php:1997
+#: lib/importers/class-mv-recipe-importer.php:2026
 msgid "Post not found"
 msgstr ""
 
 #: lib/importers/sources/class-import-cookbook.php:398
 #: lib/importers/sources/class-import-cookbook.php:458
-#: lib/importers/sources/class-import-easy-recipe.php:159
+#: lib/importers/sources/class-import-easy-recipe.php:160
+#: lib/importers/sources/class-import-getmecooking.php:641
 #: lib/importers/sources/class-import-meal-planner.php:326
 #: lib/importers/sources/class-import-purr.php:249
 #: lib/importers/sources/class-import-recipe-maker.php:615
@@ -1316,6 +1323,15 @@ msgstr ""
 #: lib/importers/sources/class-import-zip-recipes.php:286
 #: lib/importers/sources/class-import-ziplist.php:217
 msgid "Failed to process shortcode replacement"
+msgstr ""
+
+#: lib/importers/sources/class-import-getmecooking.php:470
+#: lib/importers/sources/class-import-getmecooking.php:475
+msgid "Recipe from"
+msgstr ""
+
+#: lib/importers/sources/class-import-getmecooking.php:570
+msgid "optional"
 msgstr ""
 
 #: lib/importers/sources/class-import-simple-recipes-pro-latest.php:221

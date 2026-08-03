@@ -181,11 +181,14 @@ class Admin_Init extends Plugin {
 	}
 
 	/**
-	 * Check if we are on a Create admin URL
+	 * Whether the current URL matches a Create-owned admin param string.
 	 *
-	 * @return boolean True if on a Create admin URL
+	 * Shared by is_create_admin_url() and is_create_spa_url() so the
+	 * mv_create_url_params filter + strpos loop lives in one place.
+	 *
+	 * @return bool
 	 */
-	public static function is_create_admin_url() {
+	private static function url_matches_create_params() {
 		$current_url = static::get_current_url();
 		if ( ! is_string( $current_url ) || '' === $current_url ) {
 			return false;
@@ -202,6 +205,24 @@ class Admin_Init extends Plugin {
 			if ( strpos( $current_url, $url_param_to_check ) !== false ) {
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if we are on a Create admin URL
+	 *
+	 * @return boolean True if on a Create admin URL
+	 */
+	public static function is_create_admin_url() {
+		if ( self::url_matches_create_params() ) {
+			return true;
+		}
+
+		$current_url = static::get_current_url();
+		if ( ! is_string( $current_url ) || '' === $current_url ) {
+			return false;
 		}
 
 		// For post.php and post-new.php, check if ANY editor is present
@@ -228,6 +249,96 @@ class Admin_Init extends Plugin {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Whether the current screen is a Create admin SPA page (not a content post editor).
+	 *
+	 * Matches Create-owned URL params (collections, settings, welcome, editor, import, etc.).
+	 * Post/page editors use the slim blocks bundle instead.
+	 *
+	 * @return bool
+	 */
+	public static function is_create_spa_url() {
+		return self::url_matches_create_params();
+	}
+
+	/**
+	 * Script handle for the Create admin SPA (app.build).
+	 *
+	 * @return string
+	 */
+	public static function app_script_handle() {
+		return Plugin::PLUGIN_DOMAIN . '-script';
+	}
+
+	/**
+	 * Script handle for Gutenberg/Classic block registration (blocks.build).
+	 *
+	 * @return string
+	 */
+	public static function blocks_script_handle() {
+		return Plugin::PLUGIN_DOMAIN . '-blocks-script';
+	}
+
+	/**
+	 * Build (or Vite-dev) URL for a versioned admin UI artifact.
+	 *
+	 * @param string $basename Filename stem, e.g. 'app.build' or 'blocks.build'.
+	 * @return string
+	 */
+	public static function admin_ui_script_url( $basename ) {
+		$script_url = Plugin::assets_url() . 'admin/ui/build/' . $basename . '.' . self::VERSION . '.js';
+
+		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
+			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
+			$script_url = 'http://localhost:' . $dev_port . '/' . $basename . '.' . self::VERSION . '.js';
+		}
+
+		return $script_url;
+	}
+
+	/**
+	 * Register, localize, and enqueue an admin UI script handle.
+	 *
+	 * Localization runs at most once per handle per request so Gutenberg screens
+	 * that hit both enqueue_block_editor_assets and admin_enqueue_scripts do not
+	 * double the cost of localization() (get_users, SQL, settings, MCP).
+	 *
+	 * @param string $handle Script handle.
+	 * @param string $basename Filename stem, e.g. 'app.build' or 'blocks.build'.
+	 * @param array  $deps Script dependencies.
+	 * @param bool   $in_footer Whether to load in footer.
+	 */
+	public static function enqueue_admin_ui_script( $handle, $basename, $deps, $in_footer = true ) {
+		static $localized = [];
+
+		if ( ! wp_script_is( $handle, 'registered' ) ) {
+			wp_register_script(
+				$handle,
+				self::admin_ui_script_url( $basename ),
+				$deps,
+				self::VERSION,
+				$in_footer
+			);
+		}
+
+		// register_create_script() already registers this handle on 'init' pinned to the
+		// header, so the wp_register_script() above is skipped and its $in_footer ignored.
+		// Set the group directly instead — wp_register_script() does the same thing, and
+		// notably does it outside its own "already registered" check. Without this the
+		// Classic Editor loads the script in <head>, before the media_buttons hook has
+		// emitted the [data-shortcode] node the TinyMCE block mounts into, so the Create
+		// insert button silently never renders.
+		wp_script_add_data( $handle, 'group', $in_footer ? 1 : 0 );
+
+		if ( empty( $localized[ $handle ] ) ) {
+			wp_localize_script( $handle, 'MV_CREATE', self::localization() );
+			wp_set_script_translations( $handle, 'mediavine-create', plugin_dir_path( __DIR__ ) . 'languages/' );
+			$localized[ $handle ] = true;
+		}
+
+		wp_enqueue_script( $handle );
 	}
 
 	/**
@@ -272,70 +383,54 @@ class Admin_Init extends Plugin {
 
 	/**
 	 * Enqueues the admin scripts on the page.
+	 *
+	 * Create SPA pages get the full app.build bundle. Gutenberg/Classic content
+	 * post editors get the slim blocks.build bundle (block registration only).
 	 */
 	function admin_enqueue_scripts() {
-		$script_url = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
-
-		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = 'http://localhost:' . $dev_port . '/app.build.' . self::VERSION . '.js';
+		if ( ! $this::is_create_admin_url() ) {
+			return;
 		}
 
-		if ( $this::is_create_admin_url() ) {
-			wp_enqueue_media();
+		wp_enqueue_media();
 
-			// Self-hosted fonts (both SIL OFL 1.1), served from the plugin over the
-			// site's own scheme. Only loaded on Create's own admin screens.
-			// Nunito is the primary UI typeface; Fraunces is the display face used
-			// for the dashboard headings.
-			wp_enqueue_style(
-				'mv-font/nunito',
-				Plugin::assets_url() . 'assets/fonts/nunito/nunito.css',
-				[],
-				self::VERSION
-			);
-			wp_enqueue_style(
-				'mv-font/fraunces',
-				Plugin::assets_url() . 'assets/fonts/fraunces/fraunces.css',
-				[],
-				self::VERSION
-			);
+		// Self-hosted fonts (both SIL OFL 1.1), served from the plugin over the
+		// site's own scheme. Loaded wherever Create UI may render (SPA or block modal).
+		// Nunito is the primary UI typeface; Fraunces is the display face used
+		// for the dashboard headings.
+		wp_enqueue_style(
+			'mv-font/nunito',
+			Plugin::assets_url() . 'assets/fonts/nunito/nunito.css',
+			[],
+			self::VERSION
+		);
+		wp_enqueue_style(
+			'mv-font/fraunces',
+			Plugin::assets_url() . 'assets/fonts/fraunces/fraunces.css',
+			[],
+			self::VERSION
+		);
 
-			// Core dependencies that should always be loaded
+		if ( self::is_create_spa_url() ) {
 			$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-api-fetch', 'wp-data' ];
-
-			// Add editor dependencies when available (for Gutenberg sidebar/plugins)
+			self::enqueue_admin_ui_script( self::app_script_handle(), 'app.build', $deps, true );
+		} else {
+			// Content post editor (Gutenberg or Classic) — slim blocks entry.
+			$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-api-fetch', 'wp-data' ];
 			if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
 				$deps = array_merge( $deps, [ 'wp-plugins', 'wp-editor' ] );
 			}
-
-			// In block editor context, ensure we load before the editor initializes
-			$screen = get_current_screen();
+			$screen    = get_current_screen();
 			$in_footer = true;
 			if ( $screen && ! empty( $screen->is_block_editor ) ) {
-				// Load in header for block editor to ensure blocks register before editor parses content
 				$in_footer = false;
-				$deps[] = 'wp-edit-post';
+				$deps[]    = 'wp-edit-post';
 			}
-
-			wp_register_script(
-				Plugin::PLUGIN_DOMAIN . '-script',
-				$script_url,
-				$deps,
-				self::VERSION,
-				$in_footer
-			);
-
-			wp_localize_script( Plugin::PLUGIN_DOMAIN . '-script', 'MV_CREATE', self::localization() );
-
-			if ( ! wp_script_is( 'mv-blocks' ) ) {
-				wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine-create', plugin_dir_path( __DIR__ ) . 'languages/' );
-				wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
-			}
-
-			// Add CSS to fix Chrome editor if needed
-			$this->add_slate_chrome_fix();
+			self::enqueue_admin_ui_script( self::blocks_script_handle(), 'blocks.build', $deps, $in_footer );
 		}
+
+		// Add CSS to fix Chrome editor if needed
+		$this->add_slate_chrome_fix();
 	}
 
 	function admin_head() {
@@ -615,22 +710,13 @@ class Admin_Init extends Plugin {
 	}
 
 	/**
-	 * Register the Create script early so it can be referenced by block registration.
+	 * Register the slim blocks script early so it can be referenced by block registration.
 	 * This runs on 'init' before register_gutenberg_blocks.
 	 */
 	function register_create_script() {
-		$script_url  = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
-		$is_dev_mode = apply_filters( 'mv_create_dev_mode', false );
-
-		if ( $is_dev_mode ) {
-			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = 'http://localhost:' . $dev_port . '/app.build.' . self::VERSION . '.js';
-		}
-
-		// Register script early with block editor dependencies
 		wp_register_script(
-			Plugin::PLUGIN_DOMAIN . '-script',
-			$script_url,
+			self::blocks_script_handle(),
+			self::admin_ui_script_url( 'blocks.build' ),
 			[ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-components', 'wp-api-fetch', 'wp-data' ],
 			self::VERSION,
 			false // Load in header
@@ -666,7 +752,7 @@ class Admin_Init extends Plugin {
 
 			register_block_type( $block_name, [
 				'api_version' => 3,
-				'editor_script' => Plugin::PLUGIN_DOMAIN . '-script',
+				'editor_script' => self::blocks_script_handle(),
 				'render_callback' => [ $this, 'render_block' ],
 				'attributes' => [
 					'id' => [
@@ -717,31 +803,8 @@ class Admin_Init extends Plugin {
 	 * This runs at the right time for Gutenberg integration.
 	 */
 	function enqueue_block_editor_assets() {
-		// The main admin_enqueue_scripts might not have run yet, so register the script here too
-		$script_url = Plugin::assets_url() . 'admin/ui/build/app.build.' . self::VERSION . '.js';
-
-		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = 'http://localhost:' . $dev_port . '/app.build.' . self::VERSION . '.js';
-		}
-
-		// If script is not registered yet, register it
-		if ( ! wp_script_is( Plugin::PLUGIN_DOMAIN . '-script', 'registered' ) ) {
-			$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-plugins', 'wp-edit-post', 'wp-api-fetch', 'wp-data' ];
-
-			wp_register_script(
-				Plugin::PLUGIN_DOMAIN . '-script',
-				$script_url,
-				$deps,
-				self::VERSION,
-				false // Load in header for block editor
-			);
-
-			wp_localize_script( Plugin::PLUGIN_DOMAIN . '-script', 'MV_CREATE', self::localization() );
-			wp_set_script_translations( Plugin::PLUGIN_DOMAIN . '-script', 'mediavine-create', plugin_dir_path( __DIR__ ) . 'languages/' );
-		}
-
-		wp_enqueue_script( Plugin::PLUGIN_DOMAIN . '-script' );
+		$deps = [ 'lodash', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-plugins', 'wp-edit-post', 'wp-api-fetch', 'wp-data' ];
+		self::enqueue_admin_ui_script( self::blocks_script_handle(), 'blocks.build', $deps, false );
 	}
 
 	/**

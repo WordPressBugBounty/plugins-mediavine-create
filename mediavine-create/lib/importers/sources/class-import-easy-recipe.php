@@ -3,6 +3,7 @@
 namespace Mediavine\Create\Importers\Sources;
 
 use Mediavine\Create\Helpers\Str;
+use Mediavine\Create\Importers\Helpers\EasyRecipe\EasyRecipeDocument;
 use Mediavine\Create\Importers\MV_Recipe_Importer;
 
 class Import_Easy_Recipe extends Abstract_Source_Importer {

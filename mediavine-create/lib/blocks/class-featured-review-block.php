@@ -196,7 +196,7 @@ class Featured_Review_Block extends Plugin {
 
 		register_block_type( $block_name, [
 			'api_version'     => 3,
-			'editor_script'   => Plugin::PLUGIN_DOMAIN . '-script',
+			'editor_script'   => Admin_Init::blocks_script_handle(),
 			'render_callback' => [ __CLASS__, 'render' ],
 			'attributes'      => [
 				'cardId' => [

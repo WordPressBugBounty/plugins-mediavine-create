@@ -3,6 +3,7 @@
 namespace Mediavine\Create\Importers;
 
 use Mediavine\Create\Plugin;
+use Mediavine\Create\Admin_Init;
 use Mediavine\Settings;
 
 /**
@@ -111,11 +112,12 @@ class Importers_Admin {
 			$script_url = 'http://localhost:' . $dev_port . '/importers.build.' . $version . '.js';
 		}
 
-		// Depend on Create's admin script to ensure MV_SHARED_COMPONENTS is available
+		// Depend on the slim blocks script so MV_SHARED_COMPONENTS is available
+		// without shipping the full Create admin SPA on post-edit screens.
 		wp_enqueue_script(
 			'mv_create/importers-block.js',
 			$script_url,
-			[ 'wp-blocks', 'wp-element', 'wp-i18n', Plugin::PLUGIN_DOMAIN . '-script' ],
+			[ 'wp-blocks', 'wp-element', 'wp-i18n', Admin_Init::blocks_script_handle() ],
 			$version,
 			true
 		);

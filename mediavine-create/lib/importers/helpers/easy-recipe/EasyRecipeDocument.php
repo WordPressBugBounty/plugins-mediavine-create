@@ -6,6 +6,7 @@
 namespace Mediavine\Create\Importers\Helpers\EasyRecipe;
 
 use Mediavine\Create\Importers\Helpers\Ingredient_Parse;
+use Mediavine\Create\Importers\MV_Recipe_Importer;
 use stdClass;
 use Masterminds\HTML5\Exception;
 
@@ -100,7 +101,10 @@ class EasyRecipeDocument extends EasyRecipeDOMDocument {
 		/* @var $node DOMElement */
 		$node = $this->getElementByClassName( 'endeasyrecipe', 'div', $this->easyrecipes[0], false );
 
-		$this->recipeVersion = $node->nodeValue;
+		// Older EasyRecipe content omits the endeasyrecipe version marker, but still
+		// matches has_ez_recipe(). Keep the declared 0 default so it takes the
+		// pre-v3 path below instead of fatalling on a null node.
+		$this->recipeVersion = $node ? $node->nodeValue : $this->recipeVersion;
 
 		/*
 		 * See if this post has already been formatted.

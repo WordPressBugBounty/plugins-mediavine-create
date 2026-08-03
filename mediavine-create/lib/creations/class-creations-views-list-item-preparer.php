@@ -94,9 +94,13 @@ class Creations_Views_List_Item_Preparer {
 			}
 
 			// Generate thumbnail if it doesn't exist.
+			// Probe the layout's requested ratio — not a hardcoded 1x1 — so
+			// attachments that already have square crops still get 16:9/etc.
+			// Unconstrained sizes (mv_create_vert) are handled inside
+			// check_image_size via metadata-key presence.
 			// Skip synchronous image processing during REST API requests or in admin to avoid timeouts.
 			if ( ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) && ! is_admin() ) {
-				Images::check_image_size( $item['thumbnail_id'], $img_sizes );
+				Images::check_image_size( $item['thumbnail_id'], $img_sizes, $thumbnail_image_size );
 			}
 			$highest_res_image = Images::get_highest_available_image_size( $item['thumbnail_id'], $thumbnail_image_size );
 

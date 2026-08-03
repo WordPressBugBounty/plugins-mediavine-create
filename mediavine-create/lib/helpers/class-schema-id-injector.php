@@ -76,16 +76,6 @@ class Schema_Id_Injector {
 				return false;
 			}
 			
-			if ( $li_count === 0 ) {
-				self::log_dom_failure( 'no_list_items', $creation_id, 'DOM loaded successfully but found 0 list items' );
-				return false;
-			}
-			
-			if ( $li_count === 0 ) {
-				self::log_dom_failure( 'no_list_items', $creation_id, 'DOM loaded successfully but found 0 list items' );
-				return false;
-			}
-			
 			$counter = 1;
 			foreach ( $lis as $li ) {
 				// Only add ID if one doesn't already exist
