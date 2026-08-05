@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.6.0
+Stable tag: 2.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,15 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 2.6.1 =
+
+* SECURITY: Reviews can no longer be edited by anyone other than the reader who left them
+
+
+= NEXT_RELEASE =
+
+* SECURITY: Reviews can no longer be edited by anyone other than the reader who left them
 
 = 2.6.0 =
 

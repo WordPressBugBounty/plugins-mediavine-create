@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.6.0\n"
+"Project-Id-Version: Create 2.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-03T15:17:41+00:00\n"
+"POT-Creation-Date: 2026-08-04T18:56:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
@@ -468,7 +468,7 @@ msgstr ""
 #: lib/creations/class-creations-api.php:681
 #: lib/product-maps/class-products-map-api.php:289
 #: lib/products/class-products-api.php:921
-#: lib/reviews/class-reviews-api.php:887
+#: lib/reviews/class-reviews-api.php:893
 #: lib/supplies/class-supplies-api.php:110
 msgid "Entry Could Not Be Deleted"
 msgstr ""
@@ -1293,7 +1293,7 @@ msgstr ""
 #: lib/importers/class-mv-recipe-importer.php:1129
 #: lib/reviews/class-review-responses-api.php:209
 #: lib/reviews/class-reviews-api.php:337
-#: lib/reviews/class-reviews-api.php:466
+#: lib/reviews/class-reviews-api.php:472
 #: lib/settings/class-settings-api.php:40
 msgid "Unsafe Content Submission"
 msgstr ""
@@ -2013,7 +2013,7 @@ msgstr ""
 
 #: lib/reviews/class-review-responses-api.php:210
 #: lib/reviews/class-reviews-api.php:338
-#: lib/reviews/class-reviews-api.php:467
+#: lib/reviews/class-reviews-api.php:473
 msgid "Your submission includes unsafe characters"
 msgstr ""
 
@@ -2219,28 +2219,28 @@ msgstr ""
 msgid "You are submitting reviews too quickly. Please try again later."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:445
-#: lib/reviews/class-reviews-api.php:481
+#: lib/reviews/class-reviews-api.php:451
+#: lib/reviews/class-reviews-api.php:487
 msgid "You are not authorized to edit this review."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:491
+#: lib/reviews/class-reviews-api.php:497
 msgid "Editing reviews requires a Pro subscription"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:591
+#: lib/reviews/class-reviews-api.php:597
 msgid "You are not allowed to view all reviews."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:601
+#: lib/reviews/class-reviews-api.php:607
 msgid "This creation is not associated with a public post."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:872
+#: lib/reviews/class-reviews-api.php:878
 msgid "Review Not Found"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:887
+#: lib/reviews/class-reviews-api.php:893
 msgid "A conflict occurred and the single review could not be deleted"
 msgstr ""
 

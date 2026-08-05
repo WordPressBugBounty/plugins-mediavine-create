@@ -418,7 +418,13 @@ class Reviews_API extends Reviews {
 			return false;
 		}
 
-		return (int) $params['handshake'] === (int) $review->handshake;
+		// Compare as opaque strings. Casting to (int) collapses every non-numeric
+		// token to 0, so any garbage handshake would match a non-numeric stored one.
+		if ( ! is_scalar( $params['handshake'] ) ) {
+			return false;
+		}
+
+		return hash_equals( (string) $review->handshake, (string) $params['handshake'] );
 	}
 
 	/**
