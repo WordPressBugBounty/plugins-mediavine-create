@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -163,12 +163,20 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 
 == Changelog ==
 
+= 2.6.2 =
+
+* FIX: Fixes an issue that prevented card JavaScript from loading properly on some theme configurations, including not being able to rate cards
+* FIX: Long ingredient and material groups in the detail editor no longer get cut off by the next group, Collapse All now collapses groups as well as items, and collapsed rows sit cleanly inside their borders
+* FIX: Saving a card with Save & Insert no longer leaves the block showing "This block has encountered an error and cannot be previewed" in the editor, and posts already affected recover the next time you open them
+* FIX: Ratings left or edited by readers now save to the right card and the card's star average updates immediately instead of staying stuck
+* FIX: Reviews are now reachable on posts that don't have any comments yet, the in-card "leave a review" prompt reliably appears, and the review form's layout and submit button render correctly
+* FIX: Pages with more than one card no longer open a print tab for every card when you click Print, and Pinterest share links are no longer double-encoded
+* FIX: The editor no longer warns that "saving could overwrite the original card" when a host redirect is purely cosmetic, so the banner only appears when card data is actually damaged
+* FIX: Restoring a card from a saved revision now brings back its products, and restoring from missing or damaged saved data returns a clear message instead of a fatal error or a false success
+* ENHANCEMENT: The Create Studio connection now verifies incoming updates with site-specific signed requests that can't be replayed, recovers on its own when Studio rotates its signing key, and keeps site credentials out of diagnostic output
+
+
 = 2.6.1 =
-
-* SECURITY: Reviews can no longer be edited by anyone other than the reader who left them
-
-
-= NEXT_RELEASE =
 
 * SECURITY: Reviews can no longer be edited by anyone other than the reader who left them
 

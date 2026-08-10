@@ -1,0 +1,1 @@
+const d=a=>Array.prototype.forEach.call(a,t=>{t.hasAttribute("data-mvloaded")||(t.setAttribute("data-mvloaded",!0),t.addEventListener("click",e=>{e.preventDefault();const r=t.getAttribute("data-mv-print");window.open(r,"_blank")}))});export{d as default};

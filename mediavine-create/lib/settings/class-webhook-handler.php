@@ -23,9 +23,44 @@ class Webhook_Handler {
 	const PUBLIC_KEY_TRANSIENT = 'mv_create_studio_public_key';
 
 	/**
+	 * Transient key gating how often a signature failure may force a key re-fetch.
+	 */
+	const KEY_REFRESH_LOCK_TRANSIENT = 'mv_create_studio_key_refresh_lock';
+
+	/**
+	 * Minimum seconds between signature-failure-triggered key re-fetches.
+	 */
+	const KEY_REFRESH_COOLDOWN = 300;
+
+	/**
+	 * Transient key for backing off after a failed public-key fetch.
+	 */
+	const KEY_FETCH_BACKOFF_TRANSIENT = 'mv_create_studio_key_fetch_backoff';
+
+	/**
+	 * Seconds to skip public-key fetches after one fails.
+	 */
+	const KEY_FETCH_BACKOFF = 60;
+
+	/**
+	 * Option key for the bounded list of recently processed event IDs.
+	 */
+	const PROCESSED_EVENTS_OPTION = 'mv_create_webhook_processed_events';
+
+	/**
+	 * Maximum number of processed event IDs retained for idempotency.
+	 */
+	const MAX_PROCESSED_EVENTS = 500;
+
+	/**
 	 * Maximum age of a webhook timestamp before it's rejected (seconds).
 	 */
 	const MAX_TIMESTAMP_AGE = 300;
+
+	/**
+	 * Current signed envelope version.
+	 */
+	const ENVELOPE_VERSION = 1;
 
 	/**
 	 * Initialize the webhook handler by registering REST routes.
@@ -52,29 +87,35 @@ class Webhook_Handler {
 	/**
 	 * Handle an incoming webhook request.
 	 *
+	 * Supports the v1 signed envelope
+	 * `{version, event_id, site_id, issued_at, type, payload}` and the legacy
+	 * `{type, data}` body (replay window via unauthenticated X-Studio-Timestamp).
+	 *
 	 * @param \WP_REST_Request $request The incoming request.
 	 * @return \WP_REST_Response
 	 */
 	public static function handle_webhook( \WP_REST_Request $request ) {
 		$body      = $request->get_body();
 		$signature = $request->get_header( 'X-Studio-Signature' );
-		$timestamp = $request->get_header( 'X-Studio-Timestamp' );
 
-		// Validate required headers.
-		if ( empty( $signature ) || empty( $timestamp ) ) {
+		if ( empty( $signature ) ) {
 			return new \WP_REST_Response( [ 'error' => 'Missing signature or timestamp' ], 400 );
 		}
 
-		// Replay protection.
-		$now = time();
-		if ( abs( $now - intval( $timestamp ) ) > self::MAX_TIMESTAMP_AGE ) {
-			return new \WP_REST_Response( [ 'error' => 'Timestamp too old' ], 401 );
-		}
+		$decoded = json_decode( $body, true );
+		$is_v1   = is_array( $decoded ) && self::is_v1_envelope( $decoded );
 
-		// Fetch and verify with public key.
-		$public_key = self::get_public_key();
-		if ( ! $public_key ) {
-			return new \WP_REST_Response( [ 'error' => 'Unable to fetch public key' ], 500 );
+		// Legacy envelopes still rely on the (unauthenticated) timestamp header.
+		// Check it before crypto so missing-header clients get a clear 400.
+		if ( ! $is_v1 ) {
+			$timestamp = $request->get_header( 'X-Studio-Timestamp' );
+			if ( empty( $timestamp ) ) {
+				return new \WP_REST_Response( [ 'error' => 'Missing signature or timestamp' ], 400 );
+			}
+
+			if ( abs( time() - intval( $timestamp ) ) > self::MAX_TIMESTAMP_AGE ) {
+				return new \WP_REST_Response( [ 'error' => 'Timestamp too old' ], 401 );
+			}
 		}
 
 		$sig_decoded = base64_decode( $signature, true );
@@ -82,18 +123,195 @@ class Webhook_Handler {
 			return new \WP_REST_Response( [ 'error' => 'Invalid signature encoding' ], 401 );
 		}
 
-		$verified = openssl_verify( $body, $sig_decoded, $public_key, OPENSSL_ALGO_SHA256 );
-		if ( 1 !== $verified ) {
-			return new \WP_REST_Response( [ 'error' => 'Invalid signature' ], 401 );
+		$verified = self::verify_signature( $body, $sig_decoded );
+		if ( is_wp_error( $verified ) ) {
+			$status = 'unable_to_fetch_public_key' === $verified->get_error_code() ? 500 : 401;
+			return new \WP_REST_Response( [ 'error' => $verified->get_error_message() ], $status );
 		}
 
-		// Parse payload and dispatch.
-		$payload = json_decode( $body, true );
-		if ( ! is_array( $payload ) || empty( $payload['type'] ) ) {
+		if ( ! is_array( $decoded ) || empty( $decoded['type'] ) ) {
 			return new \WP_REST_Response( [ 'error' => 'Invalid payload' ], 400 );
 		}
 
-		return self::dispatch( $payload );
+		if ( $is_v1 ) {
+			return self::handle_v1_envelope( $decoded );
+		}
+
+		return self::dispatch( $decoded );
+	}
+
+	/**
+	 * Whether the decoded body is a v1 signed envelope.
+	 *
+	 * @param array $decoded Decoded JSON body.
+	 * @return bool
+	 */
+	private static function is_v1_envelope( array $decoded ) {
+		if ( isset( $decoded['version'] ) && (int) $decoded['version'] >= self::ENVELOPE_VERSION ) {
+			return true;
+		}
+
+		return isset( $decoded['event_id'], $decoded['site_id'], $decoded['issued_at'] );
+	}
+
+	/**
+	 * Validate and dispatch a v1 signed envelope.
+	 *
+	 * @param array $envelope Decoded v1 envelope.
+	 * @return \WP_REST_Response
+	 */
+	private static function handle_v1_envelope( array $envelope ) {
+		if ( empty( $envelope['event_id'] ) || ! isset( $envelope['site_id'] ) || empty( $envelope['issued_at'] ) ) {
+			return new \WP_REST_Response( [ 'error' => 'Invalid envelope' ], 400 );
+		}
+
+		if ( abs( time() - intval( $envelope['issued_at'] ) ) > self::MAX_TIMESTAMP_AGE ) {
+			return new \WP_REST_Response( [ 'error' => 'Timestamp too old' ], 401 );
+		}
+
+		// Only Studio can reach this point (the signature already verified), so
+		// logging here can't be spammed by anonymous traffic and a rejection is
+		// always worth a line: it means Studio and this site disagree about who
+		// this site is, and every webhook will keep failing until that's fixed.
+		$local_site_id = Create_Studio_Client::get_site_id();
+		if ( empty( $local_site_id ) ) {
+			// The site token is missing, cleared, or not a parseable JWT — the
+			// site can't prove its own identity, so the envelope is refused and
+			// Studio's queue will retry until the connection is repaired.
+			Help::log(
+				sprintf(
+					'Create Studio webhook rejected: local site ID is unresolvable (event_id=%s, envelope site_id=%s). The mv_create_api_token setting is missing or malformed — reconnect the site to Create Studio.',
+					isset( $envelope['event_id'] ) ? (string) $envelope['event_id'] : '(none)',
+					(string) $envelope['site_id']
+				)
+			);
+
+			return new \WP_REST_Response( [ 'error' => 'Site mismatch' ], 401 );
+		}
+
+		if ( (string) $envelope['site_id'] !== (string) $local_site_id ) {
+			Help::log(
+				sprintf(
+					'Create Studio webhook rejected: envelope addressed to site %s but this site is %s (event_id=%s).',
+					(string) $envelope['site_id'],
+					(string) $local_site_id,
+					isset( $envelope['event_id'] ) ? (string) $envelope['event_id'] : '(none)'
+				)
+			);
+
+			return new \WP_REST_Response( [ 'error' => 'Site mismatch' ], 401 );
+		}
+
+		$event_id = (string) $envelope['event_id'];
+		if ( self::has_processed_event( $event_id ) ) {
+			return new \WP_REST_Response(
+				[
+					'status'   => 'duplicate',
+					'event_id' => $event_id,
+				],
+				200
+			);
+		}
+
+		// Prefer `payload` (v1); fall back to legacy `data` when Studio dual-writes.
+		$inner = [];
+		if ( isset( $envelope['payload'] ) && is_array( $envelope['payload'] ) ) {
+			$inner = $envelope['payload'];
+		} elseif ( isset( $envelope['data'] ) && is_array( $envelope['data'] ) ) {
+			$inner = $envelope['data'];
+		}
+
+		$response = self::dispatch(
+			[
+				'type' => $envelope['type'],
+				'data' => $inner,
+			]
+		);
+
+		// Only record idempotency after a successful (2xx) dispatch so transient
+		// failures can be retried by Studio's queue.
+		if ( $response->get_status() >= 200 && $response->get_status() < 300 ) {
+			self::record_processed_event( $event_id );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Verify an RS256 signature, refreshing the cached public key once on failure.
+	 *
+	 * @param string $body        Raw request body.
+	 * @param string $sig_decoded Binary signature.
+	 * @return true|\WP_Error
+	 */
+	private static function verify_signature( $body, $sig_decoded ) {
+		$public_key = self::get_public_key();
+		if ( ! $public_key ) {
+			return new \WP_Error( 'unable_to_fetch_public_key', 'Unable to fetch public key' );
+		}
+
+		$verified = openssl_verify( $body, $sig_decoded, $public_key, OPENSSL_ALGO_SHA256 );
+		if ( 1 === $verified ) {
+			return true;
+		}
+
+		// Stale cached key after rotation: re-fetch once and re-verify.
+		//
+		// This endpoint is public and a bogus signature is indistinguishable from
+		// a rotation mismatch, so the re-fetch is rate limited — otherwise every
+		// garbage POST would tie up a PHP worker on a blocking outbound request.
+		if ( get_transient( self::KEY_REFRESH_LOCK_TRANSIENT ) ) {
+			return new \WP_Error( 'invalid_signature', 'Invalid signature' );
+		}
+		set_transient( self::KEY_REFRESH_LOCK_TRANSIENT, 1, self::KEY_REFRESH_COOLDOWN );
+
+		$public_key = self::get_public_key( true );
+		if ( $public_key ) {
+			$verified = openssl_verify( $body, $sig_decoded, $public_key, OPENSSL_ALGO_SHA256 );
+			if ( 1 === $verified ) {
+				// Rotation confirmed: let the next mismatch re-fetch immediately.
+				delete_transient( self::KEY_REFRESH_LOCK_TRANSIENT );
+				return true;
+			}
+		}
+
+		return new \WP_Error( 'invalid_signature', 'Invalid signature' );
+	}
+
+	/**
+	 * Whether an event_id was already processed successfully.
+	 *
+	 * @param string $event_id Event identifier.
+	 * @return bool
+	 */
+	private static function has_processed_event( $event_id ) {
+		$events = get_option( self::PROCESSED_EVENTS_OPTION, [] );
+		if ( ! is_array( $events ) ) {
+			return false;
+		}
+
+		return isset( $events[ $event_id ] );
+	}
+
+	/**
+	 * Record a successfully processed event_id in a bounded map.
+	 *
+	 * @param string $event_id Event identifier.
+	 */
+	private static function record_processed_event( $event_id ) {
+		$events = get_option( self::PROCESSED_EVENTS_OPTION, [] );
+		if ( ! is_array( $events ) ) {
+			$events = [];
+		}
+
+		$events[ $event_id ] = time();
+
+		if ( count( $events ) > self::MAX_PROCESSED_EVENTS ) {
+			asort( $events );
+			$events = array_slice( $events, -1 * self::MAX_PROCESSED_EVENTS, null, true );
+		}
+
+		update_option( self::PROCESSED_EVENTS_OPTION, $events, false );
 	}
 
 	/**
@@ -223,7 +441,8 @@ class Webhook_Handler {
 						'plugins'       => self::get_plugins_info(),
 						'theme'         => self::get_theme_info(),
 						'connection'    => self::get_connection_info(),
-						'settings'      => Settings::get_settings(),
+						// Never ship credential-class values to Studio over the webhook.
+						'settings'      => Sensitive_Settings::redact( Settings::get_settings(), false ),
 						'compatibility' => self::get_compatibility_info(),
 						'features'      => self::get_features_info(),
 					],
@@ -931,12 +1150,12 @@ class Webhook_Handler {
 		}
 
 		// Check if the script URL returns a 404 (only if mismatch detected).
+		// External URL — keep TLS verification enabled (unlike the localhost loopback above).
 		if ( $result['mismatch'] && $result['script_url'] ) {
 			$script_response = wp_remote_head(
 				$result['script_url'],
 				[
-					'timeout'    => 5,
-					'sslverify'  => false,
+					'timeout' => 5,
 				]
 			);
 
@@ -1112,12 +1331,23 @@ class Webhook_Handler {
 	/**
 	 * Fetch the Studio public key, using a cached transient.
 	 *
+	 * @param bool $force_refresh When true, bypass the cache and re-fetch. The
+	 *                           cached key is only replaced on a successful fetch,
+	 *                           so a failed refresh can't leave the site keyless.
 	 * @return string|false The PEM public key string, or false on failure.
 	 */
-	private static function get_public_key() {
-		$cached = get_transient( self::PUBLIC_KEY_TRANSIENT );
-		if ( ! empty( $cached ) ) {
-			return $cached;
+	private static function get_public_key( $force_refresh = false ) {
+		if ( ! $force_refresh ) {
+			$cached = get_transient( self::PUBLIC_KEY_TRANSIENT );
+			if ( ! empty( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		// Studio unreachable or serving a bad body: stop hammering it (and stop
+		// blocking PHP workers) until the backoff window expires.
+		if ( get_transient( self::KEY_FETCH_BACKOFF_TRANSIENT ) ) {
+			return false;
 		}
 
 		$url      = Plugin::$services_api_url . '/webhooks/public-key';
@@ -1129,16 +1359,19 @@ class Webhook_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			set_transient( self::KEY_FETCH_BACKOFF_TRANSIENT, 1, self::KEY_FETCH_BACKOFF );
 			return false;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $body['key'] ) ) {
+			set_transient( self::KEY_FETCH_BACKOFF_TRANSIENT, 1, self::KEY_FETCH_BACKOFF );
 			return false;
 		}
 
 		$key = $body['key'];
 		set_transient( self::PUBLIC_KEY_TRANSIENT, $key, DAY_IN_SECONDS );
+		delete_transient( self::KEY_FETCH_BACKOFF_TRANSIENT );
 
 		return $key;
 	}

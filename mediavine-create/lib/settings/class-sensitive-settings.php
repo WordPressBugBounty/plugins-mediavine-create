@@ -56,7 +56,10 @@ class Sensitive_Settings {
 		 */
 		return apply_filters(
 			'mv_create_admin_only_settings',
-			[ 'mv_create_creators_credential_secret' ]
+			[
+				'mv_create_creators_credential_secret',
+				'mv_create_creators_credential_id',
+			]
 		);
 	}
 

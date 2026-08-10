@@ -92,11 +92,16 @@ class Reviews extends Plugin {
 			$offset = $args['offset'];
 		}
 
+		// Pin order by id: MV_DBI defaults to `created DESC`, but reviews inserted
+		// in the same second share a datetime, so that sort is non-deterministic
+		// without a tiebreaker and makes offset pagination flaky.
 		$reviews = self::$models_v2->mv_reviews->find(
 			[
-				'limit'  => $limit,
-				'offset' => $offset,
-				'where'  => [
+				'limit'    => $limit,
+				'offset'   => $offset,
+				'order_by' => 'id',
+				'order'    => 'ASC',
+				'where'    => [
 					'creation' => $creation_id,
 				],
 			]

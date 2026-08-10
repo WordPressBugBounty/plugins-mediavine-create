@@ -499,12 +499,33 @@ class Creations_Views extends Creations {
 	 */
 	public function add_async_attribute( $tag, $handle ) {
 		$prefix = Plugin::PLUGIN_DOMAIN . '/client.js';
-		if ( substr($handle, 0, strlen($prefix)) === $prefix ) {
-			// Vite emits native ESM; modules are deferred by default. Keep async + noptimize.
-			$tag = str_replace( ' src', ' async type="module" data-noptimize src', $tag );
+		if ( substr($handle, 0, strlen($prefix)) !== $prefix ) {
+			return $tag;
 		}
 
-		return $tag;
+		// Vite ships ESM. Themes without html5 script support emit type="text/javascript" first;
+		// browsers honour that and treat the bundle as a classic script. Replace (don't append)
+		// type/async/data-noptimize on the src-bearing tag only.
+		//
+		// remove_attribute() before set_attribute() is deliberate: set_attribute() rewrites only
+		// the first occurrence and leaves any duplicate copies in place, while remove_attribute()
+		// clears every copy. Without the removal pass a tag that reached us already carrying two
+		// of the same attribute would keep the extra one.
+		$processor = new \WP_HTML_Tag_Processor( $tag );
+		while ( $processor->next_tag( 'script' ) ) {
+			if ( null === $processor->get_attribute( 'src' ) ) {
+				continue;
+			}
+			foreach ( [ 'type', 'async', 'data-noptimize' ] as $attribute ) {
+				$processor->remove_attribute( $attribute );
+			}
+			$processor->set_attribute( 'type', 'module' );
+			$processor->set_attribute( 'async', true );
+			$processor->set_attribute( 'data-noptimize', true );
+			break;
+		}
+
+		return $processor->get_updated_html();
 	}
 
 	public function register_scripts() {
