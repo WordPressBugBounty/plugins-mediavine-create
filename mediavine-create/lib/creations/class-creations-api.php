@@ -75,6 +75,30 @@ class Creations_API extends Creations {
 		return $data;
 	}
 
+	/**
+	 * Restores the fields the shared response preparer reshapes, so a write
+	 * returns the same creation a read would.
+	 *
+	 * API_Services::prepare_item_for_response() serves every Create API: it
+	 * converts date columns to unix timestamps and resolves `author` as a
+	 * category term id. Creations do neither — every GET returns the stored
+	 * datetime strings and the stored author name, and `author` here is free
+	 * text, so the term lookup blanks it out.
+	 *
+	 * @param array  $data     Prepared response data.
+	 * @param object $creation Creation row as stored.
+	 * @return array
+	 */
+	private static function match_read_shape( array $data, $creation ) {
+		foreach ( [ 'created', 'modified', 'author' ] as $key ) {
+			if ( isset( $creation->{$key} ) ) {
+				$data[ $key ] = $creation->{$key};
+			}
+		}
+
+		return $data;
+	}
+
 	public function create( \WP_REST_Request $request, \WP_REST_Response $response ) {
 		$params = $request->get_params();
 		$params = $this->sideload_external_thumbnails( $params );
@@ -92,6 +116,7 @@ class Creations_API extends Creations {
 			do_action( 'mv_post_create_' . $params->type . '_card', $creation );
 		}
 		$data     = self::$api_services->prepare_item_for_response( $creation, $request );
+		$data     = self::match_read_shape( $data, $creation );
 		$response = API_Services::set_response_data( $data, $response );
 		$response->set_status( 201 );
 
@@ -177,6 +202,7 @@ class Creations_API extends Creations {
 		unset( $updated->json_ld );
 
 		$data                  = self::$api_services->prepare_item_for_response( $updated, $request );
+		$data                  = self::match_read_shape( $data, $updated );
 		$data['custom_fields'] = json_decode($data['custom_fields'] ?: '{}');
 		$response              = API_Services::set_response_data( $data, $response );
 

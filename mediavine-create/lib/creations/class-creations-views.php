@@ -217,6 +217,17 @@ class Creations_Views extends Creations {
 	const ALLOWED_LIST_LAYOUTS = [ 'circles', 'grid', 'hero', 'numbered' ];
 
 	/**
+	 * Minimum contrast ratio against white for a derived star fill to be used.
+	 *
+	 * WCAG's 3:1 floor for non-text graphics would reject star colors that read
+	 * fine today (a #333 secondary yields a #999 fill at 2.85:1), so this only
+	 * catches fills that are genuinely washed out against the card background.
+	 *
+	 * @var float
+	 */
+	const MIN_STAR_CONTRAST = 2.0;
+
+	/**
 	 * Allowlist a social icon name before it is used in a view path.
 	 *
 	 * @param mixed $social_icon Candidate icon slug from settings/custom fields.
@@ -294,13 +305,29 @@ class Creations_Views extends Creations {
 	 * because the rule body is just custom-property declarations they can't
 	 * tie back to a "used" selector. Element style attributes are not
 	 * touched by those optimizers.
+	 *
+	 * @param bool $refresh Recompute instead of using the per-request cache, and
+	 *                      leave the cache untouched. Only needed by tests that
+	 *                      change the color settings mid-request.
 	 */
-	public static function get_card_inline_style() {
+	public static function get_card_inline_style( $refresh = false ) {
 		static $cached = null;
-		if ( null !== $cached ) {
-			return $cached;
-		}
 
+		if ( $refresh ) {
+			return self::build_card_inline_style();
+		}
+		if ( null === $cached ) {
+			$cached = self::build_card_inline_style();
+		}
+		return $cached;
+	}
+
+	/**
+	 * Derive the card's color custom properties from the current settings.
+	 *
+	 * @return string Inline style declarations, space separated.
+	 */
+	private static function build_card_inline_style() {
 		$color           = trim( (string) \Mediavine\Settings::get_setting( 'mv_create_color' ) );
 		$secondary_color = trim( (string) \Mediavine\Settings::get_setting( 'mv_create_secondary_color' ) );
 
@@ -340,11 +367,16 @@ class Creations_Views extends Creations {
 		if ( $has_secondary ) {
 			$properties[] = '--mv-create-secondary-base: ' . $secondary_color . ' !important;';
 
+			// The alt shade moves away from the base — darker for a light color,
+			// lighter for a dark one — and is always emitted. Widget CSS pairs it
+			// (as the active toggle's background) with --mv-create-secondary-text,
+			// so leaving it unset left that text sitting on the stylesheet's own
+			// dark fallback: black-on-#333 for a white secondary color.
 			$secondary_color_alt = Creations_Views_Colors::darken( $secondary_color, 20 );
 			if ( Creations_Views_Colors::is_dark( $secondary_color ) ) {
 				$secondary_color_alt = Creations_Views_Colors::lighten( $secondary_color, 20 );
-				$properties[]        = '--mv-create-secondary-alt: ' . $secondary_color_alt . ' !important;';
 			}
+			$properties[] = '--mv-create-secondary-alt: ' . $secondary_color_alt . ' !important;';
 
 			$secondary_color_hover = Creations_Views_Colors::darken( $secondary_color_alt, 20 );
 			if ( Creations_Views_Colors::is_dark( $secondary_color_alt ) ) {
@@ -354,12 +386,23 @@ class Creations_Views extends Creations {
 
 			$properties[] = '--mv-create-secondary-text: ' . Creations_Views_Colors::contrast_text( $secondary_color ) . ' !important;';
 			$properties[] = '--mv-create-secondary-base-trans: ' . Creations_Views_Colors::to_rgba( $secondary_color, 0.8 ) . ' !important;';
-			$properties[] = '--mv-star-fill: ' . Creations_Views_Colors::mix( $secondary_color, '#fff' ) . ' !important;';
-			$properties[] = '--mv-star-fill-hover: ' . $secondary_color . ' !important;';
+			// Stars sit on the card's white background, so a near-white fill is
+			// invisible. The default fill is the secondary color mixed halfway to
+			// white; when that washes out, fall back to the secondary color
+			// itself, and when even that is too pale, emit nothing so the theme's
+			// own star color applies.
+			$star_fill  = Creations_Views_Colors::mix( $secondary_color, '#fff' );
+			$star_hover = $secondary_color;
+			if ( Creations_Views_Colors::contrast_ratio( $star_hover, '#ffffff' ) >= self::MIN_STAR_CONTRAST ) {
+				if ( Creations_Views_Colors::contrast_ratio( $star_fill, '#ffffff' ) < self::MIN_STAR_CONTRAST ) {
+					$star_fill = $star_hover;
+				}
+				$properties[] = '--mv-star-fill: ' . $star_fill . ' !important;';
+				$properties[] = '--mv-star-fill-hover: ' . $star_hover . ' !important;';
+			}
 		}
 
-		$cached = implode( ' ', $properties );
-		return $cached;
+		return implode( ' ', $properties );
 	}
 
 	/**
@@ -1207,6 +1250,21 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Class suffix marking an image container that has no image to hold.
+	 *
+	 * Layouts that overlay the item title on the image (hero) position the text
+	 * absolutely inside the container. With no image the container collapses to
+	 * zero height and the overlaid text lands on top of whatever precedes it, so
+	 * the empty case gets its own class to opt out of the overlay.
+	 *
+	 * @param string $img_html Image markup that will be rendered in the container.
+	 * @return string Leading-space-prefixed class name, or an empty string.
+	 */
+	public static function empty_img_container_class( $img_html ) {
+		return '' === trim( (string) $img_html ) ? ' mv-list-img-container-empty' : '';
+	}
+
+	/**
 	 * Renders the section-divider list item markup shared by every list layout.
 	 *
 	 * Emits the same bytes as the inline template block it replaced: each markup
@@ -1222,7 +1280,7 @@ class Creations_Views extends Creations {
 	public static function render_list_divider( $item, $allowed_html, $indent = "\t\t\t" ) {
 		echo esc_html( $indent ) . '<div id="create-list-item-' . esc_attr( $item['id'] ) . '" class="mv-list-text" data-mv-create-list-content-type="divider">' . "\n";
 		echo esc_html( $indent ) . "\t" . '<h2 class="mv-list-single-title">' . esc_html( $item['title'] ) . '</h2>' . "\n";
-		echo esc_html( $indent ) . "\t" . '<div class="mv-list-single-description">' . wp_kses( wpautop( $item['description'] ), $allowed_html ) . '</div>' . "\n";
+		echo esc_html( $indent ) . "\t" . '<div class="mv-list-single-description">' . wp_kses( wpautop( $item['description'] ?? '' ), $allowed_html ) . '</div>' . "\n";
 		echo esc_html( $indent ) . '</div>' . "\n";
 		echo esc_html( $indent );
 	}

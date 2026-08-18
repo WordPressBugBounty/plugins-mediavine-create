@@ -48,7 +48,7 @@
 						</div>
 					<?php } ?>
 					<h2 class="mv-list-single-title"><?php echo esc_html( $item['title'] ); ?></h2>
-					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
+					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ?? '' ), $args['allowed_html'] ); ?></div>
 				</div>
 				<?php
 			} else { // Link list item (external, post, page, card, product)
@@ -89,7 +89,7 @@
 							<?php echo esc_html( $item['thumbnail_credit'] ); ?>
 						</div>
 					<?php } ?>
-					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
+					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ?? '' ), $args['allowed_html'] ); ?></div>
 					<div>
 						<button
 							class="mv-list-link mv-to-btn"

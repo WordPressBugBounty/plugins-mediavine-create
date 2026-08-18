@@ -636,11 +636,19 @@ class Reviews_API extends Reviews {
 			}
 		}
 
-		// Filter by has_content (boolean: true = has title or content, false = rating only)
-		// Applied post-query because it checks two columns with OR logic.
-		$has_content_filter = null;
+		// Filter by has_content (boolean: true = has title or content, false = rating only).
+		// Pushed to the DB so it applies before LIMIT/OFFSET — filtering post-query would
+		// only filter the current page and make pagination + X-Total-Items wrong.
+		// The OR across two columns is expressed as a single length expression.
 		if ( isset( $params['has_content'] ) ) {
 			$has_content_filter = filter_var( $params['has_content'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+			if ( null !== $has_content_filter ) {
+				$query_args['conditions'][] = [
+					"CHAR_LENGTH(CONCAT(COALESCE(review_title, ''), COALESCE(review_content, '')))",
+					$has_content_filter ? '>' : '=',
+					0,
+				];
+			}
 		}
 
 		// Rating range filters — pushed to DB via conditions.
@@ -694,26 +702,23 @@ class Reviews_API extends Reviews {
 		$order_by = isset( $params['order_by'] ) && in_array( $params['order_by'], $allowed_order_by, true )
 			? $params['order_by']
 			: 'modified';
-		$query_args['order_by'] = $order_by;
 
 		$allowed_order = [ 'ASC', 'DESC' ];
 		$order = isset( $params['order'] ) && in_array( strtoupper( $params['order'] ), $allowed_order, true )
 			? strtoupper( $params['order'] )
 			: 'DESC';
-		$query_args['order'] = $order;
+
+		// Break ties on `id` so limit/offset paging is stable. None of the
+		// sortable columns is unique — `rating` has five values and
+		// created/modified are second-granularity — so without a tiebreaker MySQL
+		// may order tied rows differently per query and the same review can show
+		// up on two pages (or neither) while paging. MV_DBI appends `$order`
+		// after the whole expression, so the trailing `id` is left bare and picks
+		// up that direction: `ORDER BY modified DESC, id DESC`.
+		$query_args['order_by'] = $order_by . ' ' . $order . ', id';
+		$query_args['order']    = $order;
 
 		$reviews = $this->Reviews->find( $query_args, $search );
-
-		// Apply has_content filter post-query (OR across two columns)
-		if ( is_array( $reviews ) && null !== $has_content_filter ) {
-			$reviews = array_filter( $reviews, function( $review ) use ( $has_content_filter ) {
-				$title   = isset( $review->review_title ) ? $review->review_title : '';
-				$content = isset( $review->review_content ) ? $review->review_content : '';
-				$has_content = ! empty( $title ) || ! empty( $content );
-				return $has_content_filter ? $has_content : ! $has_content;
-			} );
-			$reviews = array_values( $reviews ); // Re-index array
-		}
 
 		// Suggested featured filter: optimal reviews for featuring (140-300 chars, highest rated, with content)
 		// Falls back to any review with content if no optimal matches

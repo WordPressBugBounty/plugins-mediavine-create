@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.6.2\n"
+"Project-Id-Version: Create 2.6.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-10T20:30:18+00:00\n"
+"POT-Creation-Date: 2026-08-18T20:49:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
@@ -413,7 +413,7 @@ msgid "Republish requires an explicit confirm parameter."
 msgstr ""
 
 #: lib/class-restore.php:39
-#: lib/creations/class-creations-api.php:639
+#: lib/creations/class-creations-api.php:665
 msgid "The Create Card has not been published"
 msgstr ""
 
@@ -445,48 +445,48 @@ msgstr ""
 msgid "Missing required field: [type]"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:88
+#: lib/creations/class-creations-api.php:112
 #: lib/supplies/class-supplies-api.php:31
 msgid "Entry Not Created"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:88
+#: lib/creations/class-creations-api.php:112
 msgid "A conflict occurred and the Creation could not be created"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:168
+#: lib/creations/class-creations-api.php:193
 msgid "Entry Not Updated"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:168
+#: lib/creations/class-creations-api.php:193
 msgid "A conflict occurred and the Creation could not be updated"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:575
-#: lib/creations/class-creations-api.php:584
-#: lib/creations/class-creations-api.php:635
-#: lib/creations/class-creations-api.php:654
+#: lib/creations/class-creations-api.php:601
+#: lib/creations/class-creations-api.php:610
 #: lib/creations/class-creations-api.php:661
+#: lib/creations/class-creations-api.php:680
+#: lib/creations/class-creations-api.php:687
 msgid "The Create Card could not be found"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:665
+#: lib/creations/class-creations-api.php:691
 msgid "The Create Card has no JSON-LD"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:681
+#: lib/creations/class-creations-api.php:707
 #: lib/product-maps/class-products-map-api.php:289
 #: lib/products/class-products-api.php:921
-#: lib/reviews/class-reviews-api.php:893
+#: lib/reviews/class-reviews-api.php:898
 #: lib/supplies/class-supplies-api.php:110
 msgid "Entry Could Not Be Deleted"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:681
+#: lib/creations/class-creations-api.php:707
 msgid "A conflict occurred and the Creation could not be deleted"
 msgstr ""
 
-#: lib/creations/class-creations-api.php:712
+#: lib/creations/class-creations-api.php:738
 #: lib/unit-conversion/class-unit-conversion.php:201
 msgid "Creation not found"
 msgstr ""
@@ -513,13 +513,13 @@ msgstr ""
 
 #. translators: %s: list item title
 #: lib/creations/class-creations-views-list-item-preparer.php:110
-#: lib/creations/class-creations-views.php:1919
+#: lib/creations/class-creations-views.php:1977
 #, php-format
 msgid "Image for %s"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:179
-#: lib/creations/class-creations-views.php:1463
+#: lib/creations/class-creations-views.php:1521
 #: lib/creations/class-creations.php:730
 #: lib/importers/sources/class-import-getmecooking.php:272
 #: lib/importers/sources/class-import-purr.php:159
@@ -532,7 +532,7 @@ msgid "Active Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:191
-#: lib/creations/class-creations-views.php:1465
+#: lib/creations/class-creations-views.php:1523
 #: lib/creations/class-creations.php:732
 #: lib/importers/class-mv-recipe-importer.php:962
 #: lib/importers/sources/class-import-purr.php:160
@@ -540,7 +540,7 @@ msgid "Additional Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:197
-#: lib/creations/class-creations-views.php:1485
+#: lib/creations/class-creations-views.php:1543
 msgid "Total Time"
 msgstr ""
 
@@ -563,19 +563,19 @@ msgid "Category"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:209
-#: lib/creations/class-creations-views.php:900
+#: lib/creations/class-creations-views.php:943
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:213
-#: lib/creations/class-creations-views.php:1366
+#: lib/creations/class-creations-views.php:1424
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:218
-#: lib/creations/class-creations-views.php:1369
+#: lib/creations/class-creations-views.php:1427
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
@@ -585,7 +585,7 @@ msgid "Cost"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:224
-#: lib/creations/class-creations-views.php:1493
+#: lib/creations/class-creations-views.php:1551
 msgid "Difficulty"
 msgstr ""
 
@@ -630,102 +630,102 @@ msgstr ""
 msgid "No Ratings"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:267
+#: lib/creations/class-creations-views.php:278
 msgid "Facebook Page:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:271
+#: lib/creations/class-creations-views.php:282
 msgid "Instagram:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:275
+#: lib/creations/class-creations-views.php:286
 msgid "Pinterest Profile:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:905
+#: lib/creations/class-creations-views.php:948
 #: lib/i18n/class-translation.php:60
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:910
+#: lib/creations/class-creations-views.php:953
 #: lib/i18n/class-translation.php:61
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:915
+#: lib/creations/class-creations-views.php:958
 #: lib/i18n/class-translation.php:62
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:920
+#: lib/creations/class-creations-views.php:963
 #: lib/i18n/class-translation.php:63
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:925
+#: lib/creations/class-creations-views.php:968
 #: lib/i18n/class-translation.php:64
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:930
+#: lib/creations/class-creations-views.php:973
 #: lib/i18n/class-translation.php:65
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:935
+#: lib/creations/class-creations-views.php:978
 #: lib/i18n/class-translation.php:66
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:940
+#: lib/creations/class-creations-views.php:983
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:945
+#: lib/creations/class-creations-views.php:988
 #: lib/i18n/class-translation.php:68
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:950
+#: lib/creations/class-creations-views.php:993
 #: lib/i18n/class-translation.php:69
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:955
+#: lib/creations/class-creations-views.php:998
 #: lib/i18n/class-translation.php:70
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:960
+#: lib/creations/class-creations-views.php:1003
 #: lib/i18n/class-translation.php:71
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1077
+#: lib/creations/class-creations-views.php:1120
 msgid "View Product"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1081
+#: lib/creations/class-creations-views.php:1124
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1085
+#: lib/creations/class-creations-views.php:1128
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1093
+#: lib/creations/class-creations-views.php:1136
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1364
+#: lib/creations/class-creations-views.php:1422
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1464
+#: lib/creations/class-creations-views.php:1522
 #: lib/creations/class-creations.php:737
-#: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:699
+#: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:714
 #: lib/importers/sources/class-import-cookbook.php:189
 #: lib/importers/sources/class-import-getmecooking.php:279
 #: lib/importers/sources/class-import-meal-planner.php:243
@@ -742,103 +742,103 @@ msgstr ""
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1497
+#: lib/creations/class-creations-views.php:1555
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1544
+#: lib/creations/class-creations-views.php:1602
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1545
+#: lib/creations/class-creations-views.php:1603
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1548
+#: lib/creations/class-creations-views.php:1606
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1549
+#: lib/creations/class-creations-views.php:1607
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1552
+#: lib/creations/class-creations-views.php:1610
 msgid "day"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1553
+#: lib/creations/class-creations-views.php:1611
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1556
+#: lib/creations/class-creations-views.php:1614
 #: lib/products/class-amazon-creators.php:318
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1557
+#: lib/creations/class-creations-views.php:1615
 #: lib/products/class-amazon-creators.php:319
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1560
+#: lib/creations/class-creations-views.php:1618
 #: lib/products/class-amazon-creators.php:323
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1561
+#: lib/creations/class-creations-views.php:1619
 #: lib/products/class-amazon-creators.php:324
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1564
+#: lib/creations/class-creations-views.php:1622
 #: lib/products/class-amazon-creators.php:334
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1565
+#: lib/creations/class-creations-views.php:1623
 #: lib/products/class-amazon-creators.php:335
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1783
-#: lib/creations/class-creations-views.php:1789
+#: lib/creations/class-creations-views.php:1841
+#: lib/creations/class-creations-views.php:1847
 msgid "No Card with ID found"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2022
+#: lib/creations/class-creations-views.php:2080
 msgid "You do not have permission to do this."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2030
+#: lib/creations/class-creations-views.php:2088
 msgid "Invalid theme."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2034
+#: lib/creations/class-creations-views.php:2092
 msgid "This theme requires a Pro subscription."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2110
+#: lib/creations/class-creations-views.php:2168
 msgid "Previewing theme"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2116
+#: lib/creations/class-creations-views.php:2174
 msgid "Premium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2121
+#: lib/creations/class-creations-views.php:2179
 msgid "Preview"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2143
+#: lib/creations/class-creations-views.php:2201
 #: lib/i18n/class-translation.php:78
 msgid "Cancel"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2147
+#: lib/creations/class-creations-views.php:2205
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2152
+#: lib/creations/class-creations-views.php:2210
 msgid "Apply Theme"
 msgstr ""
 
@@ -1300,7 +1300,7 @@ msgid "Inactive Time"
 msgstr ""
 
 #: lib/importers/class-mv-recipe-importer.php:1129
-#: lib/reviews/class-review-responses-api.php:209
+#: lib/reviews/class-review-responses-api.php:211
 #: lib/reviews/class-reviews-api.php:337
 #: lib/reviews/class-reviews-api.php:472
 #: lib/settings/class-settings-api.php:40
@@ -1915,29 +1915,29 @@ msgstr ""
 msgid "A conflict occurred and the product could not be deleted"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:35
+#: lib/relations/class-relations-api.php:57
 msgid "Unsafe Data"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:206
+#: lib/relations/class-relations-api.php:230
 #: lib/supplies/class-supplies-api.php:63
 msgid "No Entries Found"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:206
+#: lib/relations/class-relations-api.php:230
 msgid "No relations were found for the given create card"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:581
+#: lib/relations/class-relations-api.php:605
 msgid "Product list items require Mediavine Create Pro"
 msgstr ""
 
-#: lib/relations/class-relations-api.php:590
+#: lib/relations/class-relations-api.php:614
 msgid "Product ID is required for product list items"
 msgstr ""
 
 #. translators: %d: product ID
-#: lib/relations/class-relations-api.php:603
+#: lib/relations/class-relations-api.php:627
 #, php-format
 msgid "Product with ID %d not found"
 msgstr ""
@@ -2016,54 +2016,54 @@ msgstr ""
 msgid "This review is not associated with a public post."
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:196
+#: lib/reviews/class-review-responses-api.php:198
 msgid "Responding to reviews requires a Pro subscription"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:210
+#: lib/reviews/class-review-responses-api.php:212
 #: lib/reviews/class-reviews-api.php:338
 #: lib/reviews/class-reviews-api.php:473
 msgid "Your submission includes unsafe characters"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:237
+#: lib/reviews/class-review-responses-api.php:239
 #: lib/reviews/class-reviews-api.php:374
 msgid "Rate Limit Exceeded"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:238
+#: lib/reviews/class-review-responses-api.php:240
 msgid "You are submitting responses too quickly. Please wait before trying again."
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:253
+#: lib/reviews/class-review-responses-api.php:255
 msgid "Response Creation Failed"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:254
+#: lib/reviews/class-review-responses-api.php:256
 msgid "Unable to create response"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:272
+#: lib/reviews/class-review-responses-api.php:274
 msgid "You are not authorized to edit this response."
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:294
+#: lib/reviews/class-review-responses-api.php:296
 msgid "Response Update Failed"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:295
+#: lib/reviews/class-review-responses-api.php:297
 msgid "Unable to update response"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:313
+#: lib/reviews/class-review-responses-api.php:315
 msgid "You are not authorized to delete this response."
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:326
+#: lib/reviews/class-review-responses-api.php:328
 msgid "Response Could Not Be Deleted"
 msgstr ""
 
-#: lib/reviews/class-review-responses-api.php:327
+#: lib/reviews/class-review-responses-api.php:329
 msgid "A conflict occurred and the response could not be deleted"
 msgstr ""
 
@@ -2245,11 +2245,11 @@ msgstr ""
 msgid "This creation is not associated with a public post."
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:878
+#: lib/reviews/class-reviews-api.php:883
 msgid "Review Not Found"
 msgstr ""
 
-#: lib/reviews/class-reviews-api.php:893
+#: lib/reviews/class-reviews-api.php:898
 msgid "A conflict occurred and the single review could not be deleted"
 msgstr ""
 

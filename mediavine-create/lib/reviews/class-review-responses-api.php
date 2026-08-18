@@ -133,7 +133,9 @@ class Review_Responses_API extends Review_Responses {
 				'review_id' => $review_id,
 				'status'    => 'approved',
 			],
-			'order_by' => 'created',
+			// `id` breaks ties on the second-granularity `created` column so
+			// limit/offset paging stays stable across queries (see CRE-290).
+			'order_by' => 'created ASC, id',
 			'order'    => 'ASC',
 		];
 

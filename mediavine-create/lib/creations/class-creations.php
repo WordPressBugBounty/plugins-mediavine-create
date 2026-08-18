@@ -870,6 +870,21 @@ class Creations extends Plugin {
 	function render_view( \WP_REST_Request $request ) {
 		Creations_Views::$has_card = true;
 		header('Content-Type: text/html; charset=' . get_option('blog_charset'));
+
+		/*
+		 * WordPress 7.1 sends `Document-Isolation-Policy: isolate-and-credentialless`
+		 * on block-editor screens (see wp_set_up_cross_origin_isolation()), putting
+		 * the editor in its own agent cluster. A framed document that does not send
+		 * the same header lands in a different cluster, so the editor's attempt to
+		 * reach this preview's contentDocument throws a SecurityError despite the
+		 * origins matching, and the preview pane stays blank. The embedding page
+		 * appends `isolated=1` when it is itself isolated, so we only match when
+		 * asked — sending it unconditionally would break the reverse case, where a
+		 * non-isolated screen (the standalone card editor) embeds this preview.
+		 */
+		if ( $request->get_param( 'isolated' ) ) {
+			header( 'Document-Isolation-Policy: isolate-and-credentialless' );
+		}
 ?>
 		<html>
 

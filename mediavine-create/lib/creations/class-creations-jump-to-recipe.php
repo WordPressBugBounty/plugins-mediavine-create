@@ -546,6 +546,11 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 
 		$output = $this->build_screen_reader_jtr_link( $content );
 
+		// The builder returns null when there's no card to jump to.
+		if ( empty( $output ) ) {
+			return false;
+		}
+
 		$allowed_tags = [
 			'a'      => [
 				'class' => true,

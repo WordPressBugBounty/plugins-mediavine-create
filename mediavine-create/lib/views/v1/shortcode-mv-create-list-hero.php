@@ -12,12 +12,11 @@
 		if ( \Mediavine\Create\Creations_Views::is_list_item_divider( $item ) ) {
 			\Mediavine\Create\Creations_Views::render_list_divider( $item, $args['allowed_html'] );
 		} elseif ( 'text' === $item['content_type'] ) {
+			$img_html = ! empty( $item['thumbnail_id'] ) ? \Mediavine\Create\Creations_Views::img( $item ) : '';
 			?>
 			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="mv-list-text mv-list-single" data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>">
-				<div class="mv-list-img-container">
-					<?php if ( ! empty( $item['thumbnail_id'] ) ) { ?>
-						<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
-					<?php } ?>
+				<div class="mv-list-img-container<?php echo esc_attr( \Mediavine\Create\Creations_Views::empty_img_container_class( $img_html ) ); ?>">
+					<?php echo wp_kses_post( $img_html ); ?>
 					<div class="mv-list-img-text">
 						<h2 class="mv-list-single-title">
 							<span><?php echo esc_html( $item['title'] ); ?></span>
@@ -25,7 +24,7 @@
 					</div>
 				</div>
 				<div class="mv-list-item-container">
-					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
+					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ?? '' ), $args['allowed_html'] ); ?></div>
 				</div>
 			</div>
 
@@ -36,16 +35,17 @@
 			$target_blank_boolean = $link_context['target_blank_boolean'];
 			$item_classes         = $link_context['item_classes'];
 			$product_data_attr    = $link_context['product_data_attr'];
+			$img_html             = \Mediavine\Create\Creations_Views::img( $item );
 			?>
 
 			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="<?php echo esc_attr( $item_classes ); ?>" data-mv-create-link-target="<?php echo esc_attr( $target_blank_boolean ); ?>" data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>" data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>" <?php echo wp_kses( $product_data_attr, [] ); ?>>
-				<div class="mv-list-img-container">
+				<div class="mv-list-img-container<?php echo esc_attr( \Mediavine\Create\Creations_Views::empty_img_container_class( $img_html ) ); ?>">
 					<?php
 					$pinterest_args = \Mediavine\Create\Creations_Views::build_pinterest_args( $item, $args );
 					self::the_view( 'shortcode-mv-create-pin-button', $pinterest_args );
 					?>
 
-						<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
+						<?php echo wp_kses_post( $img_html ); ?>
 						<div class="mv-list-img-text">
 							<div data-derive-font-from=".mv-list-single-title">
 								<?php echo wp_kses_post( $item['extra'] ); ?>
@@ -71,7 +71,7 @@
 						</div>
 				</div>
 				<div class="mv-list-item-container">
-					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
+					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ?? '' ), $args['allowed_html'] ); ?></div>
 					<button
 						class="mv-list-link mv-to-btn"
 						data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"

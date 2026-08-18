@@ -14,6 +14,21 @@ class EasyRecipeDocument extends EasyRecipeDOMDocument {
 	public $isEasyRecipe  = false;
 	public $recipeVersion = 0;
 	public $isFormatted;
+
+	/*
+	 * extractData() writes recipe data onto the $data object it is handed, which
+	 * is this document itself when the importer calls it. Declared here so PHP
+	 * 8.2+ doesn't emit dynamic property deprecations on every import.
+	 */
+
+	/** @var int Index of the recipe within a multi-recipe post. */
+	public $recipeIX;
+
+	/** @var string Recipe tag/type as published by EasyRecipe. */
+	public $type;
+
+	/** @var bool Whether the recipe has at least one ingredients list. */
+	public $hasIngredients;
 	private $easyrecipes     = array();
 	private $easyrecipesHTML = array();
 	private $allowed_tags    = '<strong><em><a><br>';

@@ -3,9 +3,9 @@ Contributors: mischiefmarmot
 Donate link: https://create.studio
 Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -163,17 +163,26 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 
 == Changelog ==
 
+= 2.6.3 =
+
+* FIX: Cards using the Editorial style with a very light secondary color no longer have light-on-white visibility issues
+* FIX: Custom post types enabled under Settings → Card Types are searchable again when adding items to a list
+* FIX: Filtering and paginating reviews now behaves more smoothly
+* FIX: Hero-layout list items without an image no longer overlap the item above them
+* FIX: Clears potential PHP notices on newer PHP versions
+* ENHANCEMENT: Tested and confirmed compatible with WordPress 7.1
+
+
 = 2.6.2 =
 
 * FIX: Fixes an issue that prevented card JavaScript from loading properly on some theme configurations, including not being able to rate cards
-* FIX: Long ingredient and material groups in the detail editor no longer get cut off by the next group, Collapse All now collapses groups as well as items, and collapsed rows sit cleanly inside their borders
-* FIX: Saving a card with Save & Insert no longer leaves the block showing "This block has encountered an error and cannot be previewed" in the editor, and posts already affected recover the next time you open them
-* FIX: Ratings left or edited by readers now save to the right card and the card's star average updates immediately instead of staying stuck
-* FIX: Reviews are now reachable on posts that don't have any comments yet, the in-card "leave a review" prompt reliably appears, and the review form's layout and submit button render correctly
-* FIX: Pages with more than one card no longer open a print tab for every card when you click Print, and Pinterest share links are no longer double-encoded
-* FIX: The editor no longer warns that "saving could overwrite the original card" when a host redirect is purely cosmetic, so the banner only appears when card data is actually damaged
-* FIX: Restoring a card from a saved revision now brings back its products, and restoring from missing or damaged saved data returns a clear message instead of a fatal error or a false success
-* ENHANCEMENT: The Create Studio connection now verifies incoming updates with site-specific signed requests that can't be replayed, recovers on its own when Studio rotates its signing key, and keeps site credentials out of diagnostic output
+* FIX: Long ingredient and material groups in the detail editor no longer get cut off by the next group
+* FIX: Adding a card to a post with Save & Insert no longer leaves the block showing "This block has encountered an error and cannot be previewed" in the editor, and posts already affected recover the next time you open them
+* FIX: Cards' star averages update immediately after leaving a review instead of needing a page refresh
+* FIX: Reviews are now reachable on posts that don't have any comments yet
+* FIX: Pages with more than one card no longer open a print tab for every card when you click Print
+* FIX: The editor no longer warns that "saving could overwrite the original card" unless card data is actually damaged
+* SECURITY: Strengthens Create Studio's encrypted connection
 
 
 = 2.6.1 =

@@ -21,6 +21,28 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 	class Relations_API extends Creations {
 
 		/**
+		 * Custom post types the site has opted into for list items.
+		 *
+		 * Stale slugs (from a CPT that has since been unregistered) are dropped so
+		 * the search never queries a post type that no longer exists.
+		 *
+		 * @return string[]
+		 */
+		private static function get_enabled_custom_post_types() {
+			$enabled = json_decode( Settings::get_setting( 'mv_create_allowed_cpt_types' ) ?: '[]', true );
+
+			if ( ! is_array( $enabled ) ) {
+				return [];
+			}
+
+			$registered = get_post_types( [ 'public' => true ] );
+
+			return array_values(
+				array_diff( array_intersect( $enabled, $registered ), [ 'post', 'page' ] )
+			);
+		}
+
+		/**
 		 * Search for related content. Adds internal or external links to a List card
 		 *
 		 * @param \WP_REST_Request  $request
@@ -46,7 +68,8 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			// Parse types filter - separate card types from post types and product
 			$requested_types = isset( $params['types'] ) && is_array( $params['types'] ) ? $params['types'] : [];
 			$card_types      = [ 'recipe', 'diy', 'list' ];
-			$post_types_list = [ 'post', 'page' ];
+			$enabled_cpts    = self::get_enabled_custom_post_types();
+			$post_types_list = array_values( array_unique( array_merge( [ 'post', 'page' ], $enabled_cpts ) ) );
 
 			// Determine which card types to include
 			$filtered_card_types = empty( $requested_types )
@@ -54,9 +77,18 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				: array_intersect( $requested_types, $card_types );
 
 			// Determine which post types to include
-			$filtered_post_types = empty( $requested_types )
-				? $post_types_list
-				: array_intersect( $requested_types, $post_types_list );
+			if ( empty( $requested_types ) ) {
+				$filtered_post_types = $post_types_list;
+			} else {
+				$filtered_post_types = array_intersect( $post_types_list, $requested_types );
+
+				// The list editor has no per-CPT filter, so post types enabled in
+				// settings ride along with the "Posts" filter.
+				if ( in_array( 'post', $requested_types, true ) ) {
+					$filtered_post_types = array_merge( $filtered_post_types, $enabled_cpts );
+				}
+			}
+			$filtered_post_types = array_values( array_unique( $filtered_post_types ) );
 
 			// Determine if products should be included
 			$include_products = empty( $requested_types ) || in_array( 'product', $requested_types, true );
@@ -92,15 +124,7 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			// Only search posts if post types are requested
 			$results = [];
 			if ( ! empty( $filtered_post_types ) ) {
-				$allowed_post_types = json_decode(Settings::get_setting('mv_create_allowed_cpt_types') ?: '[]', true);
-				if ( empty( $allowed_post_types ) ) {
-					$allowed_post_types = [ 'post', 'page' ];
-				} else {
-					$allowed_post_types = array_merge( [ 'post', 'page' ], $allowed_post_types );
-				}
-
-				// Filter allowed_post_types to only include requested types
-				$allowed_post_types        = array_map( 'esc_attr', array_intersect( $allowed_post_types, $filtered_post_types ) );
+				$allowed_post_types        = $filtered_post_types;
 				$allowed_post_types_string = implode( ', ', array_fill( 0, count( $allowed_post_types ), '%s' ) );
 
 				if ( ! empty( $allowed_post_types ) ) {
