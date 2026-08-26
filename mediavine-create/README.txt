@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.6.3
+Stable tag: 2.6.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,12 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 2.6.4 =
+
+* FIX: The hands-free toggle is back on recipe cards for sites that don't have Interactive Mode on
+* FIX: The image insert menu in the Instructions editor now opens in front of the card editor when you edit a card from the post editor
+
 
 = 2.6.3 =
 

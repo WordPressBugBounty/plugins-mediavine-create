@@ -251,7 +251,6 @@ class GateKeeper {
 	public static function init() {
 		add_action( 'admin_init', [ __CLASS__, 'maybe_sync_subscription' ] );
 		add_action( 'mv_create_sync_subscription', [ __CLASS__, 'sync_subscription' ] );
-		add_action( 'mv_create_setting_updated_mv_create_enable_interactive_mode', [ __CLASS__, 'maybe_disable_hands_free_mode' ] );
 
 		foreach ( self::interactive_mode_studio_keys() as $setting_slug => $studio_key ) {
 			add_action( 'mv_create_setting_updated_' . $setting_slug, [ __CLASS__, 'sync_setting_to_studio' ], 10, 1 );
@@ -324,15 +323,23 @@ class GateKeeper {
 	}
 
 	/**
-	 * Disable hands-free mode when interactive mode is enabled, since they conflict.
+	 * Whether interactive mode should actually render for readers.
 	 *
-	 * @param object $setting The setting object with slug and value.
-	 * @return void
+	 * The setting seeds to enabled, so a free site carries a truthy value it never
+	 * chose — check access, never the setting alone.
+	 *
+	 * Free+ must not be able to switch interactive mode off, but that rule lives in
+	 * enforce_free_plus_interactive_mode() on release/new-tiers; don't add a second
+	 * copy here.
+	 *
+	 * @return bool
 	 */
-	public static function maybe_disable_hands_free_mode( $setting ) {
-		if ( ! empty( $setting->value ) ) {
-			Settings::update_setting( 'mv_create_enable_hands_free_mode', false );
+	public static function is_interactive_mode_enabled() {
+		if ( ! self::can_access( self::FEATURE_INTERACTIVE_MODE ) ) {
+			return false;
 		}
+
+		return (bool) Settings::get_setting( 'mv_create_enable_interactive_mode', false );
 	}
 
 	/**

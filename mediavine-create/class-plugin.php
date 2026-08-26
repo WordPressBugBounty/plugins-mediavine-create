@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.6.3';
+	const VERSION = '2.6.4';
 
 	const DB_VERSION = '2.4.1';
 
@@ -268,13 +268,11 @@ class Plugin {
 		// Initialize Admin Bar (adds quick edit links for Create cards)
 		\Mediavine\Create\Admin_Bar::get_instance();
 
-		$dev_mode = json_decode( get_option( 'mediavine_devmode', '[]' ), true );
-		if ( isset( $dev_mode['create'] ) && $dev_mode['create'] === 'on' ) {
-			self::$services_api_url = 'https://cs.test/api/v2';
-			// Important: keep the trailing slash
-			self::$js_services_api_url = 'https://cs.test/api/v2/';
-			self::$create_studio_base_url = 'https://cs.test';
-		}
+		// Before any subsystem captures the Studio URLs...
+		self::resolve_studio_urls();
+		// ...and again after every plugin has loaded, since a dev-tools plugin
+		// that loads after Create would miss the first pass.
+		add_action( 'plugins_loaded', [ __CLASS__, 'resolve_studio_urls' ], 999 );
 
 		self::$views        = \Mediavine\View_Loader::get_instance( MV_CREATE_DIR );
 		self::$api_services = \Mediavine\Create\API_Services::get_instance();
@@ -476,27 +474,54 @@ class Plugin {
 	}
 
 	/**
-	 * Check if Create dev mode is enabled.
+	 * Point the three Create Studio statics at `create_studio_base_url`.
 	 *
-	 * Dev mode is enabled when:
-	 * 1. The mediavine_devmode option has create set to 'on', OR
-	 * 2. The mv_create_dev_mode filter returns true
+	 * Idempotent — the API URLs are re-derived from the base, never mutated in place.
 	 *
-	 * @return bool True if dev mode is enabled.
+	 * @return void
+	 */
+	public static function resolve_studio_urls() {
+		$base = apply_filters( 'create_studio_base_url', self::$create_studio_base_url );
+
+		if ( ! is_string( $base ) || '' === trim( $base ) ) {
+			return;
+		}
+
+		self::$create_studio_base_url = untrailingslashit( trim( $base ) );
+		self::$services_api_url       = self::$create_studio_base_url . '/api/v2';
+		// Trailing slash required: the admin bundle concatenates paths onto this.
+		self::$js_services_api_url    = self::$create_studio_base_url . '/api/v2/';
+	}
+
+	/**
+	 * Whether dev mode is on: shortens caches, enables debug output, and allows
+	 * JS bundles to come from a dev server. Off unless a dev-tools plugin
+	 * (create-studio-dev) filters it on.
+	 *
+	 * @return bool
 	 */
 	public static function is_dev_mode(): bool {
-		// Check the mediavine_devmode option
-		$dev_mode = json_decode( get_option( 'mediavine_devmode', '[]' ), true );
-		if ( isset( $dev_mode['create'] ) && 'on' === $dev_mode['create'] ) {
-			return true;
+		return (bool) apply_filters( 'create_dev_mode', false );
+	}
+
+	/**
+	 * Origin serving a JS bundle in dev mode.
+	 *
+	 * @param string $which Which bundle set: 'admin' or 'client'.
+	 * @return string Origin with no trailing slash, or '' to use built assets.
+	 */
+	public static function dev_asset_origin( string $which ): string {
+		if ( ! self::is_dev_mode() ) {
+			return '';
 		}
 
-		// Check the filter (used by class-admin-init.php for localhost dev server)
-		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			return true;
+		$origin = apply_filters( 'create_dev_asset_origin', '', $which );
+
+		if ( ! is_string( $origin ) || '' === trim( $origin ) ) {
+			return '';
 		}
 
-		return false;
+		return untrailingslashit( trim( $origin ) );
 	}
 
 	/**

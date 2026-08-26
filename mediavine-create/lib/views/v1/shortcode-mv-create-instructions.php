@@ -25,7 +25,11 @@ if ( ! empty( $args['creation']['instructions'] ) ) {
 		$sanitized
 	);
 ?>
-	<?php if ( empty( $args['print'] ) && ! \Mediavine\Settings::get_setting( 'mv_create_enable_interactive_mode', false ) ) { ?>
+	<?php
+	// Interactive mode may be on too; the settings screen warns rather than forcing
+	// either off. The client only mounts the toggle when hands-free is enabled.
+	if ( empty( $args['print'] ) ) {
+		?>
 	<div class="mv-create-hands-free"></div>
 	<?php
 	}

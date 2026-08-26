@@ -37,9 +37,9 @@ class Importers_Admin {
 
 		$script_url = $assets_url . 'importers.build.' . $version . '.js';
 
-		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = 'http://localhost:' . $dev_port . '/importers.build.' . $version . '.js';
+		$dev_origin = Plugin::dev_asset_origin( 'admin' );
+		if ( '' !== $dev_origin ) {
+			$script_url = $dev_origin . '/importers.build.' . $version . '.js';
 			wp_dequeue_style( 'mv_create/importers.css' );
 		}
 
@@ -107,9 +107,9 @@ class Importers_Admin {
 		$assets_url = Plugin::assets_url() . 'admin/ui/build/';
 		$script_url = $assets_url . 'importers.build.' . $version . '.js';
 
-		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = 'http://localhost:' . $dev_port . '/importers.build.' . $version . '.js';
+		$dev_origin = Plugin::dev_asset_origin( 'admin' );
+		if ( '' !== $dev_origin ) {
+			$script_url = $dev_origin . '/importers.build.' . $version . '.js';
 		}
 
 		// Depend on the slim blocks script so MV_SHARED_COMPONENTS is available

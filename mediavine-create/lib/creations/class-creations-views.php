@@ -574,9 +574,9 @@ class Creations_Views extends Creations {
 	public function register_scripts() {
 		$handle     = Plugin::PLUGIN_DOMAIN . '/client.js';
 		$script_url = Plugin::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.js';
-		if ( apply_filters('mv_create_dev_mode', false) ) {
-			$client_dev_port = apply_filters( 'mv_create_client_dev_port', defined( 'MV_CREATE_CLIENT_DEV_PORT' ) ? MV_CREATE_CLIENT_DEV_PORT : 8080 );
-			$script_url = 'http://localhost:' . $client_dev_port . '/bundle.js';
+		$dev_origin = Plugin::dev_asset_origin( 'client' );
+		if ( '' !== $dev_origin ) {
+			$script_url = $dev_origin . '/bundle.js';
 		}
 		wp_register_script($handle, $script_url, [], Plugin::VERSION, true);
 
@@ -626,6 +626,7 @@ class Creations_Views extends Creations {
 					'checklistsEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_checklists', false) && GateKeeper::can_access( GateKeeper::FEATURE_CHECKLISTS ),
 					'checklistSections' => \Mediavine\Settings::get_setting('mv_create_checklist_sections', 'ingredients'),
 					'unitConversionEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_unit_conversion', false) && GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION ),
+					'interactiveModeEnabled' => GateKeeper::is_interactive_mode_enabled(),
 					'ctaVariant' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_variant', 'inline-banner'),
 					'ctaTitle' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_title', ''),
 					'ctaSubtitle' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_subtitle', ''),
@@ -1466,7 +1467,7 @@ class Creations_Views extends Creations {
 		if ( ! empty($creation_view) ) {
 			self::$has_card = true;
 			// Theme CSS is always PHP-enqueued (card-base + card-{style}). The Vite client no longer
-			// imports card-all.scss, so this must run in mv_create_dev_mode as well.
+			// imports card-all.scss, so this must run in dev mode as well.
 			wp_enqueue_style('mv-create-card_' . $atts['style']);
 			wp_enqueue_script(Plugin::PLUGIN_DOMAIN . '/client.js');
 			self::enqueue_studio_script();

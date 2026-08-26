@@ -9,7 +9,7 @@
  * Plugin Name:       Create
  * Plugin URI:        https://create.studio/plugin
  * Description:       Create custom recipe and how to cards to be displayed in posts.
- * Version:           2.6.3
+ * Version:           2.6.4
  * Requires at least: 6.5
  * Requires PHP:      7.4
  *
@@ -44,4 +44,8 @@ add_action( 'admin_head', 'mv_create_throw_warnings' );
 
 if ( mv_create_is_compatible() ) {
 	\Mediavine\Create\Plugin::get_instance();
+
+	// Stable handle for integrations (create-studio-dev) so they don't depend on
+	// the legacy Mediavine namespace, and renaming it stays non-breaking.
+	class_alias( \Mediavine\Create\Plugin::class, 'Create\Plugin' );
 }

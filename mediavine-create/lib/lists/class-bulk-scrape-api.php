@@ -35,19 +35,11 @@ class Bulk_Scrape_API {
 	private $namespace = 'mv-create/v1';
 
 	/**
-	 * Services API URL for external scraping.
-	 *
-	 * @var string
-	 */
-	private static $services_api_url;
-
-	/**
 	 * Initialize the API and register routes.
 	 *
 	 * @return void
 	 */
 	public function init() {
-		self::$services_api_url = Plugin::$services_api_url;
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
@@ -395,7 +387,7 @@ class Bulk_Scrape_API {
 	 * @return array Result array.
 	 */
 	private function scrape_amazon_url( $url ) {
-		$scraper = new Scraper_Service( self::$services_api_url );
+		$scraper = new Scraper_Service( Plugin::$services_api_url );
 		$amazon  = Amazon_Adapter::get_instance();
 
 		// If Amazon API is not set up, fall back to external scraper.
@@ -435,7 +427,7 @@ class Bulk_Scrape_API {
 	 * @return array Result array.
 	 */
 	private function scrape_external_url( $url ) {
-		$scraper = new Scraper_Service( self::$services_api_url );
+		$scraper = new Scraper_Service( Plugin::$services_api_url );
 		$result  = $scraper->scrape_external( $url );
 
 		if ( ! empty( $result['rate_limited'] ) ) {

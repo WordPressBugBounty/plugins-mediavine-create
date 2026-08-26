@@ -288,14 +288,14 @@ class Admin_Init extends Plugin {
 	 * @return string
 	 */
 	public static function admin_ui_script_url( $basename ) {
-		$script_url = Plugin::assets_url() . 'admin/ui/build/' . $basename . '.' . self::VERSION . '.js';
+		$filename = $basename . '.' . self::VERSION . '.js';
+		$origin   = Plugin::dev_asset_origin( 'admin' );
 
-		if ( apply_filters( 'mv_create_dev_mode', false ) ) {
-			$dev_port   = apply_filters( 'mv_create_dev_port', defined( 'MV_CREATE_DEV_PORT' ) ? MV_CREATE_DEV_PORT : 3000 );
-			$script_url = 'http://localhost:' . $dev_port . '/' . $basename . '.' . self::VERSION . '.js';
+		if ( '' !== $origin ) {
+			return $origin . '/' . $filename;
 		}
 
-		return $script_url;
+		return Plugin::assets_url() . 'admin/ui/build/' . $filename;
 	}
 
 	/**

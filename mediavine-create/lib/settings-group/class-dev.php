@@ -6,7 +6,7 @@ use Mediavine\Create\Plugin;
 
 /**
  * Settings group for development/debug options.
- * Only displayed when dev mode is enabled via mediavine_devmode option.
+ * Only displayed when dev mode is enabled (see Plugin::is_dev_mode()).
  *
  * Note: The Dev tab content is rendered directly in the React Settings component
  * (admin/ui/src/views/Settings/index.tsx) rather than through the settings system,
