@@ -27,6 +27,8 @@ return array(
 	'Mediavine\\Create\\Creations_Jump_To_Recipe' => 'lib/creations/class-creations-jump-to-recipe.php',
 	'Mediavine\\Create\\Creations_Meta_Blocks' => 'lib/creations/class-creations-meta-blocks.php',
 	'Mediavine\\Create\\Creations_Plugins' => 'lib/creations/class-creations-plugins.php',
+	'Mediavine\\Create\\Creations_Privacy' => 'lib/creations/class-creations-privacy.php',
+	'Mediavine\\Create\\Creations_REST_Controller' => 'lib/creations/class-creations-rest-controller.php',
 	'Mediavine\\Create\\Creations_Views' => 'lib/creations/class-creations-views.php',
 	'Mediavine\\Create\\Creations_Views_Card_Class_Builder' => 'lib/creations/class-creations-views-card-class-builder.php',
 	'Mediavine\\Create\\Creations_Views_Colors' => 'lib/creations/class-creations-views-colors.php',

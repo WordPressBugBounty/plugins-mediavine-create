@@ -63,6 +63,9 @@ class Creations_WP_Content extends Creations {
 			],
 		];
 
+		// Keeps published cards out of the public REST API.
+		$post_type_args['rest_controller_class'] = Creations_REST_Controller::class;
+
 		register_post_type( self::$slug, $post_type_args );
 	}
 

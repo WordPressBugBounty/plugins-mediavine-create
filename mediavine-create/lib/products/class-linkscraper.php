@@ -31,6 +31,12 @@ class LinkScraper {
 					'remote_thumbnail_uri' => '/(?:property="og:image"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:image")/',
 					'description'          => '/(?:property="og:description"[^>]+content="([^"]+))|(?:content="([^"]+)[^>]+property="og:description")/',
 				],
+				// Amazon product data must come from the Creators API, never from
+				// scraping amazon.com — see Bulk_Scrape_API::scrape_amazon_url() and
+				// Products_API::scrape(), which both refuse rather than fall back here.
+				// These patterns are retained only for non-Amazon pages that happen to
+				// use the same markup; they are deliberately not maintained against
+				// Amazon's current DOM.
 				'amazon'     => [
 					'title'                => '/id="productTitle" class="a-size-large">\s*(.*?)\s*<\/span>/s',
 					'remote_thumbnail_uri' => '/id="landingImage"\sdata-a-dynamic-image="{&quot;(.*?)&quot;/',
@@ -65,26 +71,63 @@ class LinkScraper {
 		}
 
 		// Set some defaults
-		$data   = null;
+		$data   = $this->defaults;
 		$method = 'default';
 
-		// Loop over every scrape method, breaking if we have a match
+		// Fill each property from the highest-priority method that matched it.
+		// Stopping at the first method with *any* match loses properties that
+		// method didn't cover: an Amazon page has a product image and a meta
+		// description but no `og:title`, which used to yield a blank title even
+		// though the `<title>` fallback would have found one.
 		foreach ( $priority as $method_name ) {
+			if ( ! isset( $this->methods[ $method_name ] ) ) {
+				continue;
+			}
+
 			$matches = $this->process( $response['body'], $this->methods[ $method_name ] );
 
-			if ( $matches ) {
+			if ( ! $matches ) {
+				continue;
+			}
+
+			// Source reports the first method that contributed anything, as before.
+			if ( 'default' === $method ) {
 				$method = $method_name;
-				$data   = $matches;
+			}
+
+			foreach ( $matches as $property => $value ) {
+				if ( empty( $data[ $property ] ) && ! empty( $value ) ) {
+					$data[ $property ] = $value;
+				}
+			}
+
+			if ( $this->is_complete( $data ) ) {
 				break;
 			}
 		}
 
 		// If we don't have a match, return early with defaults
-		if ( ! $data ) {
+		if ( 'default' === $method ) {
 			return array_merge( $this->defaults, [ 'source' => 'default' ] );
 		}
 
 		return array_merge( $data, [ 'source' => $method ] );
+	}
+
+	/**
+	 * Whether every scrapable property already has a value.
+	 *
+	 * @param array $data Accumulated scrape results.
+	 * @return bool True when no further method could add anything.
+	 */
+	private function is_complete( $data ) {
+		foreach ( [ 'title', 'remote_thumbnail_uri', 'description' ] as $property ) {
+			if ( empty( $data[ $property ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

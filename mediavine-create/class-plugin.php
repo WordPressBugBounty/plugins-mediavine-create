@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.6.4';
+	const VERSION = '2.6.5';
 
 	const DB_VERSION = '2.4.1';
 

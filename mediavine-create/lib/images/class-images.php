@@ -370,8 +370,9 @@ class Images {
 			if ( ! empty( $image['image_url'] ) ) {
 				$img_url = esc_url( $image['image_url'] );
 			}
-			if ( ! empty( $image['image_srcset'] ) && ! empty( $image['image_srcset_sizes'] ) ) {
-				$srcset = ' srcset="' . $image['image_srcset'] . '" sizes="' . $image['image_srcset_sizes'] . '"';
+			$srcset_data = self::get_render_srcset( $image );
+			if ( $srcset_data ) {
+				$srcset = ' srcset="' . esc_attr( $srcset_data['srcset'] ) . '" sizes="' . esc_attr( $srcset_data['sizes'] ) . '"';
 			}
 		}
 
@@ -422,6 +423,65 @@ class Images {
 		}
 
 		return $img_tag;
+	}
+
+	/**
+	 * Get srcset/sizes for a card image, calculated at render time.
+	 *
+	 * The srcset stored in mv_images is calculated when the image is saved, so it
+	 * goes stale when uploads move to a CDN/offload bucket (e.g. Cloudflare R2)
+	 * or an offload plugin only filters srcset URLs on the front end. Stale
+	 * candidates 404 and browsers pick them over a working src, leaving a
+	 * broken image. Recalculating here runs core's current srcset filters.
+	 *
+	 * @param array $image Card image row with 'image_url' and optionally 'object_id',
+	 *                     'image_srcset', and 'image_srcset_sizes'.
+	 *
+	 * @return array{srcset: string, sizes: string}|null
+	 */
+	public static function get_render_srcset( $image ) {
+		if ( empty( $image['image_url'] ) ) {
+			return null;
+		}
+
+		if ( ! empty( $image['object_id'] ) ) {
+			$image_meta = wp_get_attachment_metadata( (int) $image['object_id'] );
+
+			if ( is_array( $image_meta ) ) {
+				$size_array = wp_image_src_get_dimensions( $image['image_url'], $image_meta, (int) $image['object_id'] );
+
+				if ( $size_array ) {
+					$srcset = wp_calculate_image_srcset( $size_array, $image['image_url'], $image_meta, (int) $image['object_id'] );
+					$sizes  = wp_calculate_image_sizes( $size_array, $image['image_url'], $image_meta, (int) $image['object_id'] );
+
+					if ( $srcset && $sizes ) {
+						return [
+							'srcset' => $srcset,
+							'sizes'  => $sizes,
+						];
+					}
+				}
+			}
+		}
+
+		// Fall back to the stored srcset, but only if every candidate lives on
+		// the same host as src — a host mismatch means the stored URLs are stale.
+		if ( empty( $image['image_srcset'] ) || empty( $image['image_srcset_sizes'] ) ) {
+			return null;
+		}
+
+		$src_host = wp_parse_url( $image['image_url'], PHP_URL_HOST );
+		foreach ( explode( ',', $image['image_srcset'] ) as $candidate ) {
+			$candidate_url = strtok( trim( $candidate ), ' ' );
+			if ( wp_parse_url( $candidate_url, PHP_URL_HOST ) !== $src_host ) {
+				return null;
+			}
+		}
+
+		return [
+			'srcset' => $image['image_srcset'],
+			'sizes'  => $image['image_srcset_sizes'],
+		];
 	}
 
 	public static function is_image_correct_dimensions( $img_id, $img_size ) {

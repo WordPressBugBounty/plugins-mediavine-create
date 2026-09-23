@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared scrape primitives: Amazon PAAPI, Create Studio services API, local LinkScraper.
+ * Shared scrape primitives: Amazon Creators API, Create Studio services API, local LinkScraper.
  *
  * Callers compose these methods; there is no single orchestrator. Documented policies:
  *
@@ -8,7 +8,7 @@
  *   falls back to local on services network/HTTP/empty failures. Surfaces 429 as
  *   rate_limited without local fallback. Used by Bulk_Scrape_API and by
  *   Products_API::scrape_non_amazon when no ASIN is present.
- * - scrape_amazon(): PAAPI only. Products_API returns wp_error (including 429) to
+ * - scrape_amazon(): Amazon Creators API only. Products_API returns wp_error (including 429) to
  *   the client. Bulk_Scrape_API falls through to scrape_external() on empty/error
  *   when affiliates are configured.
  *
@@ -24,7 +24,7 @@ use Mediavine\Settings;
 use Mediavine\Create\Helpers\Str;
 
 /**
- * Scraper_Service shares PAAPI / Studio / local scrape implementations.
+ * Scraper_Service shares Creators API / Studio / local scrape implementations.
  */
 class Scraper_Service {
 
@@ -43,7 +43,7 @@ class Scraper_Service {
 	}
 
 	/**
-	 * Attempt PAAPI scrape for an Amazon URL / ASIN.
+	 * Attempt an Amazon Creators API scrape for an Amazon URL / ASIN.
 	 *
 	 * @param string      $url  URL (used to derive ASIN when not provided).
 	 * @param string|null $asin Optional ASIN.

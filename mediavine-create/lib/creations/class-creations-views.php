@@ -1819,8 +1819,50 @@ class Creations_Views extends Creations {
 		return \Mediavine\Permissions::is_user_authorized();
 	}
 
+	/**
+	 * Force every `<meta name="robots">` tag in a chunk of markup to `noindex, nofollow`.
+	 *
+	 * The print route must never be indexed, but SEO plugins (Yoast, Rank Math, ...)
+	 * emit their own site-wide `index, follow` robots tag on every `wp_head()` call.
+	 * Core's `wp_robots` filter only covers tags routed through `wp_robots()`; Yoast
+	 * additionally prints one from its own head presenter, so the output has to be
+	 * corrected after the fact.
+	 *
+	 * Rewriting rather than deleting is deliberate: `WP_HTML_Tag_Processor` can edit
+	 * attributes but not remove nodes, and a duplicated `noindex` is harmless where a
+	 * surviving `index` is not.
+	 *
+	 * @param string $head_html Buffered `wp_head()` output.
+	 * @return string
+	 */
+	public static function neutralize_robots_meta( $head_html ) {
+		$head_html = (string) $head_html;
+		if ( '' === $head_html ) {
+			return $head_html;
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $head_html );
+		// Match on get_tag() rather than next_tag( 'meta' ): before WP 6.6 the tag
+		// query is case-sensitive and skips uppercase `<META>` tags.
+		while ( $processor->next_tag() ) {
+			if ( 'META' !== $processor->get_tag() ) {
+				continue;
+			}
+			$name = $processor->get_attribute( 'name' );
+			if ( ! is_string( $name ) || 'robots' !== strtolower( trim( $name ) ) ) {
+				continue;
+			}
+			$processor->set_attribute( 'content', 'noindex, nofollow' );
+		}
+
+		return $processor->get_updated_html();
+	}
+
 	public function print_view( \WP_REST_Request $request ) {
 		header('Content-Type: text/html; charset=' . get_option('blog_charset'));
+		// Replaces the REST server's plain `noindex`; belt and braces alongside the
+		// robots meta emitted at the end of <head>.
+		header('X-Robots-Tag: noindex, nofollow');
 		$api_services = new \Mediavine\Create\API_Services();
 		$params       = $api_services->process_inbound($request);
 		$creation     = self::$models_v2->mv_creations->find_one( (int) $params['id']);
@@ -1830,9 +1872,14 @@ class Creations_Views extends Creations {
 		add_action(
 			'mv_create_card_footer',
 			function ( $args ) {
-				if ( isset($args['creation']) && isset($args['creation']['canonical_post_id']) ) {
-					echo '<span class="mv-create-canonical-link">' . esc_url(get_the_permalink($args['creation']['canonical_post_id'])) . '</span>';
+				if ( empty($args['creation']['canonical_post_id']) ) {
+					return;
 				}
+				$permalink = get_the_permalink($args['creation']['canonical_post_id']);
+				if ( empty($permalink) ) {
+					return;
+				}
+				echo '<span class="mv-create-canonical-link">' . esc_url($permalink) . '</span>';
 			},
 			100
 		);
@@ -1850,7 +1897,17 @@ class Creations_Views extends Creations {
 		}
 
 		$print_title = apply_filters('mv_create_print_title', esc_html($creation->title . ' - ' . get_bloginfo('name')));
-		$canonical   = get_permalink($creation->canonical_post_id);
+
+		// An orphaned card (no canonical post, e.g. the publisher moved to another
+		// card plugin) has no permalink. Emitting an empty canonical/og:url makes the
+		// print URL self-canonical, which invites search engines to index it.
+		$canonical = '';
+		if ( ! empty($creation->canonical_post_id) ) {
+			$canonical = get_permalink($creation->canonical_post_id);
+		}
+		if ( ! is_string($canonical) ) {
+			$canonical = '';
+		}
 
 		// Use recipe if no type
 		$default_type = 'recipe';
@@ -1874,10 +1931,11 @@ class Creations_Views extends Creations {
 
 		<head>
 			<title><?php echo esc_html($print_title); ?></title>
-			<meta name="robots" content="noindex">
 			<meta name="pinterest" content="nopin" description="Sorry, you can't pin print pages." />
-			<meta property="og:url" content="<?php echo esc_attr($canonical); ?>" />
-			<link rel="canonical" href="<?php echo esc_attr($canonical); ?>">
+			<?php if ( ! empty($canonical) ) : ?>
+			<meta property="og:url" content="<?php echo esc_url($canonical); ?>" />
+			<link rel="canonical" href="<?php echo esc_url($canonical); ?>">
+			<?php endif; ?>
 			<?php
 			do_action(
 				'mv_create_print_head',
@@ -1888,7 +1946,15 @@ class Creations_Views extends Creations {
 				]
 			);
 			?>
-			<?php wp_head(); ?>
+			<?php
+			// SEO plugins hook wp_head and emit their own `index, follow` robots tag,
+			// which overrides ours for crawlers that take the last directive. Rewrite
+			// anything wp_head produced to noindex, then emit ours last as a backstop.
+			ob_start();
+			wp_head();
+			echo self::neutralize_robots_meta( ob_get_clean() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_head() output.
+			?>
+			<meta name="robots" content="noindex, nofollow">
 
 		</head>
 

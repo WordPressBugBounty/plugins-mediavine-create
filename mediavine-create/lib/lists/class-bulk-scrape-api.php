@@ -370,18 +370,35 @@ class Bulk_Scrape_API {
 			'status' => 'success',
 			'type'   => 'card',
 			'data'   => [
-				'title'         => $this->sanitize_title( $card->title ),
-				'description'   => ! empty( $card->description ) ? $card->description : '',
-				'thumbnail_uri' => $thumbnail,
-				'card_id'       => $card_id,
-				'card_type'     => $card->type,
-				'source'        => 'internal',
+				'title'             => $this->sanitize_title( $card->title ),
+				'description'       => ! empty( $card->description ) ? $card->description : '',
+				'thumbnail_uri'     => $thumbnail,
+				'card_id'           => $card_id,
+				'card_type'         => $card->type,
+				// The card's own canonical post, not the card ID — the editor stores
+				// these separately and `relation_id` is what resolves back to the card.
+				'canonical_post_id' => ! empty( $card->canonical_post_id ) ? (int) $card->canonical_post_id : null,
+				'source'            => 'internal',
 			],
 		];
 	}
 
 	/**
-	 * Scrape Amazon URL using Amazon API.
+	 * Scrape an Amazon URL using the Amazon Creators API.
+	 *
+	 * Amazon product data comes from the Creators API or not at all. Falling back
+	 * to fetching amazon.com and parsing the HTML is not an option: Amazon's
+	 * Conditions of Use prohibit automated extraction from their pages, and the
+	 * Associates Program Operating Agreement requires product data to be sourced
+	 * through the API — which is exactly the case affiliate links fall under.
+	 *
+	 * This mirrors the single-link path (Products_API::scrape() and
+	 * scrape_non_amazon(), which only falls through to the generic scraper when
+	 * no ASIN is present). Bulk import used to be the one place that scraped
+	 * Amazon directly.
+	 *
+	 * Failures are returned as per-URL error results, never as a request-level
+	 * error, so the rest of a mixed bulk import is unaffected.
 	 *
 	 * @param string $url The Amazon URL.
 	 * @return array Result array.
@@ -390,9 +407,8 @@ class Bulk_Scrape_API {
 		$scraper = new Scraper_Service( Plugin::$services_api_url );
 		$amazon  = Amazon_Adapter::get_instance();
 
-		// If Amazon API is not set up, fall back to external scraper.
 		if ( ! $amazon->amazon_affiliates_setup() ) {
-			return $this->scrape_external_url( $url );
+			return $this->create_amazon_setup_error( $url );
 		}
 
 		$result = $scraper->scrape_amazon( $url );
@@ -416,8 +432,47 @@ class Bulk_Scrape_API {
 			];
 		}
 
-		// No product found or PAAPI error — fall back to external scraper.
-		return $this->scrape_external_url( $url );
+		// Creators API returned nothing usable. Surface that instead of scraping.
+		return $this->create_error_result(
+			$url,
+			__( 'Amazon did not return product details for this link. You can add the title and image manually.', 'mediavine-create' )
+		);
+	}
+
+	/**
+	 * Error result for an Amazon URL that cannot be looked up yet.
+	 *
+	 * The Creators API needs two things: a connected site, and the publisher's own
+	 * Amazon credentials. Point at whichever is actually missing so the publisher
+	 * isn't sent to the wrong settings screen.
+	 *
+	 * @param string $url The Amazon URL.
+	 * @return array Error result array.
+	 */
+	private function create_amazon_setup_error( $url ) {
+		$settings_url = admin_url( 'edit.php?post_type=mv_create&page=settings' );
+
+		if ( ! Create_Studio_Client::is_site_connected() ) {
+			return [
+				'url'        => $url,
+				'status'     => 'error',
+				'type'       => 'external',
+				'error'      => __( 'Connect your site to Create Studio to import Amazon links.', 'mediavine-create' ),
+				'error_code' => 'create_not_registered',
+				'link_url'   => $settings_url . '#create-studio',
+				'link_text'  => __( 'Connect Create Studio', 'mediavine-create' ),
+			];
+		}
+
+		return [
+			'url'        => $url,
+			'status'     => 'error',
+			'type'       => 'external',
+			'error'      => __( 'Add your Amazon Creators API credentials to import Amazon links.', 'mediavine-create' ),
+			'error_code' => 'amazon_not_configured',
+			'link_url'   => $settings_url . '#affiliates',
+			'link_text'  => __( 'Amazon settings', 'mediavine-create' ),
+		];
 	}
 
 	/**

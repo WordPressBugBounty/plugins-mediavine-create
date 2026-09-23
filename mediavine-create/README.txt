@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.6.4
+Stable tag: 2.6.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,16 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 2.6.5 =
+
+* FEATURE: List Bulk Import now lets you choose which scraped descriptions to import (thanks for the idea, Kat!)
+* FIX: List Bulk Import no longer stops partway through when a site limits requests, can import Amazon links, and handles links to your own posts correctly
+* FIX: Create Cards have stronger protection against other plugins/themes displaying Create CPT in feeds.
+* FIX: Card images no longer appear broken on sites that offload media to a CDN or cloud storage after publishing.
+* FIX: Recipe and How-To print pages without canonical posts are kept out of search engine results, even when an SEO plugin is active
+* FIX: Create admin pages load again when another plugin or theme adds an admin menu link without a destination
+
 
 = 2.6.4 =
 

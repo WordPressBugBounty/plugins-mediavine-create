@@ -163,6 +163,7 @@ class Creations extends Plugin {
 		add_filter('mv_dbi_before_update_' . $this->table_name, [ $this, 'before_update' ]);
 		add_filter('mv_dbi_after_update_' . $this->table_name, [ $this, 'after_update' ]);
 		add_filter('mv_dbi_after_delete_' . $this->table_name, [ $this, 'after_delete' ]);
+		Creations_Privacy::get_instance();
 		add_action('init', '\Mediavine\Create\Creations_WP_Content::register_content_types', 0);
 		add_action('init', '\Mediavine\Create\Creations_WP_Content::register_taxonomies', 0);
 		add_action('rest_api_init', [ $this, 'routes' ]);

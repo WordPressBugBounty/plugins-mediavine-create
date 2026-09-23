@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.6.4\n"
+"Project-Id-Version: Create 2.6.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-26T17:38:39+00:00\n"
+"POT-Creation-Date: 2026-09-22T21:26:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
@@ -511,29 +511,33 @@ msgstr ""
 msgid "Disable Jump-to-Recipe"
 msgstr ""
 
+#: lib/creations/class-creations-rest-controller.php:49
+msgid "Sorry, you are not allowed to view Create Cards."
+msgstr ""
+
 #. translators: %s: list item title
 #: lib/creations/class-creations-views-list-item-preparer.php:110
-#: lib/creations/class-creations-views.php:1978
+#: lib/creations/class-creations-views.php:2044
 #, php-format
 msgid "Image for %s"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:179
 #: lib/creations/class-creations-views.php:1522
-#: lib/creations/class-creations.php:730
+#: lib/creations/class-creations.php:731
 #: lib/importers/sources/class-import-getmecooking.php:272
 #: lib/importers/sources/class-import-purr.php:159
 msgid "Prep Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:185
-#: lib/creations/class-creations.php:731
+#: lib/creations/class-creations.php:732
 msgid "Active Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:191
 #: lib/creations/class-creations-views.php:1524
-#: lib/creations/class-creations.php:732
+#: lib/creations/class-creations.php:733
 #: lib/importers/class-mv-recipe-importer.php:962
 #: lib/importers/sources/class-import-purr.php:160
 msgid "Additional Time"
@@ -724,7 +728,7 @@ msgid "Type"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:1523
-#: lib/creations/class-creations.php:737
+#: lib/creations/class-creations.php:738
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:714
 #: lib/importers/sources/class-import-cookbook.php:189
 #: lib/importers/sources/class-import-getmecooking.php:279
@@ -800,61 +804,61 @@ msgstr ""
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1842
-#: lib/creations/class-creations-views.php:1848
+#: lib/creations/class-creations-views.php:1889
+#: lib/creations/class-creations-views.php:1895
 msgid "No Card with ID found"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2081
+#: lib/creations/class-creations-views.php:2147
 msgid "You do not have permission to do this."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2089
+#: lib/creations/class-creations-views.php:2155
 msgid "Invalid theme."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2093
+#: lib/creations/class-creations-views.php:2159
 msgid "This theme requires a Pro subscription."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2169
+#: lib/creations/class-creations-views.php:2235
 msgid "Previewing theme"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2175
+#: lib/creations/class-creations-views.php:2241
 msgid "Premium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2180
+#: lib/creations/class-creations-views.php:2246
 msgid "Preview"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2202
+#: lib/creations/class-creations-views.php:2268
 #: lib/i18n/class-translation.php:78
 msgid "Cancel"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2206
+#: lib/creations/class-creations-views.php:2272
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2211
+#: lib/creations/class-creations-views.php:2277
 msgid "Apply Theme"
 msgstr ""
 
-#: lib/creations/class-creations.php:539
+#: lib/creations/class-creations.php:540
 msgid "Post ID was not set in function call"
 msgstr ""
 
-#: lib/creations/class-creations.php:539
+#: lib/creations/class-creations.php:540
 msgid "A Post ID was not included in the request"
 msgstr ""
 
-#: lib/creations/class-creations.php:543
+#: lib/creations/class-creations.php:544
 msgid "Post ID value was not a number"
 msgstr ""
 
-#: lib/creations/class-creations.php:543
+#: lib/creations/class-creations.php:544
 msgid "A Post ID varable was included but was non-numeric"
 msgstr ""
 
@@ -1418,6 +1422,26 @@ msgid "Create card not found."
 msgstr ""
 
 #: lib/lists/class-bulk-scrape-api.php:438
+msgid "Amazon did not return product details for this link. You can add the title and image manually."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:460
+msgid "Connect your site to Create Studio to import Amazon links."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:463
+msgid "Connect Create Studio"
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:471
+msgid "Add your Amazon Creators API credentials to import Amazon links."
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:474
+msgid "Amazon settings"
+msgstr ""
+
+#: lib/lists/class-bulk-scrape-api.php:493
 #: lib/products/class-scraper-service.php:230
 msgid "Could not scrape URL. No title or image found."
 msgstr ""
