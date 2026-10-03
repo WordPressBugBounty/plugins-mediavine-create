@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.6.5
+Stable tag: 2.6.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,14 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 2.6.6 =
+
+* FIX: Total Time on Recipe and How-To cards now correctly includes every time field (Prep, Cook, Additional), including on cards that were saved with a wrong total
+* ENHANCEMENT: Instruction steps grouped under headings now appear as named sections in recipe schema, which helps search engines understand multi-part recipes
+* FIX: Cards no longer output an empty star rating in their schema after the last review is deleted, which stops Google Search Console Review snippet errors
+* FIX: Card images display properly on sites using offload plugins (such as Cloudflare R2) that change image URLs but don't update responsive image sizes
+
 
 = 2.6.5 =
 

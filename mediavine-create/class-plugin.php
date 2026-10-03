@@ -18,7 +18,7 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.6.5';
+	const VERSION = '2.6.6';
 
 	const DB_VERSION = '2.4.1';
 
@@ -353,6 +353,7 @@ class Plugin {
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_settings' ], 30 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_shapes' ], 35 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'republish_queue' ], 40 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'repair_stale_total_times' ], 41 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'importer_admin_notice' ], 60 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'update_services_api' ], 95 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'purge_used_css_caches_for_widget_safelist' ], 100 );
@@ -880,8 +881,53 @@ class Plugin {
 			$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $list_cards, 'id' ) ) );
 		}
 
+		// Republish recipe and how-to cards whose instructions have headings so
+		// their stored JSON-LD groups steps into HowToSections.
+		// Remove after April 2027.
+		if ( version_compare( $last_plugin_version, '2.6.5.2', '<' ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time migration; table is $wpdb->prefix . literal; values bound via prepare()
+			$sectioned_cards = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id FROM {$wpdb->prefix}mv_creations
+					WHERE type IN ( %s, %s )
+					AND published IS NOT NULL
+					AND published != ''
+					AND JSON_UNQUOTE(JSON_EXTRACT(published, '$.instructions')) REGEXP %s
+					AND JSON_UNQUOTE(JSON_EXTRACT(published, '$.instructions')) LIKE %s",
+					'recipe',
+					'diy',
+					'<h[1-6]',
+					'%<li%'
+				)
+			);
+			if ( ! empty( $sectioned_cards ) ) {
+				$republish_ids = array_merge( $republish_ids, array_values( wp_list_pluck( $sectioned_cards, 'id' ) ) );
+			}
+		}
+
 		if ( ! empty( $republish_ids ) ) {
 			\Mediavine\Create\Publish::update_publish_queue( $republish_ids );
+		}
+	}
+
+	/**
+	 * Repair card totals that don't match the sum of the times.
+	 *
+	 * Editors before 2.0.12 could save a Total Time that didn't match the
+	 * other times (e.g. 10m prep + 20m cook + 1h30 additional saved as 30m),
+	 * and nothing ever recalculated it. Remove after April 2027.
+	 *
+	 * @param string $last_plugin_version Version being upgraded from.
+	 *
+	 * @return void
+	 */
+	public function repair_stale_total_times( $last_plugin_version = '' ) {
+		if ( empty( $last_plugin_version ) ) {
+			$last_plugin_version = get_option( 'mv_create_version', self::VERSION );
+		}
+
+		if ( version_compare( $last_plugin_version, '2.6.6', '<' ) ) {
+			\Mediavine\Create\Creations::repair_stale_totals();
 		}
 	}
 

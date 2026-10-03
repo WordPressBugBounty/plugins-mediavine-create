@@ -682,7 +682,6 @@ class JSON_LD_Types {
 	 * @return array Updated JSON-LD data
 	 */
 	public function add_json_ld_step( $json_ld, $value, $schema_prop, $creation, $flags = [] ) {
-		// TODO: Add title support for steps
 		// We need DOMDocument installed for this to work. Fallback to single block of steps
 		if ( ! class_exists( 'DOMDocument' ) ) {
 			return $this->add_json_ld_string( $json_ld, $value, $schema_prop, $creation, [ 'no_html' => true ] );
@@ -703,11 +702,29 @@ class JSON_LD_Types {
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
 			libxml_use_internal_errors( false );
 		}
-		$lis   = $dom->getElementsByTagName( 'li' );
-		$steps = [];
-		$i     = 0;
+		// Walk headings and list items in document order so each step knows which
+		// heading (if any) it falls under. Step anchors count list items only, to
+		// match the ids added by Schema_ID_Injector.
+		$xpath         = new \DOMXPath( $dom );
+		$nodes         = $xpath->query( '//h1|//h2|//h3|//h4|//h5|//h6|//li' );
+		$steps         = [];
+		$step_sections = [];
+		$section_names = [];
+		$section       = null;
+		$i             = 0;
 
-		foreach ( $lis as $li ) {
+		foreach ( $nodes as $li ) {
+			if ( 'li' !== strtolower( $li->nodeName ) ) {
+				$heading = trim( $this->json_ld_helpers->remove_html( $li->textContent ) );
+				if ( '' !== $heading ) {
+					$section_names[] = $heading;
+					$section         = count( $section_names ) - 1;
+				}
+				continue;
+			}
+
+			$step_sections[ $i ] = $section;
+
 			$text = $this->json_ld_helpers->remove_html( $li->textContent );
 			$url  = get_permalink( $creation['canonical_post_id'] );
 			$id   = $creation['id'];
@@ -751,9 +768,78 @@ class JSON_LD_Types {
 			return $this->add_json_ld_string( $json_ld, $value, $schema_prop, $creation, [ 'no_html' => true ] );
 		}
 
+		/**
+		 * Filters whether headings in the instructions group steps into HowToSections.
+		 *
+		 * @param bool   $use_sections Whether to output HowToSections. Default true.
+		 * @param array  $creation     Creation card data
+		 * @param string $schema_prop  Name of schema property
+		 */
+		$use_sections = apply_filters( 'mv_create_json_ld_step_sections', true, $creation, $schema_prop );
+
+		if ( $use_sections && ! empty( array_filter( $step_sections, 'is_int' ) ) ) {
+			$steps = $this->group_steps_into_sections( $steps, $step_sections, $section_names );
+		}
+
 		$json_ld[ $schema_prop ] = $steps;
 
 		return $json_ld;
+	}
+
+	/**
+	 * Groups steps into HowToSections named after the heading each step falls under.
+	 *
+	 * Steps before the first heading stay top-level HowToSteps. Positions are
+	 * renumbered per list: top-level items, then steps within each section.
+	 *
+	 * @param array $steps         HowToStep items, in document order
+	 * @param array $step_sections Section index for each step (null when under no heading)
+	 * @param array $section_names Heading text for each section index
+	 * @return array Top-level recipeInstructions items
+	 */
+	private function group_steps_into_sections( $steps, $step_sections, $section_names ) {
+		$items   = [];
+		$current = null;
+
+		foreach ( $steps as $i => $step ) {
+			$section = $step_sections[ $i ];
+
+			if ( null === $section ) {
+				$items[] = $step;
+				$current = null;
+				continue;
+			}
+
+			if ( $section !== $current ) {
+				$items[] = [
+					'@type'           => 'HowToSection',
+					'name'            => $section_names[ $section ],
+					'itemListElement' => [],
+				];
+				$current = $section;
+			}
+
+			$items[ count( $items ) - 1 ]['itemListElement'][] = $step;
+		}
+
+		foreach ( $items as $pos => &$item ) {
+			if ( 'HowToSection' === $item['@type'] ) {
+				foreach ( $item['itemListElement'] as $step_pos => &$section_step ) {
+					if ( isset( $section_step['position'] ) ) {
+						$section_step['position'] = $step_pos + 1;
+					}
+				}
+				unset( $section_step );
+				if ( isset( $item['itemListElement'][0]['position'] ) ) {
+					$item['position'] = $pos + 1;
+				}
+			} elseif ( isset( $item['position'] ) ) {
+				$item['position'] = $pos + 1;
+			}
+		}
+		unset( $item );
+
+		return $items;
 	}
 
 	/**

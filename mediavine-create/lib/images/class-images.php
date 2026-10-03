@@ -432,7 +432,9 @@ class Images {
 	 * goes stale when uploads move to a CDN/offload bucket (e.g. Cloudflare R2)
 	 * or an offload plugin only filters srcset URLs on the front end. Stale
 	 * candidates 404 and browsers pick them over a working src, leaving a
-	 * broken image. Recalculating here runs core's current srcset filters.
+	 * broken image. Recalculating here runs core's current srcset filters, and
+	 * candidates are then moved to src's folder for offload plugins that only
+	 * rewrite attachment URLs (not srcset).
 	 *
 	 * @param array $image Card image row with 'image_url' and optionally 'object_id',
 	 *                     'image_srcset', and 'image_srcset_sizes'.
@@ -456,7 +458,7 @@ class Images {
 
 					if ( $srcset && $sizes ) {
 						return [
-							'srcset' => $srcset,
+							'srcset' => self::rebase_srcset_to_src( $srcset, $image['image_url'], $image_meta ),
 							'sizes'  => $sizes,
 						];
 					}
@@ -482,6 +484,46 @@ class Images {
 			'srcset' => $image['image_srcset'],
 			'sizes'  => $image['image_srcset_sizes'],
 		];
+	}
+
+	/**
+	 * Point srcset candidates at the same folder as src.
+	 *
+	 * Core builds srcset URLs from the local uploads base URL. Offload plugins
+	 * that rewrite attachment URLs (so src is on the CDN) but don't filter
+	 * wp_calculate_image_srcset leave every candidate pointing at local files
+	 * that no longer exist. All sizes of an attachment share one folder, so
+	 * src's folder is where the other sizes live too.
+	 *
+	 * @param string $srcset     Srcset from wp_calculate_image_srcset().
+	 * @param string $image_src  Card image src URL.
+	 * @param array  $image_meta Attachment metadata.
+	 *
+	 * @return string
+	 */
+	public static function rebase_srcset_to_src( $srcset, $image_src, $image_meta ) {
+		if ( empty( $image_meta['file'] ) ) {
+			return $srcset;
+		}
+
+		$relative_dir = _wp_get_attachment_relative_path( $image_meta['file'] );
+		$local_dir    = trailingslashit( wp_get_upload_dir()['baseurl'] ) . ( $relative_dir ? trailingslashit( $relative_dir ) : '' );
+		$src_dir      = trailingslashit( dirname( strtok( $image_src, '?#' ) ) );
+
+		// Compare without scheme; core may switch srcset URLs to https to match src.
+		$local_dir_no_scheme = preg_replace( '#^https?:#', '', $local_dir );
+		if ( preg_replace( '#^https?:#', '', $src_dir ) === $local_dir_no_scheme ) {
+			return $srcset;
+		}
+
+		// Callback so "$" or "\" in src's folder isn't read as a backreference.
+		return preg_replace_callback(
+			'#https?:' . preg_quote( $local_dir_no_scheme, '#' ) . '#',
+			static function () use ( $src_dir ) {
+				return $src_dir;
+			},
+			$srcset
+		);
 	}
 
 	public static function is_image_correct_dimensions( $img_id, $img_size ) {

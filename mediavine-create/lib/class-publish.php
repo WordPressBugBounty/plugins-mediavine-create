@@ -454,6 +454,12 @@ class Publish extends Plugin {
 	}
 
 	public static function prepare_times( $creation ) {
+		// Cards saved before 2.0.12 can carry a total that doesn't match the times.
+		$reconciled = Creations::reconcile_total_time( (array) $creation );
+		if ( isset( $reconciled['total_time'] ) ) {
+			$creation->total_time = $reconciled['total_time'];
+		}
+
 		$times_to_parse = [
 			'prep_time',
 			'active_time',

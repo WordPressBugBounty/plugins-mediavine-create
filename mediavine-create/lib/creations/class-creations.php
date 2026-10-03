@@ -710,12 +710,175 @@ class Creations extends Plugin {
 	}
 
 	/**
+	 * Set a card's total time to the sum of its prep, active and additional
+	 * times.
+	 *
+	 * The total can't be edited directly; it's stored in its own column and
+	 * the editor only recalculates it when a time field is edited. Editors
+	 * before 2.0.12 could save a total that didn't match the times (a stale
+	 * closure in the times drag-and-drop list), and nothing ever corrected
+	 * it afterward.
+	 *
+	 * Only runs when all four time fields are present, so partial updates
+	 * (e.g. a category-only write) never overwrite the stored total, and
+	 * only when at least one time is set, so a total-only card keeps its
+	 * total.
+	 *
+	 * @param array $data Creation data with time values in seconds.
+	 * @return array Creation data with a reconciled total_time.
+	 */
+	public static function reconcile_total_time( $data ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
+		foreach ( [ 'prep_time', 'active_time', 'additional_time', 'total_time' ] as $key ) {
+			if ( ! array_key_exists( $key, $data ) ) {
+				return $data;
+			}
+		}
+
+		$sum = (int) $data['prep_time'] + (int) $data['active_time'] + (int) $data['additional_time'];
+		if ( $sum > 0 && (int) $data['total_time'] !== $sum ) {
+			$data['total_time'] = $sum;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Fix stored totals that don't match the sum of a card's times.
+	 *
+	 * Patches the draft row and, separately, the published blob and its frozen
+	 * JSON-LD in place. Cards are deliberately not republished: that would
+	 * push any unpublished draft edits live.
+	 *
+	 * @return int[] IDs of the cards that were repaired.
+	 */
+	public static function repair_stale_totals() {
+		global $wpdb;
+
+		$published_times = '';
+		foreach ( [ 'prep_time', 'active_time', 'additional_time', 'total_time' ] as $key ) {
+			$published_times .= ", CASE WHEN JSON_VALID(published) THEN JSON_EXTRACT(published, '$.{$key}.original') END AS published_{$key}";
+		}
+
+		$suppress = $wpdb->suppress_errors( true );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-time migration; table is $wpdb->prefix . literal and the interpolated columns are literals
+		$rows = $wpdb->get_results( "SELECT id, prep_time, active_time, additional_time, total_time {$published_times} FROM {$wpdb->prefix}mv_creations WHERE type IN ('recipe', 'diy')", ARRAY_A );
+		$wpdb->suppress_errors( $suppress );
+
+		// Databases without JSON functions can still have their drafts repaired.
+		if ( ! is_array( $rows ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time migration; table is $wpdb->prefix . literal
+			$rows = $wpdb->get_results( "SELECT id, prep_time, active_time, additional_time, total_time FROM {$wpdb->prefix}mv_creations WHERE type IN ('recipe', 'diy')", ARRAY_A );
+		}
+
+		if ( empty( $rows ) ) {
+			return [];
+		}
+
+		$repaired = [];
+		foreach ( $rows as $row ) {
+			$id = (int) $row['id'];
+
+			$draft = self::reconcile_total_time(
+				[
+					'prep_time'       => $row['prep_time'],
+					'active_time'     => $row['active_time'],
+					'additional_time' => $row['additional_time'],
+					'total_time'      => $row['total_time'],
+				]
+			);
+			if ( (int) $draft['total_time'] !== (int) $row['total_time'] ) {
+				self::$models_v2->mv_creations->update_without_modified_date(
+					[
+						'id'         => $id,
+						'total_time' => $draft['total_time'],
+					]
+				);
+				$repaired[ $id ] = $id;
+			}
+
+			if ( ! array_key_exists( 'published_total_time', $row ) || null === $row['published_total_time'] ) {
+				continue;
+			}
+
+			$published = self::reconcile_total_time(
+				[
+					'prep_time'       => $row['published_prep_time'],
+					'active_time'     => $row['published_active_time'],
+					'additional_time' => $row['published_additional_time'],
+					'total_time'      => $row['published_total_time'],
+				]
+			);
+			if ( (int) $published['total_time'] !== (int) $row['published_total_time'] && self::patch_published_total_time( $id, (int) $published['total_time'] ) ) {
+				$repaired[ $id ] = $id;
+			}
+		}
+
+		return array_values( $repaired );
+	}
+
+	/**
+	 * Rewrite the total time in a card's published blob and frozen JSON-LD.
+	 *
+	 * @param int $creation_id Creation ID.
+	 * @param int $total_time  Corrected total time in seconds.
+	 * @return bool Whether the card was updated.
+	 */
+	private static function patch_published_total_time( $creation_id, $total_time ) {
+		$creation = self::$models_v2->mv_creations->find_one( $creation_id );
+		if ( ! is_object( $creation ) || empty( $creation->published ) ) {
+			return false;
+		}
+
+		$published = json_decode( $creation->published, true );
+		if ( ! is_array( $published ) ) {
+			return false;
+		}
+
+		$times                   = Publish::prepare_times( (object) [ 'total_time' => $total_time ] );
+		$published['total_time'] = $times->total_time;
+
+		$duration = ( new JSON_LD_Helpers() )->build_duration( $total_time );
+		$patch    = function ( $json_ld ) use ( $duration ) {
+			$decoded = is_string( $json_ld ) ? json_decode( $json_ld, true ) : null;
+			if ( ! is_array( $decoded ) || ! array_key_exists( 'totalTime', $decoded ) ) {
+				return $json_ld;
+			}
+			$decoded['totalTime'] = $duration;
+			return wp_json_encode( $decoded );
+		};
+
+		if ( isset( $published['json_ld'] ) ) {
+			$published['json_ld'] = $patch( $published['json_ld'] );
+		}
+
+		$result = self::$models_v2->mv_creations->update_without_modified_date(
+			[
+				'id'        => $creation_id,
+				'published' => wp_json_encode( $published ),
+				'json_ld'   => $patch( $creation->json_ld ),
+			]
+		);
+
+		if ( class_exists( '\Mediavine\Cache_Manager' ) && ! empty( $creation->associated_posts ) ) {
+			\Mediavine\Cache_Manager::clear_by_id( json_decode( $creation->associated_posts ) );
+		}
+
+		return ! empty( $result );
+	}
+
+	/**
 	 * Lifecycle hook to manage pre DB write Operations
 	 *
 	 * @param object $data  Associative Array with data to be stored
 	 * @return object Associative Array that includes the changes made in the hook
 	 */
 	function before_create( $data ) {
+		$data = self::reconcile_total_time( $data );
+
 		$original_data = $data;
 		$user          = \wp_get_current_user();
 		$object_id     = \wp_insert_post(
@@ -760,6 +923,8 @@ class Creations extends Plugin {
 	 * @return object Update Creation data
 	 */
 	function before_update( $data ) {
+		$data = self::reconcile_total_time( $data );
+
 		// If there is no object id, there's nothing we can do!
 		if ( ! empty($data['object_id']) ) {
 			// We'll check to see if any category was previously associated
@@ -1213,14 +1378,21 @@ class Creations extends Plugin {
 		$creation->modified     = time();
 
 		if ( ! empty($creation->json_ld) ) {
-			$json_ld                  = json_decode($creation->json_ld ?: '{}');
-			$json_ld->aggregateRating = [
-				'@type'       => 'AggregateRating',
-				// Add $rating_value as string because json_encode
-				// uses the floated number, which isn't rounded
-				'ratingValue' => strval($rating_value),
-				'reviewCount' => $rating_count,
-			];
+			$json_ld = json_decode($creation->json_ld ?: '{}');
+
+			// Google rejects a zero rating/reviewCount, so drop the block once
+			// the last review is deleted, matching what a fresh publish builds
+			if ( $rating_count < 1 || $rating_value <= 0 ) {
+				unset($json_ld->aggregateRating);
+			} else {
+				$json_ld->aggregateRating = [
+					'@type'       => 'AggregateRating',
+					// Add $rating_value as string because json_encode
+					// uses the floated number, which isn't rounded
+					'ratingValue' => strval($rating_value),
+					'reviewCount' => $rating_count,
+				];
+			}
 
 			$creation->json_ld = wp_json_encode($json_ld);
 		}

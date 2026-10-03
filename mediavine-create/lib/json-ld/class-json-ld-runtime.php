@@ -238,6 +238,35 @@ class JSON_LD_Runtime extends Plugin {
 		return true;
 	}
 
+	/**
+	 * Removes a zeroed aggregateRating from stored JSON-LD.
+	 *
+	 * Deleting a card's last review used to store ratingValue "0" and
+	 * reviewCount 0, which Google flags as invalid, so heal it at render.
+	 *
+	 * @param string $json_ld Encoded JSON-LD
+	 * @return string JSON-LD without an empty aggregateRating
+	 */
+	public static function strip_empty_aggregate_rating( $json_ld ) {
+		if ( ! is_string( $json_ld ) || false === strpos( $json_ld, '"aggregateRating"' ) ) {
+			return $json_ld;
+		}
+
+		$decoded = json_decode( $json_ld, true );
+		if ( ! is_array( $decoded ) || ! isset( $decoded['aggregateRating'] ) ) {
+			return $json_ld;
+		}
+
+		$rating = $decoded['aggregateRating'];
+		if ( floatval( $rating['ratingValue'] ?? 0 ) > 0 && intval( $rating['reviewCount'] ?? 0 ) > 0 ) {
+			return $json_ld;
+		}
+
+		unset( $decoded['aggregateRating'] );
+
+		return wp_json_encode( $decoded );
+	}
+
 	public function build_json_ld_schema_script_tag( $json_ld, $type, $creations, $post_id ) {
 		/**
 		 * Filters the JSON-LD schema to go in a script tag in wp_head
@@ -305,7 +334,7 @@ class JSON_LD_Runtime extends Plugin {
 
 			// If no schema exists yet, we can build it.
 			if ( empty( $json_ld_strings[ $published_creation['type'] ] ) ) {
-				$json_ld_strings[ $published_creation['type'] ] = $published_creation['json_ld'];
+				$json_ld_strings[ $published_creation['type'] ] = self::strip_empty_aggregate_rating( $published_creation['json_ld'] );
 			}
 		}
 

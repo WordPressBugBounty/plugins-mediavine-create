@@ -1165,6 +1165,26 @@ Filters the JSON+LD array by type before output
 
 - `array`
 
+## Filter: mv_create_json_ld_step_sections
+
+```php
+apply_filters( 'mv_create_json_ld_step_sections', $use_sections, $creation, $schema_prop ) : bool $use_sections
+```
+
+Applied in `lib/json-ld/class-json-ld-types.php`
+
+Filters whether headings in a card's instructions group the steps under them into `HowToSection`s. Return `false` to output a flat `HowToStep` list.
+
+**Parameters**
+
+- `$use_sections` Whether to output HowToSections. Default `true`
+- `$creation` The Creation data
+- `$schema_prop` Schema property name (e.g. `recipeInstructions`)
+
+**Returns**
+
+- `bool`
+
 ## Filter: mv_json_ld_value_
 
 ```php

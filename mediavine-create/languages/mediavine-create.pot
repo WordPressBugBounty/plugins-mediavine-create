@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.6.5\n"
+"Project-Id-Version: Create 2.6.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-22T21:26:27+00:00\n"
+"POT-Creation-Date: 2026-10-02T22:14:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
@@ -51,19 +51,19 @@ msgid "Dashboard"
 msgstr ""
 
 #: admin/class-admin-init.php:480
-#: class-plugin.php:1354
+#: class-plugin.php:1400
 #: lib/settings-group/class-advanced.php:284
 msgid "Recipes"
 msgstr ""
 
 #: admin/class-admin-init.php:481
-#: class-plugin.php:1361
+#: class-plugin.php:1407
 #: lib/settings-group/class-advanced.php:288
 msgid "How-Tos"
 msgstr ""
 
 #: admin/class-admin-init.php:482
-#: class-plugin.php:1368
+#: class-plugin.php:1414
 #: lib/settings-group/class-advanced.php:292
 msgid "Lists"
 msgstr ""
@@ -112,93 +112,93 @@ msgstr ""
 msgid "Theme Elements"
 msgstr ""
 
-#: class-plugin.php:557
+#: class-plugin.php:558
 #: lib/settings/class-site-verification.php:431
 msgid "Product Registration"
 msgstr ""
 
-#: class-plugin.php:558
+#: class-plugin.php:559
 #: lib/settings/class-site-verification.php:432
 msgid "In order to use services like nutrition calculation or link scraping, you must register an account. This is a free, one-time action that will grant access to all of our external APIs."
 msgstr ""
 
-#: class-plugin.php:897
+#: class-plugin.php:943
 msgid "Thanks for installing Create!"
 msgstr ""
 
 #. translators: %1$s: link to importer setting, %2$s: closing anchor tag
-#: class-plugin.php:901
+#: class-plugin.php:947
 #, php-format
 msgid "If you're moving from another recipe plugin, %1$senable the importer%2$s and breathe new life into your old recipes."
 msgstr ""
 
-#: class-plugin.php:1284
+#: class-plugin.php:1330
 msgid "CSS Class"
 msgstr ""
 
-#: class-plugin.php:1285
+#: class-plugin.php:1331
 msgid "Add an additional CSS class to this card."
 msgstr ""
 
-#: class-plugin.php:1290
+#: class-plugin.php:1336
 msgid "Custom Nutrition Disclaimer"
 msgstr ""
 
-#: class-plugin.php:1291
+#: class-plugin.php:1337
 msgid "Example: Nutrition information isn't always accurate."
 msgstr ""
 
-#: class-plugin.php:1297
+#: class-plugin.php:1343
 msgid "Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1298
+#: class-plugin.php:1344
 msgid "Override the default affiliate message for this card."
 msgstr ""
 
-#: class-plugin.php:1304
+#: class-plugin.php:1350
 msgid "Show Custom Affiliate Message"
 msgstr ""
 
-#: class-plugin.php:1305
+#: class-plugin.php:1351
 msgid "Check this box to display an affiliate message on this List."
 msgstr ""
 
-#: class-plugin.php:1314
+#: class-plugin.php:1360
 msgid "Social Footer Icon"
 msgstr ""
 
-#: class-plugin.php:1315
+#: class-plugin.php:1361
 msgid "Override the default social footer icon for this card."
 msgstr ""
 
-#: class-plugin.php:1328
+#: class-plugin.php:1374
 msgid "Social Footer Heading"
 msgstr ""
 
-#: class-plugin.php:1329
+#: class-plugin.php:1375
 msgid "Override the default social footer heading for this card."
 msgstr ""
 
-#: class-plugin.php:1335
+#: class-plugin.php:1381
 msgid "Social Footer Content"
 msgstr ""
 
-#: class-plugin.php:1336
+#: class-plugin.php:1382
 msgid "Override the default social footer content for this card."
 msgstr ""
 
-#: class-plugin.php:1353
+#: class-plugin.php:1399
 #: lib/class-admin-bar.php:142
 msgid "Recipe"
 msgstr ""
 
-#: class-plugin.php:1360
+#: class-plugin.php:1406
 #: lib/class-admin-bar.php:143
 msgid "How-To"
 msgstr ""
 
-#: class-plugin.php:1367
+#: class-plugin.php:1413
 #: lib/class-admin-bar.php:144
 #: lib/settings-group/class-reader-experience.php:552
 msgid "List"
@@ -524,20 +524,20 @@ msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:179
 #: lib/creations/class-creations-views.php:1522
-#: lib/creations/class-creations.php:731
+#: lib/creations/class-creations.php:894
 #: lib/importers/sources/class-import-getmecooking.php:272
 #: lib/importers/sources/class-import-purr.php:159
 msgid "Prep Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:185
-#: lib/creations/class-creations.php:732
+#: lib/creations/class-creations.php:895
 msgid "Active Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:191
 #: lib/creations/class-creations-views.php:1524
-#: lib/creations/class-creations.php:733
+#: lib/creations/class-creations.php:896
 #: lib/importers/class-mv-recipe-importer.php:962
 #: lib/importers/sources/class-import-purr.php:160
 msgid "Additional Time"
@@ -728,7 +728,7 @@ msgid "Type"
 msgstr ""
 
 #: lib/creations/class-creations-views.php:1523
-#: lib/creations/class-creations.php:738
+#: lib/creations/class-creations.php:901
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:714
 #: lib/importers/sources/class-import-cookbook.php:189
 #: lib/importers/sources/class-import-getmecooking.php:279
