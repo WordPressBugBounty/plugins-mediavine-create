@@ -1381,8 +1381,9 @@ class Creations extends Plugin {
 			$json_ld = json_decode($creation->json_ld ?: '{}');
 
 			// Google rejects a zero rating/reviewCount, so drop the block once
-			// the last review is deleted, matching what a fresh publish builds
-			if ( $rating_count < 1 || $rating_value <= 0 ) {
+			// the last review is deleted, matching what a fresh publish builds.
+			// It also rejects ratings on an ItemList, so lists never get one
+			if ( $rating_count < 1 || $rating_value <= 0 || 'list' === ( $creation->type ?? '' ) ) {
 				unset($json_ld->aggregateRating);
 			} else {
 				$json_ld->aggregateRating = [

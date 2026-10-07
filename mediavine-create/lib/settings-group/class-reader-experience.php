@@ -75,6 +75,33 @@ class Reader_Experience implements Settings_Group {
 				],
 			],
 			[
+				'slug'  => Plugin::$settings_group . '_jump_to_card_types',
+				'value' => 'all',
+				'group' => Plugin::$settings_group . '_reader_experience',
+				'order' => 12,
+				'data'  => [
+					'type'         => 'select',
+					'label'        => __( 'Show Jump Button On', 'mediavine-create' ),
+					'instructions' => __( 'Which card types get the Jump Button. Posts with only the other card type will not display the button.', 'mediavine-create' ),
+					'default'      => __( 'Recipes and How-Tos', 'mediavine-create' ),
+					'dependent_on' => Plugin::$settings_group . '_enable_jump_to_recipe',
+					'options'      => [
+						[
+							'label' => __( 'Recipes and How-Tos', 'mediavine-create' ),
+							'value' => 'all',
+						],
+						[
+							'label' => __( 'Recipes Only', 'mediavine-create' ),
+							'value' => 'recipe',
+						],
+						[
+							'label' => __( 'How-Tos Only', 'mediavine-create' ),
+							'value' => 'diy',
+						],
+					],
+				],
+			],
+			[
 				'slug'  => Plugin::$settings_group . '_jump_to_recipe_text',
 				'value' => __( 'Jump to Recipe', 'mediavine-create' ),
 				'group' => Plugin::$settings_group . '_reader_experience',

@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.6.6
+Stable tag: 2.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,13 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 2.7.0 =
+
+* FEATURE: New "Show Jump Button On" setting under Reader Experience lets you show the Jump to Recipe button on Recipes and How-Tos, Recipes Only, or How-Tos Only
+* FIX: List cards no longer include a star rating in their schema, which stops invalid structured data warnings in Google Search Console when custom layouts add star ratings
+* FIX: The print view no longer shows a console error on load, and the print dialog now opens after the page (including images) has finished loading
+
 
 = 2.6.6 =
 

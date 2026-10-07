@@ -95,6 +95,37 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 		return false;
 	}
 
+	/**
+	 * Gets the single card type the Jump button is limited to
+	 *
+	 * @return string Card type ('recipe' or 'diy'), or an empty string if all card types get the button
+	 */
+	public static function get_jtr_limited_type() {
+		$card_types = Settings::get_setting( 'mv_create_jump_to_card_types', 'all' );
+
+		return in_array( $card_types, [ 'recipe', 'diy' ], true ) ? $card_types : '';
+	}
+
+	/**
+	 * Checks if the Jump button should display for a card type
+	 *
+	 * @param string $type Card type
+	 * @return boolean True if the card type gets the button, false if not
+	 */
+	public static function is_jtr_type_allowed( $type ) {
+		$limited_type = self::get_jtr_limited_type();
+		if ( empty( $limited_type ) ) {
+			return true;
+		}
+
+		// Cards without a type are recipes
+		if ( empty( $type ) ) {
+			$type = 'recipe';
+		}
+
+		return $limited_type === $type;
+	}
+
 	public function insert_jtr_continue_link( $atts ) {
 		// check for active registration before starting - return early
 		$jtr_enabled       = \Mediavine\Settings::get_setting( self::$settings_group . '_enable_jump_to_recipe', false );
@@ -150,7 +181,7 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 	 */
 	public function insert_jtr_hint( $args ) {
 		// Only add extra ad if JTR is enabled
-		if ( $this->is_jtr_enabled() && 'list' !== $args['type'] ) {
+		if ( $this->is_jtr_enabled() && 'list' !== $args['type'] && self::is_jtr_type_allowed( $args['type'] ) ) {
 			?>
 			<div id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>-jtr-hint-wrapper" class="mv-create-jtr-hint-wrapper">
 			<div id="mv-creation-<?php echo esc_attr( $args['creation']['id'] ); ?>-jtr" class="mv-pre-create-target">
@@ -201,7 +232,7 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 	 * @return void
 	 */
 	public function close_jtr_hint( $args ) {
-		if ( $this->is_jtr_enabled() && 'list' !== $args['type'] ) {
+		if ( $this->is_jtr_enabled() && 'list' !== $args['type'] && self::is_jtr_type_allowed( $args['type'] ) ) {
 		?>
 			</div>
 		<?php
@@ -247,7 +278,7 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 	 * @return string
 	 */
 	public function build_mv_jtr_shortcode( $content ) {
-		$atts = self::get_jtr_atts( $content );
+		$atts = self::get_jtr_atts( $content, true );
 		if ( ! $atts ) {
 			return '';
 		}
@@ -259,11 +290,12 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 
 	/**
 	 * Parse content for mv_create shortcode and return needed arguments
-	 * @param string $content
+	 * @param string  $content
+	 * @param boolean $limit_card_types Only match cards of a type the Jump button is enabled for
 	 *
 	 * @return bool|array
 	 */
-	public static function get_jtr_atts( $content ) {
+	public static function get_jtr_atts( $content, $limit_card_types = false ) {
 		// https://regex101.com/r/dh45kM/8
 		// groups <dummy1> and <dummy2> are non-matching placeholder groups that allow the regex to backtrack
 		// and ensure `key` and `type` are in the shortcode in no particular order
@@ -284,7 +316,7 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 		if ( ! empty( $matches['type'] ) ) {
 			$index = 0;
 			foreach ( $matches['type'] as $match_type ) {
-				if ( 'list' !== $match_type[0] ) {
+				if ( 'list' !== $match_type[0] && ( ! $limit_card_types || self::is_jtr_type_allowed( $match_type[0] ) ) ) {
 					$type = $match_type[0];
 					$id   = $matches['key'][ $index ][0];
 					break;
@@ -295,6 +327,11 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 
 			// Return early if list is the shortcode type
 			if ( 'list' === $matches['type'][0] ) {
+				return false;
+			}
+
+			// Return early if no card is of a type the Jump button is enabled for
+			if ( $limit_card_types && false === $id ) {
 				return false;
 			}
 		}
@@ -349,6 +386,11 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 
 		// Don't output JTR on list types
 		if ( ! empty( $atts['type'] ) && 'list' === $atts['type'] ) {
+			return;
+		}
+
+		// Don't output JTR on card types the button isn't enabled for
+		if ( ! self::is_jtr_type_allowed( isset( $atts['type'] ) ? $atts['type'] : '' ) ) {
 			return;
 		}
 

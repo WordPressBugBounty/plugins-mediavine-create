@@ -1775,7 +1775,15 @@ class Creations_Views extends Creations {
 			window.$mediavine.web = window.$mediavine.web || {}
 			window.$mediavine.web.disable_pagespeed = true
 
-			document.addEventListener("load", window.setTimeout(function(){ window.print() }, 1500) );
+			;(function(){
+				var mvCreatePrint = function(){ window.setTimeout(function(){ window.print() }, 1500) }
+				// `load` has already fired when an optimization plugin delays this script.
+				if ( "complete" === document.readyState ) {
+					mvCreatePrint()
+				} else {
+					window.addEventListener("load", mvCreatePrint, { once: true })
+				}
+			})()
 		'
 		);
 

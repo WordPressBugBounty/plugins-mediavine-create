@@ -299,7 +299,7 @@ class Creations_Views_Hooks extends Creations_Views {
 		}
 
 		if ( empty( $args['print'] ) && $schema_display && ! empty( $args['creation']['json_ld'] ) ) {
-			$json_ld_output = '<script type="application/ld+json">' . JSON_LD_Runtime::strip_empty_aggregate_rating( $args['creation']['json_ld'] ) . '</script>';
+			$json_ld_output = '<script type="application/ld+json">' . JSON_LD_Runtime::strip_invalid_aggregate_rating( $args['creation']['json_ld'] ) . '</script>';
 			$allowed_tags   = [ 'script' => [ 'type' => true ] ];
 
 			echo wp_kses( $json_ld_output, $allowed_tags );

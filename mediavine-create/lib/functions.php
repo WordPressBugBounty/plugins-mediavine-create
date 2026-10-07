@@ -128,7 +128,10 @@ function mv_create_jtr_button( $id = null, $type = null ) {
 	global $post;
 
 	if ( empty( $id ) || empty( $type ) ) {
-		$atts = \Mediavine\Create\Creations_Jump_To_Recipe::get_jtr_atts( get_post_field( 'post_content', $post ) );
+		$atts = \Mediavine\Create\Creations_Jump_To_Recipe::get_jtr_atts( get_post_field( 'post_content', $post ), true );
+		if ( ! $atts ) {
+			return;
+		}
 		$id   = $atts['id'];
 		$type = $atts['type'];
 	}

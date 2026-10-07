@@ -202,6 +202,9 @@ class JSON_LD_Runtime extends Plugin {
 		// resolved url; the builder re-adds it from the current permalink
 		unset( $json_ld_array['@id'] );
 
+		// Lists reviewed before ratings were kept off ItemList still store one
+		unset( $json_ld_array['aggregateRating'] );
+
 		// Build creation context for text item fragment URLs
 		$creation_context = [];
 		if ( ! empty( $post_id ) ) {
@@ -239,15 +242,16 @@ class JSON_LD_Runtime extends Plugin {
 	}
 
 	/**
-	 * Removes a zeroed aggregateRating from stored JSON-LD.
+	 * Removes an aggregateRating Google would flag from stored JSON-LD.
 	 *
 	 * Deleting a card's last review used to store ratingValue "0" and
-	 * reviewCount 0, which Google flags as invalid, so heal it at render.
+	 * reviewCount 0, and reviewing a list used to store a rating on its
+	 * ItemList, which doesn't support one, so heal both at render.
 	 *
 	 * @param string $json_ld Encoded JSON-LD
-	 * @return string JSON-LD without an empty aggregateRating
+	 * @return string JSON-LD without an invalid aggregateRating
 	 */
-	public static function strip_empty_aggregate_rating( $json_ld ) {
+	public static function strip_invalid_aggregate_rating( $json_ld ) {
 		if ( ! is_string( $json_ld ) || false === strpos( $json_ld, '"aggregateRating"' ) ) {
 			return $json_ld;
 		}
@@ -257,8 +261,9 @@ class JSON_LD_Runtime extends Plugin {
 			return $json_ld;
 		}
 
-		$rating = $decoded['aggregateRating'];
-		if ( floatval( $rating['ratingValue'] ?? 0 ) > 0 && intval( $rating['reviewCount'] ?? 0 ) > 0 ) {
+		$rating  = $decoded['aggregateRating'];
+		$is_list = 'ItemList' === ( $decoded['@type'] ?? '' );
+		if ( ! $is_list && floatval( $rating['ratingValue'] ?? 0 ) > 0 && intval( $rating['reviewCount'] ?? 0 ) > 0 ) {
 			return $json_ld;
 		}
 
@@ -334,7 +339,7 @@ class JSON_LD_Runtime extends Plugin {
 
 			// If no schema exists yet, we can build it.
 			if ( empty( $json_ld_strings[ $published_creation['type'] ] ) ) {
-				$json_ld_strings[ $published_creation['type'] ] = self::strip_empty_aggregate_rating( $published_creation['json_ld'] );
+				$json_ld_strings[ $published_creation['type'] ] = self::strip_invalid_aggregate_rating( $published_creation['json_ld'] );
 			}
 		}
 

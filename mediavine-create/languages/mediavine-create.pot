@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 2.6.6\n"
+"Project-Id-Version: Create 2.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T22:14:54+00:00\n"
+"POT-Creation-Date: 2026-10-07T19:35:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
@@ -70,8 +70,8 @@ msgstr ""
 
 #: admin/class-admin-init.php:507
 #: lib/i18n/class-translation.php:52
-#: lib/settings-group/class-reader-experience.php:560
-#: lib/settings-group/class-reader-experience.php:567
+#: lib/settings-group/class-reader-experience.php:587
+#: lib/settings-group/class-reader-experience.php:594
 #: lib/views/v1/shortcode-mv-create-products-list.php:11
 #: lib/views/v1/shortcode-mv-create-products.php:24
 msgid "Recommended Products"
@@ -200,7 +200,7 @@ msgstr ""
 
 #: class-plugin.php:1413
 #: lib/class-admin-bar.php:144
-#: lib/settings-group/class-reader-experience.php:552
+#: lib/settings-group/class-reader-experience.php:579
 msgid "List"
 msgstr ""
 
@@ -491,19 +491,19 @@ msgstr ""
 msgid "Creation not found"
 msgstr ""
 
-#: lib/creations/class-creations-jump-to-recipe.php:368
+#: lib/creations/class-creations-jump-to-recipe.php:410
 #: lib/settings-group/class-pro.php:39
 #: lib/settings-group/class-pro.php:46
-#: lib/settings-group/class-reader-experience.php:79
-#: lib/settings-group/class-reader-experience.php:86
+#: lib/settings-group/class-reader-experience.php:106
+#: lib/settings-group/class-reader-experience.php:113
 msgid "Jump to Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-jump-to-recipe.php:370
+#: lib/creations/class-creations-jump-to-recipe.php:412
 #: lib/settings-group/class-pro.php:52
 #: lib/settings-group/class-pro.php:59
-#: lib/settings-group/class-reader-experience.php:92
-#: lib/settings-group/class-reader-experience.php:99
+#: lib/settings-group/class-reader-experience.php:119
+#: lib/settings-group/class-reader-experience.php:126
 msgid "Jump to How-To"
 msgstr ""
 
@@ -517,7 +517,7 @@ msgstr ""
 
 #. translators: %s: list item title
 #: lib/creations/class-creations-views-list-item-preparer.php:110
-#: lib/creations/class-creations-views.php:2044
+#: lib/creations/class-creations-views.php:2052
 #, php-format
 msgid "Image for %s"
 msgstr ""
@@ -804,45 +804,45 @@ msgstr ""
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1889
-#: lib/creations/class-creations-views.php:1895
+#: lib/creations/class-creations-views.php:1897
+#: lib/creations/class-creations-views.php:1903
 msgid "No Card with ID found"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2147
+#: lib/creations/class-creations-views.php:2155
 msgid "You do not have permission to do this."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2155
+#: lib/creations/class-creations-views.php:2163
 msgid "Invalid theme."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2159
+#: lib/creations/class-creations-views.php:2167
 msgid "This theme requires a Pro subscription."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2235
+#: lib/creations/class-creations-views.php:2243
 msgid "Previewing theme"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2241
+#: lib/creations/class-creations-views.php:2249
 msgid "Premium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2246
+#: lib/creations/class-creations-views.php:2254
 msgid "Preview"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2268
+#: lib/creations/class-creations-views.php:2276
 #: lib/i18n/class-translation.php:78
 msgid "Cancel"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2272
+#: lib/creations/class-creations-views.php:2280
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2277
+#: lib/creations/class-creations-views.php:2285
 msgid "Apply Theme"
 msgstr ""
 
@@ -968,11 +968,11 @@ msgstr ""
 msgid "<strong>Create by Mediavine</strong> requires the following disabled PHP extensions in order to function properly: <code>%1$s</code>.<br/><br/>Your hosting environment does not currently have these enabled.<br/><br/>Please contact your hosting provider and ask them to ensure these extensions are enabled."
 msgstr ""
 
-#: lib/functions.php:244
+#: lib/functions.php:247
 msgid "Refused to fetch a URL that resolves to a private or reserved address."
 msgstr ""
 
-#: lib/functions.php:268
+#: lib/functions.php:271
 msgid "Too many redirects."
 msgstr ""
 
@@ -2337,12 +2337,12 @@ msgid "Adds a toggle to Create cards to allow readers to keep their screen awake
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:73
-#: lib/settings-group/class-reader-experience.php:239
+#: lib/settings-group/class-reader-experience.php:266
 msgid "Enable Checklists"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:74
-#: lib/settings-group/class-reader-experience.php:240
+#: lib/settings-group/class-reader-experience.php:267
 msgid "Add interactive checkboxes to ingredients and instructions for tracking cooking progress."
 msgstr ""
 
@@ -2363,9 +2363,9 @@ msgstr ""
 #: lib/settings-group/class-list-ads.php:59
 #: lib/settings-group/class-lists.php:62
 #: lib/settings-group/class-pro.php:122
-#: lib/settings-group/class-reader-experience.php:241
-#: lib/settings-group/class-reader-experience.php:304
-#: lib/settings-group/class-reader-experience.php:364
+#: lib/settings-group/class-reader-experience.php:268
+#: lib/settings-group/class-reader-experience.php:331
+#: lib/settings-group/class-reader-experience.php:391
 #: lib/settings-group/class-recipes.php:24
 #: lib/settings-group/class-recipes.php:79
 #: lib/settings-group/class-recipes.php:168
@@ -2431,9 +2431,9 @@ msgstr ""
 #: lib/settings-group/class-display.php:156
 #: lib/settings-group/class-list-ads.php:59
 #: lib/settings-group/class-lists.php:50
-#: lib/settings-group/class-reader-experience.php:172
-#: lib/settings-group/class-reader-experience.php:292
-#: lib/settings-group/class-reader-experience.php:615
+#: lib/settings-group/class-reader-experience.php:199
+#: lib/settings-group/class-reader-experience.php:319
+#: lib/settings-group/class-reader-experience.php:642
 #: lib/settings-group/class-recipes.php:142
 #: lib/settings-group/class-recipes.php:156
 msgid "Enabled"
@@ -2464,22 +2464,22 @@ msgid "When enabled, scrolling the list editor will automatically scroll the pre
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:199
-#: lib/settings-group/class-reader-experience.php:290
+#: lib/settings-group/class-reader-experience.php:317
 msgid "Allow Reviews"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:200
-#: lib/settings-group/class-reader-experience.php:291
+#: lib/settings-group/class-reader-experience.php:318
 msgid "Unchecking this box will prevent users from being able to leave reviews on your recipe cards."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:211
-#: lib/settings-group/class-reader-experience.php:302
+#: lib/settings-group/class-reader-experience.php:329
 msgid "Display Review CTAs"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:212
-#: lib/settings-group/class-reader-experience.php:303
+#: lib/settings-group/class-reader-experience.php:330
 msgid "Display prompts encouraging site visitors to leave reviews."
 msgstr ""
 
@@ -2537,32 +2537,32 @@ msgid "If enabled, will allow specific custom post types to be added to Lists"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:318
-#: lib/settings-group/class-reader-experience.php:315
+#: lib/settings-group/class-reader-experience.php:342
 msgid "Allow Anonymous Ratings"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:319
-#: lib/settings-group/class-reader-experience.php:316
+#: lib/settings-group/class-reader-experience.php:343
 msgid "If enabled, 4 and 5 star reviews will be submitted when the star is clicked. Users leaving a star rating will then see a popup modal prompting them to leave an optional review. Disabling this will not sumbit the rating until after the review has been added. The prompt will still display."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:330
-#: lib/settings-group/class-reader-experience.php:327
+#: lib/settings-group/class-reader-experience.php:354
 msgid "Enable Public Reviews"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:331
-#: lib/settings-group/class-reader-experience.php:328
+#: lib/settings-group/class-reader-experience.php:355
 msgid "If enabled, card reviews will be publicly visible, displayed in a tab alongside comments. You must specify a DOM selector for your comments section."
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:342
-#: lib/settings-group/class-reader-experience.php:339
+#: lib/settings-group/class-reader-experience.php:366
 msgid "Comments Section"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:343
-#: lib/settings-group/class-reader-experience.php:340
+#: lib/settings-group/class-reader-experience.php:367
 msgid "Add the DOM selector of your comments section. (In most themes, this will be \"#comments\".)"
 msgstr ""
 
@@ -2584,8 +2584,8 @@ msgstr ""
 
 #: lib/settings-group/class-advanced.php:370
 #: lib/settings-group/class-advanced.php:385
-#: lib/settings-group/class-reader-experience.php:580
-#: lib/settings-group/class-reader-experience.php:600
+#: lib/settings-group/class-reader-experience.php:607
+#: lib/settings-group/class-reader-experience.php:627
 msgid "After Video"
 msgstr ""
 
@@ -2594,14 +2594,14 @@ msgid "Above Supplies/Ingredients"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:377
-#: lib/settings-group/class-reader-experience.php:515
-#: lib/settings-group/class-reader-experience.php:588
+#: lib/settings-group/class-reader-experience.php:542
+#: lib/settings-group/class-reader-experience.php:615
 msgid "Above Instructions"
 msgstr ""
 
 #: lib/settings-group/class-advanced.php:381
-#: lib/settings-group/class-reader-experience.php:504
-#: lib/settings-group/class-reader-experience.php:596
+#: lib/settings-group/class-reader-experience.php:531
+#: lib/settings-group/class-reader-experience.php:623
 msgid "Below Notes"
 msgstr ""
 
@@ -3037,307 +3037,328 @@ msgid ""
 msgstr ""
 
 #: lib/settings-group/class-pro.php:44
-#: lib/settings-group/class-reader-experience.php:84
+#: lib/settings-group/class-reader-experience.php:111
 msgid "Jump To Recipe Button Text"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:45
-#: lib/settings-group/class-reader-experience.php:85
+#: lib/settings-group/class-reader-experience.php:112
 msgid "The text of the Jump To Recipe Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:57
-#: lib/settings-group/class-reader-experience.php:97
+#: lib/settings-group/class-reader-experience.php:124
 msgid "Jump To How-To Button Text"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:58
-#: lib/settings-group/class-reader-experience.php:98
+#: lib/settings-group/class-reader-experience.php:125
 msgid "The text of the Jump To How-To Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:70
-#: lib/settings-group/class-reader-experience.php:110
+#: lib/settings-group/class-reader-experience.php:137
 msgid "Jump to Recipe Color"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:71
-#: lib/settings-group/class-reader-experience.php:111
+#: lib/settings-group/class-reader-experience.php:138
 msgid "Color for Jump to Recipe Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:72
 #: lib/settings-group/class-pro.php:76
-#: lib/settings-group/class-reader-experience.php:112
-#: lib/settings-group/class-reader-experience.php:116
+#: lib/settings-group/class-reader-experience.php:139
+#: lib/settings-group/class-reader-experience.php:143
 msgid "Gray"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:80
-#: lib/settings-group/class-reader-experience.php:120
+#: lib/settings-group/class-reader-experience.php:147
 msgid "Custom Colors"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:93
-#: lib/settings-group/class-reader-experience.php:133
+#: lib/settings-group/class-reader-experience.php:160
 msgid "Jump to Recipe Button Style"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:94
-#: lib/settings-group/class-reader-experience.php:134
+#: lib/settings-group/class-reader-experience.php:161
 msgid "Style for Jump to Recipe Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:95
 #: lib/settings-group/class-pro.php:99
-#: lib/settings-group/class-reader-experience.php:135
-#: lib/settings-group/class-reader-experience.php:139
+#: lib/settings-group/class-reader-experience.php:162
+#: lib/settings-group/class-reader-experience.php:166
 msgid "Link"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:103
-#: lib/settings-group/class-reader-experience.php:143
+#: lib/settings-group/class-reader-experience.php:170
 msgid "Hollow Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:107
-#: lib/settings-group/class-reader-experience.php:147
+#: lib/settings-group/class-reader-experience.php:174
 msgid "Solid Button"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:120
-#: lib/settings-group/class-reader-experience.php:362
+#: lib/settings-group/class-reader-experience.php:389
 msgid "Enable Social Footer"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:121
-#: lib/settings-group/class-reader-experience.php:363
+#: lib/settings-group/class-reader-experience.php:390
 msgid "Adds a call to action to the bottom of each card encouraging social sharing."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:132
-#: lib/settings-group/class-reader-experience.php:374
+#: lib/settings-group/class-reader-experience.php:401
 msgid "Social Sharing Service"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:133
-#: lib/settings-group/class-reader-experience.php:375
+#: lib/settings-group/class-reader-experience.php:402
 msgid "Select the social service to encourage."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:134
 #: lib/settings-group/class-pro.php:141
-#: lib/settings-group/class-reader-experience.php:376
-#: lib/settings-group/class-reader-experience.php:383
+#: lib/settings-group/class-reader-experience.php:403
+#: lib/settings-group/class-reader-experience.php:410
 msgid "Instagram"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:137
-#: lib/settings-group/class-reader-experience.php:379
+#: lib/settings-group/class-reader-experience.php:406
 msgid "Facebook"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:145
-#: lib/settings-group/class-reader-experience.php:387
+#: lib/settings-group/class-reader-experience.php:414
 msgid "Pinterest"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:159
-#: lib/settings-group/class-reader-experience.php:401
+#: lib/settings-group/class-reader-experience.php:428
 msgid "Facebook Username"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:160
-#: lib/settings-group/class-reader-experience.php:402
+#: lib/settings-group/class-reader-experience.php:429
 msgid "Enter your Facebook username to link the Facebook icon on Facebook social footer cards."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:172
-#: lib/settings-group/class-reader-experience.php:414
+#: lib/settings-group/class-reader-experience.php:441
 msgid "Instagram Username"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:173
-#: lib/settings-group/class-reader-experience.php:415
+#: lib/settings-group/class-reader-experience.php:442
 msgid "Enter your Instagram username to link the Instagram icon on Instagram social footer cards."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:185
-#: lib/settings-group/class-reader-experience.php:427
+#: lib/settings-group/class-reader-experience.php:454
 msgid "Pinterest Username"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:186
-#: lib/settings-group/class-reader-experience.php:428
+#: lib/settings-group/class-reader-experience.php:455
 msgid "Enter your Pinterest username to link the Pinterest icon on Pinterest social footer cards."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:193
-#: lib/settings-group/class-reader-experience.php:435
+#: lib/settings-group/class-reader-experience.php:462
 msgid "Did you make this recipe?"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:198
-#: lib/settings-group/class-reader-experience.php:440
+#: lib/settings-group/class-reader-experience.php:467
 msgid "Social Footer Heading - Recipe"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:199
-#: lib/settings-group/class-reader-experience.php:441
+#: lib/settings-group/class-reader-experience.php:468
 msgid "The title for the social footer on recipe cards. If left blank, \"Did you make this recipe?\" will display."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:211
-#: lib/settings-group/class-reader-experience.php:453
+#: lib/settings-group/class-reader-experience.php:480
 msgid "Social Footer Content - Recipe"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:212
-#: lib/settings-group/class-reader-experience.php:454
+#: lib/settings-group/class-reader-experience.php:481
 msgid "The content for the social footer on recipe cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:219
-#: lib/settings-group/class-reader-experience.php:461
+#: lib/settings-group/class-reader-experience.php:488
 msgid "Did you make this project?"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:224
-#: lib/settings-group/class-reader-experience.php:466
+#: lib/settings-group/class-reader-experience.php:493
 msgid "Social Footer Heading - How-To"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:225
-#: lib/settings-group/class-reader-experience.php:467
+#: lib/settings-group/class-reader-experience.php:494
 msgid "The title for the social footer on how-to cards. If left blank, \"Did you make this project?\" will display."
 msgstr ""
 
 #: lib/settings-group/class-pro.php:237
-#: lib/settings-group/class-reader-experience.php:479
+#: lib/settings-group/class-reader-experience.php:506
 msgid "Social Footer Content - How-To"
 msgstr ""
 
 #: lib/settings-group/class-pro.php:238
-#: lib/settings-group/class-reader-experience.php:480
+#: lib/settings-group/class-reader-experience.php:507
 msgid "The content for the social footer on how-to cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:170
-msgid "Enable Interactive Mode"
+#: lib/settings-group/class-reader-experience.php:84
+msgid "Show Jump Button On"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:171
-msgid "Allow readers to experience step-by-step interactive cooking mode on recipe cards."
+#: lib/settings-group/class-reader-experience.php:85
+msgid "Which card types get the Jump Button. Posts with only the other card type will not display the button."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:183
-msgid "Interactive Mode Button Text"
+#: lib/settings-group/class-reader-experience.php:86
+#: lib/settings-group/class-reader-experience.php:90
+msgid "Recipes and How-Tos"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:184
-msgid "Customize the text displayed on the Interactive Mode button. Leave blank for the default. This setting syncs with Create Studio."
+#: lib/settings-group/class-reader-experience.php:94
+msgid "Recipes Only"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:98
+msgid "How-Tos Only"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:197
-msgid "CTA Style"
+msgid "Enable Interactive Mode"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:198
-msgid "Choose how the Interactive Mode call-to-action appears on your recipe cards. This setting syncs with Create Studio."
+msgid "Allow readers to experience step-by-step interactive cooking mode on recipe cards."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:210
+msgid "Interactive Mode Button Text"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:211
-msgid "CTA Title"
+msgid "Customize the text displayed on the Interactive Mode button. Leave blank for the default. This setting syncs with Create Studio."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:212
-msgid "Title text for the CTA element. Leave blank for the default. This setting syncs with Create Studio."
+#: lib/settings-group/class-reader-experience.php:224
+msgid "CTA Style"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:225
-msgid "CTA Subtitle"
+msgid "Choose how the Interactive Mode call-to-action appears on your recipe cards. This setting syncs with Create Studio."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:226
-msgid "Subtitle text for the CTA element. Leave blank for the default. This setting syncs with Create Studio."
+#: lib/settings-group/class-reader-experience.php:238
+msgid "CTA Title"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:239
+msgid "Title text for the CTA element. Leave blank for the default. This setting syncs with Create Studio."
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:252
-msgid "Checklist Sections"
+msgid "CTA Subtitle"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:253
+msgid "Subtitle text for the CTA element. Leave blank for the default. This setting syncs with Create Studio."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:279
+msgid "Checklist Sections"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:280
 msgid "Choose which sections display interactive checkboxes."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:259
+#: lib/settings-group/class-reader-experience.php:286
 msgid "Ingredients Only"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:263
+#: lib/settings-group/class-reader-experience.php:290
 msgid "Instructions Only"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:267
+#: lib/settings-group/class-reader-experience.php:294
 msgid "Both"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:502
+#: lib/settings-group/class-reader-experience.php:529
 msgid "Video Section Position"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:503
+#: lib/settings-group/class-reader-experience.php:530
 msgid "Choose where the video section appears on recipe and how-to cards. Individual cards can override this setting."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:507
+#: lib/settings-group/class-reader-experience.php:534
 msgid "Default (Below Notes)"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:511
-#: lib/settings-group/class-reader-experience.php:584
+#: lib/settings-group/class-reader-experience.php:538
+#: lib/settings-group/class-reader-experience.php:611
 msgid "Above Supplies"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:519
-#: lib/settings-group/class-reader-experience.php:592
+#: lib/settings-group/class-reader-experience.php:546
+#: lib/settings-group/class-reader-experience.php:619
 msgid "Below Instructions"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:542
+#: lib/settings-group/class-reader-experience.php:569
 msgid "Products Display Mode"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:543
+#: lib/settings-group/class-reader-experience.php:570
 msgid "Choose how products are displayed on recipe and how-to cards. Gallery shows products in a scrollable carousel, while List displays them in a clean text format."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:544
-#: lib/settings-group/class-reader-experience.php:548
+#: lib/settings-group/class-reader-experience.php:571
+#: lib/settings-group/class-reader-experience.php:575
 msgid "Gallery"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:565
+#: lib/settings-group/class-reader-experience.php:592
 msgid "Products Section Title"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:566
+#: lib/settings-group/class-reader-experience.php:593
 msgid "The heading displayed above the products section on cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:578
+#: lib/settings-group/class-reader-experience.php:605
 msgid "Products Section Position"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:579
+#: lib/settings-group/class-reader-experience.php:606
 msgid "Choose where the products section appears on recipe and how-to cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:613
+#: lib/settings-group/class-reader-experience.php:640
 msgid "Show Affiliate Disclaimer"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:614
+#: lib/settings-group/class-reader-experience.php:641
 msgid "Display an affiliate disclaimer below the products section when using the text list display mode. This helps with FTC compliance for affiliate links."
 msgstr ""
 
