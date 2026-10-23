@@ -241,10 +241,11 @@ class Settings {
 			return '';
 		}
 
-		$dom = new \DOMDocument();
-		libxml_use_internal_errors( true );
+		$dom                   = new \DOMDocument();
+		$libxml_previous_state = libxml_use_internal_errors( true );
 		$dom->loadHTML( '<html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>' );
 		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
 
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( ! $body ) {
@@ -554,6 +555,14 @@ class Settings {
 		self::$slugged_settings = [];
 		self::$grouped_settings = [];
 		self::$cache_built      = false;
+
+		/**
+		 * Fires after the request-level settings cache is cleared.
+		 *
+		 * Consumers that memoize values derived from settings (e.g. GateKeeper's
+		 * effective tier) should discard their memos here.
+		 */
+		do_action( 'mv_create_settings_cache_reset' );
 	}
 
 	/**
@@ -784,6 +793,14 @@ class Settings {
 			$route_namespace, '/reset-subscription-tier', [
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => [ $this->settings_api, 'reset_subscription_tier' ],
+				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
+			]
+		);
+
+		register_rest_route(
+			$route_namespace, '/reset-plan-choice', [
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => [ $this->settings_api, 'reset_plan_choice' ],
 				'permission_callback' => [ \Mediavine\Permissions::class, 'admin' ],
 			]
 		);

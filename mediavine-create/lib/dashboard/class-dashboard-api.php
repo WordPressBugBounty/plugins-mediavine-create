@@ -4,7 +4,7 @@ namespace Mediavine\Create;
 /**
  * Dashboard API - REST endpoints for the Create Dashboard.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 class Dashboard_API {
 
@@ -263,9 +263,10 @@ class Dashboard_API {
 		// 5. Auto-detect: registered for Create Studio.
 		$registered = ! empty( \Mediavine\Settings::get_setting( 'mv_create_api_token' ) );
 
-		// 6. Auto-detect: Pro subscription.
-		$tier   = GateKeeper::get_subscription_tier();
-		$is_pro = in_array( $tier, [ GateKeeper::TIER_PRO, GateKeeper::TIER_FREE_PLUS ], true );
+		// 6. Auto-detect: paid plan (real non-trial PAID subscription only — a
+		// trial's Pro Pass effective tier must not complete this step, and
+		// neither must free-plus, which is granted just by connecting).
+		$has_paid_plan = GateKeeper::is_paid_subscriber();
 
 		$items = [
 			'create_card'     => $create_card,
@@ -273,7 +274,7 @@ class Dashboard_API {
 			'select_theme'    => $select_theme || ! empty( $stored['select_theme'] ),
 			'choose_colors'   => $choose_colors || ! empty( $stored['choose_colors'] ),
 			'register_studio' => $registered || ! empty( $stored['register_studio'] ),
-			'sign_up_pro'     => $is_pro || ! empty( $stored['sign_up_pro'] ),
+			'sign_up_pro'     => $has_paid_plan || ! empty( $stored['sign_up_pro'] ),
 		];
 
 		$completed = ! in_array( false, $items, true );
@@ -438,9 +439,10 @@ class Dashboard_API {
 			$stored['studious_creator'] = [ 'unlocked' => false, 'unlocked_at' => null ];
 		}
 
-		// Pro Publisher - single tier.
-		$tier   = GateKeeper::get_subscription_tier();
-		$is_pro = in_array( $tier, [ GateKeeper::TIER_PRO, GateKeeper::TIER_FREE_PLUS ], true );
+		// Pro Publisher - single tier (real non-trial subscription only:
+		// achievements are never re-locked, so a 14-day trial must not
+		// permanently unlock it).
+		$is_pro = GateKeeper::is_paid_or_free_plus_subscriber();
 		if ( $is_pro && empty( $stored['pro_create_er']['unlocked'] ) ) {
 			$stored['pro_create_er'] = [
 				'unlocked'    => true,
@@ -469,7 +471,7 @@ class Dashboard_API {
 								 ( ! empty( \Mediavine\Settings::get_setting( 'mv_create_secondary_color' ) ) && '#333333' !== \Mediavine\Settings::get_setting( 'mv_create_secondary_color' ) && '#333' !== \Mediavine\Settings::get_setting( 'mv_create_secondary_color' ) ) ||
 								 ! empty( $checklist_stored['choose_colors'] ),
 			'register_studio' => ! empty( \Mediavine\Settings::get_setting( 'mv_create_api_token' ) ) || ! empty( $checklist_stored['register_studio'] ),
-			'sign_up_pro'     => $is_pro || ! empty( $checklist_stored['sign_up_pro'] ),
+			'sign_up_pro'     => GateKeeper::is_paid_subscriber() || ! empty( $checklist_stored['sign_up_pro'] ),
 		];
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
@@ -872,7 +874,7 @@ class Dashboard_API {
 			}
 		}
 
-		$feed_url = rtrim( Plugin::$services_api_url, '/' ) . '/plugin/broadcasts?tier=' . GateKeeper::get_subscription_tier() . '&create_version=' . Plugin::VERSION;
+		$feed_url = rtrim( Plugin::$services_api_url, '/' ) . '/plugin/broadcasts?tier=' . GateKeeper::tier_for_broadcasts() . '&create_version=' . Plugin::VERSION;
 		$response = wp_remote_get( $feed_url, [
 			'timeout' => 5,
 			'headers' => [ 'Accept' => 'application/json' ],
@@ -982,7 +984,7 @@ class Dashboard_API {
 		}
 
 		if ( empty( $broadcasts ) || ! is_array( $broadcasts ) ) {
-			$feed_url = rtrim( Plugin::$services_api_url, '/' ) . '/plugin/broadcasts?tier=' . GateKeeper::get_subscription_tier() . '&create_version=' . Plugin::VERSION;
+			$feed_url = rtrim( Plugin::$services_api_url, '/' ) . '/plugin/broadcasts?tier=' . GateKeeper::tier_for_broadcasts() . '&create_version=' . Plugin::VERSION;
 			$response = wp_remote_get( $feed_url, [
 				'timeout' => 5,
 				'headers' => [ 'Accept' => 'application/json' ],

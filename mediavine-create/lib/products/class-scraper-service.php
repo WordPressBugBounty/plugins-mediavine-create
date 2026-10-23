@@ -15,7 +15,7 @@
  * Previously Products_API returned HTTP 401 `not_connected` when Studio was
  * disconnected; scrape_external() now uses the local LinkScraper fallback instead.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

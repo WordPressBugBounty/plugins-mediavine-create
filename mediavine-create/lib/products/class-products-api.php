@@ -41,6 +41,11 @@ class Products_API extends Products {
 
 		$product = Arr::only( $product['data'], $fields_to_update );
 
+		// Strip dangerous URL schemes (javascript:, data:) before the link is ever stored.
+		if ( ! empty( $product['link'] ) ) {
+			$product['link'] = esc_url_raw( $product['link'] );
+		}
+
 		// get Amazon data here
 		$amazon_scraper = Amazon_Adapter::get_instance();
 		$asin           = $amazon_scraper->get_asin_from_link( $product['link'] );
@@ -333,6 +338,46 @@ class Products_API extends Products {
 	}
 
 	/**
+	 * Guard a product-scrape endpoint behind a GateKeeper feature.
+	 *
+	 * Two distinct gates flow through here:
+	 *  - FEATURE_PRODUCT_SCRAPE (the Create Studio URL scraper) is TIER-gated —
+	 *    it requires a paid plan or Free+ (EVERYONE_BUT_FREE).
+	 *  - FEATURE_AMAZON_LOOKUP (the Amazon Creators API path) is CONNECTION-gated —
+	 *    Amazon uses the publisher's own keys, so it is free at every tier once
+	 *    connected. A failure there means "not connected", not "upgrade".
+	 *
+	 * @param string $feature The GateKeeper feature constant to check.
+	 * @return \WP_Error|null WP_Error 403 if gated, null if allowed.
+	 */
+	private function guard_scrape( $feature = GateKeeper::FEATURE_PRODUCT_SCRAPE ) {
+		if ( GateKeeper::can_access( $feature ) ) {
+			return null;
+		}
+
+		// Connection-gated features (e.g. Amazon lookup) are blocked only because
+		// the site is disconnected — surface that, not a tier upsell.
+		if ( GateKeeper::is_connection_gated( $feature ) ) {
+			return GateKeeper::connection_required_error(
+				__( 'Connect this site to Create Studio to look up Amazon products.', 'mediavine-create' )
+			);
+		}
+
+		return new \WP_Error(
+			'feature_gated',
+			sprintf(
+				/* translators: %s: list of subscription plans that unlock the feature (e.g. "Free+, Pro Guides, Pro Lists, or Pro Pass"). */
+				__( 'Product scraping requires a %s plan.', 'mediavine-create' ),
+				GateKeeper::required_tiers_label( $feature )
+			),
+			[
+				'status'      => 403,
+				'upgrade_url' => GateKeeper::get_upgrade_url(),
+			]
+		);
+	}
+
+	/**
 	 * Scrape product url for data
 	 *
 	 * @param Request  $request WordPress Request object
@@ -341,6 +386,13 @@ class Products_API extends Products {
 	 * @return array|\WP_Error|Response
 	 */
 	public function scrape( Request $request, Response $response ) {
+		// Amazon-only endpoint: connection-gated (publisher's own Amazon keys),
+		// not tier-gated. Free at every tier once connected.
+		$gated = $this->guard_scrape( GateKeeper::FEATURE_AMAZON_LOOKUP );
+		if ( $gated ) {
+			return $gated;
+		}
+
 		$simulated = $this->maybe_simulate_scrape_error( $request );
 		if ( $simulated ) {
 			return $simulated;
@@ -417,6 +469,14 @@ class Products_API extends Products {
 	 * @return array|\WP_Error|Response
 	 */
 	public function scrape_non_amazon( Request $request, Response $response ) {
+		// Baseline: require a connection (the ASIN/PA-API branch below uses the
+		// publisher's own Amazon keys). The Create Studio scraper branch layers the
+		// FEATURE_PRODUCT_SCRAPE tier gate on top, just before its remote call.
+		$gated = $this->guard_scrape( GateKeeper::FEATURE_AMAZON_LOOKUP );
+		if ( $gated ) {
+			return $gated;
+		}
+
 		$simulated = $this->maybe_simulate_scrape_error( $request );
 		if ( $simulated ) {
 			return $simulated;
@@ -447,14 +507,20 @@ class Products_API extends Products {
 			if ( ! empty( $scraped['wp_error'] ) ) {
 				return $scraped['wp_error'];
 			}
-
-			if ( ! empty( $scraped['status'] ) && 'success' === $scraped['status'] ) {
-				$result = $scraped['data'];
-			} elseif ( ! empty( $scraped['status'] ) && 'skipped' === $scraped['status'] && 'no_asin' === $scraped['reason'] ) {
-				// No ASIN: Create Studio services API, then local LinkScraper.
-				$external = $scraper->scrape_external( $link );
-				if ( ! empty( $external['status'] ) && 'success' === $external['status'] ) {
-					$result = $external['data'];
+		if ( ! empty( $scraped['status'] ) && 'success' === $scraped['status'] ) {
+			$result = $scraped['data'];
+		} elseif ( ! empty( $scraped['status'] ) && 'skipped' === $scraped['status'] && 'no_asin' === $scraped['reason'] ) {
+			// The Create Studio URL scraper is a premium (EVERYONE_BUT_FREE)
+			// feature — gate the CS branch on the tier feature. The ASIN branch
+			// above stays free for any connected tier (own Amazon keys).
+			$tier_gated = $this->guard_scrape( GateKeeper::FEATURE_PRODUCT_SCRAPE );
+			if ( $tier_gated ) {
+				return $tier_gated;
+			}
+			// No ASIN: Create Studio services API, then local LinkScraper.
+			$external = $scraper->scrape_external( $link );
+			if ( ! empty( $external['status'] ) && 'success' === $external['status'] ) {
+				$result = $external['data'];
 				} else {
 					// Match the pre-existing behavior: a response without a usable data
 					// payload should fall through to the 404 "No Data Found" branch

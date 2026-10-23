@@ -18,9 +18,10 @@ class Affiliates implements Settings_Group {
 				'group' => Plugin::$settings_group . '_affiliates',
 				'order' => 10,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Amazon Affiliates', 'mediavine-create' ),
-					'instructions' => __(
+					'type'          => 'checkbox',
+					'subgroup'      => 'general',
+					'label'         => __( 'Enable Amazon Affiliates', 'mediavine-create' ),
+					'instructions'  => __(
 						'When enabled, recommended products in Create cards have the ability to pull data from Amazon.
 
 						You will need to register with Amazon as an affiliate and use your credentials from Associates Central.
@@ -30,7 +31,7 @@ class Affiliates implements Settings_Group {
 						Checking this box also acknowledges that a valid SSL certificate is required to use this feature.',
 						'mediavine-create'
 					),
-					'default'      => 'Disabled',
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -39,22 +40,53 @@ class Affiliates implements Settings_Group {
 				'group' => Plugin::$settings_group . '_affiliates',
 				'order' => 12,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Amazon Marketplace / Creators API Region', 'mediavine-create' ),
-					'instructions' => __( 'Select the Amazon marketplace your affiliate account is registered with. This also determines the Creators API region used for requests.', 'mediavine-create' ),
-					'default'      => 'US',
-					'dependent_on' => Plugin::$settings_group . '_enable_amazon',
-					'options'      => [
-						[ 'label' => 'United States (amazon.com)',    'value' => 'US' ],
-						[ 'label' => 'United Kingdom (amazon.co.uk)', 'value' => 'UK' ],
-						[ 'label' => 'Canada (amazon.ca)',            'value' => 'CA' ],
-						[ 'label' => 'Germany (amazon.de)',           'value' => 'DE' ],
-						[ 'label' => 'France (amazon.fr)',            'value' => 'FR' ],
-						[ 'label' => 'Japan (amazon.co.jp)',          'value' => 'JP' ],
-						[ 'label' => 'Australia (amazon.com.au)',     'value' => 'AU' ],
-						[ 'label' => 'India (amazon.in)',             'value' => 'IN' ],
-						[ 'label' => 'Italy (amazon.it)',             'value' => 'IT' ],
-						[ 'label' => 'Spain (amazon.es)',             'value' => 'ES' ],
+					'type'          => 'select',
+					'subgroup'      => 'general',
+					'label'         => __( 'Amazon Marketplace / Creators API Region', 'mediavine-create' ),
+					'instructions'  => __( 'Select the Amazon marketplace your affiliate account is registered with. This also determines the Creators API region used for requests.', 'mediavine-create' ),
+					'default_label' => __( 'United States (amazon.com)', 'mediavine-create' ),
+					'dependent_on'  => Plugin::$settings_group . '_enable_amazon',
+					'options'       => [
+						[
+							'label' => 'United States (amazon.com)',
+							'value' => 'US',
+						],
+						[
+							'label' => 'United Kingdom (amazon.co.uk)',
+							'value' => 'UK',
+						],
+						[
+							'label' => 'Canada (amazon.ca)',
+							'value' => 'CA',
+						],
+						[
+							'label' => 'Germany (amazon.de)',
+							'value' => 'DE',
+						],
+						[
+							'label' => 'France (amazon.fr)',
+							'value' => 'FR',
+						],
+						[
+							'label' => 'Japan (amazon.co.jp)',
+							'value' => 'JP',
+						],
+						[
+							'label' => 'Australia (amazon.com.au)',
+							'value' => 'AU',
+						],
+						[
+							'label' => 'India (amazon.in)',
+							'value' => 'IN',
+						],
+						[
+							'label' => 'Italy (amazon.it)',
+							'value' => 'IT',
+						],
+						[
+							'label' => 'Spain (amazon.es)',
+							'value' => 'ES',
+						],
 					],
 				],
 			],
@@ -65,9 +97,9 @@ class Affiliates implements Settings_Group {
 				'order' => 15,
 				'data'  => [
 					'type'         => 'text',
+					'subgroup'     => 'general',
 					'label'        => __( 'Amazon Associate Tag', 'mediavine-create' ),
 					'instructions' => __( 'The Amazon Associate Tag/Store ID for the selected marketplace. Required for the Creators API.', 'mediavine-create' ),
-					'default'      => '',
 					'dependent_on' => Plugin::$settings_group . '_enable_amazon',
 				],
 			],
@@ -78,13 +110,13 @@ class Affiliates implements Settings_Group {
 				'order' => 20,
 				'data'  => [
 					'type'         => 'text',
+					'subgroup'     => 'general',
 					'label'        => __( 'Creators API Credential ID', 'mediavine-create' ),
 					'instructions' => sprintf(
 						/* translators: %s: link to Amazon Associates Central Creators API tools */
 						__( 'Your Credential ID from Amazon Associates Central. Find this under %s.', 'mediavine-create' ),
 						'<a href="https://affiliate-program.amazon.com/creatorsapi" target="_blank" rel="noopener noreferrer">' . __( 'Tools &rsaquo; Creators API', 'mediavine-create' ) . '</a>'
 					),
-					'default'      => '',
 					'dependent_on' => Plugin::$settings_group . '_enable_amazon',
 				],
 			],
@@ -95,9 +127,9 @@ class Affiliates implements Settings_Group {
 				'order' => 25,
 				'data'  => [
 					'type'         => 'secret',
+					'subgroup'     => 'general',
 					'label'        => __( 'Creators API Credential Secret', 'mediavine-create' ),
 					'instructions' => __( 'Your Credential Secret from Amazon Associates Central. Please note that Amazon may take time to provision new credentials.', 'mediavine-create' ),
-					'default'      => '',
 					'dependent_on' => Plugin::$settings_group . '_enable_amazon',
 				],
 			],

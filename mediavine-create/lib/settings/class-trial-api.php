@@ -2,7 +2,7 @@
 /**
  * Trial Extension API — REST proxy for extending Pro trial via Create Studio.
  *
- * @package Mediavine\Create
+ * @package Create
  * @since 2.0.0
  */
 

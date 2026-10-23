@@ -7,7 +7,7 @@ use Mediavine\Create\Helpers\Str;
 /**
  * Class JSON_LD_Types
  *
- * @package Mediavine\Create
+ * @package Create
  */
 class JSON_LD_Types {
 
@@ -692,15 +692,15 @@ class JSON_LD_Types {
 		// Build DOMDocument with blank steps array
 		$dom = new \DOMDocument();
 		if ( function_exists( 'libxml_use_internal_errors' ) ) {
-			libxml_use_internal_errors( true );
+			$libxml_previous_state = libxml_use_internal_errors( true );
 		}
 		// Encode high-bit UTF-8 as numeric entities so libxml's ISO-8859-1
 		// default does not collapse emoji/CJK/★ to "?". Prefer the XML
 		// encoding prelude as a belt-and-suspenders when mbstring is absent.
 		$html = Str::to_html_entities( do_shortcode( $value ) );
 		$load = $dom->loadHTML( '<?xml encoding="UTF-8">' . $html );
-		if ( function_exists( 'libxml_use_internal_errors' ) ) {
-			libxml_use_internal_errors( false );
+		if ( function_exists( 'libxml_use_internal_errors' ) && isset( $libxml_previous_state ) ) {
+			libxml_use_internal_errors( $libxml_previous_state );
 		}
 		// Walk headings and list items in document order so each step knows which
 		// heading (if any) it falls under. Step anchors count list items only, to

@@ -10,6 +10,11 @@ namespace Mediavine\Create;
 class Creations_Views_Themes {
 
 	/**
+	 * Free style used when a gated theme declares no fallback of its own.
+	 */
+	const DEFAULT_FALLBACK = 'big-image';
+
+	/**
 	 * Theme registry keyed by style slug.
 	 *
 	 * Order is the user-facing preview-selector order. `dark` is CSS-only
@@ -108,6 +113,30 @@ class Creations_Views_Themes {
 	public static function is_gated( $style ) {
 		$registry = self::get_registry();
 		return isset( $registry[ $style ] ) && ! empty( $registry[ $style ]['gated'] );
+	}
+
+	/**
+	 * Theme gating map for the admin localization.
+	 *
+	 * Shipped as `themes` inside the __SUBSCRIPTION__ payload so the admin reads
+	 * which themes are gated (and what each falls back to) from this registry
+	 * instead of a hand-copied JS list.
+	 *
+	 * @return array{gated: string[], fallbacks: array<string, string>, default_fallback: string}
+	 */
+	public static function get_localized_gating() {
+		$fallbacks = [];
+		foreach ( self::get_registry() as $slug => $meta ) {
+			if ( ! empty( $meta['gated'] ) ) {
+				$fallbacks[ $slug ] = isset( $meta['fallback'] ) ? $meta['fallback'] : self::DEFAULT_FALLBACK;
+			}
+		}
+
+		return [
+			'gated'            => array_keys( $fallbacks ),
+			'fallbacks'        => $fallbacks,
+			'default_fallback' => self::DEFAULT_FALLBACK,
+		];
 	}
 
 	/**

@@ -30,6 +30,8 @@ class Admin_Notices {
 	public function init() {
 		add_action( 'admin_init', [ $this, 'plugin_notice_dismiss' ] );
 		add_action( 'admin_notices', [ $this, 'password_reset_notice' ] );
+		add_action( 'admin_notices', [ $this, 'payment_failed_notice' ] );
+		add_action( 'admin_notices', [ $this, 'cancel_pending_notice' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_password_reset_script' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
@@ -275,13 +277,8 @@ class Admin_Notices {
 			return;
 		}
 
-		$token_parts = explode( '.', $api_token );
-		if ( count( $token_parts ) !== 3 ) {
-			return;
-		}
-
-		$payload = json_decode( base64_decode( strtr( $token_parts[1], '-_', '+/' ) ), true );
-		if ( ! isset( $payload['email'] ) || ! is_email( $payload['email'] ) ) {
+		$payload = \Mediavine\Create\Helpers\Jwt::decode_payload( $api_token );
+		if ( ! is_array( $payload ) || ! isset( $payload['email'] ) || ! is_email( $payload['email'] ) ) {
 			return;
 		}
 
@@ -319,5 +316,183 @@ class Admin_Notices {
 			);
 			$this->admin_error_notice( $notice_name, $message, 'warning' );
 		}
+	}
+
+	/**
+	 * Inline full-colour Create logo mark for admin notices.
+	 *
+	 * Ported from Create Studio's `img/logo/logo-solo.svg` — the current
+	 * eight-petal mark. (Its older `img/icon.svg` is a stale palette: a duller
+	 * green and a teal petal where the mark now has deep navy.)
+	 *
+	 * Flattened on the way in for two reasons, both about living inside someone
+	 * else's page:
+	 *  - The source's Inkscape clipPaths are no-ops (each is a full-canvas rect)
+	 *    but would put eight globally-scoped ids into wp-admin, where an id
+	 *    collision would silently blank out petals. Dropped; renders identically.
+	 *  - `style="fill:#..."` becomes a plain `fill` attribute so a stray
+	 *    `svg { style }` rule from another plugin can't override it.
+	 *
+	 * Inlined rather than enqueued because the notice can render on ANY admin
+	 * screen, including ones Create's assets never reach, and a broken image
+	 * would undercut the one notice that has to look trustworthy.
+	 *
+	 * @return string SVG markup.
+	 */
+	private static function brand_mark() {
+		return '<svg viewBox="0 0 267.01025 267.00867" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="28" height="28">'
+			. '<g transform="translate(-287.99996,-548.99999)">'
+			. '<path fill="#f8b0aa" d="M 0,0 C -0.566,0.747 -14.039,18.276 -31.408,18.192 -48.79,18.122 -62.098,0.466 -62.656,-0.286 l -2.097,-2.824 2.123,-2.804 c 0.565,-0.746 14.034,-18.275 31.411,-18.194 17.38,0.072 30.687,17.729 31.245,18.481 l 2.097,2.822 z" transform="matrix(1.3333333,0,0,-1.3333333,374.33733,678.55986)"/>'
+			. '<path fill="#243c4a" d="M 0,0 C -0.566,0.747 -14.039,18.276 -31.408,18.192 -48.79,18.122 -62.098,0.466 -62.656,-0.286 l -2.097,-2.824 2.123,-2.804 c 0.565,-0.746 14.034,-18.275 31.411,-18.194 17.38,0.072 30.688,17.729 31.245,18.481 l 2.098,2.822 z" transform="matrix(1.3333333,0,0,-1.3333333,552.17827,678.55986)"/>'
+			. '<path fill="#00bd7e" d="m 0,0 -2.824,2.097 -2.804,-2.121 c -0.747,-0.567 -18.275,-14.035 -18.195,-31.413 0.072,-17.379 17.729,-30.686 18.48,-31.245 l 2.824,-2.097 2.805,2.124 c 0.746,0.564 18.275,14.039 18.192,31.406 C 18.406,-13.865 0.751,-0.557 0,0" transform="matrix(1.3333333,0,0,-1.3333333,425.06827,551.796)"/>'
+			. '<path fill="#5870ac" d="m 0,0 -2.824,2.097 -2.804,-2.121 c -0.747,-0.567 -18.275,-14.035 -18.195,-31.413 0.072,-17.379 17.729,-30.686 18.48,-31.245 l 2.824,-2.097 2.805,2.124 c 0.746,0.564 18.275,14.039 18.192,31.406 C 18.406,-13.865 0.751,-0.557 0,0" transform="matrix(0.94276705,0.94285098,0.94285098,-0.94276705,516.44603,592.59868)"/>'
+			. '<path fill="#5f3553" d="m 0,0 -2.824,2.095 -2.804,-2.124 c -0.747,-0.564 -18.275,-14.032 -18.195,-31.411 0.072,-17.379 17.729,-30.686 18.48,-31.244 l 2.824,-2.097 2.805,2.124 c 0.746,0.566 18.275,14.038 18.192,31.406 C 18.406,-13.867 0.751,-0.559 0,0" transform="matrix(1.3333333,0,0,-1.3333333,425.06827,729.634)"/>'
+			. '<path fill="#dc4f3f" d="m 0,0 -0.514,3.48 -3.484,0.482 c -0.928,0.129 -22.85,2.995 -35.073,-9.345 -12.241,-12.343 -9.167,-34.237 -9.03,-35.161 l 0.514,-3.48 3.485,-0.482 c 0.927,-0.129 22.845,-2.999 35.077,9.344 C 3.212,-22.821 0.137,-0.927 0,0" transform="matrix(1.3333333,0,0,-1.3333333,390.69467,718.34893)"/>'
+			. '<path fill="#ffd267" d="m 0,0 c -12.342,12.241 -34.236,9.168 -35.162,9.031 l -3.479,-0.514 -0.483,-3.484 c -0.128,-0.928 -2.998,-22.845 9.346,-35.078 12.34,-12.236 34.235,-9.162 35.161,-9.026 l 3.48,0.514 0.481,3.486 C 9.473,-34.143 12.34,-12.222 0,0" transform="matrix(1.3333333,0,0,-1.3333333,378.4824,599.6004)"/>'
+			. '<path fill="#827a9f" d="M 0,0 C -12.342,12.241 -34.236,9.167 -35.162,9.03 L -38.641,8.516 -39.124,5.03 c -0.128,-0.926 -2.998,-22.844 9.346,-35.075 12.34,-12.239 34.235,-9.164 35.161,-9.027 l 3.48,0.514 0.482,3.484 C 9.473,-34.146 12.34,-12.223 0,0" transform="matrix(1.3333333,0,0,-1.3333333,504.23493,725.3508)"/>'
+			. '</g>'
+			. '</svg>';
+	}
+
+	/**
+	 * Scoped styles for the branded payment notice.
+	 *
+	 * Printed with the notice instead of enqueued for the same reason the mark
+	 * is inlined: this notice renders on screens Create's stylesheet never
+	 * reaches.
+	 *
+	 * @return void
+	 */
+	private static function print_payment_notice_styles() {
+		static $printed = false;
+
+		if ( $printed ) {
+			return;
+		}
+
+		$printed = true;
+
+		echo '<style id="mv-create-payment-notice-css">
+			.mv-create-payment-notice { border-left-color: #dc4f3f; padding: 12px 16px; }
+			.mv-create-payment-notice__row { display: flex; align-items: flex-start; gap: 11px; }
+			.mv-create-payment-notice__mark { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; margin-top: -1px; }
+			.mv-create-payment-notice__body { flex: 1; min-width: 0; }
+			.mv-create-payment-notice__headline { margin: 0 0 3px; font-size: 14px; color: #1d2327; }
+			.mv-create-payment-notice__brand { font-weight: 600; }
+			.mv-create-payment-notice__sep { color: #787c82; font-weight: 400; }
+			.mv-create-payment-notice__text { margin: 0 0 11px; line-height: 1.5; color: #50575e; }
+			.mv-create-payment-notice__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0; }
+			.mv-create-payment-notice__countdown { color: #a33526; font-size: 12px; font-weight: 600; }
+		</style>';
+	}
+
+	/**
+	 * Display the dunning "update your card" notice (CRE-295).
+	 *
+	 * A failed renewal no longer strips entitlements on the spot — Create Studio
+	 * holds the paid tier while Stripe retries the card (create-studio CS-27).
+	 * This notice IS the other half of that bargain: the only reason it is safe
+	 * not to degrade the site is that the publisher is told, loudly, that their
+	 * card needs fixing before the grace window closes.
+	 *
+	 * Deliberately NOT dismissible and not screen-scoped: it is time-boxed, it
+	 * clears itself the moment Studio reports a recovered payment (or the grace
+	 * window lapses), and a dismissed notice would let a site slide into a real
+	 * downgrade unwarned.
+	 */
+	public function payment_failed_notice() {
+		// Billing is an administrator concern; don't nag editors who can't fix it.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! GateKeeper::is_payment_failed() ) {
+			return;
+		}
+
+		self::print_payment_notice_styles();
+
+		$days_left  = GateKeeper::get_grace_days_remaining();
+		$plan_label = GateKeeper::tier_display_name( GateKeeper::get_effective_tier() );
+
+		$countdown = $days_left > 0
+			? sprintf(
+				/* translators: %s: number of days left to fix the payment method. */
+				_n( '%s day left', '%s days left', $days_left, 'mediavine-create' ),
+				number_format_i18n( $days_left )
+			)
+			: '';
+
+		printf(
+			'<div class="notice notice-error mv-create-payment-notice">'
+				. '<div class="mv-create-payment-notice__row">'
+					. '<span class="mv-create-payment-notice__mark">%1$s</span>'
+					. '<div class="mv-create-payment-notice__body">'
+						. '<p class="mv-create-payment-notice__headline"><span class="mv-create-payment-notice__brand">%2$s</span> <span class="mv-create-payment-notice__sep">&middot;</span> <strong>%3$s</strong></p>'
+						. '<p class="mv-create-payment-notice__text">%4$s</p>'
+						. '<p class="mv-create-payment-notice__actions"><a class="button button-primary" href="%5$s" target="_blank" rel="noopener noreferrer">%6$s</a>%7$s</p>'
+					. '</div>'
+				. '</div>'
+			. '</div>',
+			self::brand_mark(),
+			esc_html__( 'Create', 'mediavine-create' ),
+			esc_html__( "Whoops! We couldn't process your payment", 'mediavine-create' ),
+			esc_html(
+				sprintf(
+					/* translators: %s: subscription plan name, e.g. "Pro Pass". */
+					__( 'Update your billing details to keep your %s features.', 'mediavine-create' ),
+					$plan_label
+				)
+			),
+			esc_url( GateKeeper::get_billing_url() ),
+			esc_html__( 'Update payment method', 'mediavine-create' ),
+			$countdown ? '<span class="mv-create-payment-notice__countdown">' . esc_html( $countdown ) . '</span>' : ''
+		);
+	}
+
+	/**
+	 * Display the "your plan cancels on <date>" heads-up (create-studio CS-26).
+	 *
+	 * A subscriber who cancels in Stripe keeps their plan until the period they
+	 * paid for ends. Nothing is degraded in the meantime, so this is an
+	 * informational warning, not the error-level nag the failed-payment notice
+	 * uses: it tells the publisher when the premium features switch off and
+	 * where to undo the cancellation.
+	 *
+	 * Shown to the same audience as payment_failed_notice(), and for the same
+	 * reasons not dismissible or screen-scoped. It clears itself when Studio
+	 * reports the subscription resumed, or the cancel date passes.
+	 */
+	public function cancel_pending_notice() {
+		// Billing is an administrator concern; don't nag editors who can't act on it.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! GateKeeper::is_cancel_pending() ) {
+			return;
+		}
+
+		// A failed payment is the more urgent message and already links to
+		// billing; don't stack two notices about the same subscription.
+		if ( GateKeeper::is_payment_failed() ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning cre-cancel-notice"><p>%1$s <a href="%2$s" target="_blank" rel="noopener noreferrer">%3$s</a></p></div>',
+			esc_html(
+				sprintf(
+					/* translators: 1: subscription plan name, e.g. "Pro Pass". 2: date the plan cancels, in the site's date format. */
+					__( 'Your %1$s plan is set to cancel on %2$s. You\'ll keep your premium features until then.', 'mediavine-create' ),
+					GateKeeper::tier_display_name( GateKeeper::get_effective_tier() ),
+					// Shared with the React admin's localized payload so both notices
+					// print the same string.
+					GateKeeper::get_cancel_date_display()
+				)
+			),
+			esc_url( GateKeeper::get_billing_url() ),
+			esc_html__( 'Manage billing', 'mediavine-create' )
+		);
 	}
 }

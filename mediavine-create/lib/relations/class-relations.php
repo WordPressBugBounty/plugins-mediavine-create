@@ -16,7 +16,10 @@ class Relations extends Plugin {
 		'content_type'      => 'varchar(20)',
 		'secondary_type'    => 'varchar(20)',
 		'creation'          => 'bigint(20)',
-		'relation_id'       => 'bigint(20)',
+		'relation_id'       => [
+			'type' => 'bigint(20)',
+			'key'  => true,
+		],
 		'title'             => 'longtext',
 		'description'       => 'longtext',
 		'canonical_post_id' => 'bigint(20)',
@@ -29,6 +32,7 @@ class Relations extends Plugin {
 		'link_text'         => 'longtext',
 		'asin'              => 'varchar(10)',
 		'expires'           => 'datetime',
+		'sync_with_post'    => 'tinyint(1)',
 	];
 
 	/**
@@ -47,6 +51,11 @@ class Relations extends Plugin {
 	 * @var Amazon
 	 */
 	public $amazon;
+
+	/**
+	 * @var Relations_Sync
+	 */
+	public $sync;
 
 	private static $instance;
 
@@ -89,6 +98,9 @@ class Relations extends Plugin {
 			]
 		);
 		$this->amazon_refresh->register();
+
+		$this->sync = new Relations_Sync();
+		$this->sync->init();
 
 		add_filter( 'mv_custom_schema', [ $this, 'custom_schema' ] );
 		add_action( 'rest_api_init', [ $this, 'routes' ] );
@@ -437,6 +449,36 @@ class Relations extends Plugin {
 					'args'                => \Mediavine\Create\API\V1\CreationsArgs\validate_id(),
 					'permission_callback' => [ \Mediavine\Permissions::class, 'editor' ],
 				],
+			]
+		);
+
+		register_rest_route(
+			$namespace, '/list-sync/wizard-data', [
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => function ( \WP_REST_Request $request ) {
+					return \Mediavine\Create\API_Services::middleware(
+						[
+							[ $this->sync, 'rest_wizard_data' ],
+						],
+						$request
+					);
+				},
+				'permission_callback' => [ $this->sync, 'rest_permission' ],
+			]
+		);
+
+		register_rest_route(
+			$namespace, '/list-sync/bulk-apply', [
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => function ( \WP_REST_Request $request ) {
+					return \Mediavine\Create\API_Services::middleware(
+						[
+							[ $this->sync, 'rest_bulk_apply' ],
+						],
+						$request
+					);
+				},
+				'permission_callback' => [ $this->sync, 'rest_permission' ],
 			]
 		);
 	}

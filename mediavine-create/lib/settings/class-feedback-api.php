@@ -4,7 +4,7 @@
  *
  * Proxies error feedback reports from the admin UI to Create Studio.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

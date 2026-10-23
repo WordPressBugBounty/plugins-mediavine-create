@@ -5,7 +5,7 @@
  * This class registers and handles REST API endpoints for user-level
  * verification with Create Studio.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;
@@ -28,10 +28,112 @@ class User_Verification {
 	const REST_BASE = 'studio/user-verify';
 
 	/**
+	 * admin-post action that opens a Create Studio page signed in (SSO).
+	 */
+	const OPEN_STUDIO_ACTION = 'mv_create_open_studio';
+
+	/**
 	 * Initialize the class
 	 */
 	public function init() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'admin_post_' . self::OPEN_STUDIO_ACTION, [ $this, 'open_studio' ] );
+	}
+
+	/**
+	 * A plain link that opens a Create Studio page, signed in when this user
+	 * is linked. For places with no admin JS to call sso-url (the admin bar).
+	 *
+	 * @param string $path Studio path, e.g. '/admin/billing?site_url=...'.
+	 * @return string
+	 */
+	public static function open_studio_url( $path ) {
+		return wp_nonce_url(
+			add_query_arg(
+				[
+					'action' => self::OPEN_STUDIO_ACTION,
+					'path'   => rawurlencode( $path ),
+				],
+				admin_url( 'admin-post.php' )
+			),
+			self::OPEN_STUDIO_ACTION
+		);
+	}
+
+	/**
+	 * admin-post handler for open_studio_url(): redirect to a fresh SSO URL,
+	 * or to the plain Studio page (login prefilled with this user's email
+	 * hint) when the user isn't linked or SSO fails.
+	 */
+	public function open_studio() {
+		check_admin_referer( self::OPEN_STUDIO_ACTION );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'mediavine-create' ), 403 );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- validated by sanitize_return_path().
+		$path = self::sanitize_return_path( isset( $_GET['path'] ) ? wp_unslash( $_GET['path'] ) : '' );
+		if ( '' === $path ) {
+			$path = '/admin';
+		}
+
+		wp_redirect( self::resolve_studio_url( get_current_user_id(), $path ) ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Studio is off-site; only Studio URLs are returned.
+		exit;
+	}
+
+	/**
+	 * Studio's SSO URL, moved onto the Studio address this plugin uses.
+	 *
+	 * Studio builds the URL on its own root URL, which can differ from the
+	 * address the publisher signs in on (a proxy or local hostname vs. the
+	 * app's internal origin). Following it as-is starts a session on the
+	 * other host, so the user looks signed out on theirs. Only Studio's
+	 * /auth/sso path is accepted, so this can never point anywhere else.
+	 *
+	 * @param mixed $sso_url URL from POST /auth/sso.
+	 * @return string The URL on Create Studio's base, or '' if it isn't an SSO URL.
+	 */
+	public static function studio_sso_url( $sso_url ) {
+		if ( ! is_string( $sso_url ) || '' === $sso_url ) {
+			return '';
+		}
+
+		$parts = wp_parse_url( $sso_url );
+		if ( empty( $parts['path'] ) || '/auth/sso' !== $parts['path'] || empty( $parts['query'] ) ) {
+			return '';
+		}
+
+		return untrailingslashit( Create_Studio_Client::get_studio_base_url() ) . '/auth/sso?' . $parts['query'];
+	}
+
+	/**
+	 * Where open_studio() sends a user: an SSO URL when the user's token works,
+	 * otherwise the plain Studio page with the email hint.
+	 *
+	 * @param int    $user_id WP user.
+	 * @param string $path    Sanitized Studio path.
+	 * @return string
+	 */
+	public static function resolve_studio_url( $user_id, $path ) {
+		$base  = Create_Studio_Client::get_studio_base_url();
+		$token = User_Verification_Meta::get_token( $user_id );
+
+		if ( ! empty( $token ) ) {
+			$response = Create_Studio_Client::generate_sso_url( $token, $path );
+			$sso_url  = ! is_wp_error( $response ) && ! empty( $response['success'] ) ? self::studio_sso_url( $response['data']['sso_url'] ?? '' ) : '';
+
+			if ( '' !== $sso_url ) {
+				return $sso_url;
+			}
+		}
+
+		$url   = $base . $path;
+		$email = Site_Verification::get_studio_email_hint( $user_id );
+		if ( '' !== $email && false === strpos( $path, 'email=' ) ) {
+			$url = add_query_arg( 'email', rawurlencode( $email ), $url );
+		}
+
+		return $url;
 	}
 
 	/**
@@ -105,11 +207,33 @@ class User_Verification {
 					'return_url' => [
 						'type'              => 'string',
 						'required'          => false,
-						'sanitize_callback' => 'sanitize_text_field',
+						'sanitize_callback' => [ self::class, 'sanitize_return_path' ],
 					],
 				],
 			]
 		);
+	}
+
+	/**
+	 * Sanitize a Studio return path without disturbing percent-encoding.
+	 *
+	 * sanitize_text_field() strips %XX octets, which corrupts encoded query
+	 * values. Accept only a same-site path (one leading slash) verbatim.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string Path, or '' when invalid.
+	 */
+	public static function sanitize_return_path( $value ) {
+		if ( ! is_string( $value ) || '' === $value || '/' !== $value[0] ) {
+			return '';
+		}
+		if ( isset( $value[1] ) && ( '/' === $value[1] || '\\' === $value[1] ) ) {
+			return '';
+		}
+		if ( preg_match( '/[\s\x00-\x1F\x7F<>"\\\\]/', $value ) ) {
+			return '';
+		}
+		return $value;
 	}
 
 	/**
@@ -172,11 +296,36 @@ class User_Verification {
 			User_Verification_Meta::set_link_session( $session_id, $user_id );
 		}
 
+		// Build the account-link redirect from the plugin's configured Studio base
+		// URL — the same "site-connect redirection method" used by the site
+		// connection flow (see Site_Verification::initiate_connection). Studio's own
+		// link_url is derived from its internal app URL (rootUrl), which is not the
+		// browser-facing host when the plugin is pointed at a routed/proxied Studio
+		// origin, so we construct the URL ourselves to keep both flows on the same host.
+		$studio_base_url = Create_Studio_Client::get_studio_base_url();
+		if ( ! empty( $session_id ) && ! empty( $studio_base_url ) ) {
+			$link_url = add_query_arg(
+				[ 'session' => $session_id ],
+				$studio_base_url . '/auth/link'
+			);
+		} else {
+			// Fallback to Studio's link_url if we cannot construct one locally.
+			$link_url = $data['link_url'] ?? '';
+		}
+
+		// Tell Studio which account this is probably for, so its login and
+		// set-password forms start filled in. A hint only: the person can type
+		// another.
+		$email_hint = Site_Verification::get_studio_email_hint( $user_id );
+		if ( ! empty( $link_url ) && is_email( $email_hint ) ) {
+			$link_url = add_query_arg( 'email', rawurlencode( $email_hint ), $link_url );
+		}
+
 		return new \WP_REST_Response(
 			[
 				'success'  => true,
 				'status'   => 'redirect',
-				'link_url' => $data['link_url'] ?? '',
+				'link_url' => $link_url,
 			],
 			200
 		);
@@ -484,9 +633,14 @@ class User_Verification {
 
 		$data = $response['data'] ?? [];
 
+		$sso_url = self::studio_sso_url( $data['sso_url'] ?? '' );
+		if ( '' === $sso_url ) {
+			return new \WP_Error( 'api_error', __( 'Failed to generate SSO URL', 'mediavine-create' ), [ 'status' => 502 ] );
+		}
+
 		return new \WP_REST_Response(
 			[
-				'sso_url'    => $data['sso_url'] ?? '',
+				'sso_url'    => $sso_url,
 				'expires_at' => $data['expires_at'] ?? '',
 			],
 			200

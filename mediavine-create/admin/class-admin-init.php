@@ -11,7 +11,7 @@ class Admin_Init extends Plugin {
 	public static $mv_create_url_params = [
 		'post_type=mv_create',
 		'page=mv_settings',
-		'page=mv_create_welcome',
+		'page=cre_new_plans',
 		'page=create_home',
 		'page=create_editor',
 		'page=create_dashboard',
@@ -86,8 +86,15 @@ class Admin_Init extends Plugin {
 			'__ADMIN_URL__'          => esc_url_raw( admin_url() ),
 			'__STATIC__'             => MV_CREATE_URL . 'ui/static',
 			'__SITE_URL__'           => esc_url_raw( site_url() ),
+			'__SITE_NAME__'          => get_bloginfo( 'name' ),
+			// Host only, for the browser-chrome mockups on the Free+ page: an
+			// address bar showing "https://example.com" instead of "example.com"
+			// reads as a URL rather than as the publisher's own site.
+			'__SITE_HOST__'          => (string) wp_parse_url( site_url(), PHP_URL_HOST ),
 			'__CREATE_STUDIO_URL__'  => esc_url_raw( self::$create_studio_base_url ),
 			'__CURRENT_USER_EMAIL__' => $current_user->user_email,
+			// Set when the account named in the last connect declined it.
+			'__STUDIO_DECLINED__'    => Site_Verification::get_declined_connection(),
 			'__SETTINGS__'           => $settings,
 			'__SERVICES_URL__'       => esc_url_raw( self::$js_services_api_url ),
 			'__SHAPES__'             => $shapes,
@@ -99,6 +106,11 @@ class Admin_Init extends Plugin {
 			'__USER__'               => [
 				'current_user_email'      => $current_user->user_email,
 				'studio_email'            => User_Verification_Meta::get_email( $current_user->ID ),
+				// Whether this user holds a Create Studio token, i.e. can be
+				// signed in to Create Studio without a password (SSO).
+				'studio_linked'           => User_Verification_Meta::is_verified( $current_user->ID ),
+				// Which email to prefill on Create Studio's login for THIS user.
+				'studio_email_hint'       => Site_Verification::get_studio_email_hint( $current_user->ID ),
 				'current_firstname'       => $current_user->user_firstname,
 				'display_name'            => $current_user->display_name,
 				'current_lastname'        => $current_user->user_lastname,
@@ -116,34 +128,64 @@ class Admin_Init extends Plugin {
 				json_decode( \Mediavine\Settings::get_setting( 'mv_create_allowed_types' ) ),
 			],
 			'__SERVING_ADJUSTMENT_LABEL__' => \Mediavine\Settings::get_setting( 'mv_create_servings_adjustment_label' ),
+			'__SUBSCRIPTION__'       => [
+				'subscription_tier' => GateKeeper::get_effective_tier(),
+				// The plan a trial converts to (the effective tier is Pro Pass-equivalent
+				// during ANY trial). Copy only; never gates anything.
+				'plan_tier'            => GateKeeper::sanitize_plan_tier( \Mediavine\Settings::get_setting( GateKeeper::SETTING_PLAN_TIER ) ),
+				'feature_access'    => GateKeeper::get_feature_access_map(),
+				'feature_matrix'    => GateKeeper::get_feature_matrix_map(),
+				// Dunning grace (CRE-295). The tier above is the RETAINED paid
+				// tier, so these never gate anything — they only let the admin
+				// echo the wp-admin "update your card" notice in context.
+				'payment_failed'       => GateKeeper::is_payment_failed(),
+				'grace_days_remaining' => GateKeeper::get_grace_days_remaining(),
+				'billing_url'          => GateKeeper::get_billing_url(),
+				// Pending cancellation (CS-26). Same deal: the paid tier above stays
+				// in force until the period ends, so these only let the admin echo the
+				// wp-admin "plan cancels on" notice, whose container the app removes.
+				// The date is formatted here so both notices print the same string.
+				'cancel_pending'       => GateKeeper::is_cancel_pending(),
+				'cancel_plan_name'     => GateKeeper::tier_display_name( GateKeeper::get_effective_tier() ),
+				'cancel_date'          => GateKeeper::get_cancel_date_display(),
+				// Active trial, for the Dashboard trial card. Display only.
+				// Days left come from useGateKeeper().trialDaysRemaining, like the
+				// Settings page and trial checklist, not from here.
+				'is_trialing'          => GateKeeper::is_trialing(),
+				'trial_plan_name'      => GateKeeper::get_trial_plan_name(),
+				'trial_end_date'       => GateKeeper::get_trial_end_display(),
+				// Which card themes are gated + what each falls back to, straight
+				// from the PHP theme registry, so the admin never hand-copies it.
+				'themes'            => Creations_Views_Themes::get_localized_gating(),
+			],
+			// Create 3.0's plan-choice gate (Plan_Choice). The admin UI reads
+			// `required` to decide whether to block the editor/dashboard behind
+			// the plan-choice screen, `can_choose` to pick between the picker and
+			// the "an administrator needs to choose" message, and `choice` to
+			// show the currently-selected free-band plan when re-visited.
+			'__PLAN_CHOICE__'       => [
+				'required'   => Plan_Choice::is_choice_required(),
+				'reason'     => Plan_Choice::get_choice_reason(),
+				'choice'     => GateKeeper::get_free_plan_choice(),
+				'can_choose' => current_user_can( 'manage_options' ),
+				'plan_url'   => esc_url_raw( admin_url( 'admin.php?page=' . Plan_Choice::PAGE_SLUG ) ),
+			],
 		];
 	}
 
 	/**
-	 * Gets fresh settings from the database and returns their translations
+	 * Gets fresh settings from the database, with code-declared metadata applied.
+	 *
+	 * Values come from the DB; the `data` blob (labels, options, subgroup,
+	 * gating) comes from the PHP registration, which is both the translated copy
+	 * and the only copy guaranteed to be current — the stored blob is only
+	 * rewritten when the plugin version bumps.
 	 */
 	private static function get_translated_settings() {
 		// force the get_settings call to grab settings fresh from the database
 		$saved_settings = (array) \Mediavine\Settings::get_settings(null, null, true);
-		if ( 'en_US' === get_locale() ) {
-			return $saved_settings;
-		}
-		$translated_settings = self::get_settings();
-		$saved_slug_keys     = [];
-		// let's set the array key for each slug of the settings from the DB
-		// into a temporary array
-		foreach ( $saved_settings as $key => $value ) {
-			$saved_slug_keys[ $value->slug ] = $key;
-		}
-		// loop through all of the translated settings and if the slug exists
-		// in our temporary array, use the key in the temp array
-		// to update the string data/translations in the settings from the DB.
-		foreach ( $translated_settings as $setting ) {
-			if ( array_key_exists( $setting['slug'], $saved_slug_keys ) ) {
-				$saved_settings[ $saved_slug_keys[ $setting['slug'] ] ]->data = $setting['data'];
-			}
-		}
-		return $saved_settings;
+
+		return Plugin::apply_registered_setting_data( $saved_settings );
 	}
 	private static function get_translated_shapes() {
 		$shapes = \Mediavine\Create\Shapes::get_shapes();
@@ -527,6 +569,19 @@ class Admin_Init extends Plugin {
 			[ $this, 'menu_page' ]
 		);
 
+		// Setup wizards page. Registered under the real parent so WordPress
+		// keeps the Create menu open and handles capabilities correctly, but
+		// hidden from the submenu (CSS in editor_hide_menu_item()) — it's
+		// reached through the Settings sidebar callout instead.
+		add_submenu_page(
+			'edit.php?post_type=mv_create',
+			__( 'Create Setup Wizards', 'mediavine-create' ),
+			__( 'Setup', 'mediavine-create' ),
+			'manage_options',
+			'create_setup',
+			[ $this, 'setup_page' ]
+		);
+
 		add_options_page(
 			__( 'Create Plugin Settings', 'mediavine-create' ),
 			__( 'Create', 'mediavine-create' ),
@@ -547,14 +602,18 @@ class Admin_Init extends Plugin {
 			[ $this, 'editor_page' ]
 		);
 
-		// Hidden welcome page (no menu item)
+		// Hidden plan-choice / "what's new in 3.0" page (no menu item). Capability
+		// is deliberately 'edit_posts', not 'manage_options': every Create user
+		// can land here while a choice is required, even though only
+		// manage_options users can actually make the choice (the page itself
+		// branches on that, via the __PLAN_CHOICE__.can_choose localization).
 		add_submenu_page(
 			'',
-			__( 'Welcome to Create 2.0', 'mediavine-create' ),
-			__( 'Welcome', 'mediavine-create' ),
-			'manage_options',
-			'mv_create_welcome',
-			[ $this, 'welcome_page' ]
+			__( 'Create 3.0', 'mediavine-create' ),
+			__( 'Create 3.0', 'mediavine-create' ),
+			'edit_posts',
+			'cre_new_plans',
+			[ $this, 'plan_choice_page' ]
 		);
 
 		// Theme Elements page (dev mode only)
@@ -639,9 +698,20 @@ class Admin_Init extends Plugin {
 			<?php
 		}
 
-		function welcome_page() {
+		/**
+		 * Render the mount point for the Create 3.0 plan-choice / "what's new" page.
+		 *
+		 * @return void
+		 */
+		public function plan_choice_page() {
+			?>
+			<div id="MVRoot" data-page="plan"></div>
+			<?php
+		}
+
+			function setup_page() {
 				?>
-				<div id="MVRoot" data-page="welcome"></div>
+				<div id="MVRoot" data-page="setup"></div>
 				<?php
 			}
 
@@ -782,12 +852,21 @@ class Admin_Init extends Plugin {
 	 * Render callback for Gutenberg blocks
 	 */
 	function render_block( $attributes ) {
-		$id = isset( $attributes['id'] ) ? $attributes['id'] : '';
-		$title = isset( $attributes['title'] ) ? $attributes['title'] : '';
-		$thumbnail = isset( $attributes['thumbnail_uri'] ) ? $attributes['thumbnail_uri'] : '';
-		$type = isset( $attributes['type'] ) ? $attributes['type'] : 'recipe';
-		$layout = isset( $attributes['layout'] ) ? $attributes['layout'] : '';
-		
+		// Escape/normalize every value before interpolating it into the shortcode
+		// string. Block attributes are user-editable, so a stray double-quote in
+		// (e.g.) the title would otherwise break out of the attribute context.
+		$id        = isset( $attributes['id'] ) ? absint( $attributes['id'] ) : '';
+		$title     = isset( $attributes['title'] ) ? esc_attr( $attributes['title'] ) : '';
+		$thumbnail = isset( $attributes['thumbnail_uri'] ) ? esc_attr( $attributes['thumbnail_uri'] ) : '';
+		$type      = isset( $attributes['type'] ) ? $attributes['type'] : 'recipe';
+		$layout    = isset( $attributes['layout'] ) ? esc_attr( $attributes['layout'] ) : '';
+
+		// Only allow known card types; fall back to recipe like the shortcode does.
+		$allowed_types = [ 'recipe', 'list', 'diy' ];
+		if ( ! in_array( $type, $allowed_types, true ) ) {
+			$type = 'recipe';
+		}
+
 		// Build shortcode
 		$shortcode = "[mv_create key=\"{$id}\" type=\"{$type}\" title=\"{$title}\" thumbnail=\"{$thumbnail}\"";
 		if ( !empty( $layout ) ) {
@@ -836,6 +915,7 @@ class Admin_Init extends Plugin {
 		?>
 		<style>
 			#adminmenu .wp-submenu a[href*="page=create_home"],
+			#adminmenu a[href*="page=create_setup"],
 			#adminmenu a[href*="page=create_editor"] { display: none !important; }
 		</style>
 		<?php

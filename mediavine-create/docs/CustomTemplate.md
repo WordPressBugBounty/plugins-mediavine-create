@@ -1,12 +1,14 @@
 # Card Templating Guide
 
-Out of the box, Mediavine Create comes with 5 different styles for cards:
+Out of the box, Create comes with 7 different styles for cards:
 
-* Simple Square <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
-* Simple Square (Dark) <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
-* Classy Circle <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
-* Classy Circle (Dark) <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
+* Editorial <sub><sup>*designed by Mischief Marmot*</sup></sub>
+* Modern Elegant <sub><sup>*designed by Mischief Marmot*</sup></sub>
 * Hero Image <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
+* Simple Square <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
+* Dark Simple Square <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
+* Classy Circle <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
+* Dark Classy Circle <sub><sup>*designed by [Purr Design](https://www.purrdesign.com/)*</sup></sub>
 
 While these card styles are all awesome, we totally understand that you might want to customize them.
 

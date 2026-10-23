@@ -18,10 +18,14 @@ class EasyRecipeDOMDocument extends DOMDocument {
 	public function __construct( $content, $load = true, $encoding = 'UTF-8' ) {
 		parent::__construct( '1.0', $encoding );
 
-		libxml_use_internal_errors( true );
+		if ( $load ) {
+			$libxml_previous_state = libxml_use_internal_errors( true );
+			$loaded                = @$this->loadHTML( '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>' . $content );
+			libxml_use_internal_errors( $libxml_previous_state );
 
-		if ( $load && ! @$this->loadHTML( '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>' . $content ) ) {
-			return;
+			if ( ! $loaded ) {
+				return;
+			}
 		}
 
 		$this->isValidHTML = true;

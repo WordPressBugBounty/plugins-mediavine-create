@@ -5,7 +5,7 @@
  * This class handles storing and retrieving user-specific verification data
  * in WordPress user meta for Create Studio multi-user verification.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

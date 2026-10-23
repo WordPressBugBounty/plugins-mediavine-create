@@ -5,7 +5,7 @@ namespace Mediavine\Create;
 /**
  * Class JSON_LD
  *
- * @package Mediavine\Create
+ * @package Create
  */
 class JSON_LD {
 

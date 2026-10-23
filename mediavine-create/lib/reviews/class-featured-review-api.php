@@ -99,11 +99,15 @@ class Featured_Review_API extends Plugin {
 		$review_id   = absint( $request->get_param( 'id' ) );
 		$is_featured = $request->get_param( 'is_featured' );
 
-		// Check if featured reviews feature is gated (Pro feature)
+		// Check if featured reviews feature is gated (guides band: Pro Guides / Pro Pass)
 		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_FEATURED ) ) {
 			return new \WP_Error(
 				'feature_gated',
-				__( 'Featured reviews require a Pro subscription', 'mediavine-create' ),
+				sprintf(
+					/* translators: %s: list of subscription plans that unlock the feature (e.g. "Pro Guides or Pro Pass"). */
+					__( 'Featured reviews require a %s plan', 'mediavine-create' ),
+					GateKeeper::required_tiers_label( GateKeeper::FEATURE_REVIEW_FEATURED )
+				),
 				[
 					'status'      => 403,
 					'upgrade_url' => GateKeeper::get_upgrade_url(),

@@ -5,11 +5,12 @@
  * This class handles HTTP communication with the Create Studio API
  * for user verification endpoints.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;
 
+use Mediavine\Create\Helpers\Jwt;
 use Mediavine\Settings;
 
 /**
@@ -24,6 +25,12 @@ class Create_Studio_Client {
 	 * Default request timeout in seconds
 	 */
 	const DEFAULT_TIMEOUT = 15;
+
+	/**
+	 * Timeout in seconds for auto_connect(). Longer than the default because
+	 * Create Studio waits up to 15s on the site's callback before it answers.
+	 */
+	const AUTO_CONNECT_TIMEOUT = 30;
 
 	/**
 	 * Get the site API token from settings.
@@ -53,13 +60,7 @@ class Create_Studio_Client {
 			return null;
 		}
 
-		$token_parts = explode( '.', $token );
-
-		if ( empty( $token_parts[1] ) ) {
-			return null;
-		}
-
-		$payload = json_decode( base64_decode( $token_parts[1] ), true );
+		$payload = Jwt::decode_payload( $token );
 
 		return $payload['site_id'] ?? null;
 	}
@@ -217,6 +218,20 @@ class Create_Studio_Client {
 	}
 
 	/**
+	 * Self-serve switch between the two free ad tiers (free <-> free-plus).
+	 *
+	 * POST /sites/subscription-tier — authenticated with the site token. Create
+	 * Studio only accepts free and free-plus here; a paid plan or live trial is
+	 * managed through Create Studio billing (Stripe), not this endpoint.
+	 *
+	 * @param string $tier Target tier: 'free' or 'free-plus'.
+	 * @return array|\WP_Error Response array or \WP_Error.
+	 */
+	public static function set_subscription_tier( $tier ) {
+		return self::request( 'POST', '/sites/subscription-tier', [ 'tier' => $tier ] );
+	}
+
+	/**
 	 * Generate SSO URL for user to access Create Studio.
 	 *
 	 * POST /api/auth/sso
@@ -272,10 +287,14 @@ class Create_Studio_Client {
 	 * GET /sites/status
 	 * Uses the site JWT token for authentication.
 	 *
-	 * @return array|false Array with 'connected', 'subscription_tier', 'site_id' keys, or false on failure.
+	 * @param int|null $timeout Optional request timeout in seconds. Defaults to DEFAULT_TIMEOUT.
+	 * @return array|false Array with 'connected', 'subscription_tier', 'site_id',
+	 *                     'payment_failed', 'grace_until', 'cancel_at_period_end',
+	 *                     'current_period_end' keys, or false on failure.
 	 */
-	public static function check_site_status() {
-		$response = self::request( 'GET', '/sites/status' );
+	public static function check_site_status( $timeout = null ) {
+		$options  = is_int( $timeout ) && $timeout > 0 ? [ 'timeout' => $timeout ] : [];
+		$response = self::request( 'GET', '/sites/status', [], null, $options );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -288,18 +307,37 @@ class Create_Studio_Client {
 		$data = $response['data'];
 
 		return [
-			'connected'              => ! empty( $data['connected'] ),
-			'subscription_tier'      => isset( $data['subscription_tier'] ) ? $data['subscription_tier'] : 'free',
-			'site_id'                => isset( $data['site_id'] ) ? (int) $data['site_id'] : 0,
-			'site_url'               => isset( $data['site_url'] ) ? $data['site_url'] : '',
-			'site_name'              => isset( $data['site_name'] ) ? $data['site_name'] : '',
-			'active_paid_count'      => isset( $data['active_paid_count'] ) ? (int) $data['active_paid_count'] : 0,
-			'total_site_count'       => isset( $data['total_site_count'] ) ? (int) $data['total_site_count'] : 1,
-			'is_trialing'            => ! empty( $data['is_trialing'] ),
-			'trial_days_remaining'   => isset( $data['trial_days_remaining'] ) ? (int) $data['trial_days_remaining'] : 0,
-			'trial_end'              => isset( $data['trial_end'] ) ? $data['trial_end'] : '',
-			'trial_extensions'       => isset( $data['trial_extensions'] ) ? $data['trial_extensions'] : [],
-			'trial_eligible'         => ! empty( $data['trial_eligible'] ),
+			'connected'                    => ! empty( $data['connected'] ),
+			'subscription_tier'            => isset( $data['subscription_tier'] ) ? $data['subscription_tier'] : 'free',
+			'site_id'                      => isset( $data['site_id'] ) ? (int) $data['site_id'] : 0,
+			'site_url'                     => isset( $data['site_url'] ) ? $data['site_url'] : '',
+			'site_name'                    => isset( $data['site_name'] ) ? $data['site_name'] : '',
+			'active_paid_count'            => isset( $data['active_paid_count'] ) ? (int) $data['active_paid_count'] : 0,
+			'total_site_count'             => isset( $data['total_site_count'] ) ? (int) $data['total_site_count'] : 1,
+			// True when another of the owner's sites has an active Pro Pass and
+			// the owner has more than one site (50% off Pro Pass for this site).
+			// An older Studio omits the key: not eligible.
+			'multi_site_discount_eligible' => ! empty( $data['multi_site_discount_eligible'] ),
+			'is_trialing'                  => ! empty( $data['is_trialing'] ),
+			'trial_days_remaining'         => isset( $data['trial_days_remaining'] ) ? (int) $data['trial_days_remaining'] : 0,
+			'trial_end'                    => isset( $data['trial_end'] ) ? $data['trial_end'] : '',
+			// What the subscription is billed on (what a trial converts to).
+			'plan_tier'                    => isset( $data['plan_tier'] ) ? $data['plan_tier'] : '',
+			'plan_interval'                => isset( $data['plan_interval'] ) ? $data['plan_interval'] : '',
+			'trial_extensions'             => isset( $data['trial_extensions'] ) ? $data['trial_extensions'] : [],
+			'trial_eligible'               => ! empty( $data['trial_eligible'] ),
+			// Dunning grace (CRE-295 / create-studio CS-27). A failed renewal
+			// KEEPS its paid tier for the grace window, so `payment_failed` is a
+			// nag signal, never a downgrade — the tier above is already correct.
+			'payment_failed'               => ! empty( $data['payment_failed'] ),
+			'grace_until'                  => isset( $data['grace_until'] ) && is_string( $data['grace_until'] ) ? $data['grace_until'] : '',
+			'grace_days_remaining'         => isset( $data['grace_days_remaining'] ) ? (int) $data['grace_days_remaining'] : 0,
+			// Pending cancellation (create-studio CS-26). The subscriber keeps the
+			// paid tier above until `current_period_end`, so like the dunning
+			// fields this is a heads-up signal, never a downgrade. Studio always
+			// sends both keys; the period end is null when there is no subscription.
+			'cancel_at_period_end'         => ! empty( $data['cancel_at_period_end'] ),
+			'current_period_end'           => isset( $data['current_period_end'] ) && is_string( $data['current_period_end'] ) ? $data['current_period_end'] : '',
 		];
 	}
 
@@ -321,6 +359,46 @@ class Create_Studio_Client {
 			'siteId' => $site_id,
 			'step'   => $step,
 		] );
+	}
+
+	/**
+	 * Ask Create Studio to connect this site in the background.
+	 *
+	 * POST /sites/auto-connect
+	 * Unauthenticated: the site has no token yet. Create Studio proves the site
+	 * by posting the connect token back to /site-connect/callback before it
+	 * answers, so this call blocks until that round trip is done.
+	 *
+	 * @param array $body site_url, connect_token, email, firstname, lastname, tos_accepted.
+	 * @return array|\WP_Error Response array with 'success', 'data', 'status_code' keys, or \WP_Error.
+	 */
+	public static function auto_connect( $body ) {
+		$url = self::get_api_url() . '/sites/auto-connect';
+
+		$args = [
+			'headers' => [ 'Content-Type' => 'application/json' ],
+			'body'    => wp_json_encode( $body ),
+			'timeout' => self::AUTO_CONNECT_TIMEOUT,
+		];
+
+		// Disable SSL verification for local .test domains (Caddy local CA).
+		if ( str_contains( $url, '.test/' ) ) {
+			$args['sslverify'] = false;
+		}
+
+		$response = wp_remote_post( $url, $args );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$status_code = wp_remote_retrieve_response_code( $response );
+
+		return [
+			'success'     => $status_code >= 200 && $status_code < 300,
+			'data'        => json_decode( wp_remote_retrieve_body( $response ), true ),
+			'status_code' => $status_code,
+		];
 	}
 
 	/**

@@ -4,6 +4,7 @@
 namespace Mediavine\Create\Settings;
 
 use Mediavine\Create\Plugin;
+use Mediavine\Create\GateKeeper;
 
 
 class Appearance implements Settings_Group {
@@ -16,24 +17,24 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 0,
 				'data'  => [
-					'type'     => 'theme_select',
-					'label'    => __( 'Card Style', 'mediavine-create' ),
-					'default'  => __( 'Simple Square', 'mediavine-create' ),
-					'subgroup' => 'theme',
-					'options'  => [
+					'type'          => 'theme_select',
+					'label'         => __( 'Card Style', 'mediavine-create' ),
+					'default_label' => __( 'Simple Square', 'mediavine-create' ),
+					'subgroup'      => 'theme',
+					'options'       => [
 						[
 							'label' => __( 'Editorial', 'mediavine-create' ),
 							'value' => 'editorial',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-editorial.webp' ),
 							'title' => __( 'Editorial<br>by Mischief Marmot', 'mediavine-create' ),
-							'gated' => true,
+							'gated' => GateKeeper::theme_feature( 'editorial' ),
 						],
 						[
 							'label' => __( 'Modern Elegant', 'mediavine-create' ),
 							'value' => 'modern',
 							'image' => mv_create_plugin_dir_url( 'admin/img/card-style-modern.webp' ),
 							'title' => __( 'Modern Elegant<br>by Mischief Marmot', 'mediavine-create' ),
-							'gated' => true,
+							'gated' => GateKeeper::theme_feature( 'modern' ),
 						],
 						[
 							'label' => __( 'Hero Image by Purr Design', 'mediavine-create' ),
@@ -93,12 +94,12 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 30,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Photo Ratio', 'mediavine-create' ),
-					'instructions' => __( 'Select an aspect ratio for photo display on cards and lists. Circles list layout and Classy Circle card style will ignore this setting.', 'mediavine-create' ),
-					'default'      => __( 'No fixed ratio', 'mediavine-create' ),
-					'subgroup'     => 'card_display',
-					'options'      => [
+					'type'          => 'select',
+					'label'         => __( 'Photo Ratio', 'mediavine-create' ),
+					'instructions'  => __( 'Select an aspect ratio for photo display on cards and lists. Circles list layout and Classy Circle card style will ignore this setting.', 'mediavine-create' ),
+					'default_label' => __( 'No fixed ratio', 'mediavine-create' ),
+					'subgroup'      => 'card_display',
+					'options'       => [
 						[
 							'label' => __( 'No fixed ratio', 'mediavine-create' ),
 							'value' => 'mv_create_no_ratio',
@@ -124,11 +125,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 35,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Print Thumbnails', 'mediavine-create' ),
-					'instructions' => __( 'By default, card thumbnails will display in the print view. This can be disabled.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
-					'subgroup'     => 'card_display',
+					'type'          => 'checkbox',
+					'label'         => __( 'Enable Print Thumbnails', 'mediavine-create' ),
+					'instructions'  => __( 'By default, card thumbnails will display in the print view. This can be disabled.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
+					'subgroup'      => 'card_display',
 				],
 			],
 			[
@@ -137,12 +138,12 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 40,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Pinterest Button Location', 'mediavine-create' ),
-					'instructions' => __( 'Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right.', 'mediavine-create' ),
-					'default'      => __( 'Top Right', 'mediavine-create' ),
-					'subgroup'     => 'card_display',
-					'options'      => [
+					'type'          => 'select',
+					'label'         => __( 'Pinterest Button Location', 'mediavine-create' ),
+					'instructions'  => __( 'Select location for Pinterest button. Note: On the list card styles Numbered and Circles, the Pinterest button will still display to the right.', 'mediavine-create' ),
+					'default_label' => __( 'Top Right', 'mediavine-create' ),
+					'subgroup'      => 'card_display',
+					'options'       => [
 						[
 							'label' => __( 'Off', 'mediavine-create' ),
 							'value' => 'off',
@@ -172,11 +173,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 50,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Force Uppercase', 'mediavine-create' ),
-					'instructions' => __( 'By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
-					'subgroup'     => 'card_display',
+					'type'          => 'checkbox',
+					'label'         => __( 'Force Uppercase', 'mediavine-create' ),
+					'instructions'  => __( 'By default, recipe cards show some pieces of text as all-uppercase, which for certain typefaces may not be desired.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
+					'subgroup'      => 'card_display',
 				],
 			],
 			[
@@ -185,11 +186,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 51,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Use Theme Body Font Size', 'mediavine-create' ),
-					'instructions' => __( 'If enabled, the Create card body font size will match that of the theme.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'subgroup'     => 'card_display',
+					'type'          => 'checkbox',
+					'label'         => __( 'Use Theme Body Font Size', 'mediavine-create' ),
+					'instructions'  => __( 'If enabled, the Create card body font size will match that of the theme.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'subgroup'      => 'card_display',
 				],
 			],
 			[
@@ -198,11 +199,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 65,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Center Full Width Cards', 'mediavine-create' ),
-					'instructions' => __( 'When a card reaches its max width of 700px, center the card within the content area.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
-					'subgroup'     => 'card_display',
+					'type'          => 'checkbox',
+					'label'         => __( 'Center Full Width Cards', 'mediavine-create' ),
+					'instructions'  => __( 'When a card reaches its max width of 700px, center the card within the content area.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
+					'subgroup'      => 'card_display',
 				],
 			],
 			// CSS Overrides subgroup
@@ -212,11 +213,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 55,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Aggressive List CSS', 'mediavine-create' ),
-					'instructions' => __( 'Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'subgroup'     => 'css_overrides',
+					'type'          => 'checkbox',
+					'label'         => __( 'Aggressive List CSS', 'mediavine-create' ),
+					'instructions'  => __( 'Some themes may remove bullets and numbers from lists. This forces them to display in Create Cards.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'subgroup'      => 'css_overrides',
 				],
 			],
 			[
@@ -225,11 +226,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 60,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Aggressive Buttons CSS', 'mediavine-create' ),
-					'instructions' => __( "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style.", 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'subgroup'     => 'css_overrides',
+					'type'          => 'checkbox',
+					'label'         => __( 'Aggressive Buttons CSS', 'mediavine-create' ),
+					'instructions'  => __( "Some themes may not have button styles, or they won't look good with your theme. This forces a generic button style.", 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'subgroup'      => 'css_overrides',
 				],
 			],
 			[
@@ -238,11 +239,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 61,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Aggressive Widget CSS', 'mediavine-create' ),
-					'instructions' => __( 'Some themes override font sizes and spacing on card widgets (servings adjuster, unit conversion). This forces the intended widget styling.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'subgroup'     => 'css_overrides',
+					'type'          => 'checkbox',
+					'label'         => __( 'Aggressive Widget CSS', 'mediavine-create' ),
+					'instructions'  => __( 'Some themes override font sizes and spacing on card widgets (servings adjuster, unit conversion). This forces the intended widget styling.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'subgroup'      => 'css_overrides',
 				],
 			],
 			[
@@ -251,11 +252,11 @@ class Appearance implements Settings_Group {
 				'group' => Plugin::$settings_group . '_appearance',
 				'order' => 62,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Aggressive Nutrition CSS', 'mediavine-create' ),
-					'instructions' => __( 'Some themes override font sizes and spacing in the nutrition label. This forces the intended nutrition styling.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'subgroup'     => 'css_overrides',
+					'type'          => 'checkbox',
+					'label'         => __( 'Aggressive Nutrition CSS', 'mediavine-create' ),
+					'instructions'  => __( 'Some themes override font sizes and spacing in the nutrition label. This forces the intended nutrition styling.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'subgroup'      => 'css_overrides',
 				],
 			],
 			[
@@ -267,9 +268,8 @@ class Appearance implements Settings_Group {
 					'type'         => 'textarea',
 					'label'        => __( 'Custom CSS', 'mediavine-create' ),
 					'instructions' => __( 'Add custom CSS to style Create cards. Use .mv-create-card as the root selector. Example: <code>.mv-create-card .mv-create-title-primary { font-size: 24px; }</code>', 'mediavine-create' ),
-					'default'      => '',
 					'subgroup'     => 'css_overrides',
-					'gated'        => 'custom_css',
+					'gated'        => GateKeeper::FEATURE_CUSTOM_CSS,
 				],
 			],
 		];

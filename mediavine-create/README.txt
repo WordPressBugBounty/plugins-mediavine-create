@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.7.0
+Stable tag: 3.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,9 +19,9 @@ Create gives you everything you need to publish recipes, how-to guides, and list
 
 **One plugin. Three card types. Full schema support.**
 
-* **Recipes** — Granular ingredient editing, free nutrition calculator, video embeds, and built-in importers for 10+ recipe plugins
+* **Recipes** — Granular ingredient editing, nutrition facts (with automatic calculation on Free+ and paid plans), video embeds, and built-in importers for 10+ recipe plugins
 * **How-to guides** — Step-by-step instructions with materials lists, photos, and video for any kind of tutorial or guide
-* **Lists and round-ups** — Showcase links, images, and products with bulk import and drag-and-drop ordering
+* **Lists and round-ups** — Showcase links, images, and products with drag-and-drop ordering and bulk import (Pro Lists)
 
 = New Independent Ownership =
 In mid-2025, Create was [purchased](https://create.studio/hello) from Mediavine by John-Michael, one of the plugin's founding developers. Create is now fully independent and continues to be actively developed at [Create Studio](https://create.studio).
@@ -38,27 +38,28 @@ In mid-2025, Create was [purchased](https://create.studio/hello) from Mediavine 
 
 **Gutenberg and Classic Editor** — Full block editor support with live preview, plus shortcode fallback
 
-**Built-in importers** — Switch from WP Recipe Maker, Tasty, EasyRecipe, and 8 other plugins without a separate download
+**Built-in importers** — Switch from WP Recipe Maker, Tasty, EasyRecipe, and 9 other plugins without a separate download
 
-**Free nutrition calculator** — Automatic nutrition data powered by [API Ninjas](https://api-ninjas.com/api/nutrition)
+**Nutrition calculator** — Automatic nutrition data powered by [API Ninjas](https://api-ninjas.com/api/nutrition), included free with the Free+ plan
 
 **Modern editor experience** — Keyboard shortcuts throughout the app, simple workflows, and unobtrusive customization options designed for how *you* actually work
 
-= Premium Features =
-Upgrade through [Create Studio](https://create.studio) to unlock:
+= Plans =
+Create is free to use, with optional plans through [Create Studio](https://create.studio) that unlock more features. Every new site starts on Free, and you can switch plans at any time from Create > Settings.
 
-* **Interactive Mode** — Turns your cards into a hands-free cooking companion with interactive checklists so readers can check off ingredients and steps as they go
-* **Adjustable Servings and Unit Conversion** — Readers scale ingredient quantities and convert between metric and imperial
-* **Premium themes** — Editorial and Modern Elegant card designs
-* **Review management** — Reader reviews with featured review blocks and response tools
-* **Bulk list tools** — Paste URLs to bulk-import list items, plus inline bulk editing
-* **Products in Lists** — Add product items for affiliate placements
+* **Free** — Recipe, How-to, and List cards with full schema, manual nutrition, Recommended Products, the Amazon Creators API integration, the built-in importers, and the five standard card themes. Reviews you've already collected keep displaying.
+* **Free+ (free, ad-supported)** — Everything in Free, plus automatic nutrition calculation, automatic product and list-item scraping, new reader ratings and reviews, Interactive Mode, Adjustable Servings, and Unit Conversion. Interactive Mode is always on for Recipe and How-to cards on Free+: it opens in a new tab on create.studio, which is the only place Create shows its ads. Your site's own ads and pages are untouched.
+* **Pro Guides** — Everything in Free+, plus Interactive Mode on your own site with no Create ads, Interactive Checklists, review management (edit, respond to, and feature reviews, plus the Featured Review block), the Editorial and Modern Elegant themes, premium Recommended Products display options, and Custom CSS.
+* **Pro Lists** — Everything in Free, plus automatic nutrition, scraping, and new reviews; the premium Editorial, Leaderboard, and Ranked list layouts; Bulk List Import; list items that stay in sync with your cards; and Custom CSS. Pro Lists does not include Interactive Mode, Adjustable Servings, or Unit Conversion.
+* **Pro Pass** — Every Pro Guides and Pro Lists feature, plus 50% off additional sites.
+
+Eligible sites can try paid features free for 14 days, and earn up to 7 bonus trial days by completing setup steps.
 
 == Installation ==
 
 = Minimum Requirements =
 
-* PHP version 7.4 or greater
+* PHP version 7.4 or greater (tested up to PHP 8.5)
 * MySQL version 8.0 or greater
 * WordPress version 6.5 or greater
 
@@ -76,7 +77,8 @@ Upgrade through [Create Studio](https://create.studio) to unlock:
 
 = After Installation =
 1. Explore the plugin settings and choose your card style
-1. [Connect your site to Create Studio](https://create.studio/admin) to unlock features like nutrition calculation and link scraping – [Learn more](https://help.create.studio/en/articles/8916417)
+1. Connect your site to Create Studio (free) from Create > Settings to enable nutrition facts and Recommended Products, then choose Free or Free+ – [Learn more](https://help.create.studio/en/articles/8916417)
+1. Use the Guided Setup wizards under Create > Settings to configure card appearance, recipe features, list cards, Jump to Card, and Featured Reviews
 1. If you previously used another recipe card plugin, enable the built-in Recipe Importers under Create > Settings > Advanced to begin importing
 
 For more information, please see our [help center](https://help.create.studio).
@@ -85,9 +87,11 @@ For more information, please see our [help center](https://help.create.studio).
 
 = How much does it cost? =
 
-Create is free for everyone. All core features of the plugin will remain free and supported — including plugin updates, automatic nutriton calculation, user reviews, and more.
+Create is free for everyone. Recipe, How-to, and List cards, schema, manual nutrition, importers, and plugin updates are free on every plan.
 
-Premium features like premium themes, Interactive Mode, and review management are available through a [Create Studio](https://create.studio/#interactive-mode) subscription.
+The **Free+** plan is also free: it adds automatic nutrition calculation, link scraping, new reader reviews, Interactive Mode, Adjustable Servings, and Unit Conversion, supported by ads that appear only inside Interactive Mode on create.studio, never on your own site.
+
+Paid plans (Pro Guides, Pro Lists, and Pro Pass) are available through [Create Studio](https://create.studio). See "Plans" above for what each includes.
 
 = How do I import my existing recipes? =
 
@@ -97,6 +101,7 @@ Recipe Importers are built into Create. Enable them under Create > Settings > Ad
 
 * Cookbook
 * EasyRecipe
+* GetMeCooking Recipe Template
 * Meal Planner Pro Recipes
 * Purr Recipe Cards
 * Simple Recipe Pro
@@ -118,9 +123,9 @@ If the plugin is deactivated, no data will be deleted and reactivating the plugi
 
 Yes! Nutritional data is an important part of Schema, which search engines love to have for optimal results.
 
-Nutrition facts can be manually entered for a recipe. They will also transfer over through the importer if the recipe already contains it.
+Nutrition facts can be manually entered for a recipe on any plan once your site is connected to Create Studio (free). They will also transfer over through the importer if the recipe already contains it.
 
-Create provides **free** automatic nutrition calculation with [API Ninjas Nutrition](https://api-ninjas.com/api/nutrition). [Learn more about this feature](https://help.create.studio/en/articles/8914561).
+Automatic nutrition calculation with [API Ninjas Nutrition](https://api-ninjas.com/api/nutrition) is included with the free Free+ plan and every paid plan. [Learn more about this feature](https://help.create.studio/en/articles/8914561).
 
 = Where do I report security bugs found in this plugin? =
 Please report security bugs found in the source code of the Create plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/mediavine-create). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
@@ -146,7 +151,7 @@ Please report security bugs found in the source code of the Create plugin throug
 Create connects to the following third-party services. No data is sent unless you use the feature that requires it.
 
 **[Create Studio](https://create.studio)**
-Create Studio powers nutrition calculation, URL scraping, Interactive Mode/Unit Conversion/Servings Adjustment widgets, dashboard tips and broadcasts, and Premium subscription management. Requests are made when you connect your site or use those features, and may include your site URL, connection token, plugin version, card data, ingredient text, scraped URLs, and account email.
+Create Studio powers nutrition calculation, URL scraping, Interactive Mode/Unit Conversion/Servings Adjustment widgets, dashboard tips and broadcasts, and plan and subscription management. Requests are made when you connect your site or use those features, and may include your site URL, connection token, plugin version, card data, ingredient text, scraped URLs, and account email. Connecting from the plugin creates a Create Studio account for the admin's email if one doesn't exist. On the Free+ plan, Interactive Mode opens on create.studio, where Create Studio shows ads.
 [Terms of Use](https://create.studio/legal/terms) — [Privacy Policy](https://create.studio/legal/privacy)
 
 **[API Ninjas Nutrition](https://api-ninjas.com)**
@@ -162,6 +167,40 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 3.0.0 =
+
+* FEATURE: A new plan lineup — Free, Free+, Pro Guides, Pro Lists, and Pro Pass — with features unlocking per plan
+* FEATURE: Free+, a new free plan supported by ads shown only inside Interactive Mode on create.studio, includes automatic nutrition, scraping, reader reviews, Interactive Mode, Adjustable Servings, and Unit Conversion
+* FEATURE: Connect to Create Studio without leaving WordPress — Create sets up your Create Studio account in the background
+* FEATURE: Guided Setup wizards walk you through configuring card appearance, recipe features, list cards, list syncing, Jump to Card, and Featured Reviews
+* FEATURE: Three new Premium List layouts: Editorial, Leaderboard, and Ranked
+* FEATURE: Choose a site-wide default list layout, with a per-list override, plus a Photo Ratio setting for lists
+* FEATURE: List items linked to your own cards can now stay in sync with the source card's title and image, with a per-item toggle and a bulk catch-up wizard
+* FEATURE: Featured Reviews can place themselves automatically in your posts and link readers down to the card, managed from a redesigned settings panel
+* FEATURE: Pick exactly which card types use Interactive Mode (Pro Guides and Pro Pass)
+* ENHANCEMENT: The theme picker is redesigned around a live sample card, so you can see a theme on a real card before applying it
+* ENHANCEMENT: The Jump to Card setup wizard includes the "Show Jump Button On" card type control, and a featured review's jump link follows it
+* ENHANCEMENT: Every plan can select list items and preview bulk actions; acting on them still requires Pro Lists or Pro Pass
+* ENHANCEMENT: Plan badges now show "Included" on features your plan already covers instead of a generic premium label
+* ENHANCEMENT: If a payment fails, Create shows a heads-up during the grace period with a link straight to billing, so you can update your card before losing access
+* ENHANCEMENT: Plan changes show up on Create's screens right away instead of after a second reload
+* ENHANCEMENT: "Jump to Recipe" is now called "Jump to Card" everywhere, since it works on every card type
+* CHANGE: Automatic nutrition calculation and product/list-item scraping now require Free+ or a paid plan
+* CHANGE: Collecting new reviews now requires Free+ or a paid plan; reviews you've already collected continue to display, along with their schema
+* FIX: Clearing a Prep, Cook, or Additional time field now saves the cleared value and recalculates Total Time
+* FIX: Aggressive Button Styles only restyle Create's own buttons, so third-party buttons inside cards (such as a video player's close button) are left alone
+* FIX: Editorial-style cards no longer lose their colors to white theme values
+* FIX: A premium theme your plan doesn't include no longer shows as "Active" in the theme picker
+* FIX: More of the reader-facing card text is translatable
+* FIX: Images added from a URL without a file extension no longer overwrite each other in the Media Library, and are saved with their real file type
+* FIX: The list editor preview and admin navigation no longer crash on incomplete data
+* FIX: Recipe cards no longer jump or rearrange after Jump to Card on tablets and laptop resolutions; the card now shows its final layout from the start
+* FIX: The review form now stays on top of sticky ads and floating video players, so taps on Submit Review no longer land on an ad, and the form is more compact on short screens
+* FIX: With Enhanced Search on, searching several words (like "brown sugar chocolate chips") now finds posts containing all of them anywhere in the post or its card, instead of only the exact phrase, and searches run several times faster
+* ENHANCEMENT: Create now supports PHP 8.5, and the notice shown when a required PHP extension is missing names the PHP version, SAPI, and php.ini in use so your host can fix the right runtime
+* SECURITY: Tightened output escaping in block rendering, images, video embeds, and premium list item links
+
 
 = 2.7.0 =
 
@@ -230,6 +269,11 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 * FIX: Imported recipes with no rating no longer save an invalid rating value
 * FIX: Edits to list items in the editor are no longer overwritten while you type
 * FIX: The EasyRecipe importer no longer fails with a fatal error when reading recipes out of your posts
+* FIX: Your plan, trial countdown, and unlocked features now update as soon as you connect, upgrade, or earn bonus trial days — no page refresh needed
+* FIX: The Enable Checklists setting now appears under Reader Experience, where it belongs, instead of being hidden on new installs
+* FIX: The bonus trial days checklist button no longer occasionally fails to appear
+* FIX: URL scraping now works during a free trial instead of showing an upgrade prompt, and that prompt links to the correct plan
+* FIX: Premium card themes are gated consistently everywhere — the theme picker, the preview banner, and the rendered card can no longer disagree about which theme your plan includes
 
 
 = 2.5.5 =

@@ -6,7 +6,7 @@ namespace Mediavine\Create\Settings;
 /**
  * Interface Settings_Group
  *
- * @package Mediavine
+ * @package Create
  */
 interface Settings_Group {
 	/**

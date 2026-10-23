@@ -2,7 +2,7 @@
 /**
  * Shared Amazon expiry refresh and queue stepping for Products and Relations.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

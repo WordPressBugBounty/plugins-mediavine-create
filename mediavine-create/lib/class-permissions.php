@@ -13,7 +13,7 @@ namespace Mediavine;
  * Failure shape: every named level returns `true` or a `WP_Error` with a
  * `status` (via `rest_authorization_required_code()`).
  *
- * @package Mediavine
+ * @package Create
  * @see docs/rest-permission-levels.md
  */
 class Permissions {
@@ -83,6 +83,7 @@ class Permissions {
 	 */
 	const CUSTOM_AUTH_CALLBACKS = [
 		'Mediavine\\Create\\Reviews_API::can_update_single_review',
+		'Mediavine\\Create\\Relations_Sync::rest_permission',
 	];
 
 	/**

@@ -149,14 +149,14 @@ class Review_Responses_API extends Review_Responses {
 
 		$responses = $this->Review_Responses->find( $query_args );
 
-		// Check if user can see admin responses (Pro feature)
+		// Check if user can see admin responses (guides band: Pro Guides / Pro Pass)
 		$can_see_admin_responses = GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_RESPOND );
 
 		if ( is_array( $responses ) ) {
 			$response = [];
 
 			foreach ( $responses as $resp ) {
-				// Filter out admin responses for non-Pro users on the frontend
+				// Filter out admin responses on the frontend for tiers below the guides band
 				if ( ! $can_see_admin_responses && ! empty( $resp->is_admin_response ) ) {
 					continue;
 				}
@@ -191,11 +191,15 @@ class Review_Responses_API extends Review_Responses {
 		$response    = $this::$api_services->default_response;
 		$status_code = $this::$api_services->default_status;
 
-		// Check if responding to reviews is gated (Pro feature)
+		// Check if responding to reviews is gated (guides band: Pro Guides / Pro Pass)
 		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_RESPOND ) ) {
 			return new \WP_Error(
 				'feature_gated',
-				__( 'Responding to reviews requires a Pro subscription', 'mediavine-create' ),
+				sprintf(
+					/* translators: %s: list of subscription plans that unlock the feature (e.g. "Pro Guides or Pro Pass"). */
+					__( 'Responding to reviews requires a %s plan', 'mediavine-create' ),
+					GateKeeper::required_tiers_label( GateKeeper::FEATURE_REVIEW_RESPOND )
+				),
 				[
 					'status'      => 403,
 					'upgrade_url' => GateKeeper::get_upgrade_url(),

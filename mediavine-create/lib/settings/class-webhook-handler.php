@@ -5,7 +5,7 @@
  * Receives RS256-signed webhooks from Create Studio, verifies signatures
  * using the public key fetched from Studio, and dispatches by event type.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;
@@ -336,6 +336,10 @@ class Webhook_Handler {
 
 			case 'unit_conversion_refresh':
 				return self::handle_unit_conversion_refresh( $data );
+
+			case 'connection_declined':
+				Site_Verification::handle_connection_declined( isset( $data['email'] ) ? (string) $data['email'] : '' );
+				return new \WP_REST_Response( [ 'success' => true ], 200 );
 
 			default:
 				return new \WP_REST_Response( [ 'error' => 'Unknown webhook type' ], 400 );
@@ -710,7 +714,9 @@ class Webhook_Handler {
 	 * @return array
 	 */
 	private static function get_features_info() {
-		$tier = GateKeeper::get_subscription_tier();
+		// Report the effective (trial-aware) tier so the label matches the feature
+		// flags below, which can_access() resolves against get_effective_tier().
+		$tier = GateKeeper::get_effective_tier();
 
 		$features = [];
 		foreach ( GateKeeper::get_gated_features() as $feature ) {
@@ -1180,69 +1186,127 @@ class Webhook_Handler {
 			return new \WP_REST_Response( [ 'error' => 'Missing tier in data' ], 400 );
 		}
 
-		$tier        = $data['tier'];
-		$valid_tiers = [ GateKeeper::TIER_FREE, GateKeeper::TIER_PRO, GateKeeper::TIER_FREE_PLUS, GateKeeper::TIER_TRIAL ];
-
-		if ( ! in_array( $tier, $valid_tiers, true ) ) {
+		// Reject unknown tier slugs outright, changing NO state: normalize_tier()
+		// fail-closes unknown slugs to free, and a bogus slug (version skew after
+		// a server-side rename, a typo) must never trigger the destructive
+		// free-floor settings reset.
+		if ( ! GateKeeper::is_known_tier_slug( $data['tier'] ) ) {
 			return new \WP_REST_Response( [ 'error' => 'Invalid tier' ], 400 );
 		}
 
-		// Update subscription tier using the same pattern as GateKeeper::sync_subscription_tier().
-		Settings::create_settings(
+		// Capture the previous tier before overwriting it (for fallback detection).
+		$previous_tier = GateKeeper::get_subscription_tier();
+		$was_paying    = GateKeeper::is_trialing() || in_array( $previous_tier, GateKeeper::PAID_TIERS, true );
+
+		// Normalize the inbound tier onto a canonical slug (legacy slugs accepted).
+		$tier = GateKeeper::normalize_tier( $data['tier'] );
+
+		// Batch subscription writes so Settings::reset_settings() runs once.
+		$writes = [
 			[
 				'slug'  => GateKeeper::SETTING_SUBSCRIPTION_TIER,
 				'value' => $tier,
 				'group' => 'mv_create_subscription',
-			]
-		);
-
-		Settings::create_settings(
+			],
 			[
 				'slug'  => GateKeeper::SETTING_SUBSCRIPTION_SYNCED_AT,
 				'value' => gmdate( 'c' ),
 				'group' => 'mv_create_subscription',
-			]
-		);
-
-		// Store trial fields from enhanced webhook payload.
-		$is_trialing = ! empty( $data['is_trialing'] );
-		Settings::create_settings(
+			],
 			[
 				'slug'  => GateKeeper::SETTING_IS_TRIALING,
-				'value' => $is_trialing ? '1' : '',
+				'value' => ! empty( $data['is_trialing'] ) ? '1' : '',
 				'group' => 'mv_create_subscription',
-			]
-		);
-		Settings::create_settings(
+			],
 			[
 				'slug'  => GateKeeper::SETTING_TRIAL_DAYS_REMAINING,
 				'value' => isset( $data['trial_days_remaining'] ) ? (int) $data['trial_days_remaining'] : 0,
 				'group' => 'mv_create_subscription',
-			]
-		);
-		Settings::create_settings(
+			],
 			[
 				'slug'  => GateKeeper::SETTING_TRIAL_END,
 				'value' => isset( $data['trial_end'] ) ? $data['trial_end'] : '',
 				'group' => 'mv_create_subscription',
-			]
-		);
+			],
+			// What the subscription is billed on (what a trial converts to).
+			[
+				'slug'  => GateKeeper::SETTING_PLAN_TIER,
+				'value' => GateKeeper::sanitize_plan_tier( isset( $data['plan_tier'] ) ? $data['plan_tier'] : '' ),
+				'group' => 'mv_create_subscription',
+			],
+			[
+				'slug'  => GateKeeper::SETTING_PLAN_INTERVAL,
+				'value' => GateKeeper::sanitize_plan_interval( isset( $data['plan_interval'] ) ? $data['plan_interval'] : '' ),
+				'group' => 'mv_create_subscription',
+			],
+			// Dunning grace (CRE-295). Studio sends the RETAINED paid tier
+			// alongside these, so they only drive the "update your card" nag —
+			// the real downgrade arrives later as a plain tier change.
+			[
+				'slug'  => GateKeeper::SETTING_PAYMENT_FAILED,
+				'value' => ! empty( $data['payment_failed'] ) ? '1' : '',
+				'group' => 'mv_create_subscription',
+			],
+			[
+				'slug'  => GateKeeper::SETTING_GRACE_UNTIL,
+				'value' => ! empty( $data['grace_until'] ) ? (string) $data['grace_until'] : '',
+				'group' => 'mv_create_subscription',
+			],
+			// Pending cancellation (CS-26). Studio sends the still-paid tier
+			// alongside these, so they only drive the "plan cancels on" notice.
+			// Absent means not cancelling: a resumed subscription, or the final
+			// `{ tier: 'free' }` once the period has ended, clears the notice.
+			[
+				'slug'  => GateKeeper::SETTING_CANCEL_AT_PERIOD_END,
+				'value' => ! empty( $data['cancel_at_period_end'] ) ? '1' : '',
+				'group' => 'mv_create_subscription',
+			],
+			[
+				'slug'  => GateKeeper::SETTING_CURRENT_PERIOD_END,
+				'value' => ! empty( $data['current_period_end'] ) && is_string( $data['current_period_end'] ) ? $data['current_period_end'] : '',
+				'group' => 'mv_create_subscription',
+			],
+		];
 
-		// Store active paid count if provided.
 		if ( isset( $data['active_paid_count'] ) ) {
-			Settings::create_settings(
-				[
-					'slug'  => GateKeeper::SETTING_ACTIVE_PAID_COUNT,
-					'value' => (int) $data['active_paid_count'],
-					'group' => 'mv_create_subscription',
-				]
-			);
+			$writes[] = [
+				'slug'  => GateKeeper::SETTING_ACTIVE_PAID_COUNT,
+				'value' => (int) $data['active_paid_count'],
+				'group' => 'mv_create_subscription',
+			];
 		}
 
-		Settings::reset_settings();
+		// Only when reported, so an older payload without it can't clear the flag.
+		if ( isset( $data['trial_eligible'] ) ) {
+			$writes[] = [
+				'slug'  => GateKeeper::SETTING_TRIAL_ELIGIBLE,
+				'value' => ! empty( $data['trial_eligible'] ) ? '1' : '',
+				'group' => 'mv_create_subscription',
+			];
+		}
 
-		// If downgrading, switch gated themes to the fallback.
-		GateKeeper::enforce_feature_fallbacks();
+		if ( isset( $data['multi_site_discount_eligible'] ) ) {
+			$writes[] = [
+				'slug'  => GateKeeper::SETTING_MULTI_SITE_DISCOUNT_ELIGIBLE,
+				'value' => ! empty( $data['multi_site_discount_eligible'] ) ? '1' : '',
+				'group' => 'mv_create_subscription',
+			];
+		}
+
+		Settings::create_settings( $writes );
+		GateKeeper::reset_request_cache();
+
+		// Keep the free-plan choice current (e.g. Free -> Free+ switched in
+		// Create Studio), exactly as a successful sync does. Before the plan-ended
+		// handling below, which forgets the choice.
+		GateKeeper::mirror_free_plan_choice( $tier, ! empty( $data['is_trialing'] ) );
+
+		// Clear the plan-ended flag when a paid plan or trial comes back; ask
+		// Free or Free+ when one has just ended. Same as sync_subscription().
+		GateKeeper::settle_plan_choice_gate( $tier, ! empty( $data['is_trialing'] ), $was_paying );
+
+		// On a genuine downgrade to the free floor, reset gated settings; otherwise preserve.
+		GateKeeper::enforce_feature_fallbacks( $previous_tier );
 
 		return new \WP_REST_Response( [ 'success' => true, 'tier' => $tier ], 200 );
 	}
@@ -1275,7 +1339,26 @@ class Webhook_Handler {
 			'slug'     => 'mv_create_interactive_mode_cta_subtitle',
 			'sanitize' => 'sanitize_text_field',
 		],
+		'interactive_mode_card_types' => [
+			'slug'     => 'mv_create_interactive_mode_card_types',
+			'sanitize' => [ self::class, 'sanitize_interactive_mode_card_types' ],
+		],
 	];
+
+	/**
+	 * Sanitize an inbound Interactive Mode card-type value.
+	 *
+	 * Unknown values fall back to 'both' rather than writing a value the render
+	 * path would silently reinterpret.
+	 *
+	 * @param mixed $value Raw webhook value.
+	 * @return string One of 'both', 'recipes', 'howtos'.
+	 */
+	public static function sanitize_interactive_mode_card_types( $value ) {
+		$value = sanitize_text_field( (string) $value );
+
+		return in_array( $value, [ 'both', 'recipes', 'howtos' ], true ) ? $value : 'both';
+	}
 
 	/**
 	 * Handle the "settings_update" webhook type.

@@ -5,7 +5,7 @@
  * Handles bulk scraping of URLs for the List Bulk Import feature.
  * Supports internal links (posts, pages, Create cards) and external URLs.
  *
- * @package Mediavine\Create
+ * @package Create
  * @since 2.1.0
  */
 
@@ -106,11 +106,15 @@ class Bulk_Scrape_API {
 	 * @return WP_REST_Response The response with scraped data.
 	 */
 	public function bulk_scrape( WP_REST_Request $request ) {
-		// Pro feature gate (capability matches single scrape via Permissions::editor).
+		// Tier feature gate (capability matches single scrape via Permissions::editor).
 		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_LIST_BULK_IMPORT ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'Bulk import is a Pro feature. Please upgrade to access this feature.', 'mediavine-create' ),
+				sprintf(
+					/* translators: %s: list of subscription plans that unlock the feature (e.g. "Pro Lists or Pro Pass"). */
+					__( 'Bulk import requires a %s plan. Please upgrade to access this feature.', 'mediavine-create' ),
+					GateKeeper::required_tiers_label( GateKeeper::FEATURE_LIST_BULK_IMPORT )
+				),
 				[
 					'status'      => 403,
 					'upgrade_url' => GateKeeper::get_upgrade_url(),
@@ -452,7 +456,7 @@ class Bulk_Scrape_API {
 	private function create_amazon_setup_error( $url ) {
 		$settings_url = admin_url( 'edit.php?post_type=mv_create&page=settings' );
 
-		if ( ! Create_Studio_Client::is_site_connected() ) {
+		if ( ! GateKeeper::is_connected() ) {
 			return [
 				'url'        => $url,
 				'status'     => 'error',

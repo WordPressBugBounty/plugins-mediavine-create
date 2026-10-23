@@ -6,7 +6,7 @@
  * Implementation uses direct HTTP calls via wp_remote_post, so no SDK or minimum PHP
  * version beyond the plugin's baseline is required.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

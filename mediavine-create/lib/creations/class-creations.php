@@ -355,36 +355,95 @@ class Creations extends Plugin {
 			return $search;
 		}
 
-		$search_term = $query->query['s'];
-		$creations   = $wpdb->prefix . 'mv_creations';
+		// Use the terms WP_Query::parse_search() already split out, so multi-word
+		// searches match each word anywhere (like core) instead of requiring the
+		// whole phrase verbatim. Quoted phrases and sentence mode arrive as one term.
+		$terms = (array) $query->get('search_terms');
+		if ( empty($terms) ) {
+			$terms = [ $query->get('s') ];
+		}
 
-		// Build the LIKE term with wildcard escaping and pass it through
-		// $wpdb->prepare() as %s placeholders. The term is user-supplied (?s=),
-		// so it must never be interpolated directly into the query string.
-		$like = '%' . $wpdb->esc_like( $search_term ) . '%';
+		$creations        = $wpdb->prefix . 'mv_creations';
+		$supplies         = $wpdb->prefix . 'mv_supplies';
+		$relations        = $wpdb->prefix . 'mv_relations';
+		$wildcard         = $query->get('exact') ? '' : '%';
+		$exclusion_prefix = apply_filters('wp_query_search_exclusion_prefix', '-'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core hook
+		$clauses          = [];
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- direct $wpdb access on custom/plugin tables; values bound via prepare() where applicable
-		$search = $wpdb->prepare(
-			" AND
-			(
-				({$wpdb->posts}.post_title LIKE %s) OR
-				({$wpdb->posts}.post_excerpt LIKE %s) OR
-				({$wpdb->posts}.post_content LIKE %s) OR
-				({$wpdb->posts}.ID IN (
-					SELECT DISTINCT {$wpdb->posts}.ID
-					FROM {$creations}
-					JOIN {$wpdb->posts}
-					ON {$creations}.canonical_post_id = {$wpdb->posts}.ID
-					WHERE {$creations}.published LIKE %s
-				))
-			)
-		",
-			$like,
-			$like,
-			$like,
-			$like
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( $terms as $term ) {
+			$term = (string) $term;
+
+			// Mirror core: a leading exclusion prefix ("-nuts") excludes the word.
+			$exclude = $exclusion_prefix && 0 === strpos($term, $exclusion_prefix);
+			if ( $exclude ) {
+				$term = substr($term, strlen($exclusion_prefix));
+			}
+			if ( '' === $term ) {
+				continue;
+			}
+
+			// The term is user-supplied (?s=), so it is escaped for LIKE and bound
+			// through $wpdb->prepare(); never interpolate it into the SQL string.
+			$like = $wildcard . $wpdb->esc_like($term) . $wildcard;
+
+			// Match the card's text columns, supply lines and list item titles.
+			// Never reference `published` here: InnoDB reads the whole ~30 KB JSON
+			// blob for any row it touches (even for IS NULL), and LIKE-scanning it
+			// made searches ~5x slower than core. Keep these as flat IN subqueries;
+			// nesting them let MariaDB re-run the inner scans per row (seconds).
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- plugin table names only; values bound via prepare()
+			$clause = $wpdb->prepare(
+				"(
+					({$wpdb->posts}.post_title LIKE %s) OR
+					({$wpdb->posts}.post_excerpt LIKE %s) OR
+					({$wpdb->posts}.post_content LIKE %s) OR
+					({$wpdb->posts}.ID IN (
+						SELECT c.canonical_post_id
+						FROM {$creations} c
+						WHERE c.canonical_post_id IS NOT NULL
+						AND (c.title LIKE %s OR c.description LIKE %s OR c.keywords LIKE %s OR c.instructions LIKE %s OR c.notes LIKE %s)
+					)) OR
+					({$wpdb->posts}.ID IN (
+						SELECT c.canonical_post_id
+						FROM {$supplies} s
+						JOIN {$creations} c ON c.id = s.creation
+						WHERE c.canonical_post_id IS NOT NULL
+						AND s.original_text LIKE %s
+					)) OR
+					({$wpdb->posts}.ID IN (
+						SELECT c.canonical_post_id
+						FROM {$relations} r
+						JOIN {$creations} c ON c.id = r.creation
+						WHERE c.canonical_post_id IS NOT NULL
+						AND r.title LIKE %s
+					))
+				)",
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			$clauses[] = $exclude ? "(NOT {$clause})" : $clause;
+		}
+
+		if ( empty($clauses) ) {
+			return $search;
+		}
+
+		$search = ' AND (' . implode(' AND ', $clauses) . ')';
+
+		// Core hides password-protected posts from logged-out searchers; keep that.
+		if ( ! is_user_logged_in() ) {
+			$search .= " AND ({$wpdb->posts}.post_password = '')";
+		}
 
 		return $search;
 	}
@@ -909,8 +968,11 @@ class Creations extends Plugin {
 			$data['author'] = \Mediavine\Settings::get_setting(self::$settings_group . '_copyright_attribution');
 		}
 
-		if ( isset($data['type']) && ( 'list' === $data['type'] ) ) {
-			$data['layout'] = 'hero';
+		if ( isset($data['type']) && ( 'list' === $data['type'] ) && empty($data['layout']) ) {
+			// An empty layout means "follow the site default" — resolved at
+			// render time by Creations_Views::resolve_list_layout(), and shown
+			// as the "Site default" option in the list editor.
+			$data['layout'] = '';
 		}
 
 		return $data;
@@ -1004,7 +1066,10 @@ class Creations extends Plugin {
 	}
 
 	/**
-	 * Get the path to the bundle CSS file, handling both versioned and hashed filenames
+	 * Get the CSS URL for the admin card/list preview iframe.
+	 *
+	 * The Vite client build emits bundle.{VERSION}.css by contract; scan for
+	 * any hashed bundle.*.css as a fallback before defaulting.
 	 *
 	 * @return string The CSS file URL
 	 */

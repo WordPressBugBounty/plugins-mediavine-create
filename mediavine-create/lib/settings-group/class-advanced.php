@@ -3,11 +3,12 @@ namespace Mediavine\Create\Settings;
 
 use Mediavine\Create\Plugin;
 use Mediavine\Create\Theme_Checker;
+use Mediavine\Create\GateKeeper;
 
 /**
  * Class Advanced
  * Settings class for Advanced group
- * @package Mediavine
+ * @package Create
  */
 class Advanced implements Settings_Group {
 
@@ -26,12 +27,13 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 9,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Default Access Role', 'mediavine-create' ),
-					'instructions' => __( 'Select what user roles have access to edit Create Cards.', 'mediavine-create' ),
-					'default'      => __( 'Administrators', 'mediavine-create' ),
+					'type'          => 'select',
+					'subgroup'      => 'permissions',
+					'label'         => __( 'Default Access Role', 'mediavine-create' ),
+					'instructions'  => __( 'Select what user roles have access to edit Create Cards.', 'mediavine-create' ),
+					'default_label' => __( 'Administrators', 'mediavine-create' ),
 					// QUESTION: Should these settings be created programmatically?
-					'options'      => [
+					'options'       => [
 						[
 							'label' => __( 'Administrators', 'mediavine-create' ),
 							'value' => 'manage_options',
@@ -52,40 +54,35 @@ class Advanced implements Settings_Group {
 				],
 			],
 			[
-				'slug'  => Plugin::$settings_group . '_enable_hands_free_mode',
-				'value' => false,
-				'group' => Plugin::$settings_group . '_reader_experience',
-				'order' => 10,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Hands-free Mode', 'mediavine-create' ),
-					'instructions' => __( 'Adds a toggle to Create cards to allow readers to keep their screen awake while reading on supported devices.', 'mediavine-create' ),
-					'default'      => 'Disabled',
-				],
-			],
-			[
+				// Canonical home of the checklists toggle — including the `checklists`
+				// gate marker. Registered directly into the reader_experience group it
+				// renders in (older installs are moved there by
+				// Plugin::migrate_reader_experience_settings). Keep this the single
+				// declaration of the slug; do not re-add it to Reader_Experience.
 				'slug'  => Plugin::$settings_group . '_enable_checklists',
 				'value' => false,
-				'group' => Plugin::$settings_group . '_advanced',
+				'group' => Plugin::$settings_group . '_reader_experience',
 				'order' => 11,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Checklists', 'mediavine-create' ),
-					'instructions' => __( 'Add interactive checkboxes to ingredients and instructions for tracking cooking progress.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'gated'        => 'checklists',
+					'type'          => 'checkbox',
+					'subgroup'      => 'premium_features',
+					'label'         => __( 'Enable Checklists', 'mediavine-create' ),
+					'instructions'  => __( 'Add interactive checkboxes to ingredients and instructions for tracking cooking progress.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'gated'         => GateKeeper::FEATURE_CHECKLISTS,
 				],
 			],
 			[
 				'slug'  => Plugin::$settings_group . '_enable_high_contrast',
 				'value' => false,
 				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 11,
+				'order' => 12,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable High Contrast', 'mediavine-create' ),
-					'instructions' => __( 'By default, high contrast mode is disabled.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'content_settings',
+					'label'         => __( 'Enable High Contrast', 'mediavine-create' ),
+					'instructions'  => __( 'By default, high contrast mode is disabled.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -95,9 +92,9 @@ class Advanced implements Settings_Group {
 				'order' => 15,
 				'data'  => [
 					'type'         => 'text',
+					'subgroup'     => 'content_settings',
 					'label'        => __( 'Default Copyright Attribution', 'mediavine-create' ),
 					'instructions' => __( 'If left blank, the Create Card author will be displayed.', 'mediavine-create' ),
-					'default'      => null,
 				],
 			],
 			[
@@ -106,11 +103,12 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 16,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Override author', 'mediavine-create' ),
-					'instructions' => __( 'Enabling this setting will cause the Default Copyright Attribution to display instead of the author.', 'mediavine-create' ),
-					'default'      => 'false',
-					'dependent_on' => Plugin::$settings_group . '_copyright_attribution',
+					'type'          => 'checkbox',
+					'subgroup'      => 'content_settings',
+					'label'         => __( 'Override author', 'mediavine-create' ),
+					'instructions'  => __( 'Enabling this setting will cause the Default Copyright Attribution to display instead of the author.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'dependent_on'  => Plugin::$settings_group . '_copyright_attribution',
 				],
 			],
 			[
@@ -119,16 +117,17 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 18,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Primary Heading Tag', 'mediavine-create' ),
-					'instructions' => sprintf(
+					'type'          => 'select',
+					'subgroup'      => 'seo_schema',
+					'label'         => __( 'Primary Heading Tag', 'mediavine-create' ),
+					'instructions'  => sprintf(
 					// translators: Link tags
 						__( 'While having %1$smultiple H1s on a page is approved by Google%2$s, many still recommend maintaining the page to only a single H1. This allows you to choose what tag you want for the primary heading, properly adjusting the heading hierarchy throughout the card.', 'mediavine-create' ),
 						'<a href="https://www.youtube.com/watch?v=WsgrSxCmMbM" target="_blank">',
 						'</a>'
 					),
-					'default'      => __( 'H2', 'mediavine-create' ),
-					'options'      => [
+					'default_label' => __( 'H2', 'mediavine-create' ),
+					'options'       => [
 						[
 							'label' => 'H1',
 							'value' => 'h1',
@@ -146,10 +145,11 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 70,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Output JSON-LD Schema in head', 'mediavine-create' ),
-					'instructions' => __( 'If enabled, Create will output the JSON-LD schema in the wp_head hook. If disabled, it will be output just before the card.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'seo_schema',
+					'label'         => __( 'Output JSON-LD Schema in head', 'mediavine-create' ),
+					'instructions'  => __( 'If enabled, Create will output the JSON-LD schema in the wp_head hook. If disabled, it will be output just before the card.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -158,10 +158,11 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 80,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Use Enhanced Search', 'mediavine-create' ),
-					'instructions' => __( 'Create has a search feature that allows users to match posts based on the content of the recipe cards included in the post. If you notice that this feature is causing an issue with other themes or plugins that modify the search query, you can disable this feature.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'performance',
+					'label'         => __( 'Use Enhanced Search', 'mediavine-create' ),
+					'instructions'  => __( 'Create has a search feature that allows users to match posts based on the content of the recipe cards included in the post. If you notice that this feature is causing an issue with other themes or plugins that modify the search query, you can disable this feature.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -170,10 +171,11 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 85,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Autosave', 'mediavine-create' ),
-					'instructions' => __( 'By default, we\'ll save your work as you edit, even if you haven\'t published your changes. If you disable this setting, we\'ll only save draft content if you specifically click the \'Save Draft\' button.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'editor_behavior',
+					'label'         => __( 'Autosave', 'mediavine-create' ),
+					'instructions'  => __( 'By default, we\'ll save your work as you edit, even if you haven\'t published your changes. If you disable this setting, we\'ll only save draft content if you specifically click the \'Save Draft\' button.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -182,36 +184,12 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 86,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Sync Scroll', 'mediavine-create' ),
-					'instructions' => __( 'When enabled, scrolling the list editor will automatically scroll the preview to the corresponding item.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'gated'        => 'sync_scroll',
-				],
-			],
-			[
-				'slug'  => Plugin::$settings_group . '_allow_reviews',
-				'value' => true,
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 100,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Allow Reviews', 'mediavine-create' ),
-					'instructions' => __( 'Unchecking this box will prevent users from being able to leave reviews on your recipe cards.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
-				],
-			],
-			[
-				'slug'  => Plugin::$settings_group . '_reviews_ctas',
-				'value' => false,
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 104,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Display Review CTAs', 'mediavine-create' ),
-					'instructions' => __( 'Display prompts encouraging site visitors to leave reviews.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
-					'dependent_on' => Plugin::$settings_group . '_allow_reviews',
+					'type'          => 'checkbox',
+					'subgroup'      => 'editor_behavior',
+					'label'         => __( 'Enable Sync Scroll', 'mediavine-create' ),
+					'instructions'  => __( 'When enabled, scrolling the list editor will automatically scroll the preview to the corresponding item.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'gated'         => GateKeeper::FEATURE_SYNC_SCROLL,
 				],
 			],
 			[
@@ -220,11 +198,12 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 80,
 				'data'  => [
-					'type'         => 'textarea',
-					'label'        => __( 'Global Affiliate Message', 'mediavine-create' ),
-					'instructions' => __( 'Set the default affiliate disclaimer message with this text. Affiliate messaging can be overridden in individual posts.', 'mediavine-create' ),
+					'type'          => 'textarea',
+					'subgroup'      => 'content_settings',
+					'label'         => __( 'Global Affiliate Message', 'mediavine-create' ),
+					'instructions'  => __( 'Set the default affiliate disclaimer message with this text. Affiliate messaging can be overridden in individual posts.', 'mediavine-create' ),
 					// No localization because the default value does not get translated.
-					'default'      => 'As an Amazon Associate and member of other affiliate programs, I earn from qualifying purchases.',
+					'default_label' => 'As an Amazon Associate and member of other affiliate programs, I earn from qualifying purchases.',
 				],
 			],
 			[
@@ -233,10 +212,11 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 0,
 				'data'  => [
-					'type'         => 'allowed_types',
-					'label'        => __( 'Allowed Types', 'mediavine-create' ),
-					'instructions' => __( 'If any types are selected, only they will be available for adding new cards. Existing cards of disallowed types will still function properly.', 'mediavine-create' ),
-					'default'      => '[]',
+					'type'          => 'allowed_types',
+					'subgroup'      => 'card_types',
+					'label'         => __( 'Allowed Types', 'mediavine-create' ),
+					'instructions'  => __( 'If any types are selected, only they will be available for adding new cards. Existing cards of disallowed types will still function properly.', 'mediavine-create' ),
+					'default_label' => __( 'All types', 'mediavine-create' ),
 				],
 			],
 			[
@@ -245,11 +225,12 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 1,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Default Card View', 'mediavine-create' ),
-					'instructions' => __( 'When adding a card to a post, choose whether to show the card browser or the create new card form by default.', 'mediavine-create' ),
-					'default'      => __( 'Browse Existing Cards', 'mediavine-create' ),
-					'options'      => [
+					'type'          => 'select',
+					'subgroup'      => 'editor_behavior',
+					'label'         => __( 'Default Card View', 'mediavine-create' ),
+					'instructions'  => __( 'When adding a card to a post, choose whether to show the card browser or the create new card form by default.', 'mediavine-create' ),
+					'default_label' => __( 'Browse Existing Cards', 'mediavine-create' ),
+					'options'       => [
 						[
 							'label' => __( 'Browse Existing Cards', 'mediavine-create' ),
 							'value' => 'browse',
@@ -267,11 +248,12 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 2,
 				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Default Admin Page', 'mediavine-create' ),
-					'instructions' => __( 'Choose which page loads when you click the Create menu item in the WordPress admin sidebar.', 'mediavine-create' ),
-					'default'      => __( 'Dashboard', 'mediavine-create' ),
-					'options'      => [
+					'type'          => 'select',
+					'subgroup'      => 'navigation',
+					'label'         => __( 'Default Admin Page', 'mediavine-create' ),
+					'instructions'  => __( 'Choose which page loads when you click the Create menu item in the WordPress admin sidebar.', 'mediavine-create' ),
+					'default_label' => __( 'Dashboard', 'mediavine-create' ),
+					'options'       => [
 						[
 							'label' => __( 'Dashboard', 'mediavine-create' ),
 							'value' => 'dashboard',
@@ -301,48 +283,12 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 5,
 				'data'  => [
-					'type'         => 'multiselect',
-					'label'        => __( 'Allowed Custom Post Types', 'mediavine-create' ),
-					'instructions' => __( 'If enabled, will allow specific custom post types to be added to Lists', 'mediavine-create' ),
-					'default'      => 'Disabled',
-					'options'      => [],
-				],
-			],
-			[
-				'slug'  => Plugin::$settings_group . '_enable_anonymous_ratings',
-				'value' => false,
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 110,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Allow Anonymous Ratings', 'mediavine-create' ),
-					'instructions' => __( 'If enabled, 4 and 5 star reviews will be submitted when the star is clicked. Users leaving a star rating will then see a popup modal prompting them to leave an optional review. Disabling this will not sumbit the rating until after the review has been added. The prompt will still display.', 'mediavine-create' ),
-					'default'      => 'Disabled',
-				],
-			],
-			[
-				'slug'  => Plugin::$settings_group . '_enable_public_reviews',
-				'value' => false,
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 120,
-				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Public Reviews', 'mediavine-create' ),
-					'instructions' => __( 'If enabled, card reviews will be publicly visible, displayed in a tab alongside comments. You must specify a DOM selector for your comments section.', 'mediavine-create' ),
-					'default'      => 'Disabled',
-				],
-			],
-			[
-				'slug'  => Plugin::$settings_group . '_public_reviews_el',
-				'value' => ( Theme_Checker::is_trellis() ? '#mv-trellis-comments' : '#comments' ),
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 125,
-				'data'  => [
-					'type'         => 'text',
-					'label'        => __( 'Comments Section', 'mediavine-create' ),
-					'instructions' => __( 'Add the DOM selector of your comments section. (In most themes, this will be "#comments".)', 'mediavine-create' ),
-					'default'      => '#comments',
-					'dependent_on' => Plugin::$settings_group . '_enable_public_reviews',
+					'type'          => 'multiselect',
+					'subgroup'      => 'card_types',
+					'label'         => __( 'Allowed Custom Post Types', 'mediavine-create' ),
+					'instructions'  => __( 'If enabled, will allow specific custom post types to be added to Lists', 'mediavine-create' ),
+					'default_label' => __( 'None', 'mediavine-create' ),
+					'options'       => [],
 				],
 			],
 			[
@@ -351,53 +297,29 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 130,
 				'data'  => [
-					'type'         => 'multiselect',
-					'label'        => __( 'Prevent Image Size Generation', 'mediavine-create' ),
-					'instructions' => __( 'If enabled, will disable specific image sizes created by Create', 'mediavine-create' ),
-					'default'      => 'Disabled',
-					'options'      => Plugin::get_image_size_values(),
+					'type'          => 'multiselect',
+					'subgroup'      => 'performance',
+					'label'         => __( 'Prevent Image Size Generation', 'mediavine-create' ),
+					'instructions'  => __( 'If enabled, will disable specific image sizes created by Create', 'mediavine-create' ),
+					'default_label' => __( 'None', 'mediavine-create' ),
+					'options'       => Plugin::get_image_size_values(),
 				],
 			],
-			[
-				'slug'  => Plugin::$settings_group . '_products_position',
-				'value' => 'after_video',
-				'group' => Plugin::$settings_group . '_advanced',
-				'order' => 131,
-				'data'  => [
-					'type'         => 'select',
-					'label'        => __( 'Products Position', 'mediavine-create' ),
-					'instructions' => __( 'Choose where the products section appears within your recipe and how-to cards.', 'mediavine-create' ),
-					'default'      => __( 'After Video', 'mediavine-create' ),
-					'options'      => [
-						[
-							'label' => __( 'Above Supplies/Ingredients', 'mediavine-create' ),
-							'value' => 'above_supplies',
-						],
-						[
-							'label' => __( 'Above Instructions', 'mediavine-create' ),
-							'value' => 'above_instructions',
-						],
-						[
-							'label' => __( 'Below Notes', 'mediavine-create' ),
-							'value' => 'below_notes',
-						],
-						[
-							'label' => __( 'After Video', 'mediavine-create' ),
-							'value' => 'after_video',
-						],
-					],
-				],
-			],
+			// NOTE: `products_position` is declared (gated) in Reader_Experience::products_settings()
+			// in the `reader_experience` group, which is merged after Advanced and wins the
+			// upsert by slug. The legacy un-gated duplicate that used to live here has been
+			// removed to keep the products-position gate bound to a single, gated declaration.
 			[
 				'slug'  => Plugin::$settings_group . '_enable_confetti_shortcut',
 				'value' => true,
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 199,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Confetti Shortcut', 'mediavine-create' ),
-					'instructions' => __( 'Press Shift+C anywhere in Create to launch celebratory confetti. Disable to remove this keyboard shortcut.', 'mediavine-create' ),
-					'default'      => __( 'Enabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'editor_behavior',
+					'label'         => __( 'Enable Confetti Shortcut', 'mediavine-create' ),
+					'instructions'  => __( 'Press Shift+C anywhere in Create to launch celebratory confetti. Disable to remove this keyboard shortcut.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -406,10 +328,11 @@ class Advanced implements Settings_Group {
 				'group' => Plugin::$settings_group . '_advanced',
 				'order' => 200,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Recipe Importers', 'mediavine-create' ),
-					'instructions' => __( 'Import recipes from other recipe plugins like WP Recipe Maker, Tasty Recipes, and more.', 'mediavine-create' ),
-					'default'      => __( 'Disabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'importers',
+					'label'         => __( 'Enable Recipe Importers', 'mediavine-create' ),
+					'instructions'  => __( 'Import recipes from other recipe plugins like WP Recipe Maker, Tasty Recipes, and more.', 'mediavine-create' ),
+					'default_label' => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 		];

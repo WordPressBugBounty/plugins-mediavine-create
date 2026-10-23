@@ -4,7 +4,7 @@
  *
  * Factory that returns the Amazon Creators API implementation.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

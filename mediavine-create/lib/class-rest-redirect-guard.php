@@ -36,7 +36,7 @@ namespace Mediavine\Create;
  *
  * The plugin's only redirects live in admin page context (`admin_init` /
  * notice dismissal): `Admin_Init::maybe_redirect_default_admin_page()`,
- * `Admin_Init::maybe_repair_creation_object_id()`, `Welcome_Notice`,
+ * `Admin_Init::maybe_repair_creation_object_id()`, `Plan_Choice`,
  * `Admin_Notice_Helper::redirect_after_dismiss()`, and
  * `Creations_Views::handle_apply_theme()`. None of those run during a REST
  * request, so the guard cannot reach them.
@@ -66,7 +66,7 @@ namespace Mediavine\Create;
  * `mv_create_rest_redirect_blocked` action — which keeps the diagnostic trail
  * alive even though the defense worked.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 class REST_Redirect_Guard {
 

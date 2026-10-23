@@ -23,6 +23,19 @@ class Nutrition_API extends Nutrition {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function upsert( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		// CONNECTION gate (not a tier gate): the per-card nutrition EDITOR is a free
+		// feature locked only while the site is disconnected from Create Studio. Once
+		// connected it is free for every tier. Existing nutrition still RENDERS on the
+		// frontend regardless of connection (this only blocks the save path); the
+		// READ/GET route (find_one) is intentionally left ungated so existing data can
+		// still be loaded into the editor. The premium FEATURE_NUTRITION_CALC
+		// (automatic calculation) remains tier-gated elsewhere and is untouched here.
+		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_NUTRITION ) ) {
+			return GateKeeper::connection_required_error(
+				__( 'Connect this site to Create Studio to edit nutrition.', 'mediavine-create' )
+			);
+		}
+
 		$params = $request->get_params();
 
 		$nutrition = [];
@@ -81,6 +94,32 @@ class Nutrition_API extends Nutrition {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function proxy( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		// CONNECTION guard first: Free+ is off while disconnected, so a
+		// disconnected site would otherwise get an upgrade CTA for a plan it
+		// already chose. Studio's /nutrition/recipe needs the site JWT; fail
+		// with the canonical not_connected shape the editor prompts on.
+		if ( ! GateKeeper::is_connected() ) {
+			return GateKeeper::connection_required_error(
+				__( 'Connect this site to Create Studio to calculate nutrition automatically.', 'mediavine-create' )
+			);
+		}
+
+		// TIER gate: automatic calculation is premium (EVERYONE_BUT_FREE).
+		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_NUTRITION_CALC ) ) {
+			return new \WP_Error(
+				'feature_gated',
+				sprintf(
+					/* translators: %s: list of subscription plans that unlock the feature. */
+					__( 'Automatic nutrition calculation requires a %s plan.', 'mediavine-create' ),
+					GateKeeper::required_tiers_label( GateKeeper::FEATURE_NUTRITION_CALC )
+				),
+				[
+					'status'      => 403,
+					'upgrade_url' => GateKeeper::get_upgrade_url(),
+				]
+			);
+		}
+
 		$body = $request->get_json_params();
 		if ( empty( $body ) ) {
 			$body = $request->get_params();

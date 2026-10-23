@@ -5,7 +5,7 @@
  * Do not edit manually. Regenerate with:
  *   php scripts/generate-autoload-map.php
  *
- * @package Mediavine_Create
+ * @package Create
  */
 
 return array(
@@ -53,6 +53,7 @@ return array(
 	'Mediavine\\Create\\Helpers\\Arr' => 'lib/helpers/class-arr.php',
 	'Mediavine\\Create\\Helpers\\Collection' => 'lib/helpers/class-collection.php',
 	'Mediavine\\Create\\Helpers\\Instructions_Cleaner' => 'lib/helpers/class-instructions-cleaner.php',
+	'Mediavine\\Create\\Helpers\\Jwt' => 'lib/helpers/class-jwt.php',
 	'Mediavine\\Create\\Helpers\\Schema_Id_Injector' => 'lib/helpers/class-schema-id-injector.php',
 	'Mediavine\\Create\\Helpers\\Str' => 'lib/helpers/class-str.php',
 	'Mediavine\\Create\\Images' => 'lib/images/class-images.php',
@@ -92,6 +93,7 @@ return array(
 	'Mediavine\\Create\\Nutrition_API' => 'lib/nutrition/class-nutrition-api.php',
 	'Mediavine\\Create\\Paginator' => 'lib/helpers/class-paginator.php',
 	'Mediavine\\Create\\Perfmatters' => 'lib/helpers/rapscallion_plugins/class-perfmatters.php',
+	'Mediavine\\Create\\Plan_Choice' => 'lib/class-plan-choice.php',
 	'Mediavine\\Create\\Plugin' => 'class-plugin.php',
 	'Mediavine\\Create\\Plugin_Checker' => 'lib/helpers/class-plugin-checker.php',
 	'Mediavine\\Create\\Products' => 'lib/products/class-products.php',
@@ -106,6 +108,7 @@ return array(
 	'Mediavine\\Create\\Recipes' => 'lib/importer-compatibility/class-recipes.php',
 	'Mediavine\\Create\\Relations' => 'lib/relations/class-relations.php',
 	'Mediavine\\Create\\Relations_API' => 'lib/relations/class-relations-api.php',
+	'Mediavine\\Create\\Relations_Sync' => 'lib/relations/class-relations-sync.php',
 	'Mediavine\\Create\\Restore' => 'lib/class-restore.php',
 	'Mediavine\\Create\\Review_Responses' => 'lib/reviews/class-review-responses.php',
 	'Mediavine\\Create\\Review_Responses_API' => 'lib/reviews/class-review-responses-api.php',
@@ -121,10 +124,8 @@ return array(
 	'Mediavine\\Create\\Settings\\Appearance' => 'lib/settings-group/class-appearance.php',
 	'Mediavine\\Create\\Settings\\Control_Panel' => 'lib/settings-group/class-control-panel.php',
 	'Mediavine\\Create\\Settings\\Dev' => 'lib/settings-group/class-dev.php',
-	'Mediavine\\Create\\Settings\\Display' => 'lib/settings-group/class-display.php',
 	'Mediavine\\Create\\Settings\\List_Ads' => 'lib/settings-group/class-list-ads.php',
 	'Mediavine\\Create\\Settings\\Lists' => 'lib/settings-group/class-lists.php',
-	'Mediavine\\Create\\Settings\\Pro' => 'lib/settings-group/class-pro.php',
 	'Mediavine\\Create\\Settings\\Reader_Experience' => 'lib/settings-group/class-reader-experience.php',
 	'Mediavine\\Create\\Settings\\Recipes' => 'lib/settings-group/class-recipes.php',
 	'Mediavine\\Create\\Settings\\Settings_Group' => 'lib/settings-group/class-settings-group.php',
@@ -140,7 +141,6 @@ return array(
 	'Mediavine\\Create\\User_Verification' => 'lib/settings/class-user-verification.php',
 	'Mediavine\\Create\\User_Verification_Meta' => 'lib/settings/class-user-verification-meta.php',
 	'Mediavine\\Create\\Webhook_Handler' => 'lib/settings/class-webhook-handler.php',
-	'Mediavine\\Create\\Welcome_Notice' => 'lib/class-welcome-notice.php',
 	'Mediavine\\Create\\Wp_Accessibility_Helper' => 'lib/helpers/rapscallion_plugins/class-wp-accessibility-helper.php',
 	'Mediavine\\Create\\Wp_Rocket' => 'lib/helpers/rapscallion_plugins/class-wp-rocket.php',
 	'Mediavine\\MV_DBI' => 'lib/db-interface/class-mv-dbi.php',

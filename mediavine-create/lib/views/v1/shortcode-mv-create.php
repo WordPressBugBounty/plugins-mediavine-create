@@ -44,6 +44,15 @@ if ( $args['creation'] ) {
 		}
 	}
 
+	// Interactive Mode config. Emitted for both card types it can render on so
+	// the widget honors the publisher's card-type choice instead of falling back
+	// to its own recipe-only default (which is what older plugin markup means).
+	if ( in_array( $args['creation']['type'], [ 'recipe', 'diy' ], true ) ) {
+		$cs_config['interactiveMode'] = [
+			'enabled' => \Mediavine\Create\GateKeeper::is_interactive_mode_enabled_for_type( $args['creation']['type'] ),
+		];
+	}
+
 	if ( ! empty( $cs_config ) ) {
 		$cs_config['widgetLayout'] = \Mediavine\Settings::get_setting( 'mv_create_widget_toolbar_layout', 'toolbar' );
 		$cs_config['showLabels']   = (bool) \Mediavine\Settings::get_setting( 'mv_create_show_widget_labels', false );

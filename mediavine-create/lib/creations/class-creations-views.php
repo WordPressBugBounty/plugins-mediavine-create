@@ -106,17 +106,28 @@ class Creations_Views extends Creations {
 	/**
 	 * Enqueue studio script once per page
 	 *
-	 * Interactive mode features (servings adjustment, interactive widgets) require
-	 * a Pro subscription. If user doesn't have access, the script is not loaded
+	 * Interactive mode features (servings adjustment, interactive widgets) are
+	 * tier-gated. If the site doesn't have access, the script is not loaded
 	 * and cards display in standard, non-interactive format.
 	 */
 	public static function enqueue_studio_script() {
-		// Studio script powers interactive features (servings, checklists, unit conversion)
-		// available on both Pro and Free+ tiers — only free users are excluded.
+		// Studio script powers interactive features (servings, checklists, unit
+		// conversion) available to the recipe band (Free+, Pro Guides, Pro Pass)
+		// and the guides band — free and Pro Lists are excluded.
 		if ( self::$studio_script_enqueued ) {
 			return;
 		}
-		if ( ! GateKeeper::is_pro_or_higher() ) {
+
+		// Load the embed if any of the interactive feature bands are accessible to
+		// the effective tier. Loads for free-plus (no recipe floor), skips for
+		// Pro Lists (which has none of these recipe/checklist features).
+		$should_load_embed =
+			   GateKeeper::can_access( GateKeeper::FEATURE_INTERACTIVE_MODE )
+			|| GateKeeper::can_access( GateKeeper::FEATURE_SERVINGS_ADJUSTMENT )
+			|| GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION )
+			|| GateKeeper::can_access( GateKeeper::FEATURE_CHECKLISTS );
+
+		if ( ! $should_load_embed ) {
 			return;
 		}
 
@@ -214,7 +225,7 @@ class Creations_Views extends Creations {
 	 *
 	 * @var string[]
 	 */
-	const ALLOWED_LIST_LAYOUTS = [ 'circles', 'grid', 'hero', 'numbered' ];
+	const ALLOWED_LIST_LAYOUTS = [ 'circles', 'grid', 'hero', 'numbered', 'editorial', 'leaderboard', 'ranked', 'ranked-top' ];
 
 	/**
 	 * Minimum contrast ratio against white for a derived star fill to be used.
@@ -297,6 +308,25 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Resolve a list's effective layout.
+	 *
+	 * Lists store an explicit layout per card; an empty value means "follow
+	 * the site default" (the mv_create_list_layout setting). Unknown values
+	 * fall back to hero so the template dispatch always finds a view.
+	 *
+	 * @param string|null $layout The list's stored layout (may be empty).
+	 * @return string One of hero|grid|circles|numbered.
+	 */
+	public static function resolve_list_layout( $layout ) {
+		$valid = self::ALLOWED_LIST_LAYOUTS;
+		if ( ! empty( $layout ) && in_array( $layout, $valid, true ) ) {
+			return $layout;
+		}
+		$default = \Mediavine\Settings::get_setting( self::$settings_group . '_list_layout', 'hero' );
+		return in_array( $default, $valid, true ) ? $default : 'hero';
+	}
+
+	/**
 	 * Build the CSS custom properties for the card's color theme.
 	 *
 	 * Returned as an inline style string applied directly to each
@@ -348,12 +378,18 @@ class Creations_Views extends Creations {
 		if ( $has_primary ) {
 			$properties[] = '--mv-create-base: ' . $color . ' !important;';
 
+			// As with the secondary color below, the alt shade moves away from the
+			// base — darker for a light color, lighter for a dark one — and is
+			// always emitted. Themes use it as the hover background against
+			// --mv-create-text, so leaving it unset for a light primary dropped
+			// those hovers onto the stylesheet's own dark fallback: black text on
+			// a near-black background for a white primary.
 			$color_alt = Creations_Views_Colors::darken( $color, 20 );
 			if ( Creations_Views_Colors::is_dark( $color ) ) {
-				$color_alt    = Creations_Views_Colors::lighten( $color, 20 );
-				$properties[] = '--mv-create-alt: ' . $color_alt . ' !important;';
-				$properties[] = '--mv-create-alt-text: ' . Creations_Views_Colors::contrast_text( $color_alt ) . ' !important;';
+				$color_alt = Creations_Views_Colors::lighten( $color, 20 );
 			}
+			$properties[] = '--mv-create-alt: ' . $color_alt . ' !important;';
+			$properties[] = '--mv-create-alt-text: ' . Creations_Views_Colors::contrast_text( $color_alt ) . ' !important;';
 
 			$color_hover = Creations_Views_Colors::darken( $color_alt, 20 );
 			if ( Creations_Views_Colors::is_dark( $color_alt ) ) {
@@ -489,7 +525,14 @@ class Creations_Views extends Creations {
 		$allowed['img']['data-pin-media'] = true;
 		$allowed['img']['data-pin-nopin'] = true;
 
+		// Keep attrs common video shortcodes / embeds emit so wp_kses_post on
+		// rendered shortcode output does not collapse iframe dimensions.
 		$allowed['iframe']['src']             = true;
+		$allowed['iframe']['width']           = true;
+		$allowed['iframe']['height']          = true;
+		$allowed['iframe']['class']           = true;
+		$allowed['iframe']['title']           = true;
+		$allowed['iframe']['loading']         = true;
 		$allowed['iframe']['frameborder']     = true;
 		$allowed['iframe']['allow']           = true;
 		$allowed['iframe']['allowfullscreen'] = true;
@@ -501,24 +544,52 @@ class Creations_Views extends Creations {
 	}
 
 	/**
-	 * Adds async to enqued style
+	 * Optionally rewrite card stylesheets to non-render-blocking preload tags.
 	 *
-	 * @param string $tag script tag to be outputted
-	 * @param string $handle enque handle
+	 * The previous markup used rel="stylesheet preload", which every browser
+	 * still applies synchronously. The real pattern is rel="preload" as="style"
+	 * with an onload swap to stylesheet (plus noscript fallback).
 	 *
-	 * @return string script tag to be outputted
+	 * Gated behind mv_create_async_styles (default false): cards are
+	 * server-rendered, so async CSS can flash unstyled above the fold. Opt in
+	 * with add_filter( 'mv_create_async_styles', '__return_true' ).
+	 *
+	 * @param string $tag    Style tag to be outputted.
+	 * @param string $handle Style handle.
+	 * @param string $href   Stylesheet URL.
+	 *
+	 * @return string Style tag to be outputted.
 	 */
 	public function add_async_styles( $tag, $handle, $href ) {
 		$prefix = 'mv-create-card_';
-		if ( 'mv-create-card-base' === $handle || substr($handle, 0, strlen($prefix)) === $prefix ) {
-			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- style_loader_tag rewrite of an already-enqueued mv-create handle into async preload + noscript fallback.
-			$new_tag  = '<link rel="stylesheet preload" class="mv-create-styles" href="' . esc_url( $href ) . '" as="style">';
-			$new_tag .= '<noscript>' . $tag . '</noscript>';
-
-			$tag = $new_tag;
+		if ( 'mv-create-card-base' !== $handle && substr( $handle, 0, strlen( $prefix ) ) !== $prefix ) {
+			return $tag;
 		}
 
-		return $tag;
+		/**
+		 * Whether to load card CSS asynchronously via preload.
+		 *
+		 * Default false to avoid FOUC on server-rendered cards near the top of
+		 * the page. When enabled, card CSS leaves the render-blocking-resources
+		 * audit; disable again if unstyled flash is unacceptable.
+		 *
+		 * @param bool   $async  Whether to async-load this card stylesheet.
+		 * @param string $handle Style handle being filtered.
+		 * @param string $href   Stylesheet URL.
+		 */
+		if ( ! apply_filters( 'mv_create_async_styles', false, $handle, $href ) ) {
+			return $tag;
+		}
+
+		// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- style_loader_tag rewrite of an already-enqueued mv-create handle into async preload + noscript fallback.
+		$new_tag  = sprintf(
+			'<link rel="preload" class="mv-create-styles" href="%s" as="style" onload="%s">',
+			esc_url( $href ),
+			esc_attr( "this.onload=null;this.rel='stylesheet'" )
+		);
+		$new_tag .= '<noscript>' . $tag . '</noscript>';
+
+		return $new_tag;
 	}
 
 	public function register_styles() {
@@ -618,7 +689,11 @@ class Creations_Views extends Creations {
 					'email'          => Reviews_API::MAX_EMAIL_LENGTH,
 				],
 				'__OPTIONS__'          => [
-					'reviews_ctas'    => (bool) \Mediavine\Settings::get_setting('mv_create_reviews_ctas', false),
+					// Review INTAKE gate (CRE-297). Display of existing reviews, the
+					// aggregate rating and the public reviews tab stay ungated;
+					// only the affordances that collect a NEW review are hidden.
+					'reviewCollectionEnabled' => GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_COLLECTION ),
+					'reviews_ctas'    => (bool) \Mediavine\Settings::get_setting('mv_create_reviews_ctas', false) && GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_COLLECTION ),
 					'jtc_enabled'     => (bool) \Mediavine\Settings::get_setting('mv_create_enable_jump_to_recipe', false),
 					'asset_url'       => self::assets_url(),
 					'wakeLockEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_hands_free_mode', false),
@@ -627,6 +702,7 @@ class Creations_Views extends Creations {
 					'checklistSections' => \Mediavine\Settings::get_setting('mv_create_checklist_sections', 'ingredients'),
 					'unitConversionEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_unit_conversion', false) && GateKeeper::can_access( GateKeeper::FEATURE_UNIT_CONVERSION ),
 					'interactiveModeEnabled' => GateKeeper::is_interactive_mode_enabled(),
+					'interactiveModeCardTypes' => GateKeeper::interactive_mode_card_types(),
 					'ctaVariant' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_variant', 'inline-banner'),
 					'ctaTitle' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_title', ''),
 					'ctaSubtitle' => \Mediavine\Settings::get_setting('mv_create_interactive_mode_cta_subtitle', ''),
@@ -664,6 +740,13 @@ class Creations_Views extends Creations {
 		$allowed['script']['src']            = true;
 		$allowed['script']['async']          = true;
 		$allowed['script']['data-noptimize'] = true;
+		// Third-party video shortcodes often emit sized iframes; preserve those
+		// attrs when card render runs wp_kses_post on shortcode output.
+		$allowed['iframe']['width']   = true;
+		$allowed['iframe']['height']  = true;
+		$allowed['iframe']['class']   = true;
+		$allowed['iframe']['title']   = true;
+		$allowed['iframe']['loading'] = true;
 
 		$allowed['img']['nopin']          = true;
 		$allowed['img']['data-pin-media'] = true;
@@ -751,12 +834,27 @@ class Creations_Views extends Creations {
 		}
 
 		// If a card specifies its own layout (for instance, for Lists)
-		// it should override the style.
+		// it should override the style. Lists without an explicit layout
+		// follow the site-wide default list layout.
+		if ( isset( $atts['type'] ) && 'list' === $atts['type'] && empty( $atts['layout'] ) ) {
+			$atts['layout'] = self::resolve_list_layout( '' );
+		}
 		if ( ! empty( $atts['layout'] ) ) {
 			$atts['style'] = $atts['layout'];
 		}
 
 		if ( $published_creation ) {
+			// Resolve the list layout up front so the template dispatch
+			// (Creations_Views_Hooks::mv_create_list reads creation['layout'])
+			// always sees a concrete layout — an empty stored value means
+			// "follow the site default". Doing it here rather than only in
+			// Creations_Views_List_Item_Preparer keeps it true for lists with
+			// no items, which the preparer returns from early.
+			if ( 'list' === $atts['type'] ) {
+				$atts['layout']               = self::resolve_list_layout( isset( $published_creation['layout'] ) ? $published_creation['layout'] : '' );
+				$published_creation['layout'] = $atts['layout'];
+			}
+
 			$classes = Creations_Views_Card_Class_Builder::build_base_classes( $atts );
 
 			// We don't want to waste resources for lists.
@@ -774,7 +872,8 @@ class Creations_Views extends Creations {
 
 			// Add image tags.
 			$img_sizes                    = self::get_all_image_sizes( __FUNCTION__ );
-			$img_size                     = self::get_image_size();
+			// Lists honor their own photo ratio (falls back to the site-wide one).
+			$img_size                     = 'list' === $atts['type'] ? self::get_list_image_size() : self::get_image_size();
 			$published_creation['images'] = \Mediavine\View_Loader::get_mv_image_tags( $published_creation, $img_sizes );
 
 			$classes = Creations_Views_Card_Class_Builder::append_image_classes(
@@ -914,6 +1013,21 @@ class Creations_Views extends Creations {
 	 */
 	public static function get_image_size() {
 	   return \Mediavine\Settings::get_setting(self::$settings_group . '_photo_ratio', 'mv_create_16x9');
+	}
+
+	/**
+	 * Gets the image size (photo ratio) for List cards. Lists can set their own
+	 * ratio independent of the site-wide Photo Ratio; the 'default' value (or an
+	 * unset setting) defers to get_image_size().
+	 *
+	 * @return string Image size setting
+	 */
+	public static function get_list_image_size() {
+		$list_ratio = \Mediavine\Settings::get_setting( self::$settings_group . '_list_photo_ratio', 'default' );
+		if ( ! empty( $list_ratio ) && 'default' !== $list_ratio ) {
+			return $list_ratio;
+		}
+		return self::get_image_size();
 	}
 
 	/**
@@ -1358,12 +1472,12 @@ class Creations_Views extends Creations {
 			}
 		}
 
-		// Apply theme fallback for gated themes if user doesn't have Pro access
-		// Allow admins to preview gated themes via ?create_theme= without fallback
+		// Apply theme fallback for gated themes if the effective tier can't access them.
+		// Allow admins to preview gated themes via ?create_theme= without fallback.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme-preview presence check; not a state change.
 		$is_theme_preview = ! empty( $_GET['create_theme'] ) && current_user_can( 'manage_options' );
-		if ( Creations_Views_Themes::is_gated( $atts['style'] ) && ! GateKeeper::is_pro_or_higher() && ! $is_theme_preview ) {
-			$atts['style'] = Creations_Views_Themes::get_fallback_style( $atts['style'] );
+		if ( ! $is_theme_preview ) {
+			$atts['style'] = GateKeeper::get_accessible_theme( $atts['style'] );
 		}
 
 		// Print view
@@ -2163,8 +2277,16 @@ class Creations_Views extends Creations {
 			wp_die( esc_html__( 'Invalid theme.', 'mediavine-create' ) );
 		}
 
-		if ( Creations_Views_Themes::is_gated( $theme ) && ! GateKeeper::is_pro_or_higher() ) {
-			wp_die( esc_html__( 'This theme requires a Pro subscription.', 'mediavine-create' ) );
+		if ( ! GateKeeper::can_access_theme( $theme ) ) {
+			wp_die(
+				esc_html(
+					sprintf(
+						/* translators: %s: list of subscription plans that unlock the feature (e.g. "Pro Guides or Pro Pass"). */
+						__( 'This theme requires a %s plan.', 'mediavine-create' ),
+						GateKeeper::required_tiers_label( GateKeeper::theme_feature( $theme ) )
+					)
+				)
+			);
 		}
 
 		\Mediavine\Settings::update_setting( self::$settings_group . '_card_style', $theme );
@@ -2212,9 +2334,8 @@ class Creations_Views extends Creations {
 			return;
 		}
 
-		$preview_theme = sanitize_text_field( wp_unslash( $_GET['create_theme'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme-preview banner; not a state change.
-		$is_pro        = GateKeeper::is_pro_or_higher();
-		$is_premium    = Creations_Views_Themes::is_gated( $preview_theme ) && ! $is_pro;
+		$preview_theme  = sanitize_text_field( wp_unslash( $_GET['create_theme'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, capability-gated theme-preview banner; not a state change.
+		$is_premium    = ! GateKeeper::can_access_theme( $preview_theme );
 		$upgrade_url   = GateKeeper::get_upgrade_url();
 		$theme_options = Creations_Views_Themes::get_labels();
 
@@ -2260,7 +2381,7 @@ class Creations_Views extends Creations {
 					<select id="mv-preview-bar-select" class="mv-preview-bar__select">
 						<?php foreach ( $theme_options as $value => $label ) :
 							$option_label = $label;
-							if ( Creations_Views_Themes::is_gated( $value ) && ! $is_pro ) {
+							if ( ! GateKeeper::can_access_theme( $value ) ) {
 								$option_label .= ' (Premium)';
 							}
 						?>
@@ -2277,7 +2398,7 @@ class Creations_Views extends Creations {
 					</a>
 					<?php if ( $is_premium ) : ?>
 						<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" class="mv-preview-bar__btn-upgrade">
-							<?php esc_html_e( 'Upgrade to Pro', 'mediavine-create' ); ?>
+							<?php esc_html_e( 'Upgrade to Unlock', 'mediavine-create' ); ?>
 						</a>
 					<?php else : ?>
 						<a href="<?php echo esc_url( $apply_url ); ?>" class="mv-preview-bar__btn-apply">

@@ -6,8 +6,9 @@ if ( ! $args['print'] ) {
 		? $args['creation']['products_display_mode']
 		: \Mediavine\Settings::get_setting( 'mv_create_products_display_mode', 'gallery' );
 
-	// Pro gate: fall back to gallery if not Pro and list mode is selected
-	if ( 'list' === $display_mode && ! \Mediavine\Create\Plugin::is_pro() ) {
+	// Feature gate: the recommended-products list display mode is gated to
+	// pro-guides/pro. Fall back to gallery if the tier can't access it.
+	if ( 'list' === $display_mode && ! \Mediavine\Create\GateKeeper::can_access( \Mediavine\Create\GateKeeper::FEATURE_RECOMMENDED_PRODUCTS_DISPLAY ) ) {
 		$display_mode = 'gallery';
 	}
 

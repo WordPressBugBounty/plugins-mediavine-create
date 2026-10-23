@@ -52,6 +52,22 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				return new \WP_REST_Response( [ 'success' => true ], 200 );
 			}
 
+			// Free+ business rule: Interactive Mode cannot be disabled while the
+			// effective tier is free-plus. The admin locks the toggle, but the UI
+			// alone can be bypassed with a direct request, so the REST write path
+			// is gated too (bulk writes are checked per item).
+			$submitted = wp_is_numeric_array( $params ) ? $params : [ $params ];
+			foreach ( $submitted as $submitted_setting ) {
+				// A write with no value never disables anything (upsert drops
+				// null values and leaves the stored value untouched).
+				if ( ! is_array( $submitted_setting ) || ! isset( $submitted_setting['slug'] ) || ! isset( $submitted_setting['value'] ) ) {
+					continue;
+				}
+				if ( $this->is_locked_interactive_mode_write( $submitted_setting['slug'], $submitted_setting['value'] ) ) {
+					return $this->locked_interactive_mode_response();
+				}
+			}
+
 			$collection = [];
 
 			if ( wp_is_numeric_array( $params ) ) {
@@ -143,6 +159,12 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				$setting      = self::extract( $setting );
 				$collection[] = $this->api_services->prepare_item_for_response( $setting, $request );
 			}
+
+			// The admin re-reads this route after connecting/upgrading and swaps
+			// the result in for the localized payload, so it has to carry the same
+			// code-declared metadata (subgroup, gating, labels) rather than the
+			// possibly-stale `data` blob stored in the DB.
+			$collection = \Mediavine\Create\Plugin::apply_registered_setting_data( $collection );
 
 			// These routes are manage_options-gated, so credential values are kept; the
 			// site JWT is still reduced to a presence flag (never needed browser-side).
@@ -245,6 +267,15 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 				if ( empty( $params['group'] ) && ! empty( $existing->group ) ) {
 					$params['group'] = $existing->group;
 				}
+			}
+
+			// Free+ business rule: Interactive Mode cannot be disabled while the
+			// effective tier is free-plus — gate the REST write path, since the
+			// locked admin toggle can be bypassed with a direct request. A write
+			// with no value never disables anything (upsert drops null values).
+			$slug = isset( $params['slug'] ) ? $params['slug'] : null;
+			if ( isset( $params['value'] ) && $this->is_locked_interactive_mode_write( $slug, $params['value'] ) ) {
+				return $this->locked_interactive_mode_response();
 			}
 
 			// Funnel through create_settings so update sanitizes and invalidates like create
@@ -522,6 +553,66 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 		}
 
 		/**
+		 * Whether a REST-submitted setting write must be rejected because it would
+		 * disable — or narrow to a single card type — Interactive Mode while the
+		 * effective tier is free-plus.
+		 *
+		 * Free+ is a free plan subsidized by Create's ads served through hosted
+		 * Interactive Mode, so a Free+ publisher must not be able to turn it off.
+		 * The admin locks the toggle; this guards direct REST writes that bypass
+		 * the UI (which would otherwise even sync the disable to Create Studio).
+		 * Internal writes (GateKeeper enforcement, Studio sync via
+		 * Settings::create_settings()) never pass through this controller and are
+		 * unaffected. Paid tiers — and trials, which are Pro Pass-equivalent —
+		 * keep free choice.
+		 *
+		 * @param mixed $slug  The setting slug being written.
+		 * @param mixed $value The incoming value.
+		 * @return bool True when the write must be rejected.
+		 */
+		private function is_locked_interactive_mode_write( $slug, $value ) {
+			if ( Plugin::$settings_group . '_interactive_mode_card_types' === $slug ) {
+				// Narrowing Interactive Mode to one card type shrinks the same
+				// ad-supported surface a disable would; only 'both' is allowed.
+				if ( 'both' === $value || '' === $value || null === $value ) {
+					return false;
+				}
+
+				return GateKeeper::TIER_FREE_PLUS === GateKeeper::get_effective_tier();
+			}
+
+			if ( Plugin::$settings_group . '_enable_interactive_mode' !== $slug ) {
+				return false;
+			}
+
+			// Only a disable is locked; 'false' guards form-encoded booleans.
+			if ( ! empty( $value ) && 'false' !== $value ) {
+				return false;
+			}
+
+			return GateKeeper::TIER_FREE_PLUS === GateKeeper::get_effective_tier();
+		}
+
+		/**
+		 * Build the 403 response for a rejected Free+ Interactive Mode disable.
+		 *
+		 * @return \WP_REST_Response The 403 response.
+		 */
+		private function locked_interactive_mode_response() {
+			$response    = $this->api_services->default_response;
+			$status_code = 403;
+
+			$response['errors'] = $this->api_services->normalize_errors(
+				$response['errors'], $status_code, [
+					'title'   => __( 'Interactive Mode Locked', 'mediavine-create' ),
+					'details' => __( 'Interactive Mode cannot be disabled or limited to one card type on the Free+ plan, because Create\'s ads served through hosted Interactive Mode are what pay for it. Upgrade to a paid plan to control this setting.', 'mediavine-create' ),
+				], 'error'
+			);
+
+			return new \WP_REST_Response( $response, $status_code );
+		}
+
+		/**
 		 * Reset all database version options for development purposes.
 		 *
 		 * This clears all version options, forcing the plugin to re-run
@@ -622,6 +713,37 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 					'success'         => true,
 					'message'         => __( 'Subscription tier options have been reset. The plugin will re-fetch subscription status on next check.', 'mediavine-create' ),
 					'deleted_options' => $deleted_options,
+				],
+				200
+			);
+		}
+
+		/**
+		 * Reset the site to the state of a pre-3.0 install that just updated:
+		 * disconnected from Create Studio with no plan chosen.
+		 *
+		 * @param \WP_REST_Request $request The REST request.
+		 * @return \WP_REST_Response
+		 */
+		public function reset_plan_choice( \WP_REST_Request $request ) {
+			// Only allow when dev mode is enabled
+			if ( ! \Mediavine\Create\Plugin::is_dev_mode() ) {
+				return new \WP_REST_Response(
+					[
+						'success' => false,
+						'message' => __( 'This action is only available when dev mode is enabled.', 'mediavine-create' ),
+					],
+					403
+				);
+			}
+
+			\Mediavine\Create\Plan_Choice::reset_to_pre_upgrade();
+
+			return new \WP_REST_Response(
+				[
+					'success'  => true,
+					'message'  => __( 'The site is disconnected from Create Studio and needs a plan chosen again.', 'mediavine-create' ),
+					'plan_url' => esc_url_raw( admin_url( 'admin.php?page=' . \Mediavine\Create\Plan_Choice::PAGE_SLUG ) ),
 				],
 				200
 			);

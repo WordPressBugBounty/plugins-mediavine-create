@@ -380,12 +380,16 @@ class Images {
 			$img_class = ' class="' . $image_meta['class'] . '"';
 		}
 
-		if ( 'mv_create_vert' !== $image['image_size'] ) {
+		// $image can be a bare URL string (see docblock and line above), so only
+		// read the size when it is the documented array form. Accessing a string
+		// offset by key would fatal on PHP 8.
+		$image_size = is_array( $image ) && isset( $image['image_size'] ) ? $image['image_size'] : null;
+		if ( 'mv_create_vert' !== $image_size ) {
 			$attributes .= 'data-pin-nopin="true" ';
 		}
 
 		// Always display alt attribute, even if empty for HTML validation
-		$attributes .= 'alt="' . $image_alt_text . '" ';
+		$attributes .= 'alt="' . esc_attr( $image_alt_text ) . '" ';
 
 		// Add width and height attributes to prevent CLS
 		if ( ! empty( $image_meta['width'] ) && ! empty( $image_meta['height'] ) ) {
@@ -835,9 +839,78 @@ class Images {
 	}
 
 	/**
+	 * Detect the real image mime type of downloaded image data.
+	 *
+	 * @param string $img_data Raw image bytes.
+	 *
+	 * @return string|false Image mime type, or false if the data is not a recognized image.
+	 */
+	public static function get_image_data_mime_type( $img_data ) {
+		if ( ! function_exists( 'wp_tempnam' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		$tmp_file = wp_tempnam( 'mv-create-sideload' );
+		if ( ! $tmp_file ) {
+			return false;
+		}
+
+		$mime_type = false;
+		if ( false !== file_put_contents( $tmp_file, $img_data ) ) {
+			$mime_type = wp_get_image_mime( $tmp_file );
+		}
+
+		wp_delete_file( $tmp_file );
+
+		return $mime_type;
+	}
+
+	/**
+	 * Build the filename, including extension, a sideloaded image should be saved as.
+	 *
+	 * The extension follows the real mime type of the image rather than the URL, so a
+	 * PNG served from an extension-less (or mislabeled) URL is not saved as a `.jpg`.
+	 *
+	 * @param string       $img_src   URL the image was downloaded from.
+	 * @param string|false $mime_type Detected mime type of the image data, if any.
+	 *
+	 * @return string Sanitized filename. Not yet checked for uniqueness.
+	 */
+	public static function get_sideload_filename( $img_src, $mime_type = false ) {
+		// Use the URL path only, so a query string doesn't end up in the filename.
+		$url_path = wp_parse_url( $img_src, PHP_URL_PATH );
+		$img_name = sanitize_file_name( basename( (string) $url_path ) );
+		if ( '' === $img_name ) {
+			$img_name = 'image';
+		}
+
+		$url_filetype = wp_check_filetype( $img_name, null );
+
+		// The URL's extension already matches the image (or we can't tell what the image is).
+		if ( $url_filetype['type'] && ( ! $mime_type || $url_filetype['type'] === $mime_type ) ) {
+			return $img_name;
+		}
+
+		$extension = 'jpg';
+		if ( $mime_type ) {
+			$extensions = array_search( $mime_type, wp_get_mime_types(), true );
+			if ( $extensions ) {
+				$extension = explode( '|', $extensions )[0];
+			}
+		}
+
+		// Swap out a recognized-but-wrong extension; otherwise there is none to replace.
+		if ( $url_filetype['ext'] ) {
+			$img_name = substr( $img_name, 0, -1 * ( strlen( $url_filetype['ext'] ) + 1 ) );
+		}
+
+		return $img_name . '.' . $extension;
+	}
+
+	/**
 	 * Download an image from a url and add to WP Media library
 	 *
-	 * @param string $img_src
+	 * @param string $img_src URL of the image to download.
 	 *
 	 * @return false|int|\WP_Error|null
 	 */
@@ -871,7 +944,6 @@ class Images {
 		}
 
 		$img_data   = $body;
-		$img_name   = basename( $img_src );
 		$upload_dir = wp_upload_dir();
 
 		// Save as WP attachment
@@ -882,18 +954,25 @@ class Images {
 			$path = $upload_dir['basedir'] . '/';
 		}
 
-		$unique_filename = wp_unique_filename( $path, $img_name );
-		$filename        = basename( $unique_filename );
+		// The extension must be settled before the uniqueness check. Extension-less
+		// URLs (image services, CDNs) used to get `.jpg` appended afterwards, so
+		// every such download landed on the same file and overwrote the last one.
+		$mime_type = self::get_image_data_mime_type( $img_data );
+		$img_name  = self::get_sideload_filename( $img_src, $mime_type );
+		$filename  = wp_unique_filename( $path, $img_name );
+		$file      = $path . $filename;
 
-		// Check image file type
 		$wp_filetype = wp_check_filetype( $filename, null );
-		$type        = $wp_filetype['type'] ? '' : '.jpg';
-		$file        = $path . $filename . $type;
-		file_put_contents( $file, $img_data );
+
+		// Bail out if the file could not be written; continuing would create an
+		// attachment record pointing at a missing/empty file.
+		if ( false === file_put_contents( $file, $img_data ) ) {
+			return false;
+		}
 
 		$attachment = [
 			'post_mime_type' => $wp_filetype['type'] ? $wp_filetype['type'] : 'image/jpeg',
-			'post_title'     => sanitize_file_name( $filename ),
+			'post_title'     => $filename,
 			'post_content'   => '',
 			'post_status'    => 'inherit',
 		];

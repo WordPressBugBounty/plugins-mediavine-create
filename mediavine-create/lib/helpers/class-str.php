@@ -60,7 +60,7 @@ if ( ! function_exists( 'str_ends_with' ) ) {
  * Provides various string manipulation utilities and methods for working with strings.
  * Also includes polyfills for PHP 8.0+ string functions to maintain backward compatibility.
  *
- * @package Mediavine\Create\Helpers
+ * @package Create
  * @since 1.0.0
  */
 class Str {
@@ -121,8 +121,9 @@ class Str {
 		if ( is_null( $value ) ) {
 			return 0;
 		}
-		$encoding = $encoding ? $encoding : mb_internal_encoding();
-		return mb_strlen( $value, $encoding );
+		// Omit the encoding rather than call mb_internal_encoding(): core
+		// polyfills mb_strlen() when mbstring is missing, but not that.
+		return $encoding ? mb_strlen( $value, $encoding ) : mb_strlen( $value );
 	}
 
 	/**

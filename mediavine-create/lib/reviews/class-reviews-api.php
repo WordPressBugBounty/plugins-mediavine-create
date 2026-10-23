@@ -321,6 +321,26 @@ class Reviews_API extends Reviews {
 		$response    = $this::$api_services->default_response;
 		$status_code = $this::$api_services->default_status;
 
+		// Tier gate on review INTAKE only (CRE-297). Free sites keep every
+		// already-collected review, the aggregate rating, the public reviews tab
+		// and the review JSON-LD — they just can't take new submissions. Enforced
+		// here because the route is public by design, so a hidden front-end
+		// affordance is not a gate.
+		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_COLLECTION ) ) {
+			$status_code = 403;
+			// Start from an empty error list, not $response['errors'] — the shared
+			// default_response is pre-seeded with a generic "Missing required
+			// input" entry, and nothing is missing here. Matches the rate-limit
+			// branch below.
+			$response['errors'] = $this::$api_services->normalize_errors(
+				[], $status_code, [
+					'title'   => __( 'Reviews Closed', 'mediavine-create' ),
+					'details' => __( 'This site is not currently accepting new reviews.', 'mediavine-create' ),
+				], 'error'
+			);
+			return new \WP_REST_Response( $response, $status_code );
+		}
+
 		// Honeypot check — hidden field should be empty. Return a normal 201
 		// success-shaped response and silently discard, so bots can't tell the
 		// honeypot was detected (and never consume a rate-limit slot).
@@ -494,7 +514,11 @@ class Reviews_API extends Reviews {
 			if ( ! GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_EDIT ) ) {
 				return new \WP_Error(
 					'feature_gated',
-					__( 'Editing reviews requires a Pro subscription', 'mediavine-create' ),
+					sprintf(
+						/* translators: %s: list of subscription plans that unlock the feature (e.g. "Pro Guides or Pro Pass"). */
+						__( 'Editing reviews requires a %s plan', 'mediavine-create' ),
+						GateKeeper::required_tiers_label( GateKeeper::FEATURE_REVIEW_EDIT )
+					),
 					[
 						'status'      => 403,
 						'upgrade_url' => GateKeeper::get_upgrade_url(),

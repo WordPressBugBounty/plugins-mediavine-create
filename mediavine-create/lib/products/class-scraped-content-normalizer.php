@@ -2,7 +2,7 @@
 /**
  * Shared sanitizers for scraped product/list titles and thumbnails.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

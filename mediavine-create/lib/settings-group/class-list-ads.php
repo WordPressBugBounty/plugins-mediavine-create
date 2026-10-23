@@ -29,6 +29,7 @@ class List_Ads implements Settings_Group {
 				'order' => 100,
 				'data'  => [
 					'type'         => 'select',
+					'subgroup'     => 'general',
 					'label'        => __( 'Ad Provider', 'mediavine-create' ),
 					'instructions' => __( 'Choose your ad provider. "Auto-detect" checks for Mediavine Control Panel automatically.', 'mediavine-create' ),
 					'options'      => [
@@ -53,10 +54,11 @@ class List_Ads implements Settings_Group {
 				'group' => Plugin::$settings_group . '_ads',
 				'order' => 105,
 				'data'  => [
-					'type'         => 'checkbox',
-					'label'        => __( 'Enable Ads in Lists', 'mediavine-create' ),
-					'instructions' => __( 'Enable ad slot insertion between list items.', 'mediavine-create' ),
-					'default'      => $has_mcp ? __( 'Enabled', 'mediavine-create' ) : __( 'Disabled', 'mediavine-create' ),
+					'type'          => 'checkbox',
+					'subgroup'      => 'general',
+					'label'         => __( 'Enable Ads in Lists', 'mediavine-create' ),
+					'instructions'  => __( 'Enable ad slot insertion between list items.', 'mediavine-create' ),
+					'default_label' => $has_mcp ? __( 'Enabled', 'mediavine-create' ) : __( 'Disabled', 'mediavine-create' ),
 				],
 			],
 			[
@@ -66,6 +68,7 @@ class List_Ads implements Settings_Group {
 				'order' => 106,
 				'data'  => [
 					'type'         => 'select',
+					'subgroup'     => 'general',
 					'label'        => __( 'List Items Between Ads', 'mediavine-create' ),
 					'instructions' => __( 'Choose the number of list items between each ad in the card.', 'mediavine-create' ),
 					'options'      => [
@@ -102,9 +105,9 @@ class List_Ads implements Settings_Group {
 			'order' => 107,
 			'data'  => [
 				'type'         => 'textarea',
+				'subgroup'     => 'general',
 				'label'        => __( 'Ad Slot HTML', 'mediavine-create' ),
 				'instructions' => __( 'Enter the HTML to insert between list items. Allowed tags: div, span. Allowed attributes: class, id, data-* attributes. Script tags and event handlers will be stripped.', 'mediavine-create' ),
-				'default'      => '',
 			],
 		];
 

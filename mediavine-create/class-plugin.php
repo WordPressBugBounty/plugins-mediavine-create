@@ -18,15 +18,13 @@ use Mediavine\Create\Importers\Importers;
  * Plugin bootstrap class
  */
 class Plugin {
-	const VERSION = '2.7.0';
+	const VERSION = '3.0.0';
 
-	const DB_VERSION = '2.4.1';
+	const DB_VERSION = '2.5.0';
 
 	const TEXT_DOMAIN = 'mediavine-create';
 
 	const PLUGIN_DOMAIN = 'mv_create';
-
-	const PREFIX = '_mv_';
 
 	const PLUGIN_FILE_PATH = __FILE__;
 
@@ -257,8 +255,9 @@ class Plugin {
 		// initialize Admin_Notices
 		\Mediavine\Create\Admin_Notices::get_instance();
 
-		// Initialize Welcome Notice (handles 2.0 upgrade welcome screen)
-		\Mediavine\Create\Welcome_Notice::get_instance();
+		// Initialize the Create 3.0 plan-choice gate (blocks the free-band admin
+		// UI until an explicit choice is made) + "what's new" landing page.
+		\Mediavine\Create\Plan_Choice::get_instance();
 
 		// Initialize Broadcast Notice only when connected (connecting = consent to Studio contact).
 		if ( \Mediavine\Create\Create_Studio_Client::is_site_connected() ) {
@@ -319,8 +318,16 @@ class Plugin {
 
 		self::$custom_content = Custom_Content::make( 'mv-create', 'Create' );
 
-		// Connect GateKeeper subscription tier to mv_create_is_pro filter
-		add_filter( 'mv_create_is_pro', [ 'Mediavine\Create\GateKeeper', 'is_pro_or_higher' ] );
+		// Connect GateKeeper subscription tier to mv_create_is_pro filter.
+		// True for any non-basic effective tier (kept semantically stable for 3rd parties).
+		add_filter( 'mv_create_is_pro', [ 'Mediavine\Create\GateKeeper', 'is_paid_or_free_plus' ] );
+
+		// Expose the granular effective tier slug to 3rd parties.
+		add_filter(
+			'mv_create_effective_tier', function () {
+				return \Mediavine\Create\GateKeeper::get_effective_tier();
+			}
+		);
 
 		register_activation_hook( self::get_activation_path(), [ $this, 'plugin_activation' ] );
 		register_deactivation_hook( self::get_activation_path(), [ $this, 'plugin_deactivation' ] );
@@ -350,6 +357,7 @@ class Plugin {
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_interactive_mode_settings' ], 26 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_card_style_preview_images' ], 27 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_hands_free_to_reader_experience' ], 28 );
+		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'migrate_subscription_tier_to_canonical' ], 29 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_settings' ], 30 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'create_shapes' ], 35 );
 		add_action( self::PLUGIN_DOMAIN . '_plugin_updated', [ $this, 'republish_queue' ], 40 );
@@ -532,6 +540,74 @@ class Plugin {
 	public function init_translatable_data() {
 		self::$settings = self::get_settings();
 		self::$shapes   = self::get_shapes_data();
+	}
+
+	/**
+	 * Presentation metadata for every registered setting, keyed by slug.
+	 *
+	 * The `data` blob stored in mv_settings is only rewritten when the plugin
+	 * version bumps, so between releases (and on any site whose upgrade routine
+	 * hasn't run) the stored copy can lag the PHP declarations. Everything the
+	 * admin derives from `data` — subgroup, gating, labels, options — must come
+	 * from the code, so callers shipping settings to the UI overlay this map on
+	 * top of the DB rows.
+	 *
+	 * @return array<string, array> Slug => registered `data` array.
+	 */
+	public static function get_registered_setting_data() {
+		static $map = null;
+
+		if ( null === $map ) {
+			$map = [];
+			foreach ( self::get_settings() as $setting ) {
+				if ( empty( $setting['slug'] ) || ! isset( $setting['data'] ) ) {
+					continue;
+				}
+				$map[ $setting['slug'] ] = $setting['data'];
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Overlay the registered `data` metadata onto settings rows from the DB.
+	 *
+	 * Values, groups, and ordering stay as stored (publishers own those); only
+	 * the presentation/gating metadata is refreshed. Rows with no registered
+	 * counterpart (settings added by a filter, or removed from the code) keep
+	 * whatever the DB holds.
+	 *
+	 * @param array $settings Settings rows (objects or arrays) with extracted `data`.
+	 * @return array The same rows with refreshed `data`.
+	 */
+	public static function apply_registered_setting_data( $settings ) {
+		if ( empty( $settings ) || ! is_array( $settings ) ) {
+			return $settings;
+		}
+
+		$registered = self::get_registered_setting_data();
+
+		foreach ( $settings as $index => $setting ) {
+			$is_object = is_object( $setting );
+			$slug      = $is_object
+				? ( isset( $setting->slug ) ? $setting->slug : null )
+				: ( isset( $setting['slug'] ) ? $setting['slug'] : null );
+
+			// Empty registered metadata means an intentionally bare setting
+			// (hidden flags); don't clobber whatever the DB has for those.
+			if ( ! $slug || empty( $registered[ $slug ] ) ) {
+				continue;
+			}
+
+			if ( $is_object ) {
+				$settings[ $index ]->data = $registered[ $slug ];
+			} else {
+				$settings[ $index ]['data'] = $registered[ $slug ];
+			}
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -1228,6 +1304,45 @@ class Plugin {
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
+	}
+
+	/**
+	 * One-time normalization of the locally stored subscription tier.
+	 *
+	 * Rewrites the stored `mv_create_subscription_tier` setting to the canonical
+	 * slug the new plugin reads, via GateKeeper::normalize_tier() (unknown->free,
+	 * trial->free, anything unknown->free fail-closed). This only touches the
+	 * LOCAL stored copy — it never changes 'pro' semantics for old plugin
+	 * compatibility (Studio remains the source of truth and keeps emitting 'pro').
+	 *
+	 * Runs once on upgrade from < 2.6.0.
+	 *
+	 * @param string $last_plugin_version The previous plugin version.
+	 * @return void
+	 */
+	public function migrate_subscription_tier_to_canonical( $last_plugin_version ) {
+		if ( ! version_compare( $last_plugin_version, '2.6.0', '<' ) ) {
+			return;
+		}
+
+		$stored = \Mediavine\Settings::get_setting( \Mediavine\Create\GateKeeper::SETTING_SUBSCRIPTION_TIER );
+		if ( empty( $stored ) ) {
+			return;
+		}
+
+		$canonical = \Mediavine\Create\GateKeeper::normalize_tier( $stored );
+		if ( $canonical === $stored ) {
+			return;
+		}
+
+		\Mediavine\Settings::create_settings(
+			[
+				'slug'  => \Mediavine\Create\GateKeeper::SETTING_SUBSCRIPTION_TIER,
+				'value' => $canonical,
+				'group' => 'mv_create_subscription',
+			]
+		);
+		\Mediavine\Settings::reset_settings();
 	}
 
 	/**

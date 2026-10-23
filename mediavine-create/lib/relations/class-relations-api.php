@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 	/**
 	 * Class Relations_API
-	 * @package Mediavine\Create
+	 * @package Create
 	 */
 	class Relations_API extends Creations {
 
@@ -156,9 +156,11 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				}
 			}
 
-			// Search products if requested (Pro only)
+			// Search products if requested. Card-search product search is UNGATED
+			// (all tiers incl. basic) so users can find a product to manually add.
+			// The paid boundary is the scrape gate, not manual add or search.
 			$products = [];
-			if ( $include_products && \Mediavine\Create\Plugin::is_pro() ) {
+			if ( $include_products ) {
 				$products_table = self::$models_v2->mv_products->table_name;
 
 				$statement = "SELECT
@@ -278,6 +280,9 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 			$existing_asins     = $existing_data['existing_asins'];
 			$original_relations = $existing_data['original_relations'];
 
+			$sync_gated      = \Mediavine\Create\GateKeeper::can_access( \Mediavine\Create\GateKeeper::FEATURE_LIST_ITEM_SYNC );
+			$sync_default_on = $sync_gated && ! empty( Settings::get_setting( 'mv_create_list_sync_default' ) );
+
 			// Loop through relation data and build any missing relation data
 			foreach ( $data as $relation ) {
 				$relation['creation'] = $creation_id;
@@ -293,6 +298,14 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 				$relation['id']                = empty( $relation['id'] ) ? 'NULL' : $relation['id'];
 				$relation['relation_id']       = empty( $relation['relation_id'] ) ? '0' : $relation['relation_id'];
 				$relation['canonical_post_id'] = empty( $relation['canonical_post_id'] ) ? '0' : $relation['canonical_post_id'];
+
+				if ( ! array_key_exists( 'sync_with_post', $relation ) ) {
+					$is_syncable_type           = isset( $relation['content_type'] ) && in_array( $relation['content_type'], \Mediavine\Create\Relations_Sync::SYNCABLE_TYPES, true );
+					$is_new_item                = 'NULL' === $relation['id'];
+					$relation['sync_with_post'] = ( $sync_default_on && $is_syncable_type && $is_new_item ) ? 1 : 0;
+				} else {
+					$relation['sync_with_post'] = ( $sync_gated && ! empty( $relation['sync_with_post'] ) ) ? 1 : 0;
+				}
 
 				// We have had instances with undefined indexes for the relationship data
 				$default  = [
@@ -590,22 +603,17 @@ if ( class_exists( 'Mediavine\Create\Supplies' ) ) {
 		/**
 		 * Normalize product relation data
 		 *
-		 * Handles product list items by validating the product exists, merging product defaults
-		 * with list-specific overrides, and enforcing Pro gating.
+		 * Handles product list items by validating the product exists and merging product
+		 * defaults with list-specific overrides. Manual add is ungated (all tiers).
 		 *
 		 * @param array $relation Relation data
 		 * @param array $errors   Errors array (passed by reference)
 		 * @return array|\WP_Error Normalized relation data or WP_Error
 		 */
 		public function normalize_product_relation( $relation, &$errors ) {
-			// Pro feature gating
-			if ( ! \Mediavine\Create\Plugin::is_pro() ) {
-				return new \WP_Error(
-					'pro_required',
-					__( 'Product list items require Mediavine Create Pro', 'mediavine-create' ),
-					[ 'status' => 403 ]
-				);
-			}
+			// Manually adding a product to a list is UNGATED (all tiers incl. basic).
+			// The paid boundary lives in the scrape gate (FEATURE_PRODUCT_SCRAPE), not
+			// in manual add; basic users may add an existing product as a list item.
 
 			// Validate product exists
 			if ( empty( $relation['relation_id'] ) || '0' === $relation['relation_id'] ) {

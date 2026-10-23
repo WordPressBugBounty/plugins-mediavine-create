@@ -5,7 +5,7 @@
  * Replaces Composer runtime scaffolding in the shipped plugin. Developer tooling
  * (PHPUnit, PHPCS, PHPStan, Phing) still uses Composer via vendor/.
  *
- * @package Mediavine_Create
+ * @package Create
  */
 
 // Prevent direct access. Loaded only after WordPress defines ABSPATH (plugin
@@ -15,22 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$mv_create_classmap = require __DIR__ . '/autoload-classmap.php';
+$create_classmap = require __DIR__ . '/autoload-classmap.php';
 
 spl_autoload_register(
-	static function ( $class ) use ( $mv_create_classmap ) {
-		if ( ! isset( $mv_create_classmap[ $class ] ) ) {
+	static function ( $class ) use ( $create_classmap ) {
+		if ( ! isset( $create_classmap[ $class ] ) ) {
 			return;
 		}
 
-		$mv_create_path = dirname( __DIR__ ) . '/' . $mv_create_classmap[ $class ];
-		if ( is_readable( $mv_create_path ) ) {
-			require $mv_create_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable -- Path is from the committed classmap, not request input.
+		$create_path = dirname( __DIR__ ) . '/' . $create_classmap[ $class ];
+		if ( is_readable( $create_path ) ) {
+			require $create_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable -- Path is from the committed classmap, not request input.
 		}
 	}
 );
 
-$mv_create_autoload_files = [
+$create_autoload_files = [
 	__DIR__ . '/functions.php',
 	__DIR__ . '/functions-feature-flags.php',
 	__DIR__ . '/functions-version-check.php',
@@ -39,8 +39,8 @@ $mv_create_autoload_files = [
 	__DIR__ . '/helpers/functions-helpers.php',
 ];
 
-foreach ( $mv_create_autoload_files as $mv_create_autoload_file ) {
-	require_once $mv_create_autoload_file; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable -- Fixed list of plugin files above.
+foreach ( $create_autoload_files as $create_autoload_file ) {
+	require_once $create_autoload_file; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable -- Fixed list of plugin files above.
 }
 
-unset( $mv_create_classmap, $mv_create_autoload_files, $mv_create_autoload_file );
+unset( $create_classmap, $create_autoload_files, $create_autoload_file );

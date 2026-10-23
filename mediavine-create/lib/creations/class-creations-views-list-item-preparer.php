@@ -32,10 +32,15 @@ class Creations_Views_List_Item_Preparer {
 			$published_creation['pinterest_display'] = true;
 		}
 
-		$atts['layout'] = $published_creation['layout'];
+		// prep_creation_view already resolved the effective layout onto the
+		// creation (empty stored value means "follow the site default");
+		// resolve again defensively for direct callers.
+		$atts['layout']               = Creations_Views::resolve_list_layout( $published_creation['layout'] );
+		$published_creation['layout'] = $atts['layout'];
+
 		// Preserve the filter caller name from prep_creation_view for mv_create_image_sizes.
 		$img_sizes = Creations_Views::get_all_image_sizes( 'prep_creation_view' );
-		$photo_ratio    = Creations_Views::get_image_size();
+		$photo_ratio    = Creations_Views::get_list_image_size();
 		$has_ratio      = ( 'mv_create_no_ratio' !== $photo_ratio );
 
 		// Order list items by position because we can't guarantee DB write order.
@@ -81,12 +86,21 @@ class Creations_Views_List_Item_Preparer {
 				continue;
 			}
 
-			// Thumbnail url logic.
+			// Thumbnail url logic. Leaderboard is intentionally omitted so it
+			// falls through to the 1x1 default (fixed square thumbnail,
+			// independent of the photo-ratio setting).
 			$layout_image_sizes   = [
-				'circles'  => 'mv_create_1x1',
-				'grid'     => $has_ratio ? $photo_ratio : 'mv_create_16x9',
-				'hero'     => $has_ratio ? $photo_ratio : 'mv_create_vert',
-				'numbered' => $has_ratio ? $photo_ratio : 'mv_create_vert',
+				'circles'    => 'mv_create_1x1',
+				'grid'       => $has_ratio ? $photo_ratio : 'mv_create_16x9',
+				'hero'       => $has_ratio ? $photo_ratio : 'mv_create_vert',
+				'numbered'   => $has_ratio ? $photo_ratio : 'mv_create_vert',
+				'editorial'  => $has_ratio ? $photo_ratio : 'mv_create_16x9',
+				// Ranked (both the countdown and the top-first variant): the
+				// featured #1 card uses a large landscape image; the compact
+				// rows crop the same source square via CSS (srcset keeps the
+				// small thumbnails light).
+				'ranked'     => $has_ratio ? $photo_ratio : 'mv_create_16x9',
+				'ranked-top' => $has_ratio ? $photo_ratio : 'mv_create_16x9',
 			];
 			$thumbnail_image_size = 'mv_create_1x1';
 			if ( array_key_exists( $atts['layout'], $layout_image_sizes ) ) {

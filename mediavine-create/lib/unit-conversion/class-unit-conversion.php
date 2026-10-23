@@ -4,7 +4,7 @@
  *
  * Handles unit conversion for recipe ingredients via the Create Studio API.
  *
- * @package Mediavine\Create
+ * @package Create
  */
 
 namespace Mediavine\Create;

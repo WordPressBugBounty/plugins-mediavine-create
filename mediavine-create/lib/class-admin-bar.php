@@ -26,6 +26,7 @@ class Admin_Bar {
 	 */
 	public function init() {
 		add_action( 'admin_bar_menu', [ $this, 'add_create_card_links' ], 100 );
+		add_action( 'admin_bar_menu', [ $this, 'add_trial_node' ], 90 );
 		add_action( 'wp_head', [ $this, 'add_admin_bar_styles' ] );
 		add_action( 'admin_head', [ $this, 'add_admin_bar_styles' ] );
 	}
@@ -132,6 +133,95 @@ class Admin_Bar {
 	}
 
 	/**
+	 * "Create Premium Trial · 9 days left" pill, on every admin-bar screen for
+	 * admins while a trial runs. A trial converts to its paid plan on its own,
+	 * so this only says the trial is on: no price, no countdown alarm.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar
+	 */
+	public function add_trial_node( $wp_admin_bar ) {
+		if ( ! current_user_can( 'manage_options' ) || ! GateKeeper::is_trialing() ) {
+			return;
+		}
+
+		$days = GateKeeper::get_trial_days_remaining();
+		$left = $days > 0
+			/* translators: %d: whole days left in the trial */
+			? sprintf( _n( '%d day left', '%d days left', $days, 'mediavine-create' ), $days )
+			: '';
+
+		$wp_admin_bar->add_node(
+			[
+				'id'    => 'mv-create-trial',
+				'title' => '<span class="mv-create-admin-bar-icon">' . $this->get_crown_svg() . '</span>'
+					. '<span class="mv-create-trial-label">' . esc_html__( 'Create Premium Trial', 'mediavine-create' )
+					. ( '' !== $left ? ' &middot; ' . esc_html( $left ) : '' )
+					. '</span><span class="mv-create-trial-dot" aria-hidden="true"></span>',
+				'href'  => false,
+				'meta'  => [ 'class' => 'mv-create-trial' ],
+			]
+		);
+
+		// The dropdown is one card (ring, plan, end date, two buttons) rather
+		// than a list of stock submenu rows.
+		$plan = GateKeeper::get_trial_plan_name();
+		$end  = GateKeeper::get_trial_end_display();
+		$card = '<span class="mv-create-trial-row">'
+			. ( $days > 0 ? $this->get_days_ring_svg( $days ) : '' )
+			. '<span class="mv-create-trial-text"><strong>'
+			/* translators: %s: plan name, e.g. "Pro Guides". */
+			. esc_html( sprintf( __( '%s trial', 'mediavine-create' ), $plan ) )
+			. '</strong>'
+			. ( '' !== $end
+				/* translators: %s: trial end date, in the site's date format. */
+				? '<span class="mv-create-trial-end">' . esc_html( sprintf( __( 'Ends %s', 'mediavine-create' ), $end ) ) . '</span>'
+				: '' )
+			. '</span></span>'
+			. '<span class="mv-create-trial-actions">'
+			. '<a class="mv-create-trial-btn" href="' . esc_url( User_Verification::open_studio_url( '/admin/billing?site_url=' . rawurlencode( home_url() ) ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'Manage plan', 'mediavine-create' ) . '</a>'
+			. '<a class="mv-create-trial-btn is-secondary" href="' . esc_url( admin_url( 'admin.php?page=' . Plan_Choice::PAGE_SLUG ) ) . '">' . esc_html__( "See what's included", 'mediavine-create' ) . '</a>'
+			. '</span>';
+
+		$wp_admin_bar->add_node(
+			[
+				'id'     => 'mv-create-trial-card',
+				'parent' => 'mv-create-trial',
+				'title'  => $card,
+				'href'   => false,
+			]
+		);
+	}
+
+	/**
+	 * Days-left ring for the trial card, drawn against a 14-day trial (longer
+	 * when extended).
+	 *
+	 * @param int $days Days left.
+	 * @return string SVG markup
+	 */
+	private function get_days_ring_svg( $days ) {
+		$circumference = 2 * M_PI * 40;
+		$offset        = $circumference * ( 1 - $days / max( 14, $days ) );
+
+		return sprintf(
+			'<svg class="mv-create-trial-ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="#e6e0d4" stroke-width="12"/><circle cx="50" cy="50" r="40" fill="none" stroke="#00bd7e" stroke-width="12" stroke-linecap="round" stroke-dasharray="%1$.1f" stroke-dashoffset="%2$.1f" transform="rotate(-90 50 50)"/><text class="mv-create-trial-ring-n" x="50" y="55" text-anchor="middle" fill="#243c4a">%3$d</text><text class="mv-create-trial-ring-u" x="50" y="72" text-anchor="middle" fill="#243c4a">%4$s</text></svg>',
+			$circumference,
+			$offset,
+			$days,
+			esc_html( _n( 'day', 'days', $days, 'mediavine-create' ) )
+		);
+	}
+
+	/**
+	 * Crown icon for the trial pill.
+	 *
+	 * @return string SVG markup
+	 */
+	private function get_crown_svg() {
+		return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"/></svg>';
+	}
+
+	/**
 	 * Get display label for card type
 	 *
 	 * @param string $type Card type (recipe, diy, list)
@@ -179,6 +269,122 @@ class Admin_Bar {
 				display: flex;
 				align-items: center;
 				gap: 6px;
+			}
+			/* Trial pill + card (see add_trial_node()). */
+			#wpadminbar #wp-admin-bar-mv-create-trial {
+				--mvc-ink: #243c4a;
+				--mvc-plum: #5a2f4f;
+				--mvc-leaf: #00bd7e;
+				--mvc-font: ui-rounded, "SF Pro Rounded", Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial > .ab-item,
+			#wpadminbar #wp-admin-bar-mv-create-trial.hover > .ab-item,
+			#wpadminbar #wp-admin-bar-mv-create-trial:hover > .ab-item {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 0 10px;
+				background: var(--mvc-plum);
+				color: #fff;
+				font: 700 12.5px/32px var(--mvc-font);
+				cursor: default;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial > .ab-item .mv-create-admin-bar-icon svg {
+				width: 14px;
+				height: 14px;
+			}
+			#wpadminbar .mv-create-trial-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: var(--mvc-leaf);
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial > .ab-sub-wrapper {
+				width: 290px;
+				padding: 0;
+				background: #fff;
+				border: 3px solid var(--mvc-ink);
+				border-top: 0;
+				border-radius: 0 0 14px 14px;
+				box-shadow: 4px 4px 0 var(--mvc-ink);
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial .ab-submenu {
+				padding: 0;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial-card > .ab-item,
+			#wpadminbar #wp-admin-bar-mv-create-trial-card:hover > .ab-item {
+				display: block;
+				height: auto;
+				padding: 14px;
+				background: transparent;
+				color: var(--mvc-ink);
+				font: 400 12.5px/1.4 var(--mvc-font);
+				white-space: normal;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial-card * {
+				font-family: var(--mvc-font);
+				line-height: 1.4;
+			}
+			#wpadminbar .mv-create-trial-row {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			#wpadminbar .mv-create-trial-ring {
+				flex: none;
+				width: 70px;
+				height: 70px;
+			}
+			/* Sized in CSS: the admin bar's font reset beats SVG attributes. */
+			#wpadminbar #wp-admin-bar-mv-create-trial-card .mv-create-trial-ring-n {
+				font-size: 28px;
+				font-weight: 800;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial-card .mv-create-trial-ring-u {
+				font-size: 11px;
+				font-weight: 700;
+			}
+			#wpadminbar .mv-create-trial-text {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+			#wpadminbar .mv-create-trial-text strong {
+				color: var(--mvc-ink);
+				font-size: 14px;
+				font-weight: 800;
+			}
+			#wpadminbar .mv-create-trial-end {
+				color: var(--mvc-ink);
+				opacity: 0.7;
+			}
+			#wpadminbar .mv-create-trial-actions {
+				display: flex;
+				gap: 8px;
+				margin-top: 12px;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial-card a.mv-create-trial-btn {
+				display: inline-block;
+				height: auto;
+				padding: 5px 10px;
+				border: 2px solid var(--mvc-ink);
+				border-radius: 99px;
+				background: var(--mvc-leaf);
+				box-shadow: 2px 2px 0 var(--mvc-ink);
+				color: var(--mvc-ink);
+				font-size: 12px;
+				font-weight: 700;
+				text-decoration: none;
+				white-space: nowrap;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial-card a.mv-create-trial-btn.is-secondary {
+				background: #fff;
+			}
+			#wpadminbar #wp-admin-bar-mv-create-trial-card a.mv-create-trial-btn:hover,
+			#wpadminbar #wp-admin-bar-mv-create-trial-card a.mv-create-trial-btn:focus {
+				color: var(--mvc-ink);
+				transform: translate(1px, 1px);
+				box-shadow: 1px 1px 0 var(--mvc-ink);
 			}
 		</style>
 		<?php

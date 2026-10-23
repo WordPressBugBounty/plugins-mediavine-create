@@ -246,6 +246,61 @@ By default review rate limiting keys on `REMOTE_ADDR` only, because forwarded he
 
 - `bool|string[]` — `true`, an allow-list of trusted proxy IPs, or `false`.
 
+## Filter: mv_create_is_pro
+
+_Added/updated 2026-06-26._
+
+```php
+apply_filters( 'mv_create_is_pro', false ): bool
+```
+
+Applied in `class-plugin.php` (and consumed via `Plugin::is_pro()`).
+
+Returns `true` when the site's **effective subscription tier is anything other than `free`** — i.e. any paid tier (`pro-guides`, `pro-lists`, `pro`), `free-plus`, or an active trial. The semantics are intentionally kept stable for third-party themes/plugins that key on "is this a non-free Create site?"; the free-plus recipe-eligibility floor does **not** flip this filter to `false`.
+
+**Returns**
+
+- `bool` — whether the effective tier is anything other than `free`.
+
+## Filter: mv_create_effective_tier
+
+_Added 2026-06-26._
+
+```php
+apply_filters( 'mv_create_effective_tier', $tier ): string $tier
+```
+
+Applied in `class-plugin.php`.
+
+Returns the canonical, trial-aware effective tier slug: one of `free`, `free-plus`, `pro-guides`, `pro-lists`, `pro`. During an active trial it resolves to `pro` (Pro Pass). Use this for granular tier-aware behavior instead of the binary `mv_create_is_pro`. (`pro` is the shipped slug and keeps its "full access" meaning; unknown slugs fail closed to `free`.)
+
+**Returns**
+
+- `string` — the canonical effective tier slug.
+
+## Filter: mv_create_tier_floor
+
+_Added 2026-08-25 (CRE-296). Rewritten 2026-09-25 for Create 3.0's explicit plan choice, which replaced the CRE-296 automatic free-plus floor before it ever shipped._
+
+```php
+apply_filters( 'mv_create_tier_floor', $tier, $choice ): string $tier
+```
+
+Applied in `GateKeeper::default_tier()`.
+
+The tier a site falls back to when Create Studio has never told it what it is entitled to — no stored `mv_create_subscription_tier` value, because the site has never connected, was disconnected, or has not yet synced. Resolves to `free-plus` only if the publisher explicitly chose Free+ via the Create 3.0 plan-choice gate (`GateKeeper::set_free_plan_choice()` / `Plan_Choice`); otherwise `free`. There is no more automatic grant — installation alone no longer entitles a site to Free+, an admin has to choose it.
+
+The floor never overrides a real answer — any explicitly stored tier, including a genuine Studio downgrade to `free`, short-circuits it. Use this to pin a fleet to plain `free` regardless of the publisher's recorded choice.
+
+**Parameters**
+
+- `$tier` `string` — the resolved floor tier (`free` or `free-plus`).
+- `$choice` `string` — the publisher's recorded free-plan choice: `''` (none yet), `'free'`, or `'free-plus'`.
+
+**Returns**
+
+- `string` — a tier slug; anything unknown is normalized to `free`.
+
 ## Filter: mv_create_init_settings
 
 ```php

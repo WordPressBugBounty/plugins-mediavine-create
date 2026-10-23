@@ -18,6 +18,20 @@ class Products_Map_API extends Products {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function upsert( \WP_REST_Request $request, \WP_REST_Response $response ) {
+		// CONNECTION gate (not a tier gate): the per-card Recommended Products EDITOR is
+		// a free feature locked only while the site is disconnected from Create Studio.
+		// Once connected it is free for every tier. Existing products still RENDER on the
+		// frontend regardless of connection (this only blocks the save path); the
+		// READ/GET route (find) and DELETE route (destroy) are intentionally left
+		// ungated so existing data can still be loaded/managed. The premium
+		// FEATURE_RECOMMENDED_PRODUCTS_DISPLAY (display modes) and the product-scrape
+		// gate (FEATURE_PRODUCT_SCRAPE) remain tier-gated elsewhere and are untouched.
+		if ( ! GateKeeper::can_access( GateKeeper::FEATURE_RECOMMENDED_PRODUCTS ) ) {
+			return GateKeeper::connection_required_error(
+				__( 'Connect this site to Create Studio to edit recommended products.', 'mediavine-create' )
+			);
+		}
+
 		$params      = $request->get_params();
 		$creation_id = $params['id'];
 

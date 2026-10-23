@@ -499,6 +499,14 @@ class Creations_Views_Hooks extends Creations_Views {
 		if ( empty( $layout ) ) {
 			return;
 		}
+
+		// Premium layouts (Editorial, Leaderboard, Ranked, Ranked-Top) fall back to
+		// a free layout when the site can't access them (pro-lists/pro gated),
+		// so the rendered markup and the layout class always match. Per-layout
+		// fallbacks live in GateKeeper (editorial -> hero, others -> numbered).
+		$layout                     = GateKeeper::get_accessible_list_layout( $layout );
+		$args['creation']['layout'] = $layout;
+
 		self::$views->the_view( 'shortcode-mv-create-list-' . $layout, $args );
 	}
 
@@ -619,10 +627,11 @@ class Creations_Views_Hooks extends Creations_Views {
 			return '';
 		}
 
-		$dom = new \DOMDocument();
-		libxml_use_internal_errors( true );
+		$dom                   = new \DOMDocument();
+		$libxml_previous_state = libxml_use_internal_errors( true );
 		$dom->loadHTML( '<html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>' );
 		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
 
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( ! $body ) {

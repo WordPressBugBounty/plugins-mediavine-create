@@ -151,7 +151,8 @@ class Featured_Review extends Plugin {
 
 		// Get the last name initial
 		$last_part    = array_pop( $parts );
-		$last_initial = mb_strtoupper( mb_substr( $last_part, 0, 1 ) );
+		$last_initial = mb_substr( $last_part, 0, 1 );
+		$last_initial = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $last_initial ) : strtoupper( $last_initial );
 
 		// Join remaining parts (first name, middle names) with the last initial
 		$first_parts = implode( ' ', $parts );
@@ -205,15 +206,65 @@ class Featured_Review extends Plugin {
 	 */
 	public function register_settings( $settings ) {
 		$settings[] = [
+			'slug'  => 'mv_create_featured_review_placement',
+			'value' => 'manual',
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 58,
+			'data'  => [
+				'type'          => 'select',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Automatic Placement', 'mediavine-create' ),
+				'instructions'  => __( 'Where to automatically place a featured review when a card in the post has one chosen (nothing is added otherwise). Order of precedence: a Featured Review block you place yourself always wins; then the Target Element below, if it is on the page; then this automatic location. Choose "None" to rely only on a manual block or the Target Element.', 'mediavine-create' ),
+				'default_label' => __( 'None', 'mediavine-create' ),
+				'options'       => [
+					[
+						'label' => __( 'None (manual block or target element only)', 'mediavine-create' ),
+						'value' => 'manual',
+					],
+					[
+						'label' => __( 'Top of post', 'mediavine-create' ),
+						'value' => 'top',
+					],
+					[
+						'label' => __( 'Middle of post', 'mediavine-create' ),
+						'value' => 'middle',
+					],
+					[
+						'label' => __( 'Right above the card', 'mediavine-create' ),
+						'value' => 'above-card',
+					],
+				],
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_selector',
+			'value' => '',
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 59,
+			'data'  => [
+				'type'         => 'text',
+				'subgroup'     => 'featured_reviews',
+				'gated'        => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'        => __( 'Target Element', 'mediavine-create' ),
+				'instructions' => __( 'Optional. A CSS selector for a preferred location — an element you have added to your post or template (for example, #featured-review or .featured-review-slot). When that element is on the page, the featured review is placed inside it, overriding the automatic placement above. A Featured Review block you place yourself still takes precedence.', 'mediavine-create' ),
+				'placeholder'  => __( 'e.g. #featured-review', 'mediavine-create' ),
+			],
+		];
+
+		$settings[] = [
 			'slug'  => 'mv_create_featured_review_show_rating',
 			'value' => 'true',
 			'group' => Plugin::$settings_group . '_reader_experience',
 			'order' => 60,
 			'data'  => [
-				'type'         => 'checkbox',
-				'label'        => __( 'Featured Reviews: Show Rating', 'mediavine-create' ),
-				'instructions' => __( 'Display the star rating in featured review blocks.', 'mediavine-create' ),
-				'default'      => 'Enabled',
+				'type'          => 'checkbox',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Featured Reviews: Show Rating', 'mediavine-create' ),
+				'instructions'  => __( 'Display the star rating in featured review blocks.', 'mediavine-create' ),
+				'default_label' => __( 'Enabled', 'mediavine-create' ),
 			],
 		];
 
@@ -223,10 +274,12 @@ class Featured_Review extends Plugin {
 			'group' => Plugin::$settings_group . '_reader_experience',
 			'order' => 62,
 			'data'  => [
-				'type'         => 'checkbox',
-				'label'        => __( 'Featured Reviews: Show Review Text', 'mediavine-create' ),
-				'instructions' => __( 'Display the review content in featured review blocks.', 'mediavine-create' ),
-				'default'      => 'Enabled',
+				'type'          => 'checkbox',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Featured Reviews: Show Review Text', 'mediavine-create' ),
+				'instructions'  => __( 'Display the review content in featured review blocks.', 'mediavine-create' ),
+				'default_label' => __( 'Enabled', 'mediavine-create' ),
 			],
 		];
 
@@ -236,10 +289,163 @@ class Featured_Review extends Plugin {
 			'group' => Plugin::$settings_group . '_reader_experience',
 			'order' => 64,
 			'data'  => [
-				'type'         => 'checkbox',
-				'label'        => __( 'Featured Reviews: Show Reviewer Name', 'mediavine-create' ),
-				'instructions' => __( 'Display the reviewer\'s name in featured review blocks.', 'mediavine-create' ),
-				'default'      => 'Enabled',
+				'type'          => 'checkbox',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Featured Reviews: Show Reviewer Name', 'mediavine-create' ),
+				'instructions'  => __( 'Display the reviewer\'s name in featured review blocks.', 'mediavine-create' ),
+				'default_label' => __( 'Enabled', 'mediavine-create' ),
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_show_jump',
+			'value' => false,
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 66,
+			'data'  => [
+				'type'          => 'checkbox',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Show "Jump to Card" Link', 'mediavine-create' ),
+				'instructions'  => __( 'Add a link or button to the featured review that jumps the reader down to the recipe card.', 'mediavine-create' ),
+				'default_label' => __( 'Disabled', 'mediavine-create' ),
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_jump_style',
+			'value' => 'link',
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 68,
+			'data'  => [
+				'type'          => 'select',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Jump Style', 'mediavine-create' ),
+				'instructions'  => __( 'Display the "jump to card" control as a text link or a button.', 'mediavine-create' ),
+				'default_label' => __( 'Link', 'mediavine-create' ),
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
+				'options'       => [
+					[
+						'label' => __( 'Link', 'mediavine-create' ),
+						'value' => 'link',
+					],
+					[
+						'label' => __( 'Button', 'mediavine-create' ),
+						'value' => 'button',
+					],
+				],
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_jump_color',
+			'value' => 'secondary',
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 69,
+			'data'  => [
+				'type'          => 'select',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Jump Color', 'mediavine-create' ),
+				'instructions'  => __( 'Color for the "jump to card" link or button.', 'mediavine-create' ),
+				'default_label' => __( 'Secondary (matches ratings)', 'mediavine-create' ),
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
+				'options'       => [
+					[
+						'label' => __( 'Theme primary color', 'mediavine-create' ),
+						'value' => 'primary',
+					],
+					[
+						'label' => __( 'Theme secondary color (matches ratings)', 'mediavine-create' ),
+						'value' => 'secondary',
+					],
+					[
+						'label' => __( 'Custom colors', 'mediavine-create' ),
+						'value' => 'custom',
+					],
+				],
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_jump_custom_bg',
+			'value' => '#c8a951',
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 70,
+			'data'  => [
+				'type'          => 'text',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Custom Jump Background', 'mediavine-create' ),
+				'instructions'  => __( 'Background color for the jump button when "Custom colors" is selected. (Buttons only — links have no fill.)', 'mediavine-create' ),
+				'default_label' => '#c8a951',
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_jump_custom_fg',
+			'value' => '#ffffff',
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 71,
+			'data'  => [
+				'type'          => 'text',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Custom Jump Text', 'mediavine-create' ),
+				'instructions'  => __( 'Text color for the jump link or button when "Custom colors" is selected.', 'mediavine-create' ),
+				'default_label' => '#ffffff',
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_jump_label',
+			'value' => __( 'Jump to Recipe', 'mediavine-create' ),
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 72,
+			'data'  => [
+				'type'          => 'text',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Jump to Recipe Label', 'mediavine-create' ),
+				'instructions'  => __( 'The text shown on the "jump to card" control for recipe cards.', 'mediavine-create' ),
+				'default_label' => __( 'Jump to Recipe', 'mediavine-create' ),
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_jump_howto_label',
+			'value' => __( 'Jump to How-To', 'mediavine-create' ),
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 73,
+			'data'  => [
+				'type'          => 'text',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Jump to How-To Label', 'mediavine-create' ),
+				'instructions'  => __( 'The text shown on the "jump to card" control for how-to cards.', 'mediavine-create' ),
+				'default_label' => __( 'Jump to How-To', 'mediavine-create' ),
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
+			],
+		];
+
+		$settings[] = [
+			'slug'  => 'mv_create_featured_review_replace_jtr',
+			'value' => false,
+			'group' => Plugin::$settings_group . '_reader_experience',
+			'order' => 74,
+			'data'  => [
+				'type'          => 'checkbox',
+				'subgroup'      => 'featured_reviews',
+				'gated'         => GateKeeper::FEATURE_REVIEW_FEATURED,
+				'label'         => __( 'Replace Jump to Recipe Button', 'mediavine-create' ),
+				'instructions'  => __( 'When enabled, hide the standalone Jump to Recipe button on posts where the featured review is shown with its jump link — the featured review already links to the card, so the separate button is redundant.', 'mediavine-create' ),
+				'default_label' => __( 'Disabled', 'mediavine-create' ),
+				'dependent_on'  => 'mv_create_featured_review_show_jump',
 			],
 		];
 
