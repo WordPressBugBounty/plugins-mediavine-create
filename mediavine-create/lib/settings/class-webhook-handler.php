@@ -1303,7 +1303,7 @@ class Webhook_Handler {
 
 		// Clear the plan-ended flag when a paid plan or trial comes back; ask
 		// Free or Free+ when one has just ended. Same as sync_subscription().
-		GateKeeper::settle_plan_choice_gate( $tier, ! empty( $data['is_trialing'] ), $was_paying );
+		GateKeeper::settle_plan_choice_gate( $tier, ! empty( $data['is_trialing'] ), $was_paying, $previous_tier );
 
 		// On a genuine downgrade to the free floor, reset gated settings; otherwise preserve.
 		GateKeeper::enforce_feature_fallbacks( $previous_tier );

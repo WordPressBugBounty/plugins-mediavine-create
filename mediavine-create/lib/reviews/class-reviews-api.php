@@ -11,6 +11,9 @@ class Reviews_API extends Reviews {
 
 	private static $min_rating = 4;
 
+	/** Response `code` when a rating needs a written review (Rating_Policy). */
+	const ERROR_REVIEW_REQUIRED = 'review_required';
+
 	private static $instance = null;
 
 	private $Reviews;
@@ -183,6 +186,15 @@ class Reviews_API extends Reviews {
 			}
 		}
 
+		// The rating needs a written review and at least one review field is
+		// missing: flagged so the response can carry a machine-readable code.
+		$review_required = $more_required && (
+			! isset( $new_review['author_name'] ) ||
+			! isset( $new_review['author_email'] ) ||
+			! isset( $new_review['review_title'] ) ||
+			! isset( $new_review['review_content'] )
+		);
+
 		if ( $more_required ) {
 
 			if ( isset( $new_review['author_name'] ) && is_numeric( $new_review['author_name'] ) ) {
@@ -200,7 +212,7 @@ class Reviews_API extends Reviews {
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
 						'title'   => __( 'Name is Required', 'mediavine-create' ),
-						'details' => __( 'Name is required for reviews less than 4 Stars', 'mediavine-create' ),
+						'details' => __( 'A name is required to submit this rating', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -210,7 +222,7 @@ class Reviews_API extends Reviews {
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
 						'title'   => __( 'Email is Required', 'mediavine-create' ),
-						'details' => __( 'Email is required for reviews less than 4 Stars', 'mediavine-create' ),
+						'details' => __( 'An email is required to submit this rating', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -220,7 +232,7 @@ class Reviews_API extends Reviews {
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
 						'title'   => __( 'Title is Required', 'mediavine-create' ),
-						'details' => __( 'Title is required for reviews less than 4 Stars', 'mediavine-create' ),
+						'details' => __( 'A title is required to submit this rating', 'mediavine-create' ),
 					], 'error'
 				);
 			}
@@ -230,16 +242,17 @@ class Reviews_API extends Reviews {
 				$errors = $this::$api_services->normalize_errors(
 					$errors, 422, [
 						'title'   => __( 'Message is Required', 'mediavine-create' ),
-						'details' => __( 'Message is required for reviews less than 4 Stars', 'mediavine-create' ),
+						'details' => __( 'A review is required to submit this rating', 'mediavine-create' ),
 					], 'error'
 				);
 			}
 		}
 
 		return [
-			'review' => $new_review,
-			'error'  => $error,
-			'errors' => $errors,
+			'review'          => $new_review,
+			'error'           => $error,
+			'errors'          => $errors,
+			'review_required' => $review_required,
 		];
 	}
 
@@ -286,28 +299,18 @@ class Reviews_API extends Reviews {
 			];
 		}
 
-		// Set ratings autosubmit threshold
-		$ratings_submit_threshold = apply_filters( 'mv_create_ratings_submit_threshold', 4 );
-
-		// If prompt threshold is less than autosubmit, make sure we use the prompt instead
-		$ratings_prompt_threshold = apply_filters( 'mv_create_ratings_prompt_threshold', 4 );
-		if ( $ratings_prompt_threshold < $ratings_submit_threshold ) {
-			$ratings_submit_threshold = $ratings_prompt_threshold;
-		}
-
-		if ( ( $ratings_submit_threshold <= $rating ) && ( 5.5 > $rating ) ) {
+		// Rating_Policy owns the threshold math (mode, required level, filters).
+		if ( ! Rating_Policy::requires_review( $rating ) ) {
 			return [
 				'ok'            => true,
 				'more_required' => false,
 			];
 		}
 
-		if ( ( 0 < $rating ) && ( $ratings_submit_threshold > $rating ) ) {
-			return [
-				'ok'            => true,
-				'more_required' => true,
-			];
-		}
+		return [
+			'ok'            => true,
+			'more_required' => true,
+		];
 	}
 
 	/**
@@ -411,6 +414,11 @@ class Reviews_API extends Reviews {
 		if ( $error ) {
 			$status_code        = 403;
 			$response['errors'] = $errors;
+			if ( ! empty( $result['review_required'] ) ) {
+				// Lets API clients (Interactive Mode) tell "this rating needs a
+				// review" apart from other 403s such as "Reviews Closed".
+				$response['code'] = self::ERROR_REVIEW_REQUIRED;
+			}
 		}
 
 		return new \WP_REST_Response( $response, $status_code );
@@ -569,6 +577,11 @@ class Reviews_API extends Reviews {
 		if ( $error ) {
 			$status_code        = 403;
 			$response['errors'] = $errors;
+			if ( ! empty( $result['review_required'] ) ) {
+				// Lets API clients (Interactive Mode) tell "this rating needs a
+				// review" apart from other 403s such as "Reviews Closed".
+				$response['code'] = self::ERROR_REVIEW_REQUIRED;
+			}
 		}
 
 		return new \WP_REST_Response( $response, $status_code );

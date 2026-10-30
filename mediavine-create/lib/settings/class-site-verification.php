@@ -922,44 +922,14 @@ class Site_Verification {
 	 * Forget every WordPress user's Create Studio link.
 	 *
 	 * Per-user links live in user meta, not in the site's settings, so clearing
-	 * the site token leaves them behind. Reuses the same per-user clear as
-	 * "Unlink your account".
+	 * the site token leaves them behind. Drops the SSO token as well as the
+	 * email / verified-at keys: Studio rejects that token after a disconnect,
+	 * and leaving it makes the next connect look linked.
 	 *
 	 * @return void
 	 */
 	public static function clear_user_links() {
-		$linked_user_ids = get_users(
-			[
-				'fields'     => 'ID',
-				'meta_query' => [
-					'relation' => 'OR',
-					[
-						'key'     => User_Verification_Meta::TOKEN_KEY,
-						'compare' => 'EXISTS',
-					],
-					[
-						'key'     => User_Verification_Meta::EMAIL_KEY,
-						'compare' => 'EXISTS',
-					],
-					[
-						'key'     => User_Verification_Meta::VERIFIED_AT_KEY,
-						'compare' => 'EXISTS',
-					],
-					[
-						'key'     => User_Verification_Meta::EMAIL_VERIFIED_KEY,
-						'compare' => 'EXISTS',
-					],
-					[
-						'key'     => User_Verification_Meta::LINK_SESSION_KEY,
-						'compare' => 'EXISTS',
-					],
-				],
-			]
-		);
-
-		foreach ( $linked_user_ids as $user_id ) {
-			User_Verification_Meta::clear_all( (int) $user_id );
-		}
+		User_Verification_Meta::clear_all_users();
 	}
 
 	/**

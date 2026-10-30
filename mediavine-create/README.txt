@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.0
+Stable tag: 3.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,17 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 3.1.0 =
+
+* FEATURE: A new Reviews settings panel with a live preview lets you choose how readers leave feedback: ratings with reviews, or ratings only
+* ENHANCEMENT: Leaderboard, Ranked, Countdown and Editorial lists can now hide their rank numbers, site-wide or per list
+* ENHANCEMENT: Social Footer content now has a rich-text editor, so you can add links such as a book promotion
+* FIX: Links and formatting in Social Footer content are no longer removed when you save
+* FIX: Changing plans now clears page caches from BigScoots, Bluehost, Nginx Helper, Breeze, Cloudflare and other page caches, so readers see Interactive Mode and other plan features right away
+* FIX: "Read More" buttons and images on list cards now always show and link to each item, even when caching or optimization plugins delay Create's scripts
+* FIX: Republishing cards now removes old, unused image sizes Create had stored for them, including every stored image once a card's images are removed
+
 
 = 3.0.0 =
 

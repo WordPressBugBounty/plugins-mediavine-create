@@ -430,6 +430,25 @@ class GateKeeper {
 	const SETTING_FREE_PLAN_CHOICE = 'mv_create_free_plan_choice';
 
 	/**
+	 * Setting slug for the free-plan choice Create Studio has been told about.
+	 *
+	 * Studio only records a choice it hears about, and picking the plan Studio
+	 * already has (usually Free) never changed anything upstream, so it was
+	 * never sent. sync_subscription() reports the choice whenever this differs
+	 * from SETTING_FREE_PLAN_CHOICE.
+	 */
+	const SETTING_FREE_PLAN_CHOICE_REPORTED = 'mv_create_free_plan_choice_reported';
+
+	/**
+	 * Option holding the tier the site's page caches were last purged for.
+	 *
+	 * The Create Studio embed is only printed on tiers that use it, so a page
+	 * cache built before a tier change keeps serving the old markup. See
+	 * maybe_purge_page_caches_for_tier().
+	 */
+	const OPTION_PAGE_CACHE_TIER = 'mv_create_page_cache_tier';
+
+	/**
 	 * Per-request memo of get_effective_tier().
 	 *
 	 * Null means unresolved. Cleared by reset_request_cache() whenever
@@ -484,6 +503,7 @@ class GateKeeper {
 			self::SETTING_TRIAL_EXTENSIONS,
 			self::SETTING_PRE_DOWNGRADE_SETTINGS,
 			self::SETTING_FREE_PLAN_CHOICE,
+			self::SETTING_FREE_PLAN_CHOICE_REPORTED,
 			self::SETTING_MULTI_SITE_DISCOUNT_ELIGIBLE,
 		];
 	}
@@ -689,8 +709,8 @@ class GateKeeper {
 		'enable_unit_conversion'       => [ self::FEATURE_UNIT_CONVERSION, '' ],
 		'enable_servings_adjustment'   => [ self::FEATURE_SERVINGS_ADJUSTMENT, '' ],
 		'custom_css'                   => [ self::FEATURE_CUSTOM_CSS, '' ],
-		// Deliberately absent: 'allow_reviews' / 'reviews_ctas' /
-		// 'enable_anonymous_ratings'. FEATURE_REVIEW_COLLECTION gates review
+		// Deliberately absent: 'allow_reviews' / 'reviews_ctas' / 'review_mode' /
+		// 'review_required_at_or_below'. FEATURE_REVIEW_COLLECTION gates review
 		// INTAKE at render/submit time only; flipping allow_reviews off would
 		// also hide the aggregate star rating on existing cards, which the free
 		// floor must never do.
@@ -1109,6 +1129,25 @@ class GateKeeper {
 	}
 
 	/**
+	 * The free-plan choice Create Studio has been told about.
+	 *
+	 * @return string '' | 'free' | 'free-plus'.
+	 */
+	public static function get_reported_free_plan_choice() {
+		return trim( (string) Settings::get_setting( self::SETTING_FREE_PLAN_CHOICE_REPORTED ) );
+	}
+
+	/**
+	 * Record that Create Studio has been told about this free-plan choice.
+	 *
+	 * @param string $tier GateKeeper::TIER_FREE or TIER_FREE_PLUS.
+	 * @return void
+	 */
+	public static function mark_free_plan_choice_reported( $tier ) {
+		self::update_subscription_setting( self::SETTING_FREE_PLAN_CHOICE_REPORTED, $tier );
+	}
+
+	/**
 	 * Whether the current tier comes from the floor rather than a real subscription.
 	 *
 	 * Use to keep "you actually signed up for something" surfaces (achievements,
@@ -1300,16 +1339,41 @@ class GateKeeper {
 		 * retry — and the mirror would then overwrite the choice with a plan
 		 * the publisher never picked, losing it for good over a transient error.
 		 */
-		$push_failed = false;
+		$push_failed     = false;
+		$choice_reported = false;
 
 		if ( $was_floored && '' !== $local_choice && in_array( $subscription_tier, $free_band, true ) && $subscription_tier !== $local_choice ) {
 			$pushed = Create_Studio_Client::set_subscription_tier( $local_choice );
 
 			if ( ! is_wp_error( $pushed ) && ! empty( $pushed['success'] ) ) {
 				$subscription_tier = $local_choice;
+				$choice_reported   = true;
 			} else {
 				$push_failed = true;
 				Help::log( 'GateKeeper::sync_subscription: failed to push local free-plan choice to Create Studio; will retry on the next sync.' );
+			}
+		}
+
+		/*
+		 * Report a choice Studio already agrees with but has never been told
+		 * about (typically Free on a site Studio already has on free), so Studio
+		 * can record that the publisher chose it. Bookkeeping only: the tier is
+		 * unaffected, and a failure just retries on the next sync.
+		 */
+		if (
+			! $choice_reported
+			&& ! $push_failed
+			&& ! $is_trialing
+			&& '' !== $local_choice
+			&& $subscription_tier === $local_choice
+			&& self::get_reported_free_plan_choice() !== $local_choice
+		) {
+			$reported = Create_Studio_Client::set_subscription_tier( $local_choice );
+
+			if ( ! is_wp_error( $reported ) && ! empty( $reported['success'] ) ) {
+				$choice_reported = true;
+			} else {
+				Help::log( 'GateKeeper::sync_subscription: failed to report the free-plan choice to Create Studio; will retry on the next sync.' );
 			}
 		}
 
@@ -1343,6 +1407,10 @@ class GateKeeper {
 			$writes[ self::SETTING_TRIAL_EXTENSIONS ] = wp_json_encode( $status['trial_extensions'] );
 		}
 
+		if ( $choice_reported ) {
+			$writes[ self::SETTING_FREE_PLAN_CHOICE_REPORTED ] = $local_choice;
+		}
+
 		// Stay floored on the publisher's choice so the next sync retries the push.
 		if ( $push_failed ) {
 			unset( $writes[ self::SETTING_SUBSCRIPTION_TIER ] );
@@ -1357,7 +1425,7 @@ class GateKeeper {
 			self::mirror_free_plan_choice( $subscription_tier, $is_trialing, $local_choice );
 		}
 
-		self::settle_plan_choice_gate( $subscription_tier, $is_trialing, $was_paying );
+		self::settle_plan_choice_gate( $subscription_tier, $is_trialing, $was_paying, $previous_tier );
 
 		// On a genuine downgrade into free, reset gated settings; otherwise preserve.
 		self::enforce_feature_fallbacks( $previous_tier );
@@ -1372,12 +1440,13 @@ class GateKeeper {
 	 * two paths cannot drift. Run it after mirror_free_plan_choice(): ending a
 	 * plan forgets the free-plan choice that mirror just recorded.
 	 *
-	 * @param string $tier        Canonical incoming tier.
-	 * @param bool   $is_trialing Whether the incoming state is a trial.
-	 * @param bool   $was_paying  Whether the site was paying or trialing before this change.
+	 * @param string $tier          Canonical incoming tier.
+	 * @param bool   $is_trialing   Whether the incoming state is a trial.
+	 * @param bool   $was_paying    Whether the site was paying or trialing before this change.
+	 * @param string $previous_tier Canonical tier before this change, when known.
 	 * @return void
 	 */
-	public static function settle_plan_choice_gate( $tier, $is_trialing, $was_paying ) {
+	public static function settle_plan_choice_gate( $tier, $is_trialing, $was_paying, $previous_tier = '' ) {
 		// A paid or trialing result is itself a choice: the plan-choice gate
 		// must never block (or re-block) an admin who is already paying, and a
 		// stale "plan ended" flag must not outlive the plan coming back.
@@ -1387,7 +1456,7 @@ class GateKeeper {
 
 		// A paid plan or trial that has just ended: ask Free or Free+.
 		if ( $was_paying && ! $is_trialing && in_array( $tier, [ self::TIER_FREE, self::TIER_FREE_PLUS ], true ) ) {
-			Plan_Choice::require_choice_after_plan_ended();
+			Plan_Choice::require_choice_after_plan_ended( $previous_tier );
 		}
 	}
 
@@ -1433,7 +1502,18 @@ class GateKeeper {
 			return false;
 		}
 
-		self::update_subscription_setting( self::SETTING_FREE_PLAN_CHOICE, $tier );
+		if ( $tier === $local_choice ) {
+			return false;
+		}
+
+		// The switch came from Create Studio, so Studio already knows about it;
+		// mark it reported so the next sync doesn't echo it back as a choice.
+		self::update_subscription_settings(
+			[
+				self::SETTING_FREE_PLAN_CHOICE          => $tier,
+				self::SETTING_FREE_PLAN_CHOICE_REPORTED => $tier,
+			]
+		);
 
 		return true;
 	}
@@ -1889,6 +1969,8 @@ class GateKeeper {
 	public static function enforce_feature_fallbacks( $previous_tier = null ) {
 		$effective_tier = self::get_effective_tier();
 
+		self::maybe_purge_page_caches_for_tier( $effective_tier );
+
 		if ( self::TIER_FREE !== $effective_tier ) {
 			self::restore_pre_downgrade_settings( $effective_tier );
 			self::enforce_free_plus_interactive_mode( $effective_tier );
@@ -1896,6 +1978,37 @@ class GateKeeper {
 		}
 
 		self::reset_gated_settings_to_free_floor();
+	}
+
+	/**
+	 * Purge full-page caches when the effective tier changes.
+	 *
+	 * Whether the Create Studio embed (Interactive Mode, servings, checklists)
+	 * is printed depends on the tier, so a page cached before a change keeps
+	 * serving the old markup — a site that moves to Free+ shows no Interactive
+	 * Mode button until its cache happens to expire. Purges once per change.
+	 *
+	 * The first check (no tier recorded yet) purges only when the site is
+	 * already off free: a site that changed tier before this shipped may be
+	 * serving stale pages, while a free site has nothing stale to clear.
+	 *
+	 * @param string $tier The current effective tier.
+	 * @return void
+	 */
+	private static function maybe_purge_page_caches_for_tier( $tier ) {
+		$last = (string) get_option( self::OPTION_PAGE_CACHE_TIER, '' );
+
+		if ( $last === $tier ) {
+			return;
+		}
+
+		update_option( self::OPTION_PAGE_CACHE_TIER, $tier, false );
+
+		if ( '' === $last && self::TIER_FREE === $tier ) {
+			return;
+		}
+
+		\Mediavine\Cache_Manager::purge_full_page_caches( 'Mediavine Create plan change' );
 	}
 
 	/**

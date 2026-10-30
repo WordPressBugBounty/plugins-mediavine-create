@@ -144,5 +144,69 @@ class Cache_Manager {
 		if ( class_exists( '\FlyingPress\Purge' ) && method_exists( '\FlyingPress\Purge', 'purge_everything' ) ) {
 			\FlyingPress\Purge::purge_everything();
 		}
+
+		// WP-Optimize page cache.
+		if ( function_exists( 'wpo_cache_flush' ) ) {
+			wpo_cache_flush();
+		}
+
+		// W3 Total Cache.
+		if ( function_exists( 'w3tc_flush_all' ) ) {
+			w3tc_flush_all();
+		}
+
+		// WP Super Cache.
+		if ( function_exists( 'wp_cache_clear_cache' ) ) {
+			wp_cache_clear_cache();
+		}
+
+		// SiteGround Optimizer.
+		if ( function_exists( 'sg_cachepress_purge_cache' ) ) {
+			sg_cachepress_purge_cache();
+		}
+
+		// WP Fastest Cache and Cache Enabler expose purge-everything actions.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party WP Fastest Cache purge API
+		do_action( 'wpfc_clear_all_cache' );
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party Cache Enabler purge API
+		do_action( 'cache_enabler_clear_complete_cache' );
+
+		// Host and CDN page caches below only clear on post edits on their own,
+		// so a tier change otherwise kept serving stale markup for days.
+
+		// BigScoots Cache — Cloudflare-backed edge cache with a one-year TTL.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound, WordPress.NamingConventions.ValidHookName.UseUnderscores -- third-party BigScoots Cache purge API
+		do_action( 'bigscoots/cache/purge/programmatically', 'purge_everything', false );
+
+		// Bluehost / Endurance Page Cache.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party Endurance Page Cache purge API
+		do_action( 'epc_purge' );
+
+		// Nginx Helper (FastCGI / Redis page cache).
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party Nginx Helper purge API
+		do_action( 'rt_nginx_helper_purge_all' );
+
+		// Breeze (Cloudways).
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party Breeze purge API
+		do_action( 'breeze_clear_all_cache' );
+
+		// Official Cloudflare plugin (APO / plugin-specific page cache). It only
+		// exposes its Hooks instance as a global; the method no-ops unless one of
+		// those caches is enabled.
+		global $cloudflareHooks; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- set by the Cloudflare plugin
+		if ( is_object( $cloudflareHooks ) && method_exists( $cloudflareHooks, 'purgeCacheEverything' ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+			$cloudflareHooks->purgeCacheEverything(); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+		}
+
+		/**
+		 * Fires after Create has asked every known page cache to purge.
+		 *
+		 * Lets a host-level cache (or a test) hook the same sweep.
+		 *
+		 * @since 3.0.1
+		 *
+		 * @param string $litespeed_reason The reason passed to the purge.
+		 */
+		do_action( 'mv_create_full_page_caches_purged', $litespeed_reason );
 	}
 }

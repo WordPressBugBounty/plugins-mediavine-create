@@ -27,7 +27,7 @@ class Importers_Admin {
 		$shapes   = \Mediavine\Create\Shapes::get_shapes();
 
 		$version    = Plugin::VERSION;
-		$assets_url = Plugin::assets_url() . 'admin/ui/build/';
+		$assets_url = \Mediavine\Create\Plugin_Context::assets_url() . 'admin/ui/build/';
 
 		// CSS is optional - only enqueue if file exists
 		$css_path = plugin_dir_path( dirname( __DIR__ ) ) . 'admin/ui/build/importers.build.' . $version . '.css';
@@ -37,7 +37,7 @@ class Importers_Admin {
 
 		$script_url = $assets_url . 'importers.build.' . $version . '.js';
 
-		$dev_origin = Plugin::dev_asset_origin( 'admin' );
+		$dev_origin = \Mediavine\Create\Plugin_Context::dev_asset_origin( 'admin' );
 		if ( '' !== $dev_origin ) {
 			$script_url = $dev_origin . '/importers.build.' . $version . '.js';
 			wp_dequeue_style( 'mv_create/importers.css' );
@@ -104,10 +104,10 @@ class Importers_Admin {
 	 */
 	public function enqueue_block_editor_assets() {
 		$version    = Plugin::VERSION;
-		$assets_url = Plugin::assets_url() . 'admin/ui/build/';
+		$assets_url = \Mediavine\Create\Plugin_Context::assets_url() . 'admin/ui/build/';
 		$script_url = $assets_url . 'importers.build.' . $version . '.js';
 
-		$dev_origin = Plugin::dev_asset_origin( 'admin' );
+		$dev_origin = \Mediavine\Create\Plugin_Context::dev_asset_origin( 'admin' );
 		if ( '' !== $dev_origin ) {
 			$script_url = $dev_origin . '/importers.build.' . $version . '.js';
 		}

@@ -135,7 +135,7 @@ class Creations_Views extends Creations {
 
 		$logging_enabled = Settings::get_setting('mv_create_enable_logging', false);
 
-		$debug = Plugin::is_dev_mode() || $logging_enabled ? "data-create-studio-debug='true'" : "";
+		$debug = Plugin_Context::is_dev_mode() || $logging_enabled ? "data-create-studio-debug='true'" : "";
 		$timestamp = time();
 		$studio_script = self::$create_studio_base_url . "/embed/main.js";
 		if ($debug) {
@@ -164,10 +164,14 @@ class Creations_Views extends Creations {
 		}, 5);
 
 		// Add script to footer with data attributes
-		add_action('wp_footer', function() use ($studio_script, $site_url, $debug) {
+		// Interactive Mode needs the site's review policy even where it runs off-page (Free+ on create.studio).
+		$review_policy = Rating_Policy::embed_attribute();
+
+		add_action('wp_footer', function() use ($studio_script, $site_url, $debug, $review_policy) {
 			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- third-party Create Studio embed with custom module attributes; output dynamically in wp_footer.
-			printf('<script defer type="module" id="create-studio-embed" data-site-url="%s" src="%s" %s></script>',
+			printf('<script defer type="module" id="create-studio-embed" data-site-url="%s" data-review-policy="%s" src="%s" %s></script>',
 			esc_attr($site_url),
+			esc_attr($review_policy),
 			esc_url($studio_script),
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $debug is a fixed attribute literal or empty, not user input.
 			$debug);
@@ -324,6 +328,28 @@ class Creations_Views extends Creations {
 		}
 		$default = \Mediavine\Settings::get_setting( self::$settings_group . '_list_layout', 'hero' );
 		return in_array( $default, $valid, true ) ? $default : 'hero';
+	}
+
+	/**
+	 * Whether a list's ranked layouts (Editorial, Leaderboard, Ranked,
+	 * Countdown) should print their rank numbers.
+	 *
+	 * The card's list_rank_display ('show' / 'hide') wins; an empty value
+	 * follows the site-wide mv_create_list_show_ranks setting.
+	 *
+	 * @param array $creation Published creation data.
+	 * @return bool
+	 */
+	public static function show_list_ranks( $creation ) {
+		$display = isset( $creation['list_rank_display'] ) ? $creation['list_rank_display'] : '';
+		if ( 'hide' === $display ) {
+			return false;
+		}
+		if ( 'show' === $display ) {
+			return true;
+		}
+		$site_default = \Mediavine\Settings::get_setting( self::$settings_group . '_list_show_ranks', true );
+		return filter_var( $site_default, FILTER_VALIDATE_BOOLEAN );
 	}
 
 	/**
@@ -593,12 +619,12 @@ class Creations_Views extends Creations {
 	}
 
 	public function register_styles() {
-		$base_url = apply_filters('mv_recipe_stylesheet', Plugin::assets_url() . 'client/build/card-base.' . Plugin::VERSION . '.css');
+		$base_url = apply_filters('mv_recipe_stylesheet', Plugin_Context::assets_url() . 'client/build/card-base.' . Plugin::VERSION . '.css');
 		wp_register_style('mv-create-card-base', $base_url, [], Plugin::VERSION);
 
 		$card_styles = Creations_Views_Themes::get_style_slugs();
 		foreach ( $card_styles as $card_style ) {
-			$style_url = apply_filters('mv_recipe_stylesheet', Plugin::assets_url() . "client/build/card-$card_style." . Plugin::VERSION . '.css');
+			$style_url = apply_filters('mv_recipe_stylesheet', Plugin_Context::assets_url() . "client/build/card-$card_style." . Plugin::VERSION . '.css');
 			wp_register_style("mv-create-card_$card_style", $style_url, [ 'mv-create-card-base' ], Plugin::VERSION);
 		}
 	}
@@ -644,8 +670,8 @@ class Creations_Views extends Creations {
 
 	public function register_scripts() {
 		$handle     = Plugin::PLUGIN_DOMAIN . '/client.js';
-		$script_url = Plugin::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.js';
-		$dev_origin = Plugin::dev_asset_origin( 'client' );
+		$script_url = Plugin_Context::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.js';
+		$dev_origin = Plugin_Context::dev_asset_origin( 'client' );
 		if ( '' !== $dev_origin ) {
 			$script_url = $dev_origin . '/bundle.js';
 		}
@@ -659,16 +685,11 @@ class Creations_Views extends Creations {
 			$reviews_div = null;
 		}
 
-		// Set ratings submit threshold based on setting (setting is temporarily disabled)
-		$enable_anonymous_ratings = \Mediavine\Settings::get_setting(self::$settings_group . '_enable_anonymous_ratings');
-		$ratings_submit_threshold = 5.5;
-		if ( $enable_anonymous_ratings ) {
-			$ratings_submit_threshold = 4;
-		}
-
-		// Allow filter override of ratings submit and prompt thresholds
-		$ratings_submit_threshold = apply_filters('mv_create_ratings_submit_threshold', $ratings_submit_threshold);
-		$ratings_prompt_threshold = apply_filters('mv_create_ratings_prompt_threshold', 5.5);
+		// Rating_Policy owns the thresholds (mode, required level and the legacy
+		// `mv_create_ratings_*_threshold` filters).
+		$review_form_enabled      = Rating_Policy::form_enabled();
+		$ratings_submit_threshold = Rating_Policy::submit_threshold();
+		$ratings_prompt_threshold = Rating_Policy::prompt_threshold();
 
 		$px_btwn_ads = \Mediavine\Settings::get_setting(self::$settings_group . '_ad_density');
 
@@ -693,9 +714,11 @@ class Creations_Views extends Creations {
 					// aggregate rating and the public reviews tab stay ungated;
 					// only the affordances that collect a NEW review are hidden.
 					'reviewCollectionEnabled' => GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_COLLECTION ),
-					'reviews_ctas'    => (bool) \Mediavine\Settings::get_setting('mv_create_reviews_ctas', false) && GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_COLLECTION ),
+					// The in-card CTA opens the review form, so ratings-only mode hides it.
+					'reviews_ctas'    => (bool) \Mediavine\Settings::get_setting('mv_create_reviews_ctas', false) && GateKeeper::can_access( GateKeeper::FEATURE_REVIEW_COLLECTION ) && $review_form_enabled,
+					'reviewPolicy'    => Rating_Policy::client_settings(),
 					'jtc_enabled'     => (bool) \Mediavine\Settings::get_setting('mv_create_enable_jump_to_recipe', false),
-					'asset_url'       => self::assets_url(),
+					'asset_url'       => Plugin_Context::assets_url(),
 					'wakeLockEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_hands_free_mode', false),
 					'canReplyToReviews' => \Mediavine\Permissions::is_user_authorized(),
 					'checklistsEnabled' => (bool) \Mediavine\Settings::get_setting('mv_create_enable_checklists', false) && GateKeeper::can_access( GateKeeper::FEATURE_CHECKLISTS ),
@@ -760,6 +783,8 @@ class Creations_Views extends Creations {
 		$allowed['button']['rel']           = true;
 
 		$allowed['a']['data-derive-button-from'] = true;
+		// List image links are duplicates of the title link; keep them out of the tab order.
+		$allowed['a']['tabindex'] = true;
 
 		$allowed['form']['class']  = true;
 		$allowed['form']['method'] = true;
@@ -825,7 +850,7 @@ class Creations_Views extends Creations {
 		// Always use the DB column as source of truth, overriding any stale
 		// values that may have been captured in the published JSON at publish time.
 		if ( $published_creation ) {
-			$card_fields = [ 'video_position', 'products_position', 'products_display_mode', 'products_section_title' ];
+			$card_fields = [ 'video_position', 'products_position', 'products_display_mode', 'products_section_title', 'list_rank_display' ];
 			foreach ( $card_fields as $field ) {
 				if ( isset( $creation->$field ) ) {
 					$published_creation[ $field ] = $creation->$field;
@@ -1157,7 +1182,7 @@ class Creations_Views extends Creations {
 	 */
 	public static function get_unit_conversion_data( $creation_id ) {
 		$converter = Unit_Conversion::get_instance();
-		$cached    = Plugin::is_dev_mode() ? null : $converter->get_cached_conversions( $creation_id );
+		$cached    = Plugin_Context::is_dev_mode() ? null : $converter->get_cached_conversions( $creation_id );
 
 		// Lazy compute on first frontend request if not cached (or dev mode)
 		if ( empty( $cached ) ) {
@@ -2127,6 +2152,28 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Accessible name for a list item's "Read More" link.
+	 *
+	 * The visible button text ("Continue Reading", "Get Recipe", ...) is the same
+	 * on every item, so screen readers listing a page's links would hear it
+	 * repeated with no context. Lead with the visible text (WCAG label-in-name)
+	 * and append the item title.
+	 *
+	 * @param array $item List item to process
+	 * @return string
+	 */
+	public static function list_link_label( $item ) {
+		$btn_text = $item['btn_text'] ?? '';
+		$title    = $item['title'] ?? '';
+		if ( '' === $title ) {
+			return $btn_text;
+		}
+
+		/* translators: 1: list item button text (e.g. "Read More"), 2: list item title */
+		return sprintf( __( '%1$s: %2$s', 'mediavine-create' ), $btn_text, $title );
+	}
+
+	/**
 	 * Output rel attribute
 	 *
 	 * @param array   $item
@@ -2306,7 +2353,7 @@ class Creations_Views extends Creations {
 			return;
 		}
 
-		$base = Plugin::assets_url() . 'assets/theme-preview-banner/';
+		$base = Plugin_Context::assets_url() . 'assets/theme-preview-banner/';
 
 		wp_enqueue_style(
 			'mv-create-theme-preview-banner',

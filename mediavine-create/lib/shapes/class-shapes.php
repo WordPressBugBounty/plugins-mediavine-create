@@ -28,6 +28,37 @@ class Shapes extends Plugin {
 	}
 
 	/**
+	 * Code-declared shape definitions (translated names + shape JSON).
+	 *
+	 * @return array[]
+	 */
+	public static function get_shapes_data() {
+		return [
+			[
+				'name'   => __( 'Recipe', 'mediavine-create' ),
+				'plural' => __( 'Recipes', 'mediavine-create' ),
+				'slug'   => 'recipe',
+				'icon'   => 'carrot',
+				'shape'  => file_get_contents( MV_CREATE_DIR . '/shapes/recipe.json' ),
+			],
+			[
+				'name'   => __( 'How-To', 'mediavine-create' ),
+				'plural' => __( 'How-Tos', 'mediavine-create' ),
+				'slug'   => 'diy',
+				'icon'   => 'lightbulb',
+				'shape'  => file_get_contents( MV_CREATE_DIR . '/shapes/how-to.json' ),
+			],
+			[
+				'name'   => __( 'List', 'mediavine-create' ),
+				'plural' => __( 'Lists', 'mediavine-create' ),
+				'slug'   => 'list',
+				'icon'   => '',
+				'shape'  => file_get_contents( MV_CREATE_DIR . '/shapes/list.json' ),
+			],
+		];
+	}
+
+	/**
 	 * Returns an array of shapes, each with the `shape` col json_decoded and filtered by unique slugs.
 	 */
 	public static function get_shapes() {

@@ -72,14 +72,17 @@
 				</div>
 				<div class="mv-list-item-container">
 					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ?? '' ), $args['allowed_html'] ); ?></div>
-					<button
-						class="mv-list-link mv-to-btn"
-						data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-						<?php echo wp_kses( $target_blank, [] ); ?>
-						<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-					>
-						<?php echo esc_html( $item['btn_text'] ); ?>
-					</button>
+					<?php if ( ! empty( $item['url'] ) ) { ?>
+						<a
+							class="mv-list-link mv-to-btn"
+							href="<?php echo esc_url( $item['url'] ); ?>"
+							aria-label="<?php echo esc_attr( \Mediavine\Create\Creations_Views::list_link_label( $item ) ); ?>"
+							<?php echo wp_kses( $target_blank, [] ); ?>
+							<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+						>
+							<?php echo esc_html( $item['btn_text'] ); ?>
+						</a>
+					<?php } ?>
 				</div>
 			</div>
 

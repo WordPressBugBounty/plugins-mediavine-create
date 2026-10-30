@@ -75,7 +75,21 @@ class Creations_Views_Social_Footer {
 			) . '</p>';
 		}
 
-		$published_creation['social_body_kses'] = [
+		$published_creation['social_body_kses'] = self::allowed_body_html();
+
+		return $published_creation;
+	}
+
+	/**
+	 * Inline HTML allowed in social footer body content.
+	 *
+	 * Shared by the render path and the settings write path so links saved from
+	 * the WYSIWYG survive to the card.
+	 *
+	 * @return array wp_kses allowlist.
+	 */
+	public static function allowed_body_html() {
+		return [
 			'a'      => [
 				'class'  => true,
 				'href'   => true,
@@ -89,7 +103,5 @@ class Creations_Views_Social_Footer {
 				'class' => true,
 			],
 		];
-
-		return $published_creation;
 	}
 }

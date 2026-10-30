@@ -1,3 +1,4 @@
+<?php $show_ranks = \Mediavine\Create\Creations_Views::show_list_ranks( $args['creation'] ); ?>
 <div class="mv-list-list mv-list-list-<?php echo esc_attr( $args['creation']['layout'] ); ?>">
 	<?php
 	$i                        = 0;
@@ -18,8 +19,10 @@
 			// Dividers do not consume a rank — fall through without incrementing $i.
 		} elseif ( 'text' === $item['content_type'] ) {
 			?>
-			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="mv-list-text mv-list-single" data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>">
-				<div class="mv-list-rank"><?php echo esc_html( $i + 1 ); ?></div>
+			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="mv-list-text mv-list-single<?php echo $show_ranks ? '' : ' mv-list-single-no-rank'; ?>" data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>">
+				<?php if ( $show_ranks ) { ?>
+					<div class="mv-list-rank"><?php echo esc_html( $i + 1 ); ?></div>
+				<?php } ?>
 				<?php
 				$img_container_classes = [ 'mv-list-img-container' ];
 				if ( empty( $item['thumbnail_id'] ) ) {
@@ -58,6 +61,9 @@
 			if ( 'product' === $item['content_type'] ) {
 				$item_classes .= ' mv-list-product';
 			}
+			if ( ! $show_ranks ) {
+				$item_classes .= ' mv-list-single-no-rank';
+			}
 
 			// Add product ID for tracking/analytics
 			$product_data_attr = '';
@@ -67,7 +73,9 @@
 			?>
 
 			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="<?php echo esc_attr( $item_classes ); ?>" data-mv-create-link-target="<?php echo esc_attr( $target_blank_boolean ); ?>" data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>" data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>" <?php echo wp_kses( $product_data_attr, [] ); ?>>
-				<div class="mv-list-rank"><?php echo esc_html( $i + 1 ); ?></div>
+				<?php if ( $show_ranks ) { ?>
+					<div class="mv-list-rank"><?php echo esc_html( $i + 1 ); ?></div>
+				<?php } ?>
 				<?php
 				$pinterest_args = \Mediavine\Create\Creations_Views::build_pinterest_args( $item, $args );
 
@@ -85,12 +93,20 @@
 						// off the row's column count for items that have an image.
 						\Mediavine\Create\Plugin::$views->the_view( 'shortcode-mv-create-pin-button', $pinterest_args );
 						?>
-						<div data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-							<?php echo wp_kses( $target_blank, [] ); ?>
-							<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-						>
+						<?php if ( ! empty( $item['url'] ) ) { ?>
+							<a
+								class="mv-list-img-link"
+								href="<?php echo esc_url( $item['url'] ); ?>"
+								tabindex="-1"
+								aria-hidden="true"
+								<?php echo wp_kses( $target_blank, [] ); ?>
+								<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+							>
+								<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
+							</a>
+						<?php } else { ?>
 							<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
-						</div>
+						<?php } ?>
 					</div>
 					<?php if ( ! empty( $item['thumbnail_credit'] ) ) { ?>
 						<div class="mv-list-photocred"><svg class="mv-list-photocred-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg><?php echo esc_html( $item['thumbnail_credit'] ); ?></div>
@@ -113,14 +129,17 @@
 					<?php // Leaderboard descriptions are capped at ~250 characters. ?>
 					<div class="mv-list-single-description"><?php echo esc_html( \Mediavine\Create\Helpers\Str::truncate( $item['description'], 250, '…' ) ); ?></div>
 				</div>
-				<button
-					class="mv-list-link mv-to-btn"
-					data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-					<?php echo wp_kses( $target_blank, [] ); ?>
-					<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-				>
-					<?php echo esc_html( $item['btn_text'] ); ?>
-				</button>
+				<?php if ( ! empty( $item['url'] ) ) { ?>
+					<a
+						class="mv-list-link mv-to-btn"
+						href="<?php echo esc_url( $item['url'] ); ?>"
+						aria-label="<?php echo esc_attr( \Mediavine\Create\Creations_Views::list_link_label( $item ) ); ?>"
+						<?php echo wp_kses( $target_blank, [] ); ?>
+						<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+					>
+						<?php echo esc_html( $item['btn_text'] ); ?>
+					</a>
+				<?php } ?>
 			</div>
 
 			<?php

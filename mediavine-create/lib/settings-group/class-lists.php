@@ -62,6 +62,19 @@ class Lists implements Settings_Group {
 				],
 			],
 			[
+				'slug'  => Plugin::$settings_group . '_list_show_ranks',
+				'value' => true,
+				'group' => Plugin::$settings_group . '_lists',
+				'order' => 92,
+				'data'  => [
+					'type'          => 'checkbox',
+					'subgroup'      => 'general',
+					'label'         => __( 'Show rank numbers', 'mediavine-create' ),
+					'instructions'  => __( 'Show the rank number on each item in the Editorial, Leaderboard, Ranked, and Countdown layouts. Each list can override this in the card editor.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
+				],
+			],
+			[
 				'slug'  => Plugin::$settings_group . '_lists_rounded_corners',
 				'value' => '0',
 				'group' => Plugin::$settings_group . '_lists',

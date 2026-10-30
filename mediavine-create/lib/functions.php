@@ -253,6 +253,10 @@ function mv_create_safe_remote_get( $url, $args = [] ) {
 			return $response;
 		}
 
+		// Record where the response actually came from so callers can resolve
+		// relative URLs in the body against it.
+		$response['mv_create_final_url'] = $current;
+
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		if ( $code < 300 || $code >= 400 ) {
 			return $response;

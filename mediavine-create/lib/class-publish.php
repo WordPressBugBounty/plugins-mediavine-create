@@ -434,6 +434,10 @@ class Publish extends Plugin {
 	 */
 	public static function prepare_images( $creation ) {
 		if ( empty( $creation->thumbnail_id ) && empty( $creation->pinterest_img_id ) ) {
+			// The card has no image now, so every stored image row is obsolete.
+			if ( ! empty( $creation->id ) ) {
+				Creations::prune_stale_creation_images( $creation->id, [], true );
+			}
 			return $creation;
 		}
 		if ( empty( $creation->thumbnail_id ) ) {

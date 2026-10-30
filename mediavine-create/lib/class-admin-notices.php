@@ -128,7 +128,7 @@ class Admin_Notices {
 
 		wp_enqueue_script(
 			$handle,
-			Plugin::assets_url() . 'admin/ui/static/password-reset-notice.js',
+			Plugin_Context::assets_url() . 'admin/ui/static/password-reset-notice.js',
 			[ 'jquery' ],
 			Plugin::VERSION,
 			true
@@ -444,7 +444,7 @@ class Admin_Notices {
 					$plan_label
 				)
 			),
-			esc_url( GateKeeper::get_billing_url() ),
+			esc_url( User_Verification::open_billing_url() ),
 			esc_html__( 'Update payment method', 'mediavine-create' ),
 			$countdown ? '<span class="mv-create-payment-notice__countdown">' . esc_html( $countdown ) . '</span>' : ''
 		);
@@ -491,7 +491,7 @@ class Admin_Notices {
 					GateKeeper::get_cancel_date_display()
 				)
 			),
-			esc_url( GateKeeper::get_billing_url() ),
+			esc_url( User_Verification::open_billing_url() ),
 			esc_html__( 'Manage billing', 'mediavine-create' )
 		);
 	}

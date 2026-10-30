@@ -709,15 +709,33 @@ Allows developers to override Create's default Recipe card stylesheets.
 
 </aside>
 
+## Filter: mv_create_review_mode
+
+```php
+apply_filters( 'mv_create_review_mode', $mode ) : string $mode
+```
+
+Applied in `lib/reviews/class-rating-policy.php`
+
+Overrides how readers leave feedback. `'reviews'` opens a review form after a rating; `'ratings'` saves every rating on click with no form. Any other value falls back to `'reviews'`.
+
+**Parameters**
+
+- `$mode` The stored "How Readers Leave Feedback" setting
+
+**Returns**
+
+- `string` `'reviews'` or `'ratings'`
+
 ## Filter: mv_create_ratings_prompt_threshold
 
 ```php
 apply_filters( 'mv_create_ratings_prompt_threshold', $mv_create_ratings_prompt_threshold ) : float $mv_create_ratings_prompt_threshold
 ```
 
-Applied in `lib/creations/class-creations-views.php`
+Applied in `lib/reviews/class-rating-policy.php` (`Rating_Policy::prompt_threshold()`), used by the card script and the Reviews API
 
-Allows developers to override Create's default ratings prompt threshold
+Allows developers to override Create's default ratings prompt threshold: ratings at or above it never open the review form. Defaults to 5.5 (the form always opens) with the review form on, 0.5 in Ratings-only mode
 
 **Parameters**
 
@@ -733,9 +751,9 @@ Allows developers to override Create's default ratings prompt threshold
 apply_filters( 'mv_create_ratings_submit_threshold', $mv_create_ratings_submit_threshold ) : float $mv_create_ratings_submit_threshold
 ```
 
-Applied in `lib/creations/class-creations-views.php`
+Applied in `lib/reviews/class-rating-policy.php` (`Rating_Policy::submit_threshold()`), used by the card script and the Reviews API
 
-Allows developers to override Create's default ratings submit threshold
+Allows developers to override Create's default ratings submit threshold: ratings at or above it save without a written review. Defaults to the "Require a written review for ratings of" setting + 0.5 (e.g. 3.5), or 0.5 in Ratings-only mode
 
 **Parameters**
 

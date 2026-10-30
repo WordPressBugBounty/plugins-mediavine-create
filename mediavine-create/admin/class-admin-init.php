@@ -42,7 +42,7 @@ class Admin_Init extends Plugin {
 
 		$shapes   = self::get_translated_shapes();
 
-		self::$mcp_data = self::get_mcp_data();
+		self::$mcp_data = Plugin_Context::get_mcp_data();
 
 		$args = [
 			'capability' => [ 'edit_posts' ],
@@ -116,13 +116,13 @@ class Admin_Init extends Plugin {
 				'current_lastname'        => $current_user->user_lastname,
 				'avatar_url'              => get_avatar_url( $current_user->ID, [ 'size' => 96 ] ),
 				'site_url'                => esc_url_raw( site_url() ),
-				'mediavine_publisher'     => self::$mcp_enabled,
+				'mediavine_publisher'     => Plugin_Context::$mcp_enabled,
 				'current_user_authorized' => \Mediavine\Permissions::is_user_authorized(),
 			],
 			'__FLAGS__'              => [
 				'NO_DOM_DOC'            => class_exists( 'DOMDocument' ) === false,
 				'AMAZON_PROVISION_LOCK' => $amazon_provision_lock,
-				'DEV_MODE'              => Plugin::is_dev_mode(),
+				'DEV_MODE'              => Plugin_Context::is_dev_mode(),
 			],
 			'__ALLOWED_TYPES__'      => [
 				json_decode( \Mediavine\Settings::get_setting( 'mv_create_allowed_types' ) ),
@@ -166,9 +166,17 @@ class Admin_Init extends Plugin {
 			'__PLAN_CHOICE__'       => [
 				'required'   => Plan_Choice::is_choice_required(),
 				'reason'     => Plan_Choice::get_choice_reason(),
+				'ended_plan' => Plan_Choice::get_ended_plan_name(),
 				'choice'     => GateKeeper::get_free_plan_choice(),
 				'can_choose' => current_user_can( 'manage_options' ),
 				'plan_url'   => esc_url_raw( admin_url( 'admin.php?page=' . Plan_Choice::PAGE_SLUG ) ),
+			],
+			// admin-post SSO handler so <a href> (middle-click, no-JS) can sign
+			// a linked admin in the way openStudio() does for a plain click.
+			'__OPEN_STUDIO__'       => [
+				'url'    => esc_url_raw( admin_url( 'admin-post.php' ) ),
+				'action' => User_Verification::OPEN_STUDIO_ACTION,
+				'nonce'  => wp_create_nonce( User_Verification::OPEN_STUDIO_ACTION ),
 			],
 		];
 	}
@@ -185,14 +193,14 @@ class Admin_Init extends Plugin {
 		// force the get_settings call to grab settings fresh from the database
 		$saved_settings = (array) \Mediavine\Settings::get_settings(null, null, true);
 
-		return Plugin::apply_registered_setting_data( $saved_settings );
+		return Settings_Registration::apply_registered_setting_data( $saved_settings );
 	}
 	private static function get_translated_shapes() {
 		$shapes = \Mediavine\Create\Shapes::get_shapes();
 		if ( 'en_US' === get_locale() ) {
 			return $shapes;
 		}
-		$translated_shapes = self::get_shapes_data();
+		$translated_shapes = Shapes::get_shapes_data();
 		$saved_slug_keys   = [];
 
 		// we currently only use the plural string from SHAPES in the UI
@@ -331,13 +339,13 @@ class Admin_Init extends Plugin {
 	 */
 	public static function admin_ui_script_url( $basename ) {
 		$filename = $basename . '.' . self::VERSION . '.js';
-		$origin   = Plugin::dev_asset_origin( 'admin' );
+		$origin   = Plugin_Context::dev_asset_origin( 'admin' );
 
 		if ( '' !== $origin ) {
 			return $origin . '/' . $filename;
 		}
 
-		return Plugin::assets_url() . 'admin/ui/build/' . $filename;
+		return Plugin_Context::assets_url() . 'admin/ui/build/' . $filename;
 	}
 
 	/**
@@ -442,13 +450,13 @@ class Admin_Init extends Plugin {
 		// for the dashboard headings.
 		wp_enqueue_style(
 			'mv-font/nunito',
-			Plugin::assets_url() . 'assets/fonts/nunito/nunito.css',
+			Plugin_Context::assets_url() . 'assets/fonts/nunito/nunito.css',
 			[],
 			self::VERSION
 		);
 		wp_enqueue_style(
 			'mv-font/fraunces',
-			Plugin::assets_url() . 'assets/fonts/fraunces/fraunces.css',
+			Plugin_Context::assets_url() . 'assets/fonts/fraunces/fraunces.css',
 			[],
 			self::VERSION
 		);
@@ -617,7 +625,7 @@ class Admin_Init extends Plugin {
 		);
 
 		// Theme Elements page (dev mode only)
-		if ( Plugin::is_dev_mode() ) {
+		if ( Plugin_Context::is_dev_mode() ) {
 			add_submenu_page(
 				'edit.php?post_type=mv_create',
 				__( 'Theme Elements', 'mediavine-create' ),
@@ -741,7 +749,7 @@ class Admin_Init extends Plugin {
 		if ( ! is_array( $mceInit ) ) {
 			return $mceInit;
 		}
-		$content_css = Plugin::assets_url() . 'admin/ui/static/tinymce.css?' . self::VERSION;
+		$content_css = Plugin_Context::assets_url() . 'admin/ui/static/tinymce.css?' . self::VERSION;
 		if ( ! empty( $mceInit['content_css'] ) ) {
 			$mceInit['content_css'] .= ', ' . $content_css;
 		} else {

@@ -5,7 +5,7 @@
 	<div class="mv-create-notes mv-create-notes-slot-v2">
 		<h2 class="mv-create-notes-title mv-create-title-secondary"><?php esc_html_e( 'Notes', 'mediavine-create' ); ?></h2>
 		<div class="mv-create-notes-content">
-			<p><?php echo wp_kses_post( do_shortcode( \Mediavine\Create\Plugin::unfurl_media_urls( $args['creation']['notes'] ) ) ); ?></p>
+			<p><?php echo wp_kses_post( do_shortcode( \Mediavine\Create\Shortcodes::unfurl_media_urls( $args['creation']['notes'] ) ) ); ?></p>
 		</div>
 	</div>
 <?php

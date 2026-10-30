@@ -37,7 +37,7 @@ if ( ! empty( $args['creation']['instructions'] ) ) {
 	?>
 	<div class="mv-create-instructions mv-create-instructions-slot-v2">
 		<h2 class="mv-create-instructions-title mv-create-title-secondary"><?php esc_html_e( 'Instructions', 'mediavine-create' ); ?></h2>
-		<?php echo wp_kses_post( do_shortcode( \Mediavine\Create\Plugin::unfurl_media_urls( $sanitized ) ) ); ?>
+		<?php echo wp_kses_post( do_shortcode( \Mediavine\Create\Shortcodes::unfurl_media_urls( $sanitized ) ) ); ?>
 	</div>
 <?php
 }

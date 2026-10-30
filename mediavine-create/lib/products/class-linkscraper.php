@@ -70,6 +70,13 @@ class LinkScraper {
 			return array_merge( $this->defaults, [ 'source' => 'default' ] );
 		}
 
+		// A non-2xx final response is an error/block page (e.g. a WAF 403 titled
+		// "PBteen: 403 - Restricted Access"), not the product. Don't scrape it.
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 300 ) {
+			return array_merge( $this->defaults, [ 'source' => 'default' ] );
+		}
+
 		// Set some defaults
 		$data   = $this->defaults;
 		$method = 'default';
@@ -109,6 +116,13 @@ class LinkScraper {
 		// If we don't have a match, return early with defaults
 		if ( 'default' === $method ) {
 			return array_merge( $this->defaults, [ 'source' => 'default' ] );
+		}
+
+		// Relative image paths are useless to the editor; resolve them against
+		// the URL the page was actually served from (after redirects).
+		if ( ! empty( $data['remote_thumbnail_uri'] ) ) {
+			$base                         = isset( $response['mv_create_final_url'] ) ? $response['mv_create_final_url'] : $url;
+			$data['remote_thumbnail_uri'] = \WP_Http::make_absolute_url( $data['remote_thumbnail_uri'], $base );
 		}
 
 		return array_merge( $data, [ 'source' => $method ] );

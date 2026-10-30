@@ -167,6 +167,7 @@ class Settings {
 	 * - custom CSS: tags stripped
 	 * - list ad HTML: div/span markup with class/id/data-* preserved (render re-sanitizes)
 	 * - known textareas: sanitize_textarea_field so newlines survive
+	 * - social footer body WYSIWYGs: inline links/bold/italic preserved
 	 *
 	 * @param array $setting Setting fields.
 	 * @return array Sanitized setting.
@@ -206,6 +207,26 @@ class Settings {
 
 		if ( 'mv_create_list_ad_custom_html' === $slug ) {
 			return self::sanitize_list_ad_html( $value );
+		}
+
+		// Social footer bodies are WYSIWYG fields; keep the same inline markup the card renders.
+		$social_body_slugs = [
+			'mv_create_social_cta_body_recipe',
+			'mv_create_social_cta_body_diy',
+		];
+		if ( in_array( $slug, $social_body_slugs, true ) ) {
+			$allowed      = \Mediavine\Create\Creations_Views_Social_Footer::allowed_body_html();
+			$allowed['p'] = [];
+			return wp_kses( (string) $value, $allowed );
+		}
+
+		// Review feedback settings only accept their selectable values.
+		if ( \Mediavine\Create\Rating_Policy::SETTING_MODE === $slug ) {
+			$value = sanitize_text_field( $value );
+			return in_array( $value, \Mediavine\Create\Rating_Policy::selectable_modes(), true ) ? $value : \Mediavine\Create\Rating_Policy::MODE_REVIEWS;
+		}
+		if ( \Mediavine\Create\Rating_Policy::SETTING_REQUIRED === $slug ) {
+			return (string) \Mediavine\Create\Rating_Policy::sanitize_required( $value );
 		}
 
 		// Textareas and multiline button labels must keep newlines (sanitize_text_field collapses them).
@@ -636,7 +657,20 @@ class Settings {
 	];
 
 	/**
-	 * Deletes the retired PA-API credential settings on plugin update.
+	 * Settings no longer registered whose rows are dropped on plugin update.
+	 *
+	 * `enable_anonymous_ratings` was absorbed by the review threshold. Its value
+	 * is migrated first: Rating_Policy::migrate_legacy_settings() runs during
+	 * the settings upsert (plugin_updated, priority 30), before this (101).
+	 *
+	 * @var string[]
+	 */
+	const RETIRED_SETTINGS = [
+		'mv_create_enable_anonymous_ratings',
+	];
+
+	/**
+	 * Deletes the retired PA-API credential settings (and RETIRED_SETTINGS) on plugin update.
 	 *
 	 * These stopped being registered when PA-API support was removed, but rows
 	 * written by earlier versions survive in `mv_settings`. Because the settings
@@ -648,7 +682,7 @@ class Settings {
 	 * @return void
 	 */
 	public function remove_retired_paapi_credentials() {
-		foreach ( self::RETIRED_PAAPI_SETTINGS as $slug ) {
+		foreach ( array_merge( self::RETIRED_PAAPI_SETTINGS, self::RETIRED_SETTINGS ) as $slug ) {
 			self::delete_setting( $slug );
 		}
 	}

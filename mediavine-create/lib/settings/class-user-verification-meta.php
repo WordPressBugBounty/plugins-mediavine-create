@@ -43,6 +43,21 @@ class User_Verification_Meta {
 	const LINK_SESSION_KEY = 'mv_create_studio_link_session';
 
 	/**
+	 * Every user-meta key that makes up a Create Studio link.
+	 *
+	 * @return string[]
+	 */
+	public static function keys() {
+		return [
+			self::TOKEN_KEY,
+			self::EMAIL_KEY,
+			self::VERIFIED_AT_KEY,
+			self::EMAIL_VERIFIED_KEY,
+			self::LINK_SESSION_KEY,
+		];
+	}
+
+	/**
 	 * Get the user's Create Studio token.
 	 *
 	 * @param int|null $user_id WordPress user ID. Defaults to current user.
@@ -267,13 +282,27 @@ class User_Verification_Meta {
 			return false;
 		}
 
-		delete_user_meta( $user_id, self::TOKEN_KEY );
-		delete_user_meta( $user_id, self::EMAIL_KEY );
-		delete_user_meta( $user_id, self::VERIFIED_AT_KEY );
-		delete_user_meta( $user_id, self::EMAIL_VERIFIED_KEY );
-		delete_user_meta( $user_id, self::LINK_SESSION_KEY );
+		foreach ( self::keys() as $key ) {
+			delete_user_meta( $user_id, $key );
+		}
 
 		return true;
+	}
+
+	/**
+	 * Drop every Create Studio link on this site, including SSO tokens.
+	 *
+	 * Deletes each key for all users at once so a leftover token cannot hide
+	 * from a get_users() lookup. A site disconnect must not leave an SSO
+	 * token behind: Studio rejects it, but the plugin would still treat the
+	 * admin as linked.
+	 *
+	 * @return void
+	 */
+	public static function clear_all_users() {
+		foreach ( self::keys() as $key ) {
+			delete_metadata( 'user', 0, $key, '', true );
+		}
 	}
 
 	/**

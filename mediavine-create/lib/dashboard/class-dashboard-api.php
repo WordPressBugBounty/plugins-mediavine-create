@@ -891,7 +891,7 @@ class Dashboard_API {
 			return new \WP_REST_Response( [ 'error' => 'Invalid response body' ], 200 );
 		}
 
-		$ttl = Plugin::is_dev_mode() ? 3 * MINUTE_IN_SECONDS : DAY_IN_SECONDS;
+		$ttl = Plugin_Context::is_dev_mode() ? 3 * MINUTE_IN_SECONDS : DAY_IN_SECONDS;
 		set_transient( 'mv_create_broadcasts', $body, $ttl );
 
 		return new \WP_REST_Response( $this->prepare_broadcasts( $broadcasts ), 200 );
@@ -1001,7 +1001,7 @@ class Dashboard_API {
 				return null;
 			}
 
-			$ttl = Plugin::is_dev_mode() ? 3 * MINUTE_IN_SECONDS : DAY_IN_SECONDS;
+			$ttl = Plugin_Context::is_dev_mode() ? 3 * MINUTE_IN_SECONDS : DAY_IN_SECONDS;
 			set_transient( 'mv_create_broadcasts', $body, $ttl );
 		}
 

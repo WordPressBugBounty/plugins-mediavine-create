@@ -42,7 +42,8 @@ class User_Verification {
 
 	/**
 	 * A plain link that opens a Create Studio page, signed in when this user
-	 * is linked. For places with no admin JS to call sso-url (the admin bar).
+	 * is linked. For places with no admin JS to call sso-url (the admin bar,
+	 * the payment-failed and cancel-pending notices).
 	 *
 	 * @param string $path Studio path, e.g. '/admin/billing?site_url=...'.
 	 * @return string
@@ -58,6 +59,18 @@ class User_Verification {
 			),
 			self::OPEN_STUDIO_ACTION
 		);
+	}
+
+	/**
+	 * Open Studio's billing page, signed in when this user is linked.
+	 *
+	 * Same destination as GateKeeper::get_billing_url(), via open_studio_url()
+	 * so a linked admin is signed in instead of hitting the login wall.
+	 *
+	 * @return string
+	 */
+	public static function open_billing_url() {
+		return self::open_studio_url( '/admin/billing?site_url=' . rawurlencode( home_url() ) );
 	}
 
 	/**

@@ -98,6 +98,7 @@ class Creations extends Plugin {
 			'unique' => true,
 		],
 		'layout'                => 'varchar(20)',
+		'list_rank_display'     => 'varchar(10)',
 		'title_hide'            => [
 			'type'    => 'tinyint(1)',
 			'default' => 0,
@@ -542,7 +543,8 @@ class Creations extends Plugin {
 	 * @return array images added to the creation
 	 */
 	public static function add_images_to_creation( $creation, $thumbnail_id, $pinterest_img_id = null ) {
-		$images = [];
+		$images      = [];
+		$written_ids = [];
 
 		// Get image sizes to generate
 		$img_sizes = apply_filters('mv_create_image_sizes', self::$img_sizes, __FUNCTION__);
@@ -579,10 +581,59 @@ class Creations extends Plugin {
 				$image       = (array) self::$models_v2->mv_images->upsert($thumbnail['image'], $where_array);
 
 				$images[] = $image;
+				if ( ! empty($image['id']) ) {
+					$written_ids[] = (int) $image['id'];
+				}
 			}
 		}
 
+		// Drop any rows left over from a previous publish so the images table
+		// stops serving obsolete sizes. The upsert loop above only touches the
+		// sizes in `$img_sizes` right now, so a row for a size that has since
+		// left that list (dropped in an upgrade, or filtered out via
+		// `mv_create_image_sizes`) would otherwise linger and Republish could
+		// never clear it.
+		self::prune_stale_creation_images($creation->id, $written_ids);
+
 		return $images;
+	}
+
+	/**
+	 * Remove mv_images rows for a creation that the current publish pass did not write.
+	 *
+	 * @param int   $creation_id Creation (associated_id) whose image rows to prune.
+	 * @param int[] $keep_ids    IDs of rows (re)written during this publish pass.
+	 * @param bool  $allow_empty Prune every row when `$keep_ids` is empty. Only
+	 *                           for callers that know the card has no image.
+	 * @return void
+	 */
+	public static function prune_stale_creation_images( $creation_id, array $keep_ids, $allow_empty = false ) {
+		// By default never prune when nothing was written: an empty pass can mean
+		// an upsert failed, and wiping the table then would throw away rows we
+		// cannot rebuild here.
+		if ( empty($creation_id) || ( empty($keep_ids) && ! $allow_empty ) ) {
+			return;
+		}
+
+		$existing = self::$models_v2->mv_images->find(
+			[
+				'where' => [ 'associated_id' => (int) $creation_id ],
+				'limit' => 999,
+			]
+		);
+
+		if ( ! is_array($existing) ) {
+			return;
+		}
+
+		$keep_ids = array_map('intval', $keep_ids);
+
+		foreach ( $existing as $row ) {
+			if ( empty($row->id) || in_array((int) $row->id, $keep_ids, true) ) {
+				continue;
+			}
+			self::$models_v2->mv_images->delete_by_id((int) $row->id);
+		}
 	}
 
 	/**
@@ -1079,18 +1130,18 @@ class Creations extends Plugin {
 		// First try to find version-specific file
 		$versioned_file = 'bundle.' . Plugin::VERSION . '.css';
 		if ( file_exists( $build_dir . $versioned_file ) ) {
-			return Plugin::assets_url() . 'client/build/' . $versioned_file;
+			return Plugin_Context::assets_url() . 'client/build/' . $versioned_file;
 		}
 
 		// Fall back to scanning for hashed bundle.*.css file
 		$files = glob( $build_dir . 'bundle.*.css' );
 		if ( ! empty( $files ) ) {
 			$file = basename( $files[0] );
-			return Plugin::assets_url() . 'client/build/' . $file;
+			return Plugin_Context::assets_url() . 'client/build/' . $file;
 		}
 
 		// Default fallback
-		return Plugin::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.css';
+		return Plugin_Context::assets_url() . 'client/build/bundle.' . Plugin::VERSION . '.css';
 	}
 
 	/**

@@ -225,7 +225,7 @@ class Unit_Conversion extends Plugin {
 	 * @return array|\WP_Error The conversion data or a WP_Error.
 	 */
 	public function convert_creation( $creation_id, $force = false ) {
-		if ( ! $force && ! Plugin::is_dev_mode() ) {
+		if ( ! $force && ! Plugin_Context::is_dev_mode() ) {
 			$cached = $this->get_cached_conversions( $creation_id );
 			if ( ! empty( $cached ) ) {
 				return $cached;

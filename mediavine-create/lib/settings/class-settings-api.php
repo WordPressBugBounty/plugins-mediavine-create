@@ -164,7 +164,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 			// the result in for the localized payload, so it has to carry the same
 			// code-declared metadata (subgroup, gating, labels) rather than the
 			// possibly-stale `data` blob stored in the DB.
-			$collection = \Mediavine\Create\Plugin::apply_registered_setting_data( $collection );
+			$collection = \Mediavine\Create\Settings_Registration::apply_registered_setting_data( $collection );
 
 			// These routes are manage_options-gated, so credential values are kept; the
 			// site JWT is still reduced to a presence flag (never needed browser-side).
@@ -623,7 +623,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 		 */
 		public function reset_db_versions( \WP_REST_Request $request ) {
 			// Only allow when dev mode is enabled
-			if ( ! \Mediavine\Create\Plugin::is_dev_mode() ) {
+			if ( ! \Mediavine\Create\Plugin_Context::is_dev_mode() ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,
@@ -685,7 +685,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 		 */
 		public function reset_subscription_tier( \WP_REST_Request $request ) {
 			// Only allow when dev mode is enabled
-			if ( ! \Mediavine\Create\Plugin::is_dev_mode() ) {
+			if ( ! \Mediavine\Create\Plugin_Context::is_dev_mode() ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,
@@ -727,7 +727,7 @@ if ( class_exists( 'Mediavine\Settings' ) ) {
 		 */
 		public function reset_plan_choice( \WP_REST_Request $request ) {
 			// Only allow when dev mode is enabled
-			if ( ! \Mediavine\Create\Plugin::is_dev_mode() ) {
+			if ( ! \Mediavine\Create\Plugin_Context::is_dev_mode() ) {
 				return new \WP_REST_Response(
 					[
 						'success' => false,

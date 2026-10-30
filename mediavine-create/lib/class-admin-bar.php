@@ -178,7 +178,7 @@ class Admin_Bar {
 				: '' )
 			. '</span></span>'
 			. '<span class="mv-create-trial-actions">'
-			. '<a class="mv-create-trial-btn" href="' . esc_url( User_Verification::open_studio_url( '/admin/billing?site_url=' . rawurlencode( home_url() ) ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'Manage plan', 'mediavine-create' ) . '</a>'
+			. '<a class="mv-create-trial-btn" href="' . esc_url( User_Verification::open_billing_url() ) . '" target="_blank" rel="noopener">' . esc_html__( 'Manage plan', 'mediavine-create' ) . '</a>'
 			. '<a class="mv-create-trial-btn is-secondary" href="' . esc_url( admin_url( 'admin.php?page=' . Plan_Choice::PAGE_SLUG ) ) . '">' . esc_html__( "See what's included", 'mediavine-create' ) . '</a>'
 			. '</span>';
 

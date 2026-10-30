@@ -1,3 +1,4 @@
+<?php $show_ranks = \Mediavine\Create\Creations_Views::show_list_ranks( $args['creation'] ); ?>
 <div class="mv-list-list mv-list-list-<?php echo esc_attr( $args['creation']['layout'] ); ?>">
 	<?php
 	$i                        = 0;
@@ -35,7 +36,9 @@
 					</div>
 				</div>
 				<div class="mv-list-item-container">
-					<div class="mv-list-rank"><?php echo esc_html( sprintf( '%02d', $i + 1 ) ); ?></div>
+					<?php if ( $show_ranks ) { ?>
+						<div class="mv-list-rank"><?php echo esc_html( sprintf( '%02d', $i + 1 ) ); ?></div>
+					<?php } ?>
 					<h2 class="mv-list-single-title"><?php echo esc_html( $item['title'] ); ?></h2>
 					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
 				</div>
@@ -90,12 +93,20 @@
 						// off the row's column count for items that have an image.
 						\Mediavine\Create\Plugin::$views->the_view( 'shortcode-mv-create-pin-button', $pinterest_args );
 						?>
-						<div data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-							<?php echo wp_kses( $target_blank, [] ); ?>
-							<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-						>
+						<?php if ( ! empty( $item['url'] ) ) { ?>
+							<a
+								class="mv-list-img-link"
+								href="<?php echo esc_url( $item['url'] ); ?>"
+								tabindex="-1"
+								aria-hidden="true"
+								<?php echo wp_kses( $target_blank, [] ); ?>
+								<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+							>
+								<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
+							</a>
+						<?php } else { ?>
 							<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
-						</div>
+						<?php } ?>
 					</div>
 					<?php if ( ! empty( $item['thumbnail_credit'] ) ) { ?>
 						<div class="mv-list-photocred">
@@ -105,7 +116,9 @@
 					<?php } ?>
 				</div>
 				<div class="mv-list-item-container">
-					<div class="mv-list-rank"><?php echo esc_html( sprintf( '%02d', $i + 1 ) ); ?></div>
+					<?php if ( $show_ranks ) { ?>
+						<div class="mv-list-rank"><?php echo esc_html( sprintf( '%02d', $i + 1 ) ); ?></div>
+					<?php } ?>
 					<h2 class="mv-list-single-title">
 						<a
 							class="mv-list-title-link"
@@ -120,14 +133,17 @@
 						<?php echo wp_kses_post( $item['extra'] ); ?>
 					<?php } ?>
 					<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
-					<button
-						class="mv-list-link mv-to-btn"
-						data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-						<?php echo wp_kses( $target_blank, [] ); ?>
-						<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-					>
-						<?php echo esc_html( $item['btn_text'] ); ?>
-					</button>
+					<?php if ( ! empty( $item['url'] ) ) { ?>
+						<a
+							class="mv-list-link mv-to-btn"
+							href="<?php echo esc_url( $item['url'] ); ?>"
+							aria-label="<?php echo esc_attr( \Mediavine\Create\Creations_Views::list_link_label( $item ) ); ?>"
+							<?php echo wp_kses( $target_blank, [] ); ?>
+							<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+						>
+							<?php echo esc_html( $item['btn_text'] ); ?>
+						</a>
+					<?php } ?>
 				</div>
 			</div>
 

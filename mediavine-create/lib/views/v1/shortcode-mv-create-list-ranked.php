@@ -3,6 +3,7 @@
 // #1 at the end, while 'ranked-top' leads with the featured #1 (ascending
 // 1, 2, 3…). Both carry the mv-list-list-ranked class so they share all styling.
 $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
+$show_ranks       = \Mediavine\Create\Creations_Views::show_list_ranks( $args['creation'] );
 ?>
 <div class="mv-list-list mv-list-list-ranked<?php echo $ranked_ascending ? ' mv-list-list-ranked-top' : ''; ?>">
 	<?php
@@ -71,6 +72,9 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 		if ( 'product' === $item['content_type'] ) {
 			$item_classes .= ' mv-list-product';
 		}
+		if ( ! $show_ranks ) {
+			$item_classes .= ' mv-list-single-no-rank';
+		}
 
 		// Product ID for tracking/analytics.
 		$product_data_attr = '';
@@ -95,7 +99,7 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 			// ---- Featured #1 "top pick" card -----------------------------------
 			?>
 			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="<?php echo esc_attr( $item_classes ); ?>" <?php echo wp_kses( $link_data_attr, [] ); ?> data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>" <?php echo wp_kses( $product_data_attr, [] ); ?>>
-				<div class="mv-list-top-banner"><span class="mv-list-top-rank">#<?php echo esc_html( $rank ); ?></span> <?php esc_html_e( 'Top Pick', 'mediavine-create' ); ?></div>
+				<div class="mv-list-top-banner"><?php if ( $show_ranks ) { ?><span class="mv-list-top-rank">#<?php echo esc_html( $rank ); ?></span> <?php } ?><?php esc_html_e( 'Top Pick', 'mediavine-create' ); ?></div>
 				<div class="mv-list-top-body">
 					<div class="<?php echo esc_attr( implode( ' ', $img_container_classes ) ); ?>">
 						<?php
@@ -104,12 +108,20 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 						\Mediavine\Create\Plugin::$views->the_view( 'shortcode-mv-create-pin-button', $pinterest_args );
 						if ( ! $is_text ) {
 							?>
-							<div data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-								<?php echo wp_kses( $target_blank, [] ); ?>
-								<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-							>
+							<?php if ( ! empty( $item['url'] ) ) { ?>
+								<a
+									class="mv-list-img-link"
+									href="<?php echo esc_url( $item['url'] ); ?>"
+									tabindex="-1"
+									aria-hidden="true"
+									<?php echo wp_kses( $target_blank, [] ); ?>
+									<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+								>
+									<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
+								</a>
+							<?php } else { ?>
 								<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
-							</div>
+							<?php } ?>
 							<?php
 						} else {
 							echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) );
@@ -140,14 +152,17 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 						<?php // The featured card shows the full description; the compact rows cap theirs. ?>
 						<div class="mv-list-single-description"><?php echo wp_kses( wpautop( $item['description'] ), $args['allowed_html'] ); ?></div>
 						<?php if ( ! $is_text ) { ?>
-							<button
-								class="mv-list-link mv-to-btn"
-								data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-								<?php echo wp_kses( $target_blank, [] ); ?>
-								<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-							>
-								<?php echo esc_html( $item['btn_text'] ); ?>
-							</button>
+							<?php if ( ! empty( $item['url'] ) ) { ?>
+								<a
+									class="mv-list-link mv-to-btn"
+									href="<?php echo esc_url( $item['url'] ); ?>"
+									aria-label="<?php echo esc_attr( \Mediavine\Create\Creations_Views::list_link_label( $item ) ); ?>"
+									<?php echo wp_kses( $target_blank, [] ); ?>
+									<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+								>
+									<?php echo esc_html( $item['btn_text'] ); ?>
+								</a>
+							<?php } ?>
 						<?php } ?>
 					</div>
 				</div>
@@ -157,7 +172,9 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 			// ---- Compact ranked row --------------------------------------------
 			?>
 			<div id="create-list-item-<?php echo esc_attr( $item['id'] ); ?>" class="<?php echo esc_attr( $item_classes ); ?>" <?php echo wp_kses( $link_data_attr, [] ); ?> data-mv-create-list-content-type="<?php echo esc_attr( $item['content_type'] ); ?>" <?php echo wp_kses( $product_data_attr, [] ); ?>>
-				<div class="mv-list-rank"><?php echo esc_html( $rank ); ?></div>
+				<?php if ( $show_ranks ) { ?>
+					<div class="mv-list-rank"><?php echo esc_html( $rank ); ?></div>
+				<?php } ?>
 				<div class="mv-list-img-col">
 					<div class="<?php echo esc_attr( implode( ' ', $img_container_classes ) ); ?>">
 						<?php
@@ -167,12 +184,20 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 						\Mediavine\Create\Plugin::$views->the_view( 'shortcode-mv-create-pin-button', $pinterest_args );
 						if ( ! $is_text ) {
 							?>
-							<div data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-								<?php echo wp_kses( $target_blank, [] ); ?>
-								<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-							>
+							<?php if ( ! empty( $item['url'] ) ) { ?>
+								<a
+									class="mv-list-img-link"
+									href="<?php echo esc_url( $item['url'] ); ?>"
+									tabindex="-1"
+									aria-hidden="true"
+									<?php echo wp_kses( $target_blank, [] ); ?>
+									<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+								>
+									<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
+								</a>
+							<?php } else { ?>
 								<?php echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) ); ?>
-							</div>
+							<?php } ?>
 							<?php
 						} else {
 							echo wp_kses_post( \Mediavine\Create\Creations_Views::img( $item ) );
@@ -205,14 +230,17 @@ $ranked_ascending = ( 'ranked-top' === $args['creation']['layout'] );
 					<div class="mv-list-single-description"><?php echo esc_html( \Mediavine\Create\Helpers\Str::truncate( $item['description'], 250, '…' ) ); ?></div>
 				</div>
 				<?php if ( ! $is_text ) { ?>
-					<button
-						class="mv-list-link mv-to-btn"
-						data-mv-create-link-href="<?php echo esc_url( $item['url'] ); ?>"
-						<?php echo wp_kses( $target_blank, [] ); ?>
-						<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
-					>
-						<?php echo esc_html( $item['btn_text'] ); ?>
-					</button>
+					<?php if ( ! empty( $item['url'] ) ) { ?>
+						<a
+							class="mv-list-link mv-to-btn"
+							href="<?php echo esc_url( $item['url'] ); ?>"
+							aria-label="<?php echo esc_attr( \Mediavine\Create\Creations_Views::list_link_label( $item ) ); ?>"
+							<?php echo wp_kses( $target_blank, [] ); ?>
+							<?php echo wp_kses( \Mediavine\Create\Creations_Views::rel_attribute( $item, $target_blank_boolean ), [] ); ?>
+						>
+							<?php echo esc_html( $item['btn_text'] ); ?>
+						</a>
+					<?php } ?>
 				<?php } ?>
 			</div>
 			<?php

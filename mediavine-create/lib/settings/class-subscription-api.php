@@ -170,6 +170,7 @@ class Subscription_API {
 		// (which also clears the plan-choice gate) so a later disconnect falls
 		// back to the same plan; sync_subscription()'s mirror keeps it current.
 		GateKeeper::set_free_plan_choice( $tier );
+		GateKeeper::mark_free_plan_choice_reported( $tier );
 
 		// Pull authoritative state so local gating + the localized feature_access
 		// map reflect the switch on the next paint. Retry once before giving up:

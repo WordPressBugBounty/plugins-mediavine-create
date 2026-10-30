@@ -61,6 +61,18 @@ class Plan_Choice {
 	const REASON_PLAN_ENDED = 'plan_ended';
 
 	/**
+	 * Option key: canonical paid tier that just ended (pro / pro-guides / pro-lists).
+	 *
+	 * Set by require_choice_after_plan_ended() so the banner, plan-page hero,
+	 * and overlay can name the plan ("Your Pro Pass plan has ended") after
+	 * the live tier has already been written to Free. Empty when the lapse
+	 * was a trial (no paid slug to name) or a first-run 3.0 choice.
+	 *
+	 * @var string
+	 */
+	const OPTION_ENDED_PLAN = 'mv_create_plan_ended_tier';
+
+	/**
 	 * First version that ships explicit plan choice. Sites updating from
 	 * before this either need to choose (free band) or see the "what's new"
 	 * page (paid/trial).
@@ -194,13 +206,28 @@ class Plan_Choice {
 	 * (ad-supported) instead is the publisher's call, so the gate comes back
 	 * with its "your plan has ended" wording. Any earlier free-band choice is
 	 * forgotten: it predates the paid plan, and is_choice_required() treats a
-	 * recorded choice as already answered.
+	 * recorded choice as already answered. The per-user redirect-seen flag is
+	 * cleared so everyone is sent to the plan page again, not just shown the
+	 * overlay. `$ended_tier` is the paid slug that just ended (when known),
+	 * so the banner and hero can name it after the live tier is already Free.
 	 *
+	 * @param string $ended_tier Canonical paid tier that ended, or empty.
 	 * @return void
 	 */
-	public static function require_choice_after_plan_ended() {
+	public static function require_choice_after_plan_ended( $ended_tier = '' ) {
 		GateKeeper::clear_free_plan_choice();
 		update_option( self::OPTION_CHOICE_REQUIRED, self::REASON_PLAN_ENDED );
+
+		// Users redirected once for the 3.0 upgrade would otherwise skip the
+		// plan-page bounce after a later lapse, and only see the overlay.
+		delete_metadata( 'user', 0, self::USER_META_CHOICE_SEEN, '', true );
+
+		$ended_tier = is_string( $ended_tier ) ? $ended_tier : '';
+		if ( in_array( $ended_tier, GateKeeper::PAID_TIERS, true ) ) {
+			update_option( self::OPTION_ENDED_PLAN, $ended_tier );
+		} else {
+			delete_option( self::OPTION_ENDED_PLAN );
+		}
 	}
 
 	/**
@@ -214,6 +241,29 @@ class Plan_Choice {
 	}
 
 	/**
+	 * Localized display name of the paid plan that just ended, or empty.
+	 *
+	 * Empty unless a choice is currently required because a paid plan ended
+	 * (not a trial, not the 3.0 first-run ask). Used by the wp-admin banner
+	 * and localized onto `__PLAN_CHOICE__.ended_plan` for the plan page and
+	 * overlay.
+	 *
+	 * @return string
+	 */
+	public static function get_ended_plan_name() {
+		if ( self::REASON_PLAN_ENDED !== self::get_choice_reason() ) {
+			return '';
+		}
+
+		$tier = (string) get_option( self::OPTION_ENDED_PLAN, '' );
+		if ( ! in_array( $tier, GateKeeper::PAID_TIERS, true ) ) {
+			return '';
+		}
+
+		return GateKeeper::tier_display_name( $tier );
+	}
+
+	/**
 	 * Clear the plan-choice-required flag.
 	 *
 	 * Called by GateKeeper::set_free_plan_choice() (a local choice) and by a
@@ -224,6 +274,7 @@ class Plan_Choice {
 	 */
 	public static function mark_choice_made() {
 		delete_option( self::OPTION_CHOICE_REQUIRED );
+		delete_option( self::OPTION_ENDED_PLAN );
 	}
 
 	/**
@@ -247,6 +298,7 @@ class Plan_Choice {
 		update_option( self::OPTION_CHOICE_REQUIRED, true );
 		update_option( self::OPTION_SHOW, true );
 		update_option( self::OPTION_CHECK_DONE, true );
+		delete_option( self::OPTION_ENDED_PLAN );
 
 		// Every user gets the one-time redirect again.
 		delete_metadata( 'user', 0, self::USER_META_CHOICE_SEEN, '', true );
@@ -450,12 +502,33 @@ class Plan_Choice {
 			return;
 		}
 
-		$page_url = admin_url( 'admin.php?page=' . self::PAGE_SLUG );
+		$page_url   = admin_url( 'admin.php?page=' . self::PAGE_SLUG );
+		$plan_ended = self::REASON_PLAN_ENDED === self::get_choice_reason();
+		$ended_plan = self::get_ended_plan_name();
 		?>
 		<div class="notice notice-warning mv-create-plan-choice-notice">
 			<p>
-				<strong><?php esc_html_e( 'Create 3.0 needs you to choose a plan.', 'mediavine-create' ); ?></strong>
-				<?php esc_html_e( 'Premium features are paused until you do.', 'mediavine-create' ); ?>
+				<?php if ( $plan_ended ) : ?>
+					<strong>
+						<?php
+						if ( '' !== $ended_plan ) {
+							echo esc_html(
+								sprintf(
+									/* translators: %s: plan name, e.g. "Pro Pass". */
+									__( 'Your %s plan has ended.', 'mediavine-create' ),
+									$ended_plan
+								)
+							);
+						} else {
+							esc_html_e( 'Your paid plan has ended.', 'mediavine-create' );
+						}
+						?>
+					</strong>
+					<?php esc_html_e( 'Choose a plan to keep going.', 'mediavine-create' ); ?>
+				<?php else : ?>
+					<strong><?php esc_html_e( 'Create 3.0 needs you to choose a plan.', 'mediavine-create' ); ?></strong>
+					<?php esc_html_e( 'Premium features are paused until you do.', 'mediavine-create' ); ?>
+				<?php endif; ?>
 			</p>
 			<p>
 				<a href="<?php echo esc_url( $page_url ); ?>" class="button button-primary">

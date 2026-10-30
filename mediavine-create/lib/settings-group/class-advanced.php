@@ -57,7 +57,7 @@ class Advanced implements Settings_Group {
 				// Canonical home of the checklists toggle — including the `checklists`
 				// gate marker. Registered directly into the reader_experience group it
 				// renders in (older installs are moved there by
-				// Plugin::migrate_reader_experience_settings). Keep this the single
+				// Upgrader::migrate_reader_experience_settings). Keep this the single
 				// declaration of the slug; do not re-add it to Reader_Experience.
 				'slug'  => Plugin::$settings_group . '_enable_checklists',
 				'value' => false,
@@ -302,7 +302,7 @@ class Advanced implements Settings_Group {
 					'label'         => __( 'Prevent Image Size Generation', 'mediavine-create' ),
 					'instructions'  => __( 'If enabled, will disable specific image sizes created by Create', 'mediavine-create' ),
 					'default_label' => __( 'None', 'mediavine-create' ),
-					'options'       => Plugin::get_image_size_values(),
+					'options'       => \Mediavine\Create\Settings_Registration::get_image_size_values(),
 				],
 			],
 			// NOTE: `products_position` is declared (gated) in Reader_Experience::products_settings()

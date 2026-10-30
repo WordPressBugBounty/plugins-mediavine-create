@@ -16,6 +16,7 @@ namespace Mediavine\Create\Settings;
 use Mediavine\Create\Plugin;
 use Mediavine\Create\Theme_Checker;
 use Mediavine\Create\GateKeeper;
+use Mediavine\Create\Rating_Policy;
 
 /**
  * Class Reader_Experience
@@ -403,9 +404,9 @@ class Reader_Experience implements Settings_Group {
 
 		$allow_reviews_instructions = __( 'Unchecking this box will prevent users from being able to leave reviews on your recipe cards.', 'mediavine-create' );
 		if ( ! $can_collect ) {
-			$allow_reviews_instructions .= ' ' . sprintf(
+			$allow_reviews_instructions = sprintf(
 				/* translators: %s: list of subscription plans that unlock the feature (e.g. "Free+, Pro Guides, Pro Lists or Pro Pass"). */
-				__( 'Collecting new reviews requires a %s plan. Ratings and reviews you have already collected continue to display.', 'mediavine-create' ),
+				__( 'Shows the rating from reviews you have already collected. Collecting new reviews requires a %s plan.', 'mediavine-create' ),
 				GateKeeper::required_tiers_label( GateKeeper::FEATURE_REVIEW_COLLECTION )
 			);
 		}
@@ -419,7 +420,8 @@ class Reader_Experience implements Settings_Group {
 				'data'  => [
 					'type'          => 'checkbox',
 					'subgroup'      => 'reviews',
-					'label'         => __( 'Allow Reviews', 'mediavine-create' ),
+					// Without collection this switch only shows already-collected ratings.
+					'label'         => $can_collect ? __( 'Allow Reviews', 'mediavine-create' ) : __( 'Show Star Rating on Cards', 'mediavine-create' ),
 					'instructions'  => $allow_reviews_instructions,
 					'default_label' => __( 'Enabled', 'mediavine-create' ),
 				],
@@ -440,16 +442,64 @@ class Reader_Experience implements Settings_Group {
 				],
 			],
 			[
-				'slug'  => Plugin::$settings_group . '_enable_anonymous_ratings',
-				'value' => false,
+				'slug'  => Rating_Policy::SETTING_MODE,
+				'value' => Rating_Policy::MODE_REVIEWS,
 				'group' => Plugin::$settings_group . '_reader_experience',
-				'order' => 220,
+				'order' => 205,
 				'data'  => [
-					'type'          => 'checkbox',
+					'type'          => 'select',
 					'subgroup'      => 'reviews',
-					'label'         => __( 'Allow Anonymous Ratings', 'mediavine-create' ),
-					'instructions'  => __( 'If enabled, 4 and 5 star reviews will be submitted when the star is clicked. Users leaving a star rating will then see a popup modal prompting them to leave an optional review. Disabling this will not sumbit the rating until after the review has been added. The prompt will still display.', 'mediavine-create' ),
-					'default_label' => __( 'Disabled', 'mediavine-create' ),
+					'label'         => __( 'How Readers Leave Feedback', 'mediavine-create' ),
+					'instructions'  => __( 'Ratings only saves every rating on click, with no review form. Ratings + reviews opens a review form after a reader rates.', 'mediavine-create' ),
+					'default_label' => __( 'Ratings + reviews', 'mediavine-create' ),
+					'options'       => [
+						[
+							'value' => Rating_Policy::MODE_RATINGS,
+							'label' => __( 'Ratings only', 'mediavine-create' ),
+						],
+						[
+							'value' => Rating_Policy::MODE_REVIEWS,
+							'label' => __( 'Ratings + reviews', 'mediavine-create' ),
+						],
+					],
+					'dependent_on'  => Plugin::$settings_group . '_allow_reviews',
+					'gated'         => GateKeeper::FEATURE_REVIEW_COLLECTION,
+				],
+			],
+			[
+				'slug'  => Rating_Policy::SETTING_REQUIRED,
+				'value' => (string) Rating_Policy::DEFAULT_REQUIRED,
+				'group' => Plugin::$settings_group . '_reader_experience',
+				'order' => 207,
+				'data'  => [
+					'type'          => 'select',
+					'subgroup'      => 'reviews',
+					'label'         => __( 'Require a Written Review for Ratings Of', 'mediavine-create' ),
+					'instructions'  => __( 'Ratings at or below this need a written review before they count. Higher ratings save on click, and the review is optional. Ratings saved without a review still count toward your average.', 'mediavine-create' ),
+					'default_label' => __( '3 stars or lower', 'mediavine-create' ),
+					'options'       => [
+						[
+							'value' => '1',
+							'label' => __( '1 star', 'mediavine-create' ),
+						],
+						[
+							'value' => '2',
+							'label' => __( '2 stars or lower', 'mediavine-create' ),
+						],
+						[
+							'value' => '3',
+							'label' => __( '3 stars or lower', 'mediavine-create' ),
+						],
+						[
+							'value' => '4',
+							'label' => __( '4 stars or lower', 'mediavine-create' ),
+						],
+						[
+							'value' => '5',
+							'label' => __( 'Every rating', 'mediavine-create' ),
+						],
+					],
+					'dependent_on'  => Plugin::$settings_group . '_allow_reviews',
 					'gated'         => GateKeeper::FEATURE_REVIEW_COLLECTION,
 				],
 			],
@@ -461,7 +511,7 @@ class Reader_Experience implements Settings_Group {
 				'data'  => [
 					'type'          => 'checkbox',
 					'subgroup'      => 'reviews',
-					'label'         => __( 'Enable Public Reviews', 'mediavine-create' ),
+					'label'         => $can_collect ? __( 'Enable Public Reviews', 'mediavine-create' ) : __( 'Display Existing Reviews Publicly', 'mediavine-create' ),
 					'instructions'  => __( 'If enabled, card reviews will be publicly visible, displayed in a tab alongside comments. You must specify a DOM selector for your comments section.', 'mediavine-create' ),
 					'default_label' => __( 'Disabled', 'mediavine-create' ),
 				],
