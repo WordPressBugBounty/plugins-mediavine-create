@@ -198,6 +198,46 @@ class Cache_Manager {
 			$cloudflareHooks->purgeCacheEverything(); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 		}
 
+		// Kinsta — the MU plugin exposes its purger on a global.
+		global $kinsta_cache;
+		if ( is_object( $kinsta_cache ) && isset( $kinsta_cache->kinsta_cache_purge ) && is_object( $kinsta_cache->kinsta_cache_purge ) && method_exists( $kinsta_cache->kinsta_cache_purge, 'purge_complete_caches' ) ) {
+			$kinsta_cache->kinsta_cache_purge->purge_complete_caches();
+		}
+
+		// WP Engine — Varnish edge cache plus memcached.
+		if ( class_exists( '\WpeCommon' ) ) {
+			if ( method_exists( '\WpeCommon', 'purge_varnish_cache' ) ) {
+				\WpeCommon::purge_varnish_cache();
+			}
+			if ( method_exists( '\WpeCommon', 'purge_memcached' ) ) {
+				\WpeCommon::purge_memcached();
+			}
+		}
+
+		// Pantheon Advanced Page Cache / Pantheon MU plugin edge cache.
+		if ( function_exists( 'pantheon_wp_clear_edge_all' ) ) {
+			pantheon_wp_clear_edge_all();
+		}
+
+		// SpinupWP.
+		if ( function_exists( 'spinupwp_purge_site' ) ) {
+			spinupwp_purge_site();
+		}
+
+		// RunCloud Hub.
+		if ( class_exists( '\RunCloud_Hub' ) && method_exists( '\RunCloud_Hub', 'purge_cache_all' ) ) {
+			\RunCloud_Hub::purge_cache_all();
+		}
+
+		// Comet Cache.
+		if ( class_exists( '\comet_cache' ) && method_exists( '\comet_cache', 'clear' ) ) {
+			\comet_cache::clear();
+		}
+
+		// Hummingbird (WPMU DEV).
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- third-party Hummingbird purge API
+		do_action( 'wphb_clear_page_cache' );
+
 		/**
 		 * Fires after Create has asked every known page cache to purge.
 		 *

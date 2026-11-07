@@ -449,6 +449,15 @@ class GateKeeper {
 	const OPTION_PAGE_CACHE_TIER = 'mv_create_page_cache_tier';
 
 	/**
+	 * Cron hook fired when a trial's stored end date passes.
+	 *
+	 * A trial ends by the clock — is_trialing() flips without any write — so
+	 * nothing else would re-run enforce_feature_fallbacks() (and its page-cache
+	 * purge) until the next admin-triggered sync.
+	 */
+	const TRIAL_END_HOOK = 'mv_create_trial_ended';
+
+	/**
 	 * Per-request memo of get_effective_tier().
 	 *
 	 * Null means unresolved. Cleared by reset_request_cache() whenever
@@ -766,6 +775,7 @@ class GateKeeper {
 	public static function init() {
 		add_action( 'admin_init', [ __CLASS__, 'maybe_sync_subscription' ] );
 		add_action( 'mv_create_sync_subscription', [ __CLASS__, 'sync_subscription' ] );
+		add_action( self::TRIAL_END_HOOK, [ __CLASS__, 'handle_trial_end' ] );
 		add_action( 'mv_create_settings_cache_reset', [ __CLASS__, 'reset_request_cache' ] );
 
 		foreach ( self::interactive_mode_studio_keys() as $setting_slug => $studio_key ) {
@@ -1970,6 +1980,7 @@ class GateKeeper {
 		$effective_tier = self::get_effective_tier();
 
 		self::maybe_purge_page_caches_for_tier( $effective_tier );
+		self::schedule_trial_end_check();
 
 		if ( self::TIER_FREE !== $effective_tier ) {
 			self::restore_pre_downgrade_settings( $effective_tier );
@@ -2009,6 +2020,49 @@ class GateKeeper {
 		}
 
 		\Mediavine\Cache_Manager::purge_full_page_caches( 'Mediavine Create plan change' );
+	}
+
+	/**
+	 * Schedule (or clear) the cron check for the current trial's end.
+	 *
+	 * Runs on every enforce_feature_fallbacks(), i.e. after every write to the
+	 * subscription state, so the event always tracks the latest trial_end and
+	 * is cleared once the site is no longer trialing.
+	 *
+	 * @return void
+	 */
+	private static function schedule_trial_end_check() {
+		wp_clear_scheduled_hook( self::TRIAL_END_HOOK );
+
+		if ( ! self::is_trialing() ) {
+			return;
+		}
+
+		$end = strtotime( self::get_trial_end() );
+
+		if ( false === $end || $end <= time() ) {
+			return;
+		}
+
+		wp_schedule_single_event( $end, self::TRIAL_END_HOOK );
+	}
+
+	/**
+	 * Re-resolve the tier when a trial's end date passes.
+	 *
+	 * Prefers a Studio sync (the trial may have converted to a paid plan);
+	 * if that fails, applies the local clock-based expiry so the downgrade
+	 * fallbacks and page-cache purge still run.
+	 *
+	 * @return void
+	 */
+	public static function handle_trial_end() {
+		if ( self::sync_subscription() ) {
+			return;
+		}
+
+		self::reset_request_cache();
+		self::enforce_feature_fallbacks();
 	}
 
 	/**

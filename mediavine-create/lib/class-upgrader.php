@@ -19,6 +19,22 @@ namespace Mediavine\Create;
 class Upgrader {
 
 	/**
+	 * Lock set when the version write fails to stick, so plugin_update_check()
+	 * backs off instead of looping on every request.
+	 *
+	 * Written twice, to fail in different layers: a transient (object cache when
+	 * one is installed) holding Plugin::VERSION, and an options row of the same
+	 * name holding "VERSION|expiry", read and written with raw SQL so a stale or
+	 * write-dropping object cache can't hide it.
+	 */
+	const UPDATE_CHECK_LOCK = 'mv_create_update_check_lock';
+
+	/**
+	 * How long a failed update check backs off, in seconds.
+	 */
+	const UPDATE_CHECK_LOCK_TTL = HOUR_IN_SECONDS;
+
+	/**
 	 * Runs hook at plugin activation.
 	 *
 	 * The update hook will run a bit later through its own hook
@@ -43,6 +59,20 @@ class Upgrader {
 			return;
 		}
 
+		// A recent run for this version couldn't persist mv_create_version; don't
+		// rerun the whole chain (Studio POSTs, rewrite flush) on every request.
+		// The chain already ran and saved the version; only the object cache is
+		// stale. Repair it instead of rerunning everything.
+		if ( self::db_option( 'mv_create_version' ) === Plugin::VERSION ) {
+			self::repair_cached_version();
+			self::clear_update_check_lock();
+			return;
+		}
+
+		if ( self::is_update_check_locked() ) {
+			return;
+		}
+
 		$last_plugin_version = get_option( 'mv_create_version', Plugin::VERSION );
 
 		/**
@@ -55,6 +85,145 @@ class Upgrader {
 
 		update_option( 'mv_create_version', Plugin::VERSION );
 		flush_rewrite_rules();
+
+		if ( self::stored_version() === Plugin::VERSION ) {
+			self::clear_update_check_lock();
+			return;
+		}
+
+		self::set_update_check_lock();
+		Help::log(
+			sprintf(
+				'Create: mv_create_version did not persist after the plugin update chain (db: %s, external object cache: %s); pausing update checks for an hour.',
+				var_export( self::db_option( 'mv_create_version' ), true ), // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export -- one-off diagnostic.
+				wp_using_ext_object_cache() ? 'yes' : 'no'
+			)
+		);
+	}
+
+	/**
+	 * Whether a recent failed run for this version is still backing off.
+	 *
+	 * @return bool
+	 */
+	private static function is_update_check_locked() {
+		if ( get_transient( self::UPDATE_CHECK_LOCK ) === Plugin::VERSION ) {
+			return true;
+		}
+
+		$row = explode( '|', (string) self::db_option( self::UPDATE_CHECK_LOCK ), 2 );
+		if ( Plugin::VERSION !== $row[0] ) {
+			return false;
+		}
+
+		if ( isset( $row[1] ) && (int) $row[1] > time() ) {
+			return true;
+		}
+
+		// Expired after a failure: retry only from admin / cron / CLI, never
+		// from front-end traffic, so a still-broken site loops at admin pace.
+		return ! self::is_backend_request();
+	}
+
+	/**
+	 * Whether this is an admin, cron, or WP-CLI request.
+	 *
+	 * REST isn't detectable yet at `init`, so it counts as front-end.
+	 *
+	 * @return bool
+	 */
+	private static function is_backend_request() {
+		return is_admin() || wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
+	 * @return void
+	 */
+	private static function set_update_check_lock() {
+		global $wpdb;
+
+		set_transient( self::UPDATE_CHECK_LOCK, Plugin::VERSION, self::UPDATE_CHECK_LOCK_TTL );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- must bypass the object cache.
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no') ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)",
+				self::UPDATE_CHECK_LOCK,
+				Plugin::VERSION . '|' . ( time() + self::UPDATE_CHECK_LOCK_TTL )
+			)
+		);
+	}
+
+	/**
+	 * @return void
+	 */
+	private static function clear_update_check_lock() {
+		global $wpdb;
+
+		delete_transient( self::UPDATE_CHECK_LOCK );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- must bypass the object cache.
+		$wpdb->delete( $wpdb->options, [ 'option_name' => self::UPDATE_CHECK_LOCK ] );
+	}
+
+	/**
+	 * Read an option row straight from the database, skipping the object cache.
+	 *
+	 * @param string $name Option name.
+	 * @return string|null
+	 */
+	private static function db_option( $name ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- must bypass the object cache.
+		return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s LIMIT 1", $name ) );
+	}
+
+	/**
+	 * Re-read mv_create_version past the object cache.
+	 *
+	 * Drops the cached copy first so a stale persistent object cache, a failed
+	 * DB write, or a read-only replica all read back as a mismatch.
+	 *
+	 * @return mixed
+	 */
+	private static function stored_version() {
+		wp_cache_delete( 'mv_create_version', 'options' );
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+
+		$version = get_option( 'mv_create_version' );
+		if ( Plugin::VERSION !== $version && self::db_option( 'mv_create_version' ) === Plugin::VERSION ) {
+			self::repair_cached_version();
+			$version = get_option( 'mv_create_version' );
+		}
+
+		return $version;
+	}
+
+	/**
+	 * Overwrite a stale cached mv_create_version with Plugin::VERSION.
+	 *
+	 * Only called once the database row is known to hold Plugin::VERSION. Fixes
+	 * whichever cache slot get_option() reads: the alloptions blob (autoloaded),
+	 * the per-option key, or a notoptions entry claiming the option is missing.
+	 *
+	 * @return void
+	 */
+	private static function repair_cached_version() {
+		$notoptions = wp_cache_get( 'notoptions', 'options' );
+		if ( is_array( $notoptions ) && isset( $notoptions['mv_create_version'] ) ) {
+			unset( $notoptions['mv_create_version'] );
+			wp_cache_set( 'notoptions', $notoptions, 'options' );
+		}
+
+		$alloptions = wp_load_alloptions();
+		if ( isset( $alloptions['mv_create_version'] ) ) {
+			$alloptions['mv_create_version'] = Plugin::VERSION;
+			wp_cache_set( 'alloptions', $alloptions, 'options' );
+			return;
+		}
+
+		wp_cache_set( 'mv_create_version', Plugin::VERSION, 'options' );
 	}
 
 	/**

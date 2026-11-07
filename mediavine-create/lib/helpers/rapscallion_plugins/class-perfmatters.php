@@ -84,6 +84,28 @@ class Perfmatters extends Rascal_Plugin {
 	public function register_plugin_disable() {
 		add_filter( 'perfmatters_rucss_excluded_selectors', [ $this, 'excluded_selectors' ] );
 		add_filter( 'perfmatters_rucss_excluded_stylesheets', [ $this, 'excluded_stylesheets' ] );
+		add_filter( 'perfmatters_delay_js_exclusions', [ $this, 'delay_js_exclusions' ] );
+		add_filter( 'perfmatters_defer_js_exclusions', [ $this, 'delay_js_exclusions' ] );
+		add_filter( 'perfmatters_minify_js_exclusions', [ $this, 'delay_js_exclusions' ] );
+	}
+
+	/**
+	 * Keep the Create Studio embed out of Perfmatters Delay JS, Defer JS and Minify JS.
+	 *
+	 * All three filters take an array of script fragments (perfmatters.io/docs/filters/).
+	 *
+	 * Delayed scripts become `type="pmdelayedscript"` and only run after an
+	 * interaction, so CTAs never render for visitors who don't interact.
+	 *
+	 * @param array $exclusions Script fragments Delay JS must leave alone.
+	 * @return array
+	 */
+	public function delay_js_exclusions( $exclusions ) {
+		if ( ! is_array( $exclusions ) ) {
+			$exclusions = [];
+		}
+
+		return array_values( array_unique( array_merge( $exclusions, Creations_Views::STUDIO_EMBED_EXCLUSIONS ) ) );
 	}
 
 	/**

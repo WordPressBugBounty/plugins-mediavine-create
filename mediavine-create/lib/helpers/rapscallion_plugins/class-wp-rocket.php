@@ -16,6 +16,26 @@ class Wp_Rocket extends Rascal_Plugin {
 	public function register_plugin_disable() {
 		add_action( 'rocket_excluded_inline_js_content', [ $this, 'exclude_create_inline_js' ] );
 		add_filter( 'rocket_rucss_safelist', [ $this, 'rucss_safelist' ] );
+		add_filter( 'rocket_delay_js_exclusions', [ $this, 'exclude_studio_embed' ] );
+		add_filter( 'rocket_exclude_defer_js', [ $this, 'exclude_studio_embed' ] );
+		add_filter( 'rocket_exclude_js', [ $this, 'exclude_studio_embed' ] );
+	}
+
+	/**
+	 * Keep the Create Studio embed out of Delay JS, Defer JS and minify/combine.
+	 *
+	 * Delay JS rewrites the embed to `type="rocketlazyloadscript"`, so CTAs
+	 * never render for visitors who don't interact with the page.
+	 *
+	 * @param array $excluded Script patterns/URLs WP Rocket must leave alone.
+	 * @return array
+	 */
+	public function exclude_studio_embed( $excluded ) {
+		if ( ! is_array( $excluded ) ) {
+			$excluded = [];
+		}
+
+		return array_values( array_unique( array_merge( $excluded, Creations_Views::STUDIO_EMBED_EXCLUSIONS ) ) );
 	}
 
 	/**

@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,11 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 3.1.1 =
+
+* FIX: Hero list item titles no longer overlap or clip when they wrap onto multiple lines on mobile
+* FIX: Bulk Import for Lists now works correctly in the Post Editor, rather than just the standalone Create editor
 
 = 3.1.0 =
 

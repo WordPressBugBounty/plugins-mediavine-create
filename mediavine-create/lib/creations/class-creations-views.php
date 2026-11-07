@@ -22,6 +22,27 @@ class Creations_Views extends Creations {
 	public static $studio_script_enqueued = false;
 
 	/**
+	 * Fragments identifying the embed in optimizer exclusion lists (matched
+	 * against the script tag or src by WP Rocket / Perfmatters).
+	 *
+	 * @var string[]
+	 */
+	const STUDIO_EMBED_EXCLUSIONS = [ 'create-studio-embed', 'create.studio/embed/' ];
+
+	/**
+	 * Attributes that tell JS optimizers to leave the Create Studio embed alone.
+	 *
+	 * Delay-JS features (WP Rocket, Perfmatters, LiteSpeed, Cloudflare Rocket
+	 * Loader, etc.) rewrite scripts to wait for a visitor interaction, so the
+	 * embed — and every CTA it renders — never runs for visitors who don't
+	 * interact. `data-cs-delay-exempt` is a marker for page scans confirming
+	 * the exemption shipped; it isn't read by any optimizer.
+	 *
+	 * @var string
+	 */
+	const STUDIO_OPTIMIZER_EXEMPT_ATTRIBUTES = 'data-cfasync="false" data-no-defer="1" data-no-optimize="1" data-noptimize="1" nowprocket data-pmdelayedscript="false" data-cs-delay-exempt="1"';
+
+	/**
 	 * Tracks whether a Create card has been rendered on the current page.
 	 */
 	public static $has_card = false;
@@ -157,7 +178,8 @@ class Creations_Views extends Creations {
 		// than waiting for main.js to execute and dynamically inject the CSS link.
 		add_action('wp_head', function() use ($studio_script, $css_url, $preload_css) {
 			echo '<link rel="preconnect" href="https://create.studio" crossorigin>' . "\n";
-			printf('<link rel="preload" href="%s" as="script" crossorigin>' . "\n", esc_url($studio_script));
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- STUDIO_OPTIMIZER_EXEMPT_ATTRIBUTES is a fixed attribute literal.
+			printf('<link rel="preload" href="%s" as="script" crossorigin %s>' . "\n", esc_url($studio_script), self::STUDIO_OPTIMIZER_EXEMPT_ATTRIBUTES);
 			if ($preload_css) {
 				printf('<link rel="preload" href="%s" as="style">' . "\n", esc_url($css_url));
 			}
@@ -168,8 +190,11 @@ class Creations_Views extends Creations {
 		$review_policy = Rating_Policy::embed_attribute();
 
 		add_action('wp_footer', function() use ($studio_script, $site_url, $debug, $review_policy) {
+			// Exempt attributes go before src: Rocket Loader only honours data-cfasync there.
 			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- third-party Create Studio embed with custom module attributes; output dynamically in wp_footer.
-			printf('<script defer type="module" id="create-studio-embed" data-site-url="%s" data-review-policy="%s" src="%s" %s></script>',
+			printf('<script defer type="module" id="create-studio-embed" %s data-site-url="%s" data-review-policy="%s" src="%s" %s></script>',
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed attribute literal.
+			self::STUDIO_OPTIMIZER_EXEMPT_ATTRIBUTES,
 			esc_attr($site_url),
 			esc_attr($review_policy),
 			esc_url($studio_script),
