@@ -1231,6 +1231,42 @@ class Creations extends Plugin {
 	}
 
 	/**
+	 * Whether a card is only shown inside password-protected posts the current
+	 * visitor hasn't unlocked.
+	 *
+	 * Core hides a protected post's content until the password cookie is set, so
+	 * a card that appears nowhere else must stay hidden from Create's public
+	 * outputs too. A card that is also in an unprotected post is already public
+	 * and isn't hidden. Authorized Create editors always see it.
+	 *
+	 * @param object|array $creation Card row (needs canonical_post_id/associated_posts).
+	 * @return bool
+	 */
+	public static function is_hidden_by_post_password( $creation ) {
+		$creation = (object) $creation;
+
+		$post_ids = empty( $creation->associated_posts ) ? [] : json_decode( $creation->associated_posts, true );
+		$post_ids = is_array( $post_ids ) ? $post_ids : [];
+		if ( ! empty( $creation->canonical_post_id ) ) {
+			$post_ids[] = $creation->canonical_post_id;
+		}
+
+		$protected = false;
+		foreach ( array_unique( array_map( 'intval', $post_ids ) ) as $post_id ) {
+			$post = $post_id ? get_post( $post_id ) : null;
+			if ( ! $post ) {
+				continue;
+			}
+			if ( ! post_password_required( $post ) ) {
+				return false;
+			}
+			$protected = true;
+		}
+
+		return $protected && ! \Mediavine\Permissions::is_user_authorized();
+	}
+
+	/**
 	 * Function to add a post to a creation's associated_posts
 	 *
 	 * @param int $creation_id  the id of the creation we want updated with a new associated_post
@@ -1798,7 +1834,7 @@ class Creations extends Plugin {
 						// CRE-206: Only published cards expose JSON-LD, and only
 						// the schema stored at publish time. Never regenerate for
 						// unpublished/never-published drafts.
-						if ( ! is_object( $creation ) || empty( $creation->published ) || empty( $creation->json_ld ) ) {
+						if ( ! is_object( $creation ) || empty( $creation->published ) || empty( $creation->json_ld ) || self::is_hidden_by_post_password( $creation ) ) {
 							status_header( 404 );
 							exit;
 						}

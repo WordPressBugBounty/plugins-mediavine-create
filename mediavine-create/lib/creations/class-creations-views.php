@@ -268,6 +268,12 @@ class Creations_Views extends Creations {
 	const MIN_STAR_CONTRAST = 2.0;
 
 	/**
+	 * Priority of the render-scoped `create_wp_kses` allowlist filter. Shared by
+	 * add_filter() and remove_filter() so the filter can't outlive the card render.
+	 */
+	const CARD_KSES_PRIORITY = 2;
+
+	/**
 	 * Allowlist a social icon name before it is used in a view path.
 	 *
 	 * @param mixed $social_icon Candidate icon slug from settings/custom fields.
@@ -1603,30 +1609,40 @@ class Creations_Views extends Creations {
 			$atts['disable_reviews']   = ! $atts['allow_reviews'];
 		}
 
-		// Run filter for wp_kses output and then remove after shortcode added
-		add_filter('wp_kses_allowed_html', [ $this, 'create_wp_kses' ], 2, 10);
+		// Widen the kses allowlist only while this card renders. It must be removed with the
+		// same priority, and in a finally block, or it stays active for the rest of the
+		// request and lets later wp_kses_post() calls (e.g. page builder saves) keep <script>.
+		// Nested renders leave the outer render's filter in place.
+		$owns_kses_filter = false === has_filter( 'wp_kses_allowed_html', [ $this, 'create_wp_kses' ] );
+		if ( $owns_kses_filter ) {
+			add_filter( 'wp_kses_allowed_html', [ $this, 'create_wp_kses' ], self::CARD_KSES_PRIORITY, 2 );
+		}
 
-		/**
-		 * Fires immediately before Create card template has been built
-		 *
-		 * @param array $atts All card attributes used to generate card
-		 */
-		do_action('mv_create_card_before_render', $atts);
+		try {
+			/**
+			 * Fires immediately before Create card template has been built
+			 *
+			 * @param array $atts All card attributes used to generate card
+			 */
+			do_action('mv_create_card_before_render', $atts);
 
-		$creation_view = self::$views->get_view('shortcode-mv-create.php', $atts);
+			$creation_view = self::$views->get_view('shortcode-mv-create.php', $atts);
 
-		/**
-		 * Fires immediately after Create card template has been built
-		 *
-		 * @param array $atts All card attributes used to generate card
-		 * @param array $creation_view Rendered HTML of Create card
-		 */
-		do_action('mv_create_card_after_render', $atts, $creation_view);
+			/**
+			 * Fires immediately after Create card template has been built
+			 *
+			 * @param array $atts All card attributes used to generate card
+			 * @param array $creation_view Rendered HTML of Create card
+			 */
+			do_action('mv_create_card_after_render', $atts, $creation_view);
+		} finally {
+			// Clear style hooks so overlapping actions cannot create duplicate content on the next card.
+			Creations_Views_Hooks::unregister_style_hooks( $resolved_style, $card_type );
 
-		// Clear style hooks so overlapping actions cannot create duplicate content on the next card.
-		Creations_Views_Hooks::unregister_style_hooks( $resolved_style, $card_type );
-
-		remove_filter('wp_kses_allowed_html', [ $this, 'create_wp_kses' ], 10);
+			if ( $owns_kses_filter ) {
+				remove_filter( 'wp_kses_allowed_html', [ $this, 'create_wp_kses' ], self::CARD_KSES_PRIORITY );
+			}
+		}
 
 		if ( ! empty($creation_view) ) {
 			self::$has_card = true;
@@ -1981,6 +1997,10 @@ class Creations_Views extends Creations {
 	 */
 	public static function can_render_print_view( $creation ) {
 		if ( empty($creation) ) {
+			return false;
+		}
+
+		if ( self::is_hidden_by_post_password($creation) ) {
 			return false;
 		}
 

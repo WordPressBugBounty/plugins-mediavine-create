@@ -383,6 +383,11 @@ class JSON_LD_Runtime extends Plugin {
 			$post_data = $post;
 		}
 
+		// Core hides a locked protected post's content; its cards' schema too.
+		if ( empty( $post_data ) || post_password_required( $post_data ) ) {
+			return;
+		}
+
 		// Find all Create cards attached to post.
 		$card_ids = $this->find_create_cards( $post_data->post_content );
 

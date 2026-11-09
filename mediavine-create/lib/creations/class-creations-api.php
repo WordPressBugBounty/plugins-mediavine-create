@@ -610,6 +610,11 @@ class Creations_API extends Creations {
 			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
 		}
 
+		// A card only shown in locked password-protected posts stays hidden.
+		if ( self::is_hidden_by_post_password( $creation ) ) {
+			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
+		}
+
 		$creation = \Mediavine\Create\Publish::maybe_republish( $creation );
 
 		$creation->relations = Relations::get_creation_relations( $params['id'] );
@@ -665,6 +670,10 @@ class Creations_API extends Creations {
 			return new \WP_Error( 404, __( 'The Create Card has not been published', 'mediavine-create' ), [ 'request_params' => $params ] );
 		}
 
+		if ( self::is_hidden_by_post_password( $creation ) ) {
+			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
+		}
+
 		$published = json_decode( $creation->published );
 
 		$response->set_data( $published );
@@ -684,6 +693,10 @@ class Creations_API extends Creations {
 		// populated. A draft can carry stored `json_ld` from an earlier publish,
 		// which made this route only incidentally safe.
 		if ( empty( $creation->published ) && ! \Mediavine\Permissions::is_user_authorized() ) {
+			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
+		}
+
+		if ( self::is_hidden_by_post_password( $creation ) ) {
 			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
 		}
 

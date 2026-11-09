@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,17 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 3.1.2 =
+
+* FIX: Cards in password-protected posts are no longer visible to visitors who haven't entered the password, including in the page's recipe schema and the card's print page
+* FIX: Fixed a reported security issue where rendering a Create card could let other plugins on the same page, such as page builders, save unsafe scripts
+
+
+= 3.1.2 =
+
+* FIX: Cards in password-protected posts are no longer visible to visitors who haven't entered the password, including in the page's recipe schema and the card's print page
+* SECURITY: Fixed a reported issue where rendering a Create card could let other plugins on the same page, such as page builders, save unsafe scripts
 
 = 3.1.1 =
 
