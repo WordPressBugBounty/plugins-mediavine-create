@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Create 3.1.2\n"
+"Project-Id-Version: Create 3.1.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mediavine-create\n"
 "Last-Translator:  \n"
 "Language-Team:  \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-09T15:54:37+00:00\n"
+"POT-Creation-Date: 2026-11-14T04:02:34+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mediavine-create\n"
@@ -71,8 +71,8 @@ msgstr ""
 
 #: admin/class-admin-init.php:557
 #: lib/i18n/class-translation.php:52
-#: lib/settings-group/class-reader-experience.php:752
-#: lib/settings-group/class-reader-experience.php:760
+#: lib/settings-group/class-reader-experience.php:790
+#: lib/settings-group/class-reader-experience.php:798
 #: lib/views/v1/shortcode-mv-create-products-list.php:11
 #: lib/views/v1/shortcode-mv-create-products.php:25
 msgid "Recommended Products"
@@ -110,7 +110,7 @@ msgstr ""
 
 #: admin/class-admin-init.php:620
 #: admin/class-admin-init.php:621
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Create 3.0"
 msgstr ""
 
@@ -254,7 +254,7 @@ msgid "See what's included"
 msgstr ""
 
 #: lib/class-admin-bar.php:211
-#: lib/creations/class-creations-views.php:1791
+#: lib/creations/class-creations-views.php:1800
 msgid "day"
 msgid_plural "days"
 msgstr[0] ""
@@ -271,7 +271,7 @@ msgid "How-To"
 msgstr ""
 
 #: lib/class-admin-bar.php:234
-#: lib/settings-group/class-reader-experience.php:744
+#: lib/settings-group/class-reader-experience.php:782
 #: lib/shapes/class-shapes.php:52
 msgid "List"
 msgstr ""
@@ -477,7 +477,7 @@ msgid "Your paid plan has ended."
 msgstr ""
 
 #: lib/class-plan-choice.php:527
-#: admin/ui/build/app.build.3.1.2.js:12592
+#: admin/ui/build/app.build.3.1.3.js:12592
 msgid "Choose a plan to keep going."
 msgstr ""
 
@@ -605,13 +605,13 @@ msgstr ""
 
 #. translators: %s: list item title
 #: lib/creations/class-creations-views-list-item-preparer.php:124
-#: lib/creations/class-creations-views.php:2258
+#: lib/creations/class-creations-views.php:2267
 #, php-format
 msgid "Image for %s"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:193
-#: lib/creations/class-creations-views.php:1702
+#: lib/creations/class-creations-views.php:1711
 #: lib/creations/class-creations.php:1004
 #: lib/importers/sources/class-import-getmecooking.php:272
 #: lib/importers/sources/class-import-purr.php:159
@@ -624,7 +624,7 @@ msgid "Active Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:205
-#: lib/creations/class-creations-views.php:1704
+#: lib/creations/class-creations-views.php:1713
 #: lib/creations/class-creations.php:1006
 #: lib/importers/class-mv-recipe-importer.php:962
 #: lib/importers/sources/class-import-purr.php:160
@@ -632,7 +632,7 @@ msgid "Additional Time"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:211
-#: lib/creations/class-creations-views.php:1724
+#: lib/creations/class-creations-views.php:1733
 msgid "Total Time"
 msgstr ""
 
@@ -655,19 +655,19 @@ msgid "Category"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:223
-#: lib/creations/class-creations-views.php:1114
+#: lib/creations/class-creations-views.php:1123
 #: lib/i18n/class-translation.php:59
 msgid "Calories"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:227
-#: lib/creations/class-creations-views.php:1595
+#: lib/creations/class-creations-views.php:1604
 #: lib/i18n/class-translation.php:48
 msgid "Cuisine"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:232
-#: lib/creations/class-creations-views.php:1598
+#: lib/creations/class-creations-views.php:1607
 #: lib/i18n/class-translation.php:49
 msgid "Project Type"
 msgstr ""
@@ -677,7 +677,7 @@ msgid "Cost"
 msgstr ""
 
 #: lib/creations/class-creations-views-list-item-preparer.php:238
-#: lib/creations/class-creations-views.php:1732
+#: lib/creations/class-creations-views.php:1741
 msgid "Difficulty"
 msgstr ""
 
@@ -734,88 +734,88 @@ msgstr ""
 msgid "Pinterest Profile:"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1119
+#: lib/creations/class-creations-views.php:1128
 #: lib/i18n/class-translation.php:60
 msgid "Total Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1124
+#: lib/creations/class-creations-views.php:1133
 #: lib/i18n/class-translation.php:61
 msgid "Saturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1129
+#: lib/creations/class-creations-views.php:1138
 #: lib/i18n/class-translation.php:62
 msgid "Trans Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1134
+#: lib/creations/class-creations-views.php:1143
 #: lib/i18n/class-translation.php:63
 msgid "Unsaturated Fat"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1139
+#: lib/creations/class-creations-views.php:1148
 #: lib/i18n/class-translation.php:64
 msgid "Cholesterol"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1144
+#: lib/creations/class-creations-views.php:1153
 #: lib/i18n/class-translation.php:65
 msgid "Sodium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1149
+#: lib/creations/class-creations-views.php:1158
 #: lib/i18n/class-translation.php:66
 msgid "Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1154
+#: lib/creations/class-creations-views.php:1163
 #: lib/i18n/class-translation.php:67
 msgid "Net Carbohydrates"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1159
+#: lib/creations/class-creations-views.php:1168
 #: lib/i18n/class-translation.php:68
 msgid "Fiber"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1164
+#: lib/creations/class-creations-views.php:1173
 #: lib/i18n/class-translation.php:69
 msgid "Sugar"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1169
+#: lib/creations/class-creations-views.php:1178
 #: lib/i18n/class-translation.php:70
 msgid "Sugar Alcohols"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1174
+#: lib/creations/class-creations-views.php:1183
 #: lib/i18n/class-translation.php:71
 msgid "Protein"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1291
+#: lib/creations/class-creations-views.php:1300
 msgid "View Product"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1295
+#: lib/creations/class-creations-views.php:1304
 msgid "Get the Recipe"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1299
+#: lib/creations/class-creations-views.php:1308
 msgid "Read the Guide"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1307
+#: lib/creations/class-creations-views.php:1316
 msgid "Continue Reading"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1593
+#: lib/creations/class-creations-views.php:1602
 #: lib/i18n/class-translation.php:50
 msgid "Type"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1703
+#: lib/creations/class-creations-views.php:1712
 #: lib/creations/class-creations.php:1011
 #: lib/importers/helpers/easy-recipe/EasyRecipeDocument.php:714
 #: lib/importers/sources/class-import-cookbook.php:189
@@ -834,107 +834,107 @@ msgstr ""
 msgid "Cook Time"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1736
+#: lib/creations/class-creations-views.php:1745
 msgid "Estimated Cost"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1783
+#: lib/creations/class-creations-views.php:1792
 msgid "year"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1784
+#: lib/creations/class-creations-views.php:1793
 msgid "years"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1787
+#: lib/creations/class-creations-views.php:1796
 msgid "month"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1788
+#: lib/creations/class-creations-views.php:1797
 msgid "months"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1792
+#: lib/creations/class-creations-views.php:1801
 msgid "days"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1795
+#: lib/creations/class-creations-views.php:1804
 #: lib/products/class-amazon-creators.php:318
 msgid "hour"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1796
+#: lib/creations/class-creations-views.php:1805
 #: lib/products/class-amazon-creators.php:319
 msgid "hours"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1799
+#: lib/creations/class-creations-views.php:1808
 #: lib/products/class-amazon-creators.php:323
 msgid "minute"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1800
+#: lib/creations/class-creations-views.php:1809
 #: lib/products/class-amazon-creators.php:324
 msgid "minutes"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1803
+#: lib/creations/class-creations-views.php:1812
 #: lib/products/class-amazon-creators.php:334
 msgid "second"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:1804
+#: lib/creations/class-creations-views.php:1813
 #: lib/products/class-amazon-creators.php:335
 msgid "seconds"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2081
-#: lib/creations/class-creations-views.php:2087
+#: lib/creations/class-creations-views.php:2090
+#: lib/creations/class-creations-views.php:2096
 msgid "No Card with ID found"
 msgstr ""
 
 #. translators: 1: list item button text (e.g. "Read More"), 2: list item title
-#: lib/creations/class-creations-views.php:2218
+#: lib/creations/class-creations-views.php:2227
 #, php-format
 msgid "%1$s: %2$s"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2361
+#: lib/creations/class-creations-views.php:2370
 msgid "You do not have permission to do this."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2369
+#: lib/creations/class-creations-views.php:2378
 msgid "Invalid theme."
 msgstr ""
 
 #. translators: %s: list of subscription plans that unlock the feature (e.g. "Pro Guides or Pro Pass").
-#: lib/creations/class-creations-views.php:2377
+#: lib/creations/class-creations-views.php:2386
 #, php-format
 msgid "This theme requires a %s plan."
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2456
+#: lib/creations/class-creations-views.php:2465
 msgid "Previewing theme"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2462
+#: lib/creations/class-creations-views.php:2471
 msgid "Premium"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2467
+#: lib/creations/class-creations-views.php:2476
 msgid "Preview"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2489
+#: lib/creations/class-creations-views.php:2498
 #: lib/i18n/class-translation.php:78
 msgid "Cancel"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2493
+#: lib/creations/class-creations-views.php:2502
 msgid "Upgrade to Unlock"
 msgstr ""
 
-#: lib/creations/class-creations-views.php:2498
+#: lib/creations/class-creations-views.php:2507
 msgid "Apply Theme"
 msgstr ""
 
@@ -987,8 +987,8 @@ msgid "Enable reviews on your cards to let readers rate your recipes. Higher eng
 msgstr ""
 
 #: lib/dashboard/class-dashboard-api.php:789
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Connect to Create Studio"
 msgstr ""
 
@@ -1295,7 +1295,7 @@ msgid "Off"
 msgstr ""
 
 #: lib/i18n/class-translation.php:87
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Close"
 msgstr ""
 
@@ -2229,7 +2229,8 @@ msgstr ""
 #: lib/settings-group/class-lists.php:149
 #: lib/settings-group/class-reader-experience.php:208
 #: lib/settings-group/class-reader-experience.php:426
-#: lib/settings-group/class-reader-experience.php:810
+#: lib/settings-group/class-reader-experience.php:543
+#: lib/settings-group/class-reader-experience.php:848
 #: lib/settings-group/class-recipes.php:150
 #: lib/settings-group/class-recipes.php:165
 msgid "Enabled"
@@ -2280,7 +2281,7 @@ msgstr ""
 #: lib/settings-group/class-reader-experience.php:386
 #: lib/settings-group/class-reader-experience.php:439
 #: lib/settings-group/class-reader-experience.php:516
-#: lib/settings-group/class-reader-experience.php:553
+#: lib/settings-group/class-reader-experience.php:591
 #: lib/settings-group/class-recipes.php:26
 #: lib/settings-group/class-recipes.php:84
 #: lib/settings-group/class-recipes.php:178
@@ -3107,7 +3108,7 @@ msgid "Some themes override font sizes and spacing in the nutrition label. This 
 msgstr ""
 
 #: lib/settings-group/class-appearance.php:269
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Custom CSS"
 msgstr ""
 
@@ -3566,7 +3567,7 @@ msgid "Display Existing Reviews Publicly"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:515
-msgid "If enabled, card reviews will be publicly visible, displayed in a tab alongside comments. You must specify a DOM selector for your comments section."
+msgid "If enabled, card reviews will be publicly visible, displayed in a tab alongside comments, or on their own on posts without a comments section. You must specify a DOM selector for your comments section."
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:527
@@ -3577,170 +3578,195 @@ msgstr ""
 msgid "Add the DOM selector of your comments section. (In most themes, this will be \"#comments\".)"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:551
-msgid "Enable Social Footer"
+#: lib/settings-group/class-reader-experience.php:541
+msgid "Show Reviews When Comments Are Closed"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:552
-msgid "Adds a call to action to the bottom of each card encouraging social sharing."
+#: lib/settings-group/class-reader-experience.php:542
+msgid "Posts with comments closed have no comments section to sit beside, so reviews appear on their own. If disabled, those posts show only the star rating."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:564
-msgid "Social Sharing Service"
+#: lib/settings-group/class-reader-experience.php:555
+msgid "Where Reviews Appear When Comments Are Closed"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:556
+msgid "After the post puts them below your last paragraph. After the card puts them right below the recipe card."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:557
+#: lib/settings-group/class-reader-experience.php:561
+msgid "After the post"
 msgstr ""
 
 #: lib/settings-group/class-reader-experience.php:565
+msgid "After the card"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:589
+msgid "Enable Social Footer"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:590
+msgid "Adds a call to action to the bottom of each card encouraging social sharing."
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:602
+msgid "Social Sharing Service"
+msgstr ""
+
+#: lib/settings-group/class-reader-experience.php:603
 msgid "Select the social service to encourage."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:566
-#: lib/settings-group/class-reader-experience.php:573
+#: lib/settings-group/class-reader-experience.php:604
+#: lib/settings-group/class-reader-experience.php:611
 msgid "Instagram"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:569
+#: lib/settings-group/class-reader-experience.php:607
 msgid "Facebook"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:577
+#: lib/settings-group/class-reader-experience.php:615
 msgid "Pinterest"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:592
+#: lib/settings-group/class-reader-experience.php:630
 msgid "Facebook Username"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:593
+#: lib/settings-group/class-reader-experience.php:631
 msgid "Enter your Facebook username to link the Facebook icon on Facebook social footer cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:605
+#: lib/settings-group/class-reader-experience.php:643
 msgid "Instagram Username"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:606
+#: lib/settings-group/class-reader-experience.php:644
 msgid "Enter your Instagram username to link the Instagram icon on Instagram social footer cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:618
+#: lib/settings-group/class-reader-experience.php:656
 msgid "Pinterest Username"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:619
+#: lib/settings-group/class-reader-experience.php:657
 msgid "Enter your Pinterest username to link the Pinterest icon on Pinterest social footer cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:625
+#: lib/settings-group/class-reader-experience.php:663
 msgid "Did you make this recipe?"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:631
+#: lib/settings-group/class-reader-experience.php:669
 msgid "Social Footer Heading - Recipe"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:632
+#: lib/settings-group/class-reader-experience.php:670
 msgid "The title for the social footer on recipe cards. If left blank, \"Did you make this recipe?\" will display."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:644
+#: lib/settings-group/class-reader-experience.php:682
 msgid "Social Footer Content - Recipe"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:645
+#: lib/settings-group/class-reader-experience.php:683
 msgid "The content for the social footer on recipe cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:651
+#: lib/settings-group/class-reader-experience.php:689
 msgid "Did you make this project?"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:657
+#: lib/settings-group/class-reader-experience.php:695
 msgid "Social Footer Heading - How-To"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:658
+#: lib/settings-group/class-reader-experience.php:696
 msgid "The title for the social footer on how-to cards. If left blank, \"Did you make this project?\" will display."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:670
+#: lib/settings-group/class-reader-experience.php:708
 msgid "Social Footer Content - How-To"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:671
+#: lib/settings-group/class-reader-experience.php:709
 msgid "The content for the social footer on how-to cards. If left blank, \"Please leave a comment on the blog or share a photo on {service_name}\" will display."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:693
+#: lib/settings-group/class-reader-experience.php:731
 msgid "Video Section Position"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:694
+#: lib/settings-group/class-reader-experience.php:732
 msgid "Choose where the video section appears on recipe and how-to cards. Individual cards can override this setting."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:695
-#: lib/settings-group/class-reader-experience.php:790
+#: lib/settings-group/class-reader-experience.php:733
+#: lib/settings-group/class-reader-experience.php:828
 msgid "Below Notes"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:698
+#: lib/settings-group/class-reader-experience.php:736
 msgid "Default (Below Notes)"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:702
-#: lib/settings-group/class-reader-experience.php:778
+#: lib/settings-group/class-reader-experience.php:740
+#: lib/settings-group/class-reader-experience.php:816
 msgid "Above Supplies"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:706
-#: lib/settings-group/class-reader-experience.php:782
+#: lib/settings-group/class-reader-experience.php:744
+#: lib/settings-group/class-reader-experience.php:820
 msgid "Above Instructions"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:710
-#: lib/settings-group/class-reader-experience.php:786
+#: lib/settings-group/class-reader-experience.php:748
+#: lib/settings-group/class-reader-experience.php:824
 msgid "Below Instructions"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:734
+#: lib/settings-group/class-reader-experience.php:772
 msgid "Products Display Mode"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:735
+#: lib/settings-group/class-reader-experience.php:773
 msgid "Choose how products are displayed on recipe and how-to cards. Gallery shows products in a scrollable carousel, while List displays them in a clean text format."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:736
-#: lib/settings-group/class-reader-experience.php:740
+#: lib/settings-group/class-reader-experience.php:774
+#: lib/settings-group/class-reader-experience.php:778
 msgid "Gallery"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:758
+#: lib/settings-group/class-reader-experience.php:796
 msgid "Products Section Title"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:759
+#: lib/settings-group/class-reader-experience.php:797
 msgid "The heading displayed above the products section on cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:772
+#: lib/settings-group/class-reader-experience.php:810
 msgid "Products Section Position"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:773
+#: lib/settings-group/class-reader-experience.php:811
 msgid "Choose where the products section appears on recipe and how-to cards."
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:774
-#: lib/settings-group/class-reader-experience.php:794
+#: lib/settings-group/class-reader-experience.php:812
+#: lib/settings-group/class-reader-experience.php:832
 msgid "After Video"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:808
+#: lib/settings-group/class-reader-experience.php:846
 msgid "Show Affiliate Disclaimer"
 msgstr ""
 
-#: lib/settings-group/class-reader-experience.php:809
+#: lib/settings-group/class-reader-experience.php:847
 msgid "Display an affiliate disclaimer below the products section when using the text list display mode. This helps with FTC compliance for affiliate links."
 msgstr ""
 
@@ -4104,1051 +4130,1051 @@ msgstr ""
 msgid "Toggle ingredient group"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:2934
-#: admin/ui/build/blocks.build.3.1.2.js:2934
+#: admin/ui/build/app.build.3.1.3.js:2934
+#: admin/ui/build/blocks.build.3.1.3.js:2934
 msgid "We couldn't connect to Create Studio. Please try again."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Connecting"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Your Create Studio account"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 #, js-format
 msgid "%s links this site and creates a free Create Studio account for"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Email for the account"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Done"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Use a different email"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "By continuing you agree to the Create Studio"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Terms of Service"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "and"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Privacy Policy"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Setting up your account. This can take a few seconds."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "We emailed you a link to set a password. You'll need it to manage your plan in Create Studio."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "We already emailed you a link to set a password. You'll need it to manage your plan in Create Studio."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "To manage your plan in Create Studio,"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "set a password for that email"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Log in to Create Studio with that account to manage your plan."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "We couldn't connect automatically."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Connect manually"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 #, js-format
 msgid "Connected to Create Studio as %s."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Connected to Create Studio."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Continue"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Connecting…"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:3112
-#: admin/ui/build/blocks.build.3.1.2.js:3112
+#: admin/ui/build/app.build.3.1.3.js:3112
+#: admin/ui/build/blocks.build.3.1.3.js:3112
 msgid "Try again"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:8389
-#: admin/ui/build/blocks.build.3.1.2.js:8383
+#: admin/ui/build/app.build.3.1.3.js:8389
+#: admin/ui/build/blocks.build.3.1.3.js:8383
 msgid "List Items"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:8389
-#: admin/ui/build/blocks.build.3.1.2.js:8383
+#: admin/ui/build/app.build.3.1.3.js:8389
+#: admin/ui/build/blocks.build.3.1.3.js:8383
 msgid "Image"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:8389
-#: admin/ui/build/blocks.build.3.1.2.js:8383
+#: admin/ui/build/app.build.3.1.3.js:8389
+#: admin/ui/build/blocks.build.3.1.3.js:8383
 msgid "Description"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:12592
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/blocks.build.3.1.2.js:9602
+#: admin/ui/build/app.build.3.1.3.js:12592
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/blocks.build.3.1.3.js:9602
 msgid "Automatic nutrition calculation"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:12592
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/blocks.build.3.1.2.js:9602
+#: admin/ui/build/app.build.3.1.3.js:12592
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/blocks.build.3.1.3.js:9602
 msgid "Automatic product & list-item scraping"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:12592
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/blocks.build.3.1.2.js:9602
+#: admin/ui/build/app.build.3.1.3.js:12592
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/blocks.build.3.1.3.js:9602
 msgid "Interactive Mode, servings adjustment & unit conversion"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:12592
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/blocks.build.3.1.2.js:9602
+#: admin/ui/build/app.build.3.1.3.js:12592
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/blocks.build.3.1.3.js:9602
 msgid "New reader ratings & reviews"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:12592
-#: admin/ui/build/blocks.build.3.1.2.js:9602
+#: admin/ui/build/app.build.3.1.3.js:12592
+#: admin/ui/build/blocks.build.3.1.3.js:9602
 #, js-format
 msgid "Your %s plan has ended"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:12592
-#: admin/ui/build/blocks.build.3.1.2.js:9602
+#: admin/ui/build/app.build.3.1.3.js:12592
+#: admin/ui/build/blocks.build.3.1.3.js:9602
 msgid "Your paid plan has ended"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Continue with Free?"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Free turns these features off on your site. We just want to make sure you know before you choose:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Ratings you've already collected stay visible, and your cards keep working. You can switch to Free+ or a paid plan at any time to turn everything back on."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Go back"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Saving…"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Yes, continue with Free"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Plan saved"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 #, js-format
 msgid "You're on %s"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Your plan is saved."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Free+ features turn on once the site is connected."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Continue without connecting"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Upgrades happen in Create Studio, so your site is connected first."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Create plans are managed in Create Studio, so choosing one automatically connects your site."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Continuing"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "We couldn't connect automatically"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Upgrading needs this site connected to Create Studio. You can connect by signing in there instead."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "See plans"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 #, js-format
 msgid "upgrading to %s"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "upgrading"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Site connected"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Finish upgrading in Create Studio"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Check your email to finish upgrading"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 #, js-format
 msgid "Taking you to Create Studio to finish %s…"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "You're signed in. Continue to Create Studio to finish upgrading."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Log in with that account and you'll land on this site's upgrade page."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 #, js-format
 msgid "We already emailed you a link. Open it to set a password, or carry on without one for now, and you'll go straight to %s."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 #, js-format
 msgid "We emailed you a link. Open it to set a password, or carry on without one for now, and you'll go straight to %s."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Set a password for that email"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 #, js-format
 msgid " and you'll go straight to %s."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Stay here"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Continue to Create Studio"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14290
+#: admin/ui/build/app.build.3.1.3.js:14290
 msgid "Got it"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "slideshow"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "A letter from the Create-er"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Chapter %1$d of %2$d"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Chapter %1$d of %2$d. %3$s"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Start reading"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Read it as a letter"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Prev"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Next"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "JM"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Reading format"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Letter Format"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Slideshow"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "You asked for it!"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Publishers like you requested this feature."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Introducing Guided Setup"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Short setup wizards walk you through card appearance, recipe features, list cards, list syncing, Jump to Card, and Featured Reviews."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Try Guided Setup"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Three new List layouts"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Editorial, Leaderboard, and Ranked join your Premium layout selection. You can also set a site-wide default now, overriding it on any list, as well as choosing a photo ratio specifically for Lists."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Setup your Lists"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "List items can now automatically update"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Items linked to your own cards can now follow the source card's title and image. Toggle it per item, or catch up your existing lists in one go using our List Sync catch-up tool."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Sync up your lists"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Featured review auto-placement"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Featured reviews can appear in your posts automatically and link readers down to the card. The settings panel is redesigned, too."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Set up Featured Reviews"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Choose where Interactive Mode runs"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Offer Interactive Mode on recipes, how-tos, or both, instead of all or nothing."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Choose card types"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Redesigned theme picker"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "See any theme on a live sample card before you apply it."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Try it"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Connect to Create Studio from WordPress"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Create sets up your Create Studio account in the background. No more bouncing between tabs."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Create Studio settings"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Jump to Card"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "\"Jump to Recipe\" has a new name, because it works on every card type."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "See settings"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Interactive Mode"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Servings adjustment & unit conversion"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Product & list-item scraping"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Reviews: collect, edit, respond & feature"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Checklists"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Editorial & Modern card themes"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "List bulk import & sync scroll"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "A note from JM"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Hey there!"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Thanks for trying Create Premium! Create 3.0 makes the best stuff easier to find, so start with the checklist below and see how far five minutes gets you."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "If something feels confusing, "
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "let me know"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Enjoy the tour!"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Thank you so much for being a Pro Pass subscriber. Seriously. Much of what shipped in 3.0 came from people like you telling me what to build next, and every new feature below is included in your plan."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Have a poke around, and"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "what delights, or if anything breaks."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "When you're done looking here, check out"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "the announcement non-Pro users see"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Happy Creating!"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "3.0 checklist"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Tick each one off as you try it."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Setup progress: %1$d of %2$d done"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "%1$d of %2$d"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Mark done: %s"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "In your trial"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Included with Pro Pass"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "For everyone"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Put it back"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "I'll do this later"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Hide skipped (%d)"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Show skipped (%d)"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "All set. You're a Create 3.0 Pro (get it?!)."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Everything new is configured. Your readers will see the difference on their next visit."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "New for"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "everyone"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "These are available to users on every plan."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "On for you"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Everything you already had is still included."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your trial includes all of it."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Pro Pass also includes 50% off additional sites."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Recipe, How-To & List cards, with schema"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Existing ratings stay visible"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Everything in Free+, plus:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Interactive Mode on your own site (no Create ads)"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Checklists & advanced steps"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Edit, respond to & feature reviews"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Editorial & Modern themes, premium product display options"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Nutrition, scraping & ratings, plus:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Premium list layouts: Editorial, Leaderboard & Ranked"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Bulk import, sync scroll & list-item sync"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "No Interactive Mode, servings adjustment or unit conversion"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Plus 50% off additional sites"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Everything in Pro Guides and Pro Lists:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Every guide & recipe feature"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Every list layout & sync tool"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "A reader is browsing your site"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your post, your page, your ads."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "They open Interactive Mode"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "The card opens full-screen in a new tab on create.studio. Create's ads show only here."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "They finish and land back on your site"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Closing it puts them right back on your post."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Step 1 of 3 — a reader is browsing your site."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Step 2 of 3 — they open Interactive Mode on create.studio."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Step 3 of 3 — they finish and land back on your site."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your site"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your plan"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your trial"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "We couldn't save that choice. Please try again in a moment."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Back to your trial view"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Back to your %s view"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "See the announcement everyone else sees"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "An administrator needs to choose a Create plan before Create can be used."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Every new"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Pro Pass feature"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "is yours to try"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Welcome to"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Your %s trial is active and it unlocks everything new in 3.0."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your plan:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Free+ features are paused until this site is connected to Create Studio. Switch anytime below."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Switch anytime below."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Switch anytime below. Free+, paid plans, nutrition calculation and the Amazon Creators API need a Create Studio connection."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Jump to plans"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "3.0 is"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "here"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "This update comes with changes to how various features are accessed, so reading this welcome page is highly recommended."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "How Free+ works"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Step through the round trip"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Your recipe"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Open Interactive Mode"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "The End"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Pause the walkthrough"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Resume the walkthrough"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Pause"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Resume"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "It's all yours"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Pro Pass includes every Premium feature on every plan."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Your %s plan is highlighted so you can see what it includes."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "It's all yours to try"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Every Premium feature in Pro Pass is available for the duration of your trial."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Your trial unlocks every premium feature in Pro Pass, but your %s plan is marked so you can see what it includes."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Unlocked by your trial"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Included with your plan"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Select your tier"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Free+ is best for most publishers, but new premium features are included in our paid plans!"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Choosing a plan is required to prevent you from losing features you rely on."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Current plan"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "forever"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Keep using Create at no cost, without premium features."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Included:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Not included:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "The trade:"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "no Create ads anywhere, and no premium features."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "You're on the Free plan"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Switch to Free"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Stay on Free"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Best for most publishers"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "$0"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "supported by ads"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Keep premium features without a subscription."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Interactive Mode opens in a new tab on create.studio, where our ads display — about 1 in every 300 reader sessions (~0.3%). Your site's own ads are untouched."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "You're on the Free+ plan"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:14396
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Choose Free+"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "Or go Pro"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "New premium features, no Create ads, and you directly support Create's development."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Try %s free for 14 days"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Upgrade to %s"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "Best value — save $%d/yr"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 #, js-format
 msgid "then $%d/yr · cancel anytime"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:14396
+#: admin/ui/build/app.build.3.1.3.js:14396
 msgid "No downgrade risk: Free+ and Free are always available if a paid tier isn't for you."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Try Pro free for 14 days"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Updating to Create 3.0 requires choosing a plan"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "This site is now on Free. Choose how to continue: Free+ keeps premium features like ratings, nutrition calculation and Interactive Mode, supported by Create's ads. Free has no ads and the core features only."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "You can also upgrade again at any time."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "The Free plan keeps Create's core features, like your cards and manual nutrition entry. Free+ and paid plans add premium features like ratings, nutrition calculation, Interactive Mode, and more."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Rather than automatically downgrading your functionality, we leave the choice to you. Please choose a plan before continuing to use the Create admin."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Your cards are still displaying on the frontend"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid ", only the admin is restricted while you choose."
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Learn more on the welcome page"
 msgstr ""
 
-#: admin/ui/build/app.build.3.1.2.js:16087
+#: admin/ui/build/app.build.3.1.3.js:16087
 msgid "Continue with Free"
 msgstr ""

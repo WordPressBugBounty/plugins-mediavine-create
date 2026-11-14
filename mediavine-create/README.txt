@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.2
+Stable tag: 3.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -168,10 +168,10 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 
 == Changelog ==
 
-= 3.1.2 =
+= 3.1.3 =
 
-* FIX: Cards in password-protected posts are no longer visible to visitors who haven't entered the password, including in the page's recipe schema and the card's print page
-* FIX: Fixed a reported security issue where rendering a Create card could let other plugins on the same page, such as page builders, save unsafe scripts
+* ENHANCEMENT: New "When comments are closed" options in Reviews settings let you choose whether reviews still show on posts with comments closed, and whether they appear after the post content or right after the card
+* FIX: Ingredients with links no longer split into side-by-side columns when ingredient checkboxes are turned on
 
 
 = 3.1.2 =

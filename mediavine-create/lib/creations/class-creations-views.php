@@ -393,17 +393,13 @@ class Creations_Views extends Creations {
 	 * tie back to a "used" selector. Element style attributes are not
 	 * touched by those optimizers.
 	 *
-	 * @param bool $refresh Recompute instead of using the per-request cache, and
-	 *                      leave the cache untouched. Only needed by tests that
-	 *                      change the color settings mid-request.
+	 * @param bool $refresh Recompute and replace the per-request cache. Only needed
+	 *                      by tests that change the color settings mid-request.
 	 */
 	public static function get_card_inline_style( $refresh = false ) {
 		static $cached = null;
 
-		if ( $refresh ) {
-			return self::build_card_inline_style();
-		}
-		if ( null === $cached ) {
+		if ( $refresh || null === $cached ) {
 			$cached = self::build_card_inline_style();
 		}
 		return $cached;
@@ -716,6 +712,16 @@ class Creations_Views extends Creations {
 			$reviews_div = null;
 		}
 
+		// Checkbox values are stored as '', '0', '1', 'true' or 'false'; a plain
+		// (bool) cast would read 'false' as true.
+		$reviews_standalone = filter_var(
+			\Mediavine\Settings::get_setting(self::$settings_group . '_public_reviews_when_comments_closed', true),
+			FILTER_VALIDATE_BOOLEAN
+		);
+		// Lets the client tell "closed" from "a comment system that fills in later".
+		$comments_status    = is_singular() ? ( comments_open() ? 'open' : 'closed' ) : 'unknown';
+		$reviews_placement  = 'after_card' === \Mediavine\Settings::get_setting(self::$settings_group . '_public_reviews_closed_placement') ? 'after_card' : 'after_content';
+
 		// Rating_Policy owns the thresholds (mode, required level and the legacy
 		// `mv_create_ratings_*_threshold` filters).
 		$review_form_enabled      = Rating_Policy::form_enabled();
@@ -728,19 +734,22 @@ class Creations_Views extends Creations {
 			$handle,
 			'MV_CREATE_SETTINGS',
 			[
-				'__API_ROOT__'         => rest_url(),
-				'__REVIEWS_DIV__'      => $reviews_div,
-				'__PROMPT_THRESHOLD__' => $ratings_prompt_threshold,
-				'__SUBMIT_THRESHOLD__' => $ratings_submit_threshold,
-				'__PX_BETWEEN_ADS__'   => $px_btwn_ads,
-				'__USER_ID__'          => get_current_user_id(),
-				'__REVIEW_LIMITS__'    => [
+				'__API_ROOT__'           => rest_url(),
+				'__REVIEWS_DIV__'        => $reviews_div,
+				'__REVIEWS_STANDALONE__' => $reviews_standalone,
+				'__REVIEWS_PLACEMENT__'  => $reviews_placement,
+				'__COMMENTS_STATUS__'    => $comments_status,
+				'__PROMPT_THRESHOLD__'   => $ratings_prompt_threshold,
+				'__SUBMIT_THRESHOLD__'   => $ratings_submit_threshold,
+				'__PX_BETWEEN_ADS__'     => $px_btwn_ads,
+				'__USER_ID__'            => get_current_user_id(),
+				'__REVIEW_LIMITS__'      => [
 					'author_name'    => Reviews_API::MAX_AUTHOR_NAME_LENGTH,
 					'review_title'   => Reviews_API::MAX_REVIEW_TITLE_LENGTH,
 					'review_content' => Reviews_API::MAX_REVIEW_CONTENT_LENGTH,
 					'email'          => Reviews_API::MAX_EMAIL_LENGTH,
 				],
-				'__OPTIONS__'          => [
+				'__OPTIONS__'            => [
 					// Review INTAKE gate (CRE-297). Display of existing reviews, the
 					// aggregate rating and the public reviews tab stay ungated;
 					// only the affordances that collect a NEW review are hidden.

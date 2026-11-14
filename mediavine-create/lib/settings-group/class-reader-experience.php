@@ -512,7 +512,7 @@ class Reader_Experience implements Settings_Group {
 					'type'          => 'checkbox',
 					'subgroup'      => 'reviews',
 					'label'         => $can_collect ? __( 'Enable Public Reviews', 'mediavine-create' ) : __( 'Display Existing Reviews Publicly', 'mediavine-create' ),
-					'instructions'  => __( 'If enabled, card reviews will be publicly visible, displayed in a tab alongside comments. You must specify a DOM selector for your comments section.', 'mediavine-create' ),
+					'instructions'  => __( 'If enabled, card reviews will be publicly visible, displayed in a tab alongside comments, or on their own on posts without a comments section. You must specify a DOM selector for your comments section.', 'mediavine-create' ),
 					'default_label' => __( 'Disabled', 'mediavine-create' ),
 				],
 			],
@@ -528,6 +528,44 @@ class Reader_Experience implements Settings_Group {
 					'instructions'  => __( 'Add the DOM selector of your comments section. (In most themes, this will be "#comments".)', 'mediavine-create' ),
 					'default_label' => '#comments',
 					'dependent_on'  => Plugin::$settings_group . '_enable_public_reviews',
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_public_reviews_when_comments_closed',
+				'value' => true,
+				'group' => Plugin::$settings_group . '_reader_experience',
+				'order' => 245,
+				'data'  => [
+					'type'          => 'checkbox',
+					'subgroup'      => 'reviews',
+					'label'         => __( 'Show Reviews When Comments Are Closed', 'mediavine-create' ),
+					'instructions'  => __( 'Posts with comments closed have no comments section to sit beside, so reviews appear on their own. If disabled, those posts show only the star rating.', 'mediavine-create' ),
+					'default_label' => __( 'Enabled', 'mediavine-create' ),
+					'dependent_on'  => Plugin::$settings_group . '_enable_public_reviews',
+				],
+			],
+			[
+				'slug'  => Plugin::$settings_group . '_public_reviews_closed_placement',
+				'value' => 'after_content',
+				'group' => Plugin::$settings_group . '_reader_experience',
+				'order' => 246,
+				'data'  => [
+					'type'          => 'select',
+					'subgroup'      => 'reviews',
+					'label'         => __( 'Where Reviews Appear When Comments Are Closed', 'mediavine-create' ),
+					'instructions'  => __( 'After the post puts them below your last paragraph. After the card puts them right below the recipe card.', 'mediavine-create' ),
+					'default_label' => __( 'After the post', 'mediavine-create' ),
+					'dependent_on'  => Plugin::$settings_group . '_public_reviews_when_comments_closed',
+					'options'       => [
+						[
+							'label' => __( 'After the post', 'mediavine-create' ),
+							'value' => 'after_content',
+						],
+						[
+							'label' => __( 'After the card', 'mediavine-create' ),
+							'value' => 'after_card',
+						],
+					],
 				],
 			],
 		];
