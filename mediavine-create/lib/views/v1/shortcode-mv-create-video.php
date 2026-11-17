@@ -27,7 +27,7 @@ if ( ( ! empty( $video['include'] ) || ! empty( $video['display'] ) ) && ! $args
 			// Sanitize the rendered output, not the stored shortcode: wp_kses_post()
 			// strips HTML but not shortcodes, so running it on the input can mangle
 			// shortcode attributes that contain HTML-ish characters.
-			echo wp_kses_post( do_shortcode( $args['creation']['video_shortcode'] ) );
+			echo \Mediavine\Create\Creations_Views::render_author_html( $args['creation']['video_shortcode'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized by render_author_html().
 			?>
 		</div>
 	<?php

@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.3
+Stable tag: 3.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,13 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 3.1.4 =
+
+* FIX: Round images on Centered and Centered Dark cards no longer overlap the content above the card when your theme changes the card's spacing
+* FIX: Cook Mode and other Create Studio features now work on sites where WordPress is installed in a subfolder
+* FIX: Reviews and featured reviews for cards that only appear in password-protected or unpublished posts are no longer visible to visitors who can't see those posts
+
 
 = 3.1.3 =
 

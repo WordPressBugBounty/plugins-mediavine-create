@@ -180,8 +180,17 @@ class Featured_Review_API extends Plugin {
 		// CVE-2026-16992: a featured review is only public once its parent card is.
 		// An empty body is the same shape as "this card has no featured
 		// review", so an anonymous caller learns nothing about the draft.
+		// Anonymous callers get the same gate as the reviews list: a publicly
+		// viewable post that isn't locked behind a post password. Front-end
+		// rendering is server-side and doesn't go through this route.
 		$creation = self::$models_v2->mv_creations->find_one( $card_id );
-		if ( empty( $creation ) || ( empty( $creation->published ) && ! \Mediavine\Permissions::is_user_authorized() ) ) {
+		if ( empty( $creation ) ) {
+			return new \WP_REST_Response( null, 200 );
+		}
+		if (
+			! \Mediavine\Permissions::is_user_authorized()
+			&& ( empty( $creation->published ) || ! Reviews_API::get_instance()->has_public_associated_post( $creation ) )
+		) {
 			return new \WP_REST_Response( null, 200 );
 		}
 

@@ -51,6 +51,14 @@ if ( $args['creation'] ) {
 		$cs_config['interactiveMode'] = [
 			'enabled' => \Mediavine\Create\GateKeeper::is_interactive_mode_enabled_for_type( $args['creation']['type'] ),
 		];
+
+		// Interactive Mode loads the card through Create Studio, which can't send the
+		// reader's password cookie. A reader who can see a password-only card here
+		// gets a short-lived token Studio passes back to the card route.
+		$card_access = $cs_config['interactiveMode']['enabled'] ? \Mediavine\Create\Creations::card_access_token_for_viewer( $args['creation']['id'] ) : null;
+		if ( $card_access ) {
+			$cs_config['cardAccess'] = $card_access;
+		}
 	}
 
 	if ( ! empty( $cs_config ) ) {

@@ -1231,6 +1231,53 @@ class Creations extends Plugin {
 	}
 
 	/**
+	 * Lifetime of a card access token, in seconds. Long enough to cover a reader
+	 * cooking from an open tab; short enough that a copied token goes stale.
+	 */
+	const CARD_ACCESS_TTL = 43200;
+
+	/**
+	 * The existing posts that show a card (canonical + associated).
+	 *
+	 * @param object|array $creation Card row (needs canonical_post_id/associated_posts).
+	 * @return \WP_Post[]
+	 */
+	private static function card_posts( $creation ) {
+		$creation = (object) $creation;
+
+		$post_ids = empty( $creation->associated_posts ) ? [] : json_decode( $creation->associated_posts, true );
+		$post_ids = is_array( $post_ids ) ? $post_ids : [];
+		if ( ! empty( $creation->canonical_post_id ) ) {
+			$post_ids[] = $creation->canonical_post_id;
+		}
+
+		$posts = [];
+		foreach ( array_unique( array_map( 'intval', $post_ids ) ) as $post_id ) {
+			$post = $post_id ? get_post( $post_id ) : null;
+			if ( $post ) {
+				$posts[] = $post;
+			}
+		}
+		return $posts;
+	}
+
+	/**
+	 * Whether every post that shows a card has a password, whoever is asking.
+	 *
+	 * @param object|array $creation Card row (needs canonical_post_id/associated_posts).
+	 * @return bool
+	 */
+	public static function is_password_only( $creation ) {
+		$posts = self::card_posts( $creation );
+		foreach ( $posts as $post ) {
+			if ( '' === (string) $post->post_password ) {
+				return false;
+			}
+		}
+		return ! empty( $posts );
+	}
+
+	/**
 	 * Whether a card is only shown inside password-protected posts the current
 	 * visitor hasn't unlocked.
 	 *
@@ -1243,27 +1290,139 @@ class Creations extends Plugin {
 	 * @return bool
 	 */
 	public static function is_hidden_by_post_password( $creation ) {
-		$creation = (object) $creation;
-
-		$post_ids = empty( $creation->associated_posts ) ? [] : json_decode( $creation->associated_posts, true );
-		$post_ids = is_array( $post_ids ) ? $post_ids : [];
-		if ( ! empty( $creation->canonical_post_id ) ) {
-			$post_ids[] = $creation->canonical_post_id;
-		}
-
-		$protected = false;
-		foreach ( array_unique( array_map( 'intval', $post_ids ) ) as $post_id ) {
-			$post = $post_id ? get_post( $post_id ) : null;
-			if ( ! $post ) {
-				continue;
-			}
+		$posts = self::card_posts( $creation );
+		foreach ( $posts as $post ) {
 			if ( ! post_password_required( $post ) ) {
 				return false;
 			}
-			$protected = true;
 		}
 
-		return $protected && ! \Mediavine\Permissions::is_user_authorized();
+		return ! empty( $posts ) && ! \Mediavine\Permissions::is_user_authorized();
+	}
+
+	/**
+	 * A short-lived token proving the bearer was shown a card.
+	 *
+	 * Interactive Mode loads cards through Create Studio, which calls the public
+	 * card route server-to-server without the reader's cookies. For a card hidden
+	 * by post passwords, the page that showed it to an unlocked reader embeds this
+	 * token; Studio passes it back and find_public() accepts it. Only this site
+	 * issues and checks it, so Studio treats it as opaque.
+	 *
+	 * @param int      $creation_id Card ID.
+	 * @param int|null $now         Current time, for tests.
+	 * @return string
+	 */
+	public static function card_access_token( $creation_id, $now = null ) {
+		$expires = ( null === $now ? time() : (int) $now ) + self::CARD_ACCESS_TTL;
+		$payload = (int) $creation_id . '.' . $expires;
+
+		return self::base64url_encode( $payload ) . '.' . self::base64url_encode( hash_hmac( 'sha256', $payload, self::card_access_key(), true ) );
+	}
+
+	/**
+	 * The card access token for the current viewer, or null when they don't need
+	 * one (the card is public) or mustn't get one (they haven't unlocked it).
+	 *
+	 * Reads the card row rather than the render's published snapshot, which
+	 * doesn't track the posts a card is shown in.
+	 *
+	 * @param int $creation_id Card ID.
+	 * @return string|null
+	 */
+	public static function card_access_token_for_viewer( $creation_id ) {
+		$creation = self::$models_v2->mv_creations->find_one( (int) $creation_id );
+		if ( empty( $creation ) || ! self::is_password_only( $creation ) || self::is_hidden_by_post_password( $creation ) ) {
+			return null;
+		}
+		return self::card_access_token( $creation_id );
+	}
+
+	/**
+	 * Whether a token from card_access_token() is genuine, unexpired, and for this card.
+	 *
+	 * @param mixed $token       Token from the request.
+	 * @param int   $creation_id Card ID being read.
+	 * @return bool
+	 */
+	public static function is_valid_card_access_token( $token, $creation_id ) {
+		if ( ! is_string( $token ) || strlen( $token ) > 256 || ! preg_match( '/^([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/', $token, $parts ) ) {
+			return false;
+		}
+
+		$payload   = self::base64url_decode( $parts[1] );
+		$signature = self::base64url_decode( $parts[2] );
+		if ( false === $payload || false === $signature ) {
+			return false;
+		}
+
+		if ( ! hash_equals( hash_hmac( 'sha256', $payload, self::card_access_key(), true ), $signature ) ) {
+			return false;
+		}
+
+		if ( ! preg_match( '/^(\d+)\.(\d+)$/', $payload, $claims ) ) {
+			return false;
+		}
+
+		return (int) $claims[1] === (int) $creation_id && (int) $claims[2] >= time();
+	}
+
+	/**
+	 * Signing key for card access tokens, derived from the site's auth salt so
+	 * it never needs storing and rotates with the salts.
+	 *
+	 * @return string
+	 */
+	private static function card_access_key() {
+		return hash_hmac( 'sha256', 'mv-create-card-access', wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * @param string $data Raw bytes.
+	 * @return string URL-safe base64 without padding.
+	 */
+	private static function base64url_encode( $data ) {
+		return rtrim( strtr( base64_encode( $data ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- token encoding.
+	}
+
+	/**
+	 * @param string $data URL-safe base64.
+	 * @return string|false
+	 */
+	private static function base64url_decode( $data ) {
+		return base64_decode( strtr( $data, '-_', '+/' ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- token decoding.
+	}
+
+	/**
+	 * Load a card for a public (anonymous-capable) read, or null if the reader
+	 * may not see it.
+	 *
+	 * Every public card route goes through here so they can't drift apart: the
+	 * card must exist, be published (Create editors also see drafts), and not be
+	 * hidden by post passwords. Card IDs are sequential, so any route that skips
+	 * one of these checks can be enumerated.
+	 *
+	 * A valid card_access_token() for the card lifts the post-password check only.
+	 *
+	 * @param int    $id           Card ID.
+	 * @param string $access_token Optional token from card_access_token().
+	 * @return object|null Card row.
+	 */
+	public static function find_public( $id, $access_token = '' ) {
+		$creation = self::$models_v2->mv_creations->find_one( (int) $id );
+		if ( empty( $creation ) ) {
+			return null;
+		}
+
+		if ( empty( $creation->published ) && ! \Mediavine\Permissions::is_user_authorized() ) {
+			return null;
+		}
+
+		if ( self::is_hidden_by_post_password( $creation ) && ! self::is_valid_card_access_token( $access_token, $creation->id ) ) {
+			return null;
+		}
+
+		return $creation;
 	}
 
 	/**
@@ -1828,13 +1987,12 @@ class Creations extends Plugin {
 				[
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => function ( \WP_REST_Request $request ) {
-						$creation_id = (int) $request['id'];
-						$creation    = self::$models_v2->mv_creations->find_one( $creation_id );
+						$creation = self::find_public( (int) $request['id'] );
 
 						// CRE-206: Only published cards expose JSON-LD, and only
 						// the schema stored at publish time. Never regenerate for
 						// unpublished/never-published drafts.
-						if ( ! is_object( $creation ) || empty( $creation->published ) || empty( $creation->json_ld ) || self::is_hidden_by_post_password( $creation ) ) {
+						if ( ! is_object( $creation ) || empty( $creation->published ) || empty( $creation->json_ld ) ) {
 							status_header( 404 );
 							exit;
 						}

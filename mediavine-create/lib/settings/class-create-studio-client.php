@@ -294,7 +294,11 @@ class Create_Studio_Client {
 	 */
 	public static function check_site_status( $timeout = null ) {
 		$options  = is_int( $timeout ) && $timeout > 0 ? [ 'timeout' => $timeout ] : [];
-		$response = self::request( 'GET', '/sites/status', [], null, $options );
+		// CS-84: Studio moves Sites.url to this address when it differs (same apex
+		// only). Rows registered with site_url() (WP core in a subfolder) otherwise
+		// point every Studio→site REST call at a folder that 404s.
+		$endpoint = '/sites/status?home_url=' . rawurlencode( home_url() );
+		$response = self::request( 'GET', $endpoint, [], null, $options );
 
 		if ( is_wp_error( $response ) ) {
 			return false;

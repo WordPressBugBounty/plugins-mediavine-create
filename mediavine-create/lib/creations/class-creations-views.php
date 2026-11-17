@@ -657,6 +657,86 @@ class Creations_Views extends Creations {
 	}
 
 	/**
+	 * Remove every `<script>` tag (and its contents) from author-written HTML.
+	 *
+	 * Shortcodes are left unexpanded, so this is safe for both the render path
+	 * (which expands them afterwards) and REST payloads that return raw card
+	 * fields to readers such as Create Studio's Interactive Mode.
+	 *
+	 * @param string $html Author-written HTML.
+	 * @return string HTML without script tags, or '' if PCRE failed.
+	 */
+	public static function strip_author_scripts( $html ) {
+		$html = (string) $html;
+
+		// Loop so a tag rebuilt by removing an inner one (`<scr<script></script>ipt>`)
+		// is removed too.
+		do {
+			$before = $html;
+			$html   = preg_replace( '#<\s*script\b[^>]*>.*?<\s*/\s*script\s*>#is', '', $html );
+			$html   = preg_replace( '#<\s*/?\s*script\b[^>]*>?#i', '', (string) $html );
+			if ( null === $html ) {
+				// PCRE gave up (backtrack limit); fail closed rather than return unchecked input.
+				return '';
+			}
+		} while ( $html !== $before );
+
+		return $html;
+	}
+
+	/**
+	 * Apply strip_author_scripts() to every string in a card payload
+	 * (objects and arrays are walked recursively).
+	 *
+	 * @param mixed $value Card object, array, or scalar.
+	 * @return mixed The same structure with scripts removed from its strings.
+	 */
+	public static function strip_author_scripts_deep( $value ) {
+		if ( is_string( $value ) ) {
+			return false === stripos( $value, 'script' ) ? $value : self::strip_author_scripts( $value );
+		}
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				$value[ $key ] = self::strip_author_scripts_deep( $item );
+			}
+			return $value;
+		}
+		if ( is_object( $value ) ) {
+			foreach ( get_object_vars( $value ) as $key => $item ) {
+				$value->{$key} = self::strip_author_scripts_deep( $item );
+			}
+		}
+		return $value;
+	}
+
+	/**
+	 * Expand the shortcodes in author-written card HTML (notes, instructions, the
+	 * video shortcode field) and sanitize the result.
+	 *
+	 * Shortcodes such as third-party video players can emit `<script>` tags, so the
+	 * output allows them. Scripts the author typed are removed before expansion, so
+	 * the only scripts left are ones a shortcode handler generated — the same trust
+	 * core gives shortcode output in post content. Card editors don't need
+	 * `unfiltered_html`, so their own markup must never carry a script.
+	 *
+	 * @param string $html Author-written HTML that may contain shortcodes.
+	 * @return string Sanitized HTML.
+	 */
+	public static function render_author_html( $html ) {
+		$html = self::strip_author_scripts( $html );
+
+		$allowed           = wp_kses_allowed_html( 'post' );
+		$allowed['script'] = [
+			'type'           => true,
+			'src'            => true,
+			'async'          => true,
+			'data-noptimize' => true,
+		];
+
+		return wp_kses( do_shortcode( $html ), $allowed );
+	}
+
+	/**
 	 * Adds async to enqued script
 	 *
 	 * @param string $tag script tag to be outputted
@@ -799,10 +879,6 @@ class Creations_Views extends Creations {
 		$allowed['div']['data-autoplay']     = true;
 		$allowed['div']['data-ratio']        = true;
 		$allowed['div']['data-volume']       = true;
-		$allowed['script']['type']           = true;
-		$allowed['script']['src']            = true;
-		$allowed['script']['async']          = true;
-		$allowed['script']['data-noptimize'] = true;
 		// Third-party video shortcodes often emit sized iframes; preserve those
 		// attrs when card render runs wp_kses_post on shortcode output.
 		$allowed['iframe']['width']   = true;
@@ -1993,34 +2069,6 @@ class Creations_Views extends Creations {
 	}
 
 	/**
-	 * Whether the print view may be rendered for the current request.
-	 *
-	 * CVE-2026-16992: the print route is public so readers can print a card, but only
-	 * a published card is public. The render path reaches
-	 * `Publish::maybe_republish()`, so the check has to sit above it: without
-	 * it, a single anonymous GET both disclosed a draft's content and flipped
-	 * the draft to published, which in turn opened the gated read routes.
-	 *
-	 * @param object|null $creation Creation DB row.
-	 * @return bool
-	 */
-	public static function can_render_print_view( $creation ) {
-		if ( empty($creation) ) {
-			return false;
-		}
-
-		if ( self::is_hidden_by_post_password($creation) ) {
-			return false;
-		}
-
-		if ( ! empty($creation->published) ) {
-			return true;
-		}
-
-		return \Mediavine\Permissions::is_user_authorized();
-	}
-
-	/**
 	 * Force every `<meta name="robots">` tag in a chunk of markup to `noindex, nofollow`.
 	 *
 	 * The print route must never be indexed, but SEO plugins (Yoast, Rank Math, ...)
@@ -2066,7 +2114,7 @@ class Creations_Views extends Creations {
 		header('X-Robots-Tag: noindex, nofollow');
 		$api_services = new \Mediavine\Create\API_Services();
 		$params       = $api_services->process_inbound($request);
-		$creation     = self::$models_v2->mv_creations->find_one( (int) $params['id']);
+		$creation     = self::find_public( $params['id'] );
 
 		add_action('wp_enqueue_scripts', [ $this, 'print_inline_script' ]);
 
@@ -2085,13 +2133,10 @@ class Creations_Views extends Creations {
 			100
 		);
 
+		// CVE-2026-16992: find_public() has to run above the render path, which
+		// reaches Publish::maybe_republish(). Without it, one anonymous GET both
+		// disclosed a draft's content and flipped the draft to published.
 		if ( empty($creation) ) {
-			header('HTTP/1.0 404 Not Found');
-			esc_html_e('No Card with ID found', 'mediavine-create');
-			exit();
-		}
-
-		if ( ! self::can_render_print_view($creation) ) {
 			header('HTTP/1.0 404 Not Found');
 			esc_html_e('No Card with ID found', 'mediavine-create');
 			exit();

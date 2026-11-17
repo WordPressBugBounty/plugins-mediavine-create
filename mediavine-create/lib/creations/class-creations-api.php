@@ -595,23 +595,17 @@ class Creations_API extends Creations {
 	}
 
 	public function find_one( \WP_REST_Request $request, \WP_REST_Response $response ) {
-		$params   = $request->get_params();
-		$creation = self::$models_v2->mv_creations->find_one( (int) $params['id'] );
-		if ( empty( $creation ) ) {
-			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
-		}
+		$params = $request->get_params();
 
 		// CRE-206: This GET is public so Create Studio and crawlers can read
 		// published cards, but unpublished/never-published drafts (and their
 		// internal editorial metadata) must not leak to anonymous callers.
 		// Authorized Create editors still receive drafts — the admin editor
-		// loads them for editing.
-		if ( empty( $creation->published ) && ! \Mediavine\Permissions::is_user_authorized() ) {
-			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
-		}
-
-		// A card only shown in locked password-protected posts stays hidden.
-		if ( self::is_hidden_by_post_password( $creation ) ) {
+		// loads them for editing. Create Studio forwards the token a
+		// password-protected post gave an unlocked reader, so Interactive Mode
+		// can load the card for them.
+		$creation = self::find_public( $params['id'], (string) $request->get_header( 'x-create-card-access' ) );
+		if ( empty( $creation ) ) {
 			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
 		}
 
@@ -653,14 +647,34 @@ class Creations_API extends Creations {
 		// Ensure that creation is an integer. We can't use prepare_item_for_response because it coerces
 		// empty arrays into empty strings, which breaks the UI.
 		$creation->id = intval( $creation->id );
+		$creation     = self::strip_scripts_for_public_reader( $creation );
 		$response     = API_Services::set_response_data( $creation, $response );
 		$response->set_status( 200 );
 		return $response;
 	}
 
+	/**
+	 * Remove author-typed `<script>` tags from a card payload unless the reader
+	 * is a Create editor.
+	 *
+	 * The front end strips them at render (Creations_Views::render_author_html()),
+	 * but the public card routes return the raw fields, and Create Studio's
+	 * Interactive Mode renders those as HTML. Editors keep the stored value so the
+	 * admin editor round-trips it unchanged.
+	 *
+	 * @param mixed $payload Card object (or decoded published JSON).
+	 * @return mixed
+	 */
+	private static function strip_scripts_for_public_reader( $payload ) {
+		if ( \Mediavine\Permissions::is_user_authorized() ) {
+			return $payload;
+		}
+		return Creations_Views::strip_author_scripts_deep( $payload );
+	}
+
 	public function find_published( \WP_REST_Request $request, \WP_REST_Response $response ) {
 		$params   = $request->get_params();
-		$creation = self::$models_v2->mv_creations->find_one( (int) $params['id'] );
+		$creation = self::find_public( $params['id'] );
 
 		if ( empty( $creation ) ) {
 			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
@@ -670,11 +684,7 @@ class Creations_API extends Creations {
 			return new \WP_Error( 404, __( 'The Create Card has not been published', 'mediavine-create' ), [ 'request_params' => $params ] );
 		}
 
-		if ( self::is_hidden_by_post_password( $creation ) ) {
-			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
-		}
-
-		$published = json_decode( $creation->published );
+		$published = self::strip_scripts_for_public_reader( json_decode( $creation->published ) );
 
 		$response->set_data( $published );
 		$response->set_status( 200 );
@@ -682,21 +692,13 @@ class Creations_API extends Creations {
 	}
 
 	public function find_json_ld( \WP_REST_Request $request, \WP_REST_Response $response ) {
-		$params   = $request->get_params();
-		$creation = self::$models_v2->mv_creations->find_one( (int) $params['id'] );
-
-		if ( empty( $creation ) ) {
-			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
-		}
+		$params = $request->get_params();
 
 		// CVE-2026-16992: gate on `published`, not just on the schema column being
 		// populated. A draft can carry stored `json_ld` from an earlier publish,
 		// which made this route only incidentally safe.
-		if ( empty( $creation->published ) && ! \Mediavine\Permissions::is_user_authorized() ) {
-			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
-		}
-
-		if ( self::is_hidden_by_post_password( $creation ) ) {
+		$creation = self::find_public( $params['id'] );
+		if ( empty( $creation ) ) {
 			return new \WP_Error( 404, __( 'The Create Card could not be found', 'mediavine-create' ), [ 'request_params' => $params ] );
 		}
 

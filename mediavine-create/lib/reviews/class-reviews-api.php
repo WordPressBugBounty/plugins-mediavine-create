@@ -598,6 +598,11 @@ class Reviews_API extends Reviews {
 			return false;
 		}
 
+		// A card only shown inside locked password-protected posts isn't public.
+		if ( Creations::is_hidden_by_post_password( $creation ) ) {
+			return false;
+		}
+
 		$associated_posts = json_decode( $creation->associated_posts );
 		if ( ! is_iterable( $associated_posts ) ) {
 			return false;
