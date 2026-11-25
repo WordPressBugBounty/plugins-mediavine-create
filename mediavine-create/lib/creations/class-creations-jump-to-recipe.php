@@ -10,6 +10,13 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 
 	public static $instance = null;
 
+	/**
+	 * Per-request results of find_schema_candidate(), keyed by post ID and card IDs.
+	 *
+	 * @var array
+	 */
+	private static $schema_candidate_cache = [];
+
 	public static function get_instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -314,15 +321,27 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 		$type = 'recipe';
 		$id   = false;
 		if ( ! empty( $matches['type'] ) ) {
-			$index = 0;
-			foreach ( $matches['type'] as $match_type ) {
+			$candidates = [];
+			foreach ( $matches['type'] as $index => $match_type ) {
 				if ( 'list' !== $match_type[0] && ( ! $limit_card_types || self::is_jtr_type_allowed( $match_type[0] ) ) ) {
-					$type = $match_type[0];
-					$id   = $matches['key'][ $index ][0];
-					break;
+					$candidates[] = [
+						'id'   => $matches['key'][ $index ][0],
+						'type' => $match_type[0],
+					];
 				}
-				$type = $match_type[0];
-				$index++;
+			}
+
+			if ( ! empty( $candidates ) ) {
+				// Jump to the card Google sees as the post's recipe when there is one,
+				// so readers rate the same card the schema advertises. See CRE-345.
+				$target = self::find_schema_candidate( $candidates );
+				if ( ! $target ) {
+					$target = $candidates[0];
+				}
+				$type = $target['type'];
+				$id   = $target['id'];
+			} else {
+				$type = end( $matches['type'] )[0];
 			}
 
 			// Return early if list is the shortcode type
@@ -340,6 +359,59 @@ class Creations_Jump_To_Recipe extends Creations_Views {
 			'id'   => $id,
 			'type' => $type,
 		];
+	}
+
+	/**
+	 * Finds the first candidate card that outputs Recipe/HowTo schema on the current post.
+	 *
+	 * A card emits schema only on its canonical post and only when its schema isn't
+	 * disabled, matching JSON_LD_Runtime::build_json_ld_schema() and
+	 * Creations_Views_Hooks::mv_create_schema().
+	 *
+	 * @param array $candidates Eligible cards in content order, each `[ 'id' => ..., 'type' => ... ]`
+	 * @return array|false The schema card, or false if none of the candidates emit schema
+	 */
+	public static function find_schema_candidate( $candidates ) {
+		$post_id = get_current_post_id();
+		if ( empty( $post_id ) ) {
+			return false;
+		}
+
+		// The button, skip link and mv_create_jtr_button() all resolve the target on
+		// one page view, so look each set of cards up once per request.
+		$ids       = wp_list_pluck( $candidates, 'id' );
+		$cache_key = $post_id . ':' . implode( ',', $ids );
+		if ( array_key_exists( $cache_key, self::$schema_candidate_cache ) ) {
+			return self::$schema_candidate_cache[ $cache_key ];
+		}
+
+		$runtime   = JSON_LD_Runtime::get_instance();
+		$published = $runtime->get_multiple_cards_published_data( $ids );
+		$found     = false;
+
+		foreach ( $candidates as $candidate ) {
+			if ( empty( $published[ $candidate['id'] ] ) ) {
+				continue;
+			}
+
+			$creation = json_decode( $published[ $candidate['id'] ], true );
+			if (
+				! is_array( $creation ) ||
+				! isset( $creation['canonical_post_id'], $creation['type'] ) ||
+				! in_array( $creation['type'], [ 'recipe', 'diy' ], true ) ||
+				$runtime->is_json_ld_schema_disabled( $creation ) ||
+				$runtime->is_post_not_canonical( $creation, $post_id )
+			) {
+				continue;
+			}
+
+			$found = $candidate;
+			break;
+		}
+
+		self::$schema_candidate_cache[ $cache_key ] = $found;
+
+		return $found;
 	}
 
 	/**

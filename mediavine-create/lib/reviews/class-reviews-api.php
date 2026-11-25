@@ -84,9 +84,11 @@ class Reviews_API extends Reviews {
 			);
 		}
 
-		if ( isset( $params['handshake'] ) ) {
-			$new_review['handshake'] = $params['handshake'];
-		}
+		// The handshake (per-review edit token) is NEVER taken from the request.
+		// Accepting a client-chosen token let an anonymous visitor pick the token
+		// that later authorizes edits to their own review. It is minted
+		// server-side at create time (see create_reviews) and left untouched on
+		// update, so it never appears in $new_review here.
 
 		if ( isset( $params['review_title'] ) ) {
 			if ( mb_strlen( $params['review_title'] ) > self::MAX_REVIEW_TITLE_LENGTH ) {
@@ -401,6 +403,11 @@ class Reviews_API extends Reviews {
 				return new \WP_REST_Response( $response, $status_code );
 			}
 
+			// Mint the per-review edit token server-side. Returned in the create
+			// response (so the submitting client can store it for later edits)
+			// but never accepted as input — an attacker must not choose it.
+			$new_review['handshake'] = wp_generate_password( 32, false );
+
 			$inserted = self::$models->reviews->insert( $new_review );
 
 			if ( $inserted ) {
@@ -559,7 +566,32 @@ class Reviews_API extends Reviews {
 		$errors     = $result['errors'];
 
 		if ( ! $error ) {
-			$updated = $this->Reviews->update( $params );
+			// Write ONLY the validated fields, never the raw request body. Writing
+			// $params let an anonymous handshake editor set any real column —
+			// notably is_featured (editor + FEATURE_REVIEW_FEATURED gated via the
+			// dedicated /reviews/{id}/featured endpoint) and handshake (the edit
+			// token itself). $new_review carries only the safe content fields;
+			// handshake/is_featured/type are never added to it.
+			$update_fields       = $new_review;
+			$update_fields['id'] = (int) $params['id'];
+
+			if ( \Mediavine\Permissions::is_user_authorized() ) {
+				// Authorized editors may also set the admin-only columns the admin
+				// UI sends. is_featured stays owned by its own gated endpoint.
+				foreach ( [ 'edited_by_admin', 'notify_responses' ] as $admin_field ) {
+					if ( isset( $params[ $admin_field ] ) ) {
+						$update_fields[ $admin_field ] = $params[ $admin_field ];
+					}
+				}
+			} else {
+				// Anonymous handshake editors may only revise their own review's
+				// content. Drop creation so they cannot move the review to another
+				// card and skew its aggregate rating (keep the stored value).
+				unset( $update_fields['creation'] );
+				$update_fields['edited_by_user'] = 1;
+			}
+
+			$updated = $this->Reviews->update( $update_fields );
 
 			if ( $updated ) {
 				$updated->updated = true;

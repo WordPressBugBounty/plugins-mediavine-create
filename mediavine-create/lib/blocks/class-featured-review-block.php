@@ -57,11 +57,12 @@ class Featured_Review_Block extends Plugin {
 			return '';
 		}
 
-		// Format reviewer name
-		$formatted_name = Featured_Review::format_reviewer_name( $review->author_name );
-
-		// Sanitize review content
-		$review_content = wp_kses( $review->review_content, [] );
+		// Review text and reviewer name come from an unauthenticated REST
+		// submission and are rendered into the_content by do_blocks (priority 9)
+		// BEFORE core runs do_shortcode (priority 11), so both must have their
+		// shortcode brackets neutralised or a visitor's shortcode would execute.
+		$formatted_name = self::neutralise_shortcodes( Featured_Review::format_reviewer_name( $review->author_name ) );
+		$review_content = self::neutralise_shortcodes( wp_kses( $review->review_content, [] ) );
 
 		// Determine if we have text content to display
 		$has_text = $show_text && ! empty( $review_content );
@@ -258,6 +259,20 @@ class Featured_Review_Block extends Plugin {
 	 */
 	private static function contrast_text_color( $hex ) {
 		return Creations_Views_Colors::contrast_text( $hex, '#ffffff', '#1a1a1a' );
+	}
+
+	/**
+	 * Neutralise shortcode brackets in visitor-supplied text.
+	 *
+	 * Neither wp_kses( …, [] ) nor esc_html() strips '[' or ']'. The entities
+	 * render as literal brackets, and esc_html() leaves them intact
+	 * (double_encode is off), so do_shortcode never sees a shortcode tag.
+	 *
+	 * @param string $text Plain text from a review.
+	 * @return string Text with '[' and ']' replaced by numeric entities.
+	 */
+	private static function neutralise_shortcodes( $text ) {
+		return str_replace( [ '[', ']' ], [ '&#91;', '&#93;' ], (string) $text );
 	}
 
 	/**

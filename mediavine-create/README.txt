@@ -5,7 +5,7 @@ Tags: recipe, recipe card, how to, schema, nutrition
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.1.4
+Stable tag: 3.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,14 @@ If a card references a Mediavine-hosted video, Create requests that video's meta
 [Privacy Policy](https://www.mediavine.com/privacy-policy/)
 
 == Changelog ==
+
+= 3.1.5 =
+
+* FIX: Jump to Recipe and the screen reader skip link now take readers to the card that appears in Google's recipe results, rather than the first card on the post
+* FIX: Card previews in Theme settings, list layout settings and the setup wizard no longer flicker as the scrollbar appears and disappears
+* FIX: Closed a reported security issue where review text submitted by visitors could run shortcodes when shown in a Featured Review block
+* FIX: Closed a reported security issue where a crafted link to the card editor could send unintended requests as a logged-in admin
+
 
 = 3.1.4 =
 
